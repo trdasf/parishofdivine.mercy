@@ -1,0 +1,290 @@
+.appointment-container-ca {
+    padding: 20px 50px;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .title-ca {
+    font-size: 35px;
+    font-weight: 800;
+    color: #573901;
+    font-family: Montserrat;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+  }
+  
+  .appointment-actions-ca {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    align-items: center;
+  }
+  
+  .search-bar-ca {
+    position: relative;
+    width: 650px;
+  }
+  
+  .search-bar-ca input {
+    width: 100%;
+    padding: 8px 35px 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+    color: #333;
+    font-family: Roboto;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+  
+  .search-icon-ca {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b3701f;
+  }
+  
+  .filter-pdf-container-ca {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .filter-select-ca {
+    background: white;
+    color: #333;
+    border: 1px solid #333;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 18px;
+    font-family: Roboto;
+    letter-spacing: 1px;
+    width: 200px;
+  }
+  
+  .pdf-btn-ca {
+    background: #b3701f;
+    border: 1px solid #b3701f;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: Roboto;
+    letter-spacing: 1px;
+    width: 100px;
+  }
+  .pdf-btn-ca:hover {
+    background: #d19a15;
+    border-color: #d19a15;
+  }
+  
+  .appointment-table-ca {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1px;
+  }
+  
+  .appointment-table-ca thead tr {
+    background: #fff7df;
+    font-family: Roboto;
+    font-size: 14px;
+    padding: 20px;
+  }
+  
+  .appointment-table-ca thead tr th:first-child {
+    border-top-left-radius: 10px;
+  }
+  
+  .appointment-table-ca thead tr th:last-child {
+    border-top-right-radius: 10px;
+  }
+  
+  .appointment-table-ca th,
+  .appointment-table-ca td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .appointment-table-ca th {
+    background: #fdf8e8;
+    color: #333;
+    font-family: Roboto;
+    font-weight: 900;
+    font-size: 15px;
+    border: none;
+  }
+  
+  .appointment-table-ca td {
+    background: #fff;
+    color: #333;
+    font-family: Roboto;
+    font-weight: 500;
+    font-size: 14px;
+    border: 1px solid #ececec;
+  }
+  
+  .appointment-table-ca td:last-child {
+    text-align: center;
+    color: #b3701f;
+  }
+  
+  .appointment-table-ca tbody tr {
+    border-top: 0.1px solid #e7e7e7;
+  }
+  
+  .ca-details {
+    font-family: Roboto;
+    font-weight: 800;
+    text-decoration: underline;
+    text-decoration-color: #b3701f;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    background-color: white;
+    color: #b3701f;
+  }
+  
+  .ca-details:hover {
+    border: 1px solid #b3701f;
+    background-color: #e7e7e7;
+    color: #b3701f;
+  }
+  
+  .total-count-ca {
+    position: absolute;
+    bottom: 30px;
+    right: 60px;
+    font-weight: 900;
+    color: #333;
+    padding: 15px 20px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-family: Roboto;
+    font-size: 35px;
+  }
+  
+  .total-count-ca::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 100%;
+    background: linear-gradient(to bottom, #b3701f, #d19a15);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  
+  .total-ca {
+    color: #b3701f;
+    font-size: 30px;
+    font-weight: 900;
+    font-family: montserrat;
+  }
+  
+  /* Add these CSS styles to your clientappointment.css file */
+
+/* Modal overlay */
+.sacrament-modal-overlay-ca {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal container */
+  .sacrament-modal-ca {
+    background-color: white;
+    border-radius: 10px;
+    width: 550px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  /* Modal header */
+  .sacrament-modal-header-ca {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+  
+  .sacrament-modal-header-ca h2 {
+    color: #573901;
+    font-family: Montserrat;
+    font-weight: 800;
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  .close-modal-btn-ca {
+    background: none;
+    border: none;
+    color: #b3701f;
+    font-size: 20px;
+    cursor: pointer;
+
+  }
+  
+  .close-modal-btn-ca:hover {
+    color: #d19a15;
+  }
+  
+  .sacrament-options-ca {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;      /* Centers items horizontally */
+    justify-content: center;  /* Centers items vertically if you have a height */
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  
+  
+  /* Sacrament option buttons */
+  .sacrament-option-btn-ca {
+    background-color: #fff;
+    color: #b3701f;
+    border: 1px solid #b3701f;
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-family: Montserrat;
+    font-weight: 600;
+    width: 300px;
+    font-size: 18px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+
+  }
+  
+  .sacrament-option-btn-ca:hover {
+    background-color: #d19a15;
+    color: #fff;
+    border: 1px solid #b3701f;
+  }
+
+  /* In your CSS */
+.custom-hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, #710808, #ffcccc);
+  width: 100%;
+  margin: 20px auto;
+}

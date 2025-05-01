@@ -1,0 +1,338 @@
+/* Main container styling */
+.client-kumpil-view-container {
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 20px;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  
+  /* Scrollbar styling */
+  .client-kumpil-view-container::-webkit-scrollbar {
+    width: 5px;
+    background-color: #ffffff;
+  }
+  
+  .client-kumpil-view-container::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb;
+    border-radius: 5px;
+  }
+  
+  .client-kumpil-view-container::-webkit-scrollbar-track {
+    background-color: #ffffff;
+  }
+  
+  /* Header styling */
+  .client-kumpil-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+  
+  .client-kumpil-view-left-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .client-kumpil-view-back-button {
+    background-color: transparent;
+    color: #710808;
+    border: none;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-family: Roboto;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .client-kumpil-view-back-icon {
+    font-size: 22px;
+    margin-right: 5px;
+    font-weight: 700;
+  }
+  
+  .client-kumpil-view-back-button:hover {
+    color: #5a0606;
+  }
+  
+  .client-kumpil-view-title {
+    font-size: 35px;
+    font-weight: 800;
+    color: #573901;
+    font-family: Montserrat;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  /* Confirmation view data section */
+  .client-kumpil-view-data h2 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #b3701f;
+    font-family: Roboto;
+    letter-spacing: 1px;
+  }
+  
+  .client-kumpil-view-row-date {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 15px;
+    align-items: center;
+  }
+  
+  /* Info cards */
+  .client-kumpil-view-bypart {
+    margin-top: 40px;
+  }
+  
+  /* Add info card styling */
+  .client-kumpil-view-info-card {
+    background-color: #fff;
+    border-top: 1px solid #f8d7da;
+    border-right: 1px solid #f8d7da;
+    border-bottom: 1px solid #f8d7da;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #b3701f;
+  }
+  
+  .client-kumpil-view-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+  
+  /* Label & Value in a row */
+  .client-kumpil-view-field-date,
+  .client-kumpil-view-field-time {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+  }
+  
+  /* Labels Styling */
+  .client-kumpil-view-field-date label,
+  .client-kumpil-view-field-time label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #573901;
+    min-width: 180px;
+    text-align: left;
+    margin-top: 0;
+    font-family: Roboto;
+  }
+  
+  /* Value styling for read-only fields */
+  .client-kumpil-view-value {
+    padding: 8px;
+    background-color: #f9f9f9;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 16px;
+    min-width: 200px;
+    font-family: Roboto;
+  }
+  
+  .client-kumpil-view-sub-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: #573901;
+    font-family: Roboto;
+    letter-spacing: 1px;
+    text-align: left;
+    margin-bottom: 15px;
+    margin-top: 40px;
+  }
+  
+  /* Confirmation view row styling */
+  .client-kumpil-view-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .client-kumpil-view-field label,
+  .client-kumpil-view-field-ga label,
+  .client-kumpil-view-field-pob label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #573901;
+    display: block;
+    margin-bottom: 5px;
+    font-family: Roboto;
+  }
+  
+  .client-kumpil-view-field-ga {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 220px;
+  }
+  
+  .client-kumpil-view-field-pob {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 300px;
+  }
+  
+  /* Requirements container styling */
+  .client-kumpil-view-requirements-container {
+    width: 100%;
+    margin: 40px auto 20px;
+    font-family: "Roboto", sans-serif;
+  }
+  
+  .client-kumpil-view-requirements-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #b36b09;
+    margin-bottom: 15px;
+    font-family: Montserrat;
+  }
+  
+  .client-kumpil-view-requirements-box {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+  }
+  
+  .client-kumpil-view-section-header {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-family: Montserrat;
+    border-bottom: 2px solid #b3701f;
+    padding-bottom: 8px;
+    width: fit-content;
+    margin-left: 20px;
+  }
+  
+  .client-kumpil-view-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 40px;
+    margin-bottom: 30px;
+  }
+  
+  .client-kumpil-view-requirement-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border-left: 3px solid #b3701f;
+  }
+  
+  .client-kumpil-view-req-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .client-kumpil-view-req-label p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    font-family: Roboto;
+    font-weight: 400;
+  }
+  
+  .client-kumpil-view-requirement-name {
+    font-size: 15px;
+    color: #333;
+    font-family: Roboto;
+    flex: 1;
+  }
+  
+  /* Checkbox styling for view-only mode */
+  .client-kumpil-view-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+  }
+  
+  /* Checked state for view-only checkbox */
+  .client-kumpil-view-checked {
+    background-color: #b3701f;
+    border-color: #b3701f;
+  }
+  
+  .client-kumpil-view-checked::after {
+    content: "✓";
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  /* Status indicators */
+  .client-kumpil-view-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 100px;
+    text-align: center;
+  }
+  
+  .client-kumpil-view-submitted {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .client-kumpil-view-not-submitted {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  /* Info lists */
+  .client-kumpil-view-info-list {
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 3px solid #710808;
+  }
+  
+  .client-kumpil-view-info-item {
+    background-color: #f9f9f9;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .client-kumpil-view-info-item p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    font-family: Roboto;
+    font-weight: 400;
+  }

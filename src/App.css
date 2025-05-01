@@ -1,0 +1,95 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Poppins, Inter;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.main-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffff;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  width: 26%;
+  background-color: #fff;
+  padding: 10px;
+  padding-left: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center; /* Logo and text are centered vertically */
+  gap: 10px;
+  padding: 0;
+  z-index: 1000;
+}
+
+.sidebar-logo {
+  width: 80px;
+  margin-bottom: 1px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column; /* Stack the two titles vertically */
+  row-gap: 5px;
+}
+
+.logo-title {
+  font-size: 16px;
+  font-family: Montserrat;
+  font-weight: 900;
+  color: #a56a00;
+  margin: 0; /* Remove default margin of h1 */
+}
+.logo-subtitle {
+  font-size: 15px;
+  margin-top: 20px;
+  letter-spacing: 1px;
+  font-family: Nunito;
+  font-weight: 700;
+  color: #573901;
+  margin: 0; /* Remove default margin of h1 */
+}
+
+.form-container {
+  width: 75%;
+  background-color: white;
+  padding: 20px;
+  overflow: hidden;
+  border-left: 1px solid #b9b9b9;
+  z-index: 1000;
+}
+.main-divider {
+  width: 100%; /* Make the line span the full width */
+  height: 100px; /* Set the thickness */
+  background-color: #fff; /* Match logo title color */
+  border-bottom: 2px solid #b9b9b9;
+  position: absolute; /* Position it without affecting other elements */
+  top: 0; /* Place it at the bottom of the main container */
+  left: 0;
+}

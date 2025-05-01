@@ -1,0 +1,333 @@
+/* Main container */
+.dashboard-container-cd {
+    padding: 20px 50px;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    font-family: 'Roboto', sans-serif;
+  }
+  .dashboard-container-cd::-webkit-scrollbar {
+    width: 5px;
+    background-color: #ffffff;
+  }
+  
+  .dashboard-container-cd::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb;
+    border-radius: 5px;
+  }
+  
+  .dashboard-container-cd::-webkit-scrollbar-track {
+    background-color: #ffffff;
+  }
+  /* Title styling */
+  .title-cd {
+    font-size: 35px;
+    font-weight: 800;
+    color: #573901;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+  }
+  
+  /* Calendar section styling */
+  .calendar-section-cd {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .calendar-header-cd {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .month-year-cd {
+    font-size: 24px;
+    font-weight: 700;
+    color: #573901;
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+  }
+  
+  .nav-btn-cd {
+    background: #b3701f;
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-btn-cd:hover {
+    background: #d19a15;
+  }
+  
+  /* Calendar grid */
+  .calendar-grid-cd {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  
+  .weekday-cd {
+    text-align: center;
+    font-weight: 600;
+    color: #573901;
+    padding: 10px 0;
+    background-color: #fdf8e8;
+    border-radius: 5px;
+  }
+  
+  .calendar-day-cd {
+    position: relative;
+    height: 70px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .calendar-day-cd:hover {
+    background-color: #fdf8e8;
+    border-color: #b3701f;
+  }
+  
+  .empty-day-cd {
+    background-color: #f9f9f9;
+    cursor: default;
+  }
+  
+  .empty-day-cd:hover {
+    background-color: #f9f9f9;
+    border-color: #e0e0e0;
+  }
+  
+  .day-number-cd {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .holiday-dot-cd {
+    width: 15px;
+    height: 15px;
+    background-color: #e74c3c;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 8px;
+  }
+  
+  .has-appointment-cd {
+    background-color: #fff7df;
+    border: 2px solid #b3701f;
+  }
+  
+  .selected-day-cd {
+    background-color: #b3701f !important;
+    border-color: #b3701f !important;
+  }
+  
+  .selected-day-cd .day-number-cd {
+    color: white;
+  }
+  
+  /* Appointments section styling */
+  .appointments-section-cd {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .section-title-cd {
+    font-size: 22px;
+    font-weight: 700;
+    color: #573901;
+    font-family: 'Montserrat', sans-serif;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .section-icon-cd {
+    margin-right: 10px;
+    color: #b3701f;
+  }
+  
+  /* Appointments table styling */
+  .appointments-table-cd {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1px;
+    margin-top: 15px;
+  }
+  
+  .appointments-table-cd thead tr {
+    background: #fff7df;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+  }
+  
+  .appointments-table-cd thead tr th:first-child {
+    border-top-left-radius: 10px;
+  }
+  
+  .appointments-table-cd thead tr th:last-child {
+    border-top-right-radius: 10px;
+  }
+  
+  .appointments-table-cd th,
+  .appointments-table-cd td {
+    padding: 12px 15px;
+    text-align: left;
+  }
+  
+  .appointments-table-cd th {
+    background: #fdf8e8;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    border: none;
+  }
+  
+  .appointments-table-cd td {
+    background: #fff;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    border: 1px solid #ececec;
+  }
+  
+  .appointments-table-cd tbody tr {
+    border-top: 0.1px solid #e7e7e7;
+  }
+  
+  /* Status styling */
+  .status-cd {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .pending-cd {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .confirmed-cd {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .cancelled-cd {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .completed-cd {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+  
+  /* View button styling */
+  .view-btn-cd {
+    background-color: #b3701f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-btn-cd:hover {
+    background-color: #d19a15;
+  }
+  
+  /* No appointments message */
+  .no-appointments-cd {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #777;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    .calendar-grid-cd {
+      gap: 5px;
+    }
+    
+    .calendar-day-cd {
+      height: 60px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .dashboard-container-cd {
+      padding: 20px 30px;
+    }
+    
+    .day-number-cd {
+      font-size: 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .calendar-day-cd {
+      height: 50px;
+    }
+    
+    .weekday-cd {
+      font-size: 14px;
+    }
+    
+    .appointments-table-cd {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .dashboard-container-cd {
+      padding: 15px;
+    }
+    
+    .title-cd {
+      font-size: 28px;
+      margin-bottom: 25px;
+    }
+    
+    .calendar-day-cd {
+      height: 40px;
+    }
+    
+    .day-number-cd {
+      font-size: 14px;
+    }
+    
+    .holiday-dot-cd {
+      width: 4px;
+      height: 4px;
+      bottom: 5px;
+    }
+  }

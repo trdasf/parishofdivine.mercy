@@ -1,0 +1,160 @@
+.community-sidebar {
+    width: 360px;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    height: 100vh;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 20px;
+    margin-top: 15px;
+    overflow-y: auto;
+}
+.community-sidebar::-webkit-scrollbar {
+    width: 5px;
+    background-color: #ffffff; /* White background */
+  }
+  
+  .community-sidebar::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb; /* Light grey color for the thumb */
+    border-radius: 5px;
+  }
+  
+  .community-sidebar::-webkit-scrollbar-track {
+    background-color: #ffffff; /* White background for the track */
+  }
+  
+
+.community-sidebar-header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.community-sidebar-header h2 {
+    color: #573901;
+    font-family: Montserrat;
+    font-weight: 800;
+    font-size: 35px;
+}
+
+/* Sidebar Menu */
+.community-sidebar-menu .community-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    justify-content: space-between; /* Ensures spacing between text and dropdown icon */
+    gap: 10px;
+    margin-bottom: 2px;
+    color: #333;
+}
+
+.community-menu-item span {
+    flex-grow: 1; /* Ensures text takes up remaining space */
+    text-align: left; /* Align text to the left */
+    font-family: roboto;
+    font-weight: 800;
+    padding-left: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.community-menu-item span {
+    flex-grow: 1; /* Ensures text takes up remaining space */
+    text-align: left; /* Align text to the left */
+    font-family: roboto;
+    font-weight: 800;
+    padding-left: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+
+
+/* Active State */
+.community-menu-item.active,
+.community-submenu-item.active {
+    background: #db9005;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+}
+.community-menu-item.active span,
+.community-submenu-item.active {
+    background: #db9005;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+}
+
+
+.dropdown-icon {
+    margin-left: auto; /* Pushes dropdown icon to the far right */
+}
+
+.community-menu-item:hover {
+    background: #db9005;
+    border-radius: 5px;
+    color: white;
+}
+.community-menu-item:hover span{
+    color: white;
+}
+
+/* Dropdown Submenu */
+
+.community-submenu {
+    margin-left: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+.community-submenu-item {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333;
+    font-family: roboto;
+    font-weight: 600;
+    padding-left: 10px;
+    margin-bottom: 5px;
+}
+
+.community-submenu-item:hover {
+    background: #db9005;
+    border-radius: 5px;
+    color: white;
+    gap: 20px;
+}
+
+/* Dropdown Icon */
+.dropdown-icon {
+    transition: transform 0.3s ease;
+}
+
+.rotate {
+    transform: rotate(180deg);
+}
+
+/* Logout */
+.community-menu-item-logout {
+    margin-top: 10px;
+    background: #db9005;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: roboto;
+    font-weight: 700;
+    font-size: 18px;
+    justify-content: center; /* Ensures spacing between text and dropdown icon */
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    color: white;
+    height: 35px;
+}

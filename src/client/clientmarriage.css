@@ -1,0 +1,562 @@
+/* Main container styling */
+.client-marriage-container {
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 20px;
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  
+  /* Scrollbar styling */
+  .client-marriage-container::-webkit-scrollbar {
+    width: 5px;
+    background-color: #ffffff;
+  }
+  
+  .client-marriage-container::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb;
+    border-radius: 5px;
+  }
+  
+  .client-marriage-container::-webkit-scrollbar-track {
+    background-color: #ffffff;
+  }
+  
+  /* Header styling */
+  .client-marriage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+  
+  .client-marriage-left-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .client-marriage-back-button {
+    background-color: transparent;
+    color: #710808;
+    border: none;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-family: Roboto;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .client-marriage-back-icon {
+    font-size: 22px;
+    margin-right: 5px;
+    font-weight: 700;
+  }
+  
+  .client-marriage-back-button:hover {
+    color: #5a0606;
+  }
+  
+  .client-marriage-title {
+    font-size: 35px;
+    font-weight: 800;
+    color: #573901;
+    font-family: Montserrat;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .client-marriage-pdf-button {
+    background: #b3701f;
+    border: 1px solid #b3701f;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: Roboto;
+    letter-spacing: 1px;
+    width: 130px;
+  }
+  
+  .client-marriage-pdf-button:hover {
+    background: #d19a15;
+    border: 1px solid #d19a15;
+    color: white;
+  }
+  
+  /* Marriage data section */
+  .client-marriage-data h2 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #b3701f;
+    font-family: Roboto;
+    letter-spacing: 1px;
+  }
+  
+  .client-marriage-row-date {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 15px;
+    align-items: center;
+  }
+  
+  /* Label & Input in a row */
+  .client-marriage-field-date,
+  .client-marriage-field-time {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Labels Styling */
+  .client-marriage-field-date label,
+  .client-marriage-field-time label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #000;
+    min-width: 150px;
+    text-align: left;
+    margin-top: 22px;
+    font-family: Roboto;
+  }
+  
+  /* Input Styling */
+  .client-marriage-field-date select,
+  .client-marriage-field-time select {
+    padding: 8px;
+    background-color: #ffffff;
+    color: #000;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    outline: none;
+    font-size: 16px;
+    width: 200px;
+  }
+  
+  /* Name of the Priest input styling */
+  .client-marriage-notp {
+    width: 250px;
+    padding: 8px;
+    border: none;
+    border-bottom: 2px solid #b3701f;
+    outline: none;
+    font-size: 16px;
+  }
+  
+  .client-marriage-bypart {
+    margin-top: 40px;
+  }
+  
+  .client-marriage-sub-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #573901;
+    font-family: Roboto;
+    letter-spacing: 1px;
+    text-align: left;
+    margin-bottom: 15px;
+    margin-top: 40px;
+  }
+  
+  /* Marriage row styling */
+  .client-marriage-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .client-marriage-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .client-marriage-field label {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #000;
+    font-family: roboto;
+  }
+  
+  .client-marriage-field input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #000;
+  }
+  
+  .client-marriage-field-ga {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .client-marriage-field-ga label {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #000;
+    font-family: Roboto, sans-serif;
+  }
+  
+  .client-marriage-field-ga input {
+    width: 105px; /* Shorter input for Gender and Age */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #000;
+  }
+  
+  .client-marriage-field-dob, .client-marriage-field-pob {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .client-marriage-field-dob label, .client-marriage-field-pob label {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: #000;
+    font-family: Roboto, sans-serif;
+  }
+  
+  .client-marriage-field-dob input {
+  width: 285px; /* Shorter input for Gender and Age */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  }
+  
+  .client-marriage-field-pob input {
+    width: 245px; /* Shorter input for Gender and Age */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #000;
+    }
+  
+  /* Address row and dropdown styling */
+  .client-marriage-address-row {
+    margin-top: 20px;
+  }
+  
+  .client-marriage-address-dropdown {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #333;
+    font-family: Roboto, sans-serif;
+  }
+  
+  /* Requirements container styling */
+  .client-marriage-requirements-container {
+    width: 100%;
+    margin: 20px auto;
+    font-family: "Roboto", sans-serif;
+  }
+  
+  .client-marriage-requirements-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #b36b09;
+    margin-bottom: 10px;
+    font-family: Montserrat;
+  }
+  
+  .client-marriage-requirements-box {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #fff;
+  }
+  
+  .client-marriage-section-header {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-family: Montserrat;
+    margin-left: 20px;
+  }
+  
+  .client-marriage-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 60px;
+    margin-bottom: 30px;
+  }
+  
+  /* Requirement item with upload buttons */
+  .client-marriage-requirement-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .client-marriage-requirement-item label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #000;
+    font-family: Roboto;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  
+  .client-marriage-requirement-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    appearance: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-right: 10px;
+  }
+  
+  .client-marriage-requirement-item input[type="checkbox"]:checked {
+    background-color: #b3701f;
+    border-color: #d19a15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .client-marriage-requirement-item input[type="checkbox"]:checked::after {
+    content: "✓";
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .client-marriage-upload-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  
+  .client-marriage-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .client-marriage-upload-button {
+    background-color: #b3701f;
+    color: white;
+    border: 1px solid #b3701f;
+    border-radius: 4px;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+  }
+  
+  .client-marriage-upload-button:hover {
+    background-color: #d19a15;
+    border-color: #d19a15;
+  }
+  
+  .client-marriage-status-dropdown {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    min-width: 120px;
+  }
+  
+  .client-marriage-status-not-submitted {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .client-marriage-status-submitted {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .client-marriage-file-preview {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+    padding-left: 24px;
+    width: 100%;
+  }
+  
+  /* Information lists for requirements */
+  .client-marriage-info-list {
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 3px solid #710808;
+  }
+  
+  .client-marriage-info-item {
+    background-color: #f9f9f9;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .client-marriage-info-item p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    font-family: Roboto;
+    font-weight: 400;
+  }
+  
+  /* Button styling */
+  .client-marriage-button-container {
+    display: flex;
+    gap: 100px;
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 70px;
+  }
+  
+  .client-marriage-submit-btn, 
+  .client-marriage-cancel-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: "Roboto", sans-serif;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 120px;
+    text-align: center;
+  }
+  
+  .client-marriage-submit-btn {
+    background-color: #b3701f;
+    color: white;
+  }
+  
+  .client-marriage-submit-btn:hover {
+    background-color: #d19a15;
+  }
+  
+  .client-marriage-cancel-btn {
+    background-color: #a32835;
+    color: white;
+  }
+  
+  .client-marriage-cancel-btn:hover {
+    background-color: #c82333;
+  }
+  
+  /* Modal styling */
+  .client-marriage-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .client-marriage-modal {
+    background-color: white;
+    margin: 0;
+    padding: 0;
+    border-radius: 8px;
+    width: 400px;
+    text-align: center;
+  }
+  
+  .client-marriage-modal h2 {
+    margin-top: 0;
+    color: #573901;
+    font-family: Montserrat;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  
+  .client-marriage-modal p {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px;
+    font-family: Roboto;
+    color: #000;
+  }
+  
+  .client-marriage-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 30px;
+  }
+  
+  .client-marriage-yes-btn {
+    background-color: #b3701f;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: Roboto;
+    width: 120px;
+  }
+  
+  .client-marriage-yes-btn:hover {
+    background-color: #d19a15;
+  }
+  
+  .client-marriage-modal-no-btn {
+    background-color: #a32835;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: Roboto;
+    width: 120px;
+  }
+  
+  .client-marriage-modal-no-btn:hover {
+    background-color: #c82333;
+  }
+  .custom-hr-b {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #710808, #ffcccc);
+    width: 100%;
+  }
+  
