@@ -34,6 +34,11 @@ try {
 
     $funeralID = $data['funeralID'];
     $status = $data['status'];
+    
+    // Get optional schedule parameters from request
+    $date = isset($data['date']) ? $data['date'] : null;
+    $time = isset($data['time']) ? $data['time'] : null;
+    $priest = isset($data['priest']) ? $data['priest'] : null;
 
     // Database connection
     $servername = "localhost";
@@ -48,14 +53,40 @@ try {
     }
 
     // Update status of funeral mass application
-    $sql = "UPDATE funeral_mass_application SET status = ? WHERE funeralID = ?";
+    $sql = "UPDATE funeral_mass_application SET status = ?";
+    $params = [$status];
+    $types = "s";
+    
+    // Add optional parameters to update query if provided
+    if ($date !== null) {
+        $sql .= ", dateOfFuneralMass = ?";
+        $params[] = $date;
+        $types .= "s";
+    }
+    
+    if ($time !== null) {
+        $sql .= ", timeOfFuneralMass = ?";
+        $params[] = $time;
+        $types .= "s";
+    }
+    
+    if ($priest !== null) {
+        $sql .= ", priestName = ?";
+        $params[] = $priest;
+        $types .= "s";
+    }
+    
+    $sql .= " WHERE funeralID = ?";
+    $params[] = $funeralID;
+    $types .= "i";
+    
     $stmt = $conn->prepare($sql);
     
     if (!$stmt) {
         throw new Exception("Prepare failed: " . $conn->error);
     }
     
-    $stmt->bind_param("si", $status, $funeralID);
+    $stmt->bind_param($types, ...$params);
     
     if (!$stmt->execute()) {
         throw new Exception("Error updating status: " . $stmt->error);
@@ -63,6 +94,66 @@ try {
     
     if ($stmt->affected_rows > 0) {
         $message = "Status updated successfully";
+        
+        // If status is "Approved", send confirmation email
+        if ($status === "Approved") {
+            // Make a request to the approved_funeral_email.php script
+            $emailData = [
+                "funeralID" => $funeralID
+            ];
+            
+            // Add schedule information if provided
+            if ($date !== null) {
+                $emailData["date"] = $date;
+            }
+            
+            if ($time !== null) {
+                $emailData["time"] = $time;
+            }
+            
+            if ($priest !== null) {
+                $emailData["priest"] = $priest;
+            }
+            
+            $jsonEmailData = json_encode($emailData);
+            
+            $ch = curl_init();
+            
+            $url = 'https://parishofdivinemercy.com/backend/approved_funeral_email.php';
+            
+            // Set cURL options
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonEmailData);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30); // 30-second timeout
+            
+            // Execute the request
+            $emailResponse = curl_exec($ch);
+            
+            // Check for errors
+            if (curl_errno($ch)) {
+                error_log("cURL Error: " . curl_error($ch));
+                $emailSent = false;
+                $emailMessage = "Failed to send email: " . curl_error($ch);
+            } else {
+                // Log and include email response
+                error_log("Email API response: " . $emailResponse);
+                
+                $emailResult = json_decode($emailResponse, true);
+                
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $emailSent = false;
+                    $emailMessage = "Invalid response from email server";
+                } else {
+                    $emailSent = isset($emailResult['success']) && $emailResult['success'] === true;
+                    $emailMessage = isset($emailResult['message']) ? $emailResult['message'] : "Unknown email status";
+                }
+            }
+            
+            curl_close($ch);
+        }
     } else {
         $message = "No changes made. Funeral mass application might not exist or already has the same status.";
     }
@@ -70,10 +161,18 @@ try {
     $stmt->close();
     $conn->close();
     
-    echo json_encode([
+    $response = [
         "success" => true,
         "message" => $message
-    ]);
+    ];
+    
+    // Add email info to response if we tried to send an email
+    if (isset($emailSent)) {
+        $response["email_sent"] = $emailSent;
+        $response["email_message"] = $emailMessage;
+    }
+    
+    echo json_encode($response);
 
 } catch (Exception $e) {
     error_log("Error: " . $e->getMessage());
@@ -83,4 +182,4 @@ try {
         "message" => $e->getMessage()
     ]);
 }
-?> 
+?>

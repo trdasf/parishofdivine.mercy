@@ -1,78 +1,92 @@
 <?php
-// Enable error reporting for debugging
+// Enable error reporting for debugging (consider disabling in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Set JSON header
-header("Content-Type: application/json; charset=UTF-8");
-
-// CORS headers
+// Handle CORS
 header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Handle preflight request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+// Respond to preflight (OPTIONS) request and exit
+if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
     http_response_code(200);
     exit();
 }
 
+// Database connection
+$servername = "localhost";
+$username = "u572625467_divine_mercy";
+$password = "Parish_12345";
+$dbname = "u572625467_parish";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die(json_encode([
+        "success" => false,
+        "message" => "Connection failed: " . $conn->connect_error
+    ]));
+}
+
 try {
-    // Database connection
-    $servername = "localhost";
-    $username = "u572625467_divine_mercy";  
-    $password = "Parish_12345";   
-    $dbname = "u572625467_parish";  
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
-    
-    // Prepare the query to fetch funeral appointments - for secretary, retrieve ONLY approved ones
+    // Query to get only approved funeral mass applications with deceased information
     $sql = "SELECT 
-                f.funeralID as id, 
-                d.first_name as firstName, 
+                f.funeralID as id,
+                d.first_name as firstName,
                 d.last_name as lastName,
-                f.dateOfFuneralMass as date, 
-                f.timeOfFuneralMass as time, 
-                f.status, 
-                DATE(f.created_at) as createdAt
+                f.dateOfFuneralMass as date,
+                f.timeOfFuneralMass as time,
+                f.status,
+                f.created_at as createdAt,
+                f.clientID
             FROM 
                 funeral_mass_application f
-            LEFT JOIN 
+            JOIN 
                 deceased_info d ON f.funeralID = d.funeralID
             WHERE
                 f.status = 'Approved'
             ORDER BY 
-                f.created_at DESC";
-    
+                f.dateOfFuneralMass DESC";
+                
     $result = $conn->query($sql);
     
     if (!$result) {
-        throw new Exception("Error executing query: " . $conn->error);
+        throw new Exception("Query failed: " . $conn->error);
     }
     
     $appointments = [];
     
     while ($row = $result->fetch_assoc()) {
+        // Format the date
+        if (isset($row['date'])) {
+            $date = new DateTime($row['date']);
+            $row['date'] = $date->format('F j, Y');
+        }
+        
+        // Format the createdAt date
+        if (isset($row['createdAt'])) {
+            $createdAt = new DateTime($row['createdAt']);
+            $row['createdAt'] = $createdAt->format('F j, Y');
+        }
+        
         $appointments[] = $row;
     }
     
-    $conn->close();
-    
     echo json_encode([
         "success" => true,
+        "message" => "Approved funeral mass applications retrieved successfully",
         "appointments" => $appointments
     ]);
-
+    
 } catch (Exception $e) {
-    error_log("Error: " . $e->getMessage());
-    http_response_code(500);
     echo json_encode([
         "success" => false,
         "message" => $e->getMessage()
     ]);
 }
+
+$conn->close();
 ?> 
