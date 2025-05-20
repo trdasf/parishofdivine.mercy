@@ -15,11 +15,10 @@ import {
   faRing,
   faChurch,
   faHandsPraying,
-  faMoneyBillWave,
   faUsersCog,
   faChartBar,
-  faCalendarCheck, // added for Event
-  faTasks // added for Activities
+  faCalendarCheck,
+  faTasks
 } from "@fortawesome/free-solid-svg-icons";
 import "./secretarysidebar.css";
 
@@ -98,19 +97,16 @@ const SecretarySidebar = () => {
             <Link to="/secretary-communion" className={`secretary-submenu-item ${location.pathname === "/secretary-communion" ? "active" : ""}`}>
               <FontAwesomeIcon icon={faBreadSlice} /> Communion
             </Link>
+            <Link to="/secretary-anointing-of-the-sick" className={`secretary-submenu-item ${location.pathname === "/secretary-anointing-of-the-sick" ? "active" : ""}`}>
+              <FontAwesomeIcon icon={faHandsPraying} /> Anointing of the Sick
+            </Link>
           </div>
         )}
 
-        {/* New: Event Tab */}
+        {/* Event and Activities */}
         <Link to="/secretary-activities-event" className={`secretary-menu-item ${location.pathname === "/secretary-activities-event" ? "active" : ""}`}>
           <FontAwesomeIcon icon={faCalendarCheck} />
           <span>Event and Activities</span>
-        </Link>
-
-        {/* Payment */}
-        <Link to="/secretary-payment" className={`secretary-menu-item ${location.pathname === "/secretary-payment" ? "active" : ""}`}>
-          <FontAwesomeIcon icon={faMoneyBillWave} />
-          <span>Payment</span>
         </Link>
 
         {/* Report */}

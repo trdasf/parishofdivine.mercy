@@ -1,170 +1,368 @@
 import React, { useState, useEffect } from 'react';
-import './parishdashboard.css';
+import './ParishDashboard.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faChevronLeft, 
   faChevronRight, 
+  faInfoCircle, 
   faCalendarAlt, 
-  faEye, 
   faUsers, 
   faClipboardList,
   faHandshake,
-  faPrayingHands,
-  faChurch
+  faCircle,
+  faCheckCircle,
+  faEye,
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Make sure axios is installed
 
 const ParishDashboard = () => {
   const navigate = useNavigate();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
   
-  // Modal state
+  // Setting default date to May 2025 as specified
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 17)); // May 17, 2025
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showHolidayInfo, setShowHolidayInfo] = useState(false);
+  const [selectedHoliday, setSelectedHoliday] = useState(null);
+  
+  // State for data
+  const [appointments, setAppointments] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [totalAppointments, setTotalAppointments] = useState(0);
+  const [totalActivities, setTotalActivities] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Added modal state
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEventData, setSelectedEventData] = useState(null);
   
-  // Sample data - in a real app, these would come from an API or database
-  const holidays = [
-    { date: new Date(2025, 0, 1), name: "New Year's Day" },
-    { date: new Date(2025, 3, 18), name: "Good Friday" },
-    { date: new Date(2025, 4, 1), name: "Labor Day" },
-    { date: new Date(2025, 5, 12), name: "Independence Day" },
-    { date: new Date(2025, 7, 21), name: "Ninoy Aquino Day" },
-    { date: new Date(2025, 10, 1), name: "All Saints' Day" },
-    { date: new Date(2025, 11, 25), name: "Christmas Day" },
-    { date: new Date(2025, 11, 30), name: "Rizal Day" },
-  ];
+  // API Base URL
+  const API_BASE_URL = 'https://parishofdivinemercy.com/backend';
   
-  // Corrected the id: A to id: 1
-  const appointments = [
-    { 
-      id: 1, 
-      firstName: "Maria", 
-      lastName: "Santos", 
-      sacramentType: "Baptism", 
-      date: new Date(2025, 3, 13), 
-      time: "8:00 AM", 
-      status: "Approved" 
-    },
-    { 
-      id: 2, 
-      firstName: "Juan", 
-      lastName: "Dela Cruz", 
-      sacramentType: "Marriage", 
-      date: new Date(2025, 3, 17), 
-      time: "6:00 PM", 
-      status: "Approved" 
-    },
-    { 
-      id: 3, 
-      firstName: "Pedro", 
-      lastName: "Reyes", 
-      sacramentType: "Communion", 
-      date: new Date(2025, 3, 20), 
-      time: "5:30 PM", 
-      status: "Approved" 
-    },
-    { 
-      id: 4, 
-      firstName: "Ana", 
-      lastName: "Manalo", 
-      sacramentType: "Confirmation", 
-      date: new Date(2025, 3, 27), 
-      time: "9:00 PM", 
-      status: "Approved" 
-    }
-  ];
-
-  const parishEvents = [
-    { 
-      id: 1, 
-      name: "Youth Bible Study", 
-      organizer: "Youth Ministry", 
-      type: "Formation", 
-      date: new Date(2025, 3, 12), 
-      time: "4:00 PM", 
-      location: "Parish Hall",
-      status: "Approved",
-      description: "Weekly Bible study session for youth members",
-      category: "Formation",
-      start_date: "04/12/2025",
-      end_date: "04/12/2025",
-      start_time: "4:00 PM",
-      created_at: "03/15/2025",
-      updated_at: "03/15/2025"
-    },
-    { 
-      id: 2, 
-      name: "Charity Outreach", 
-      organizer: "Social Services Committee", 
-      type: "Outreach", 
-      date: new Date(2025, 3, 18), 
-      time: "9:00 AM", 
-      location: "Barangay Center",
-      status: "Approved",
-      description: "Community service outreach program",  
-      category: "Outreach",
-      start_date: "04/18/2025",
-      end_date: "04/18/2025",
-      start_time: "9:00 AM",
-      created_at: "03/20/2025",
-      updated_at: "03/25/2025"
-    },
-    { 
-      id: 3, 
-      name: "Choir Practice", 
-      organizer: "Music Ministry", 
-      type: "Formation", 
-      date: new Date(2025, 3, 22), 
-      time: "5:30 PM", 
-      location: "Church",
-      status: "Approved",
-      description: "Weekly practice for the church choir",
-      category: "Formation",
-      start_date: "04/22/2025",
-      end_date: "04/22/2025",
-      start_time: "5:30 PM",
-      created_at: "03/28/2025",
-      updated_at: "03/28/2025"
-    },
-    { 
-      id: 4, 
-      name: "Parish Council Meeting", 
-      organizer: "Parish Council", 
-      type: "Administrative", 
-      date: new Date(2025, 3, 25), 
-      time: "7:00 PM", 
-      location: "Conference Room",
-      status: "Approved",
-      description: "Monthly parish council meeting to discuss parish matters",
-      category: "Administrative",
-      start_date: "04/25/2025",
-      end_date: "04/25/2025",
-      start_time: "7:00 PM",
-      created_at: "04/01/2025",
-      updated_at: "04/05/2025"
-    }
-  ];
-
-  // Calculate totals
-  const totalAppointments = appointments.length;
-  const totalEvents = parishEvents.length;
-  
-  // Get current month data
-  const getCurrentMonthAppointments = () => {
-    return appointments.filter(appointment => 
-      appointment.date.getMonth() === currentDate.getMonth() &&
-      appointment.date.getFullYear() === currentDate.getFullYear()
-    );
+  // Function to calculate Easter Sunday (needed for Holy Week calculations)
+  const calculateEaster = (year) => {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-indexed month
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    
+    return new Date(year, month, day);
   };
 
-  const getCurrentMonthEvents = () => {
-    return parishEvents.filter(event => 
-      event.date.getMonth() === currentDate.getMonth() &&
-      event.date.getFullYear() === currentDate.getFullYear()
-    );
+  // Function to get the last Monday of a specific month
+  const getLastMondayOfMonth = (year, month) => {
+    const lastDay = new Date(year, month + 1, 0);
+    const lastMonday = new Date(lastDay);
+    while (lastMonday.getDay() !== 1) {
+      lastMonday.setDate(lastMonday.getDate() - 1);
+    }
+    return lastMonday;
   };
 
+  // Function to calculate Chinese New Year (approximate)
+  const calculateChineseNewYear = (year) => {
+    // This is a simplified calculation. For precise dates, you'd need a lunar calendar API
+    const baseYear = 2024;
+    const baseDate = new Date(2024, 1, 10); // Feb 10, 2024
+    const yearDiff = year - baseYear;
+    const daysToAdd = yearDiff * 354; // Lunar year is approximately 354 days
+    const newDate = new Date(baseDate);
+    newDate.setDate(newDate.getDate() + daysToAdd);
+    
+    // Adjust to ensure it falls between Jan 21 and Feb 20
+    if (newDate.getMonth() === 0 && newDate.getDate() < 21) {
+      newDate.setDate(21);
+    } else if (newDate.getMonth() === 1 && newDate.getDate() > 20) {
+      newDate.setDate(20);
+    }
+    
+    return newDate;
+  };
+
+  // Function to calculate Islamic holidays (approximate)
+  const calculateIslamicHolidays = (year) => {
+    // Islamic calendar is lunar, approximately 11 days shorter than Gregorian
+    // This is a simplified calculation. For precise dates, you'd need an Islamic calendar API
+    const baseYear = 2024;
+    const baseEidAlFitr = new Date(2024, 3, 10); // April 10, 2024
+    const baseEidAlAdha = new Date(2024, 5, 17); // June 17, 2024
+    
+    const yearDiff = year - baseYear;
+    const daysToSubtract = yearDiff * 11; // Islamic year is about 11 days shorter
+    
+    const eidAlFitr = new Date(baseEidAlFitr);
+    eidAlFitr.setDate(eidAlFitr.getDate() - daysToSubtract);
+    
+    const eidAlAdha = new Date(baseEidAlAdha);
+    eidAlAdha.setDate(eidAlAdha.getDate() - daysToSubtract);
+    
+    return { eidAlFitr, eidAlAdha };
+  };
+
+  // Function to get all holidays for a given year
+  const getHolidaysForYear = (year) => {
+    const holidays = [];
+    
+    // Regular holidays (fixed dates)
+    holidays.push({ date: new Date(year, 0, 1), name: "New Year's Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 3, 9), name: "Araw ng Kagitingan", type: "Regular" });
+    holidays.push({ date: new Date(year, 4, 1), name: "Labor Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 5, 12), name: "Independence Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 10, 30), name: "Bonifacio Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 11, 25), name: "Christmas Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 11, 30), name: "Rizal Day", type: "Regular" });
+    
+    // Special non-working holidays (fixed dates)
+    holidays.push({ date: new Date(year, 7, 21), name: "Ninoy Aquino Day", type: "Special" });
+    holidays.push({ date: new Date(year, 10, 1), name: "All Saints' Day", type: "Special" });
+    holidays.push({ date: new Date(year, 10, 2), name: "All Souls' Day", type: "Special" });
+    holidays.push({ date: new Date(year, 11, 8), name: "Immaculate Conception", type: "Special" });
+    holidays.push({ date: new Date(year, 11, 24), name: "Christmas Eve", type: "Special" });
+    holidays.push({ date: new Date(year, 11, 31), name: "New Year's Eve", type: "Special" });
+    
+    // EDSA Revolution Anniversary (February 25)
+    holidays.push({ date: new Date(year, 1, 25), name: "EDSA Revolution", type: "Special" });
+    
+    // Moveable holidays
+    
+    // National Heroes Day (Last Monday of August)
+    const nationalHeroesDay = getLastMondayOfMonth(year, 7);
+    holidays.push({ date: nationalHeroesDay, name: "National Heroes Day", type: "Regular" });
+    
+    // Holy Week (based on Easter)
+    const easter = calculateEaster(year);
+    const holyThursday = new Date(easter);
+    holyThursday.setDate(easter.getDate() - 3);
+    const goodFriday = new Date(easter);
+    goodFriday.setDate(easter.getDate() - 2);
+    const blackSaturday = new Date(easter);
+    blackSaturday.setDate(easter.getDate() - 1);
+    
+    holidays.push({ date: holyThursday, name: "Maundy Thursday", type: "Regular" });
+    holidays.push({ date: goodFriday, name: "Good Friday", type: "Regular" });
+    holidays.push({ date: blackSaturday, name: "Black Saturday", type: "Special" });
+    
+    // Chinese New Year
+    const chineseNewYear = calculateChineseNewYear(year);
+    holidays.push({ date: chineseNewYear, name: "Chinese New Year", type: "Special" });
+    
+    // Islamic holidays
+    const islamicHolidays = calculateIslamicHolidays(year);
+    holidays.push({ date: islamicHolidays.eidAlFitr, name: "Eid'l Fitr", type: "Regular" });
+    holidays.push({ date: islamicHolidays.eidAlAdha, name: "Eid'l Adha", type: "Regular" });
+    
+    return holidays;
+  };
+
+  // Get holidays for the current year
+  const [holidays, setHolidays] = useState([]);
+  
+  useEffect(() => {
+    const year = currentDate.getFullYear();
+    setHolidays(getHolidaysForYear(year));
+  }, [currentDate]);
+  
+  // Fetch data when component mounts or currentDate changes
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Get the month and year from currentDate
+        const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+        const year = currentDate.getFullYear();
+        
+        // Fetch total appointments
+        try {
+          const totalAppsResponse = await axios.get(`${API_BASE_URL}/fetch_total_appointments.php`);
+          if (totalAppsResponse.data && totalAppsResponse.data.success) {
+            setTotalAppointments(totalAppsResponse.data.total_appointments);
+          }
+        } catch (err) {
+          console.error('Error fetching total appointments:', err);
+          // Continue execution, don't set error state yet
+        }
+        
+        // Fetch total activities
+        try {
+          const totalActsResponse = await axios.get(`${API_BASE_URL}/fetch_total_activities.php`);
+          if (totalActsResponse.data && totalActsResponse.data.success) {
+            setTotalActivities(totalActsResponse.data.total_activities);
+          }
+        } catch (err) {
+          console.error('Error fetching total activities:', err);
+          // Continue execution, don't set error state yet
+        }
+        
+        // Fetch monthly appointments with status=Approved
+        try {
+          const monthlyAppsResponse = await axios.get(`${API_BASE_URL}/fetch_all_appointments.php`);
+          if (monthlyAppsResponse.data && monthlyAppsResponse.data.success) {
+            // Filter approved appointments for current month/year
+            const filteredAppointments = monthlyAppsResponse.data.appointments.filter(app => {
+              // Create a Date object from the date string
+              let dateObj;
+              
+              if (app.date) {
+                dateObj = new Date(app.date);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(dateObj.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = app.date.split('/');
+                  if (dateParts.length === 3) {
+                    dateObj = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = app.date.split('-');
+                    if (dashParts.length === 3) {
+                      dateObj = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                return false; // Skip entries without dates
+              }
+              
+              // Filter by month, year and status
+              return dateObj.getMonth() + 1 === month && 
+                     dateObj.getFullYear() === year && 
+                     app.status.toLowerCase() === 'approved';
+            }).map(app => {
+              // Convert date strings to Date objects
+              let dateObj;
+              
+              if (app.date) {
+                dateObj = new Date(app.date);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(dateObj.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = app.date.split('/');
+                  if (dateParts.length === 3) {
+                    dateObj = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = app.date.split('-');
+                    if (dashParts.length === 3) {
+                      dateObj = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                dateObj = new Date(); // Default to current date if no date is provided
+              }
+              
+              return {
+                ...app,
+                date: dateObj
+              };
+            });
+            
+            setAppointments(filteredAppointments);
+          }
+        } catch (err) {
+          console.error('Error fetching monthly appointments:', err);
+          setAppointments([]);
+        }
+        
+        // Fetch activities with status=Approved
+        try {
+          const activitiesResponse = await axios.get(`${API_BASE_URL}/fetch_activities.php?status=Approved`);
+          if (activitiesResponse.data && activitiesResponse.data.success) {
+            // Filter for current month/year
+            const filteredActivities = activitiesResponse.data.activities.filter(activity => {
+              // Try to parse startDate
+              let dateObj;
+              
+              if (activity.startDate) {
+                dateObj = new Date(activity.startDate);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(dateObj.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = activity.startDate.split('/');
+                  if (dateParts.length === 3) {
+                    dateObj = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = activity.startDate.split('-');
+                    if (dashParts.length === 3) {
+                      dateObj = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                return false; // Skip entries without dates
+              }
+              
+              // Filter by month and year
+              return dateObj.getMonth() + 1 === month && 
+                     dateObj.getFullYear() === year;
+            }).map(activity => {
+              // Create a Date object
+              let dateObj;
+              
+              if (activity.startDate) {
+                dateObj = new Date(activity.startDate);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(dateObj.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = activity.startDate.split('/');
+                  if (dateParts.length === 3) {
+                    dateObj = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = activity.startDate.split('-');
+                    if (dashParts.length === 3) {
+                      dateObj = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                dateObj = new Date(); // Default to current date if no date is provided
+              }
+              
+              return {
+                ...activity,
+                date: dateObj,
+                // Create standardized fields if needed
+                time: activity.startTime || '12:00 PM'
+              };
+            });
+            
+            setActivities(filteredActivities);
+          }
+        } catch (err) {
+          console.error('Error fetching activities:', err);
+          setActivities([]);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [currentDate, API_BASE_URL]);
+  
   // Navigate to previous month
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -175,12 +373,7 @@ const ParishDashboard = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  // Format date to display in the header
-  const formatMonthYear = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  };
-
-  // Check for special dates
+  // Check if a date has a holiday
   const hasHoliday = (date) => {
     return holidays.some(holiday => 
       holiday.date.getDate() === date.getDate() && 
@@ -189,16 +382,16 @@ const ParishDashboard = () => {
     );
   };
 
-  // Get holiday name for a specific date
-  const getHolidayName = (date) => {
-    const holiday = holidays.find(holiday => 
+  // Get holiday for a specific date
+  const getHoliday = (date) => {
+    return holidays.find(holiday => 
       holiday.date.getDate() === date.getDate() && 
       holiday.date.getMonth() === date.getMonth() && 
       holiday.date.getFullYear() === date.getFullYear()
     );
-    return holiday ? holiday.name : null;
   };
 
+  // Check if a date has an appointment
   const hasAppointment = (date) => {
     return appointments.some(appointment => 
       appointment.date.getDate() === date.getDate() && 
@@ -207,12 +400,18 @@ const ParishDashboard = () => {
     );
   };
 
+  // Check if a date has an event
   const hasEvent = (date) => {
-    return parishEvents.some(event => 
-      event.date.getDate() === date.getDate() && 
-      event.date.getMonth() === date.getMonth() && 
-      event.date.getFullYear() === date.getFullYear()
+    return activities.some(activity => 
+      activity.date.getDate() === date.getDate() && 
+      activity.date.getMonth() === date.getMonth() && 
+      activity.date.getFullYear() === date.getFullYear()
     );
+  };
+
+  // Format date to display in the header
+  const formatMonthYear = (date) => {
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
   // Generate calendar days
@@ -246,48 +445,96 @@ const ParishDashboard = () => {
   const handleDayClick = (date) => {
     if (date) {
       setSelectedDate(date);
-    }
-  };
-
-  // Format date for display in the table
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
-  };
-
-  // View details functions
- // In ParishDashboard.js, modify the viewAppointmentDetails function
-
-const viewAppointmentDetails = (appointmentId) => {
-    const appointment = appointments.find(a => a.id === appointmentId);
-    if (appointment) {
-      // Navigate based on sacrament type with source parameter
-      switch(appointment.sacramentType) {
-        case "Baptism":
-          navigate("/baptism-view", { state: { appointmentData: appointment, source: "parish" } });
-          break;
-        case "Marriage":
-          navigate("/marriage-view", { state: { appointmentData: appointment, source: "parish" } });
-          break;
-        case "Funeral Mass":
-          navigate("/funeral-mass-view", { state: { appointmentData: appointment, source: "parish" } });
-          break;
-        case "Blessing":
-          navigate("/blessing-view", { state: { appointmentData: appointment, source: "parish" } });
-          break;
-        case "Confirmation":
-          navigate("/confirmation-view", { state: { appointmentData: appointment, source: "parish" } });
-          break;
-        case "Communion":
-          navigate("/communion-view", { state: { appointmentData: appointment, source: "parish" } });
-          break;
-        default:
-          console.log(`Unknown sacrament: ${appointment.sacramentType}`);
+      
+      // Check if the date has a holiday
+      if (hasHoliday(date)) {
+        setSelectedHoliday(getHoliday(date));
+        setShowHolidayInfo(true);
+      } else {
+        setShowHolidayInfo(false);
+        setSelectedHoliday(null);
       }
     }
   };
-  // Opens the modal for event details
+
+  // Format date for display
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  // Format date for table display
+  const formatDateShort = (date) => {
+    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  };
+
+  // View details functions - Updated to match requirements
+  const viewAppointmentDetails = (appointment) => {
+    // Navigate based on sacrament type, passing ID and status
+    switch(appointment.sacramentType) {
+      case "Baptism":
+        navigate("/baptism-view", { 
+          state: { 
+            baptismID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      case "Marriage":
+        navigate("/marriage-view", { 
+          state: { 
+            marriageID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      case "Funeral Mass":
+        navigate("/funeral-mass-view", { 
+          state: { 
+            funeralID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      case "Blessing":
+        navigate("/blessing-view", { 
+          state: { 
+            blessingID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      case "Communion":
+        navigate("/communion-view", { 
+          state: { 
+            communionID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      case "Confirmation":
+        navigate("/confirmation-view", { 
+          state: { 
+            confirmationID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      case "Anointing of the Sick and Viaticum":
+        navigate("/anointing-of-the-sick-view", { 
+          state: { 
+            anointingID: appointment.id,
+            status: appointment.status
+          }
+        });
+        break;
+      default:
+        console.log(`Unknown sacrament: ${appointment.sacramentType}`);
+    }
+  };
+  
+  // View event details - Updated to match SecretaryActivitiesEvent component
   const viewEventDetails = (eventId) => {
-    const event = parishEvents.find(e => e.id === eventId);
+    const event = activities.find(e => e.activityID === eventId);
     if (event) {
       setSelectedEventData(event);
       setShowEventModal(true);
@@ -295,62 +542,84 @@ const viewAppointmentDetails = (appointmentId) => {
   };
 
   // Get specific day details if selected
-  const getSelectedDayDetails = () => {
-    if (!selectedDate) return { appointments: [], events: [] };
+  const getAppointmentsForSelectedDate = () => {
+    if (!selectedDate) return [];
     
-    const dayAppointments = appointments.filter(appointment => 
+    return appointments.filter(appointment => 
       appointment.date.getDate() === selectedDate.getDate() && 
       appointment.date.getMonth() === selectedDate.getMonth() && 
       appointment.date.getFullYear() === selectedDate.getFullYear()
     );
-    
-    const dayEvents = parishEvents.filter(event => 
-      event.date.getDate() === selectedDate.getDate() && 
-      event.date.getMonth() === selectedDate.getMonth() && 
-      event.date.getFullYear() === selectedDate.getFullYear()
-    );
-    
-    return { appointments: dayAppointments, events: dayEvents };
   };
   
-  // Get the selected day's holiday name
-  const getSelectedDayHoliday = () => {
-    if (!selectedDate) return null;
+  const getEventsForSelectedDate = () => {
+    if (!selectedDate) return [];
     
-    const holiday = holidays.find(holiday => 
-      holiday.date.getDate() === selectedDate.getDate() && 
-      holiday.date.getMonth() === selectedDate.getMonth() && 
-      holiday.date.getFullYear() === selectedDate.getFullYear()
+    return activities.filter(activity => 
+      activity.date.getDate() === selectedDate.getDate() && 
+      activity.date.getMonth() === selectedDate.getMonth() && 
+      activity.date.getFullYear() === selectedDate.getFullYear()
     );
-    
-    return holiday ? holiday.name : null;
   };
 
-  const selectedDayDetails = getSelectedDayDetails();
-  const selectedDayHoliday = getSelectedDayHoliday();
+  // Get status icon based on status
+  const getStatusIcon = (status) => {
+    const statusLower = status.toLowerCase();
+    
+    switch(statusLower) {
+      case 'approved':
+      case 'confirmed':
+        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#155724' }} />;
+      case 'pending':
+        return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#856404' }} />;
+      case 'cancelled':
+      case 'rejected':
+        return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#721c24' }} />;
+      case 'completed':
+        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#004085' }} />;
+      default:
+        return null;
+    }
+  };
+
+  // Check if a date is today
+  const isToday = (date) => {
+    const today = new Date(2025, 4, 17); // May 17, 2025 (hardcoded for the example)
+    return date.getDate() === today.getDate() && 
+           date.getMonth() === today.getMonth() && 
+           date.getFullYear() === today.getFullYear();
+  };
 
   return (
     <div className="dashboard-container-parish">
-      <h1 className="title-parish">PARISH DASHBOARD</h1>
+      <h1 className="title-parish">SECRETARY DASHBOARD</h1>
+      
+      {/* Error message */}
+      {error && (
+        <div className="error-message-container">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="error-icon" />
+          <span>{error}</span>
+        </div>
+      )}
       
       {/* Summary Cards */}
       <div className="summary-container-parish">
-        <div className="card-parish masses-card-parish">
+        <div className="card-parish appointments-card-parish">
           <div className="card-icon-parish">
-            <FontAwesomeIcon icon={faPrayingHands} />
+            <FontAwesomeIcon icon={faCalendarAlt} />
           </div>
-          <div className="card-content-parish">
-            <h3 className="card-title-parish">Total Appointments</h3>
-            <p className="card-count-parish">{totalAppointments}</p>
+          <div className="card-content-sec">
+            <h3 className="card-title-sec">Total Appointments</h3>
+            <p className="card-count-parish">{loading ? "..." : totalAppointments}</p>
           </div>
         </div>
         <div className="card-parish events-card-parish">
           <div className="card-icon-parish">
-            <FontAwesomeIcon icon={faChurch} />
+            <FontAwesomeIcon icon={faUsers} />
           </div>
           <div className="card-content-parish">
             <h3 className="card-title-parish">Total Events</h3>
-            <p className="card-count-parish">{totalEvents}</p>
+            <p className="card-count-parish">{loading ? "..." : totalActivities}</p>
           </div>
         </div>
       </div>
@@ -358,187 +627,233 @@ const viewAppointmentDetails = (appointmentId) => {
       {/* Calendar Section */}
       <div className="calendar-section-parish">
         <div className="calendar-header-parish">
-          <button className="nav-btn-parish" onClick={prevMonth}>
+          <button className="nav-btn-parish" onClick={prevMonth} aria-label="Previous month">
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
-          <h2 className="month-year-parish">{formatMonthYear(currentDate)}</h2>
-          <button className="nav-btn-parish" onClick={nextMonth}>
+          <h2 className="month-year-parish">
+            <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
+            {formatMonthYear(currentDate)}
+          </h2>
+          <button className="nav-btn-parish" onClick={nextMonth} aria-label="Next month">
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
         </div>
         
-        <div className="calendar-grid-parish">
-          {/* Calendar week days */}
-          <div className="weekday-parish">Sun</div>
-          <div className="weekday-parish">Mon</div>
-          <div className="weekday-parish">Tue</div>
-          <div className="weekday-parish">Wed</div>
-          <div className="weekday-parish">Thu</div>
-          <div className="weekday-parish">Fri</div>
-          <div className="weekday-parish">Sat</div>
-          
-          {/* Calendar days */}
-          {generateCalendarDays().map((date, index) => (
-            <div 
-              key={index} 
-              className={`calendar-day-parish ${!date ? 'empty-day-parish' : ''} ${
-                date && hasAppointment(date) ? 'has-appointment-parish' : ''
-              } ${
-                date && hasEvent(date) ? 'has-event-parish' : ''
-              } ${
-                date && selectedDate && 
-                date.getDate() === selectedDate.getDate() && 
-                date.getMonth() === selectedDate.getMonth() && 
-                date.getFullYear() === selectedDate.getFullYear() 
-                  ? 'selected-day-parish' 
-                  : ''
-              }`}
-              onClick={() => handleDayClick(date)}
-            >
-              {date && (
-                <>
-                  <span className="day-number-parish">{date.getDate()}</span>
-                  <div className="indicator-container-parish">
+        {loading ? (
+          <div className="loading-calendar">
+            <p>Loading calendar data...</p>
+          </div>
+        ) : (
+          <div className="calendar-grid-parish">
+            {/* Calendar week days */}
+            <div className="weekday-parish">Sun</div>
+            <div className="weekday-parish">Mon</div>
+            <div className="weekday-parish">Tue</div>
+            <div className="weekday-parish">Wed</div>
+            <div className="weekday-parish">Thu</div>
+            <div className="weekday-parish">Fri</div>
+            <div className="weekday-parish">Sat</div>
+            
+            {/* Calendar days */}
+            {generateCalendarDays().map((date, index) => (
+              <div 
+                key={index} 
+                className={`calendar-day-parish 
+                  ${!date ? 'empty-day-parish' : ''} 
+                  ${date && hasAppointment(date) ? 'has-appointment-parish' : ''} 
+                  ${date && hasEvent(date) ? 'has-event-parish' : ''} 
+                  ${date && hasHoliday(date) ? 'holiday-day-parish' : ''} 
+                  ${date && isToday(date) ? 'today-parish' : ''}
+                  ${date && selectedDate && 
+                    date.getDate() === selectedDate.getDate() && 
+                    date.getMonth() === selectedDate.getMonth() && 
+                    date.getFullYear() === selectedDate.getFullYear() 
+                      ? 'selected-day-parish' 
+                      : ''
+                  }`}
+                onClick={() => handleDayClick(date)}
+                aria-label={date ? `${date.getDate()}, ${hasHoliday(date) ? 'Holiday' : ''} ${hasAppointment(date) ? 'Has appointment' : ''} ${hasEvent(date) ? 'Has event' : ''}` : 'Empty day'}
+              >
+                {date && (
+                  <>
+                    <span className="day-number-sec">{date.getDate()}</span>
+                    {hasAppointment(date) && <div className="appointment-dot-sec"></div>}
+                    {hasEvent(date) && <div className="event-dot-sec"></div>}
                     {hasHoliday(date) && (
-                      <div className="holiday-indicator-parish">
-                        <div className="holiday-dot-parish"></div>
-                        <span className="holiday-name-parish">{getHolidayName(date)}</span>
+                      <div className="holiday-indicator-sec">
+                        <div 
+                          className="holiday-dot-sec" 
+                          style={{ 
+                            backgroundColor: getHoliday(date).type === "Regular" ? "#e74c3c" : "#f39c12" 
+                          }}
+                        ></div>
+                        <span className="holiday-name-sec">{getHoliday(date).name}</span>
                       </div>
                     )}
-                    {hasAppointment(date) && <div className="appointment-dot-parish"></div>}
-                    {hasEvent(date) && <div className="event-dot-parish"></div>}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         
         {/* Calendar Legend */}
         <div className="calendar-legend-parish">
           <div className="legend-item-parish">
-            <div className="legend-color-holiday-parish"></div>
-            <span>Holiday</span>
+            <div className="legend-dot-parish" style={{ backgroundColor: "#e74c3c" }}></div>
+            <span>Regular Holiday</span>
           </div>
           <div className="legend-item-parish">
-            <div className="legend-color-appointment-parish"></div>
-            <span>Appointment</span>
+            <div className="legend-dot-parish" style={{ backgroundColor: "#f39c12" }}></div>
+            <span>Special Holiday</span>
           </div>
           <div className="legend-item-parish">
-            <div className="legend-color-event-parish"></div>
-            <span>Parish Event</span>
+            <div className="legend-dot-parish appointment-legend-parish"></div>
+            <span>Appointment Scheduled</span>
+          </div>
+          <div className="legend-item-parish">
+            <div className="legend-dot-parish event-legend-parish"></div>
+            <span>Community Event</span>
           </div>
         </div>
-      </div>
-      
-      {/* Selected Date Details Section */}
-      {selectedDate && (
-        <div className="selected-date-details-parish">
-          <h3 className="selected-date-title-parish">
-            Details for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-          </h3>
-          
-          {selectedDayHoliday && (
-            <div className="holiday-alert-parish">
-              <FontAwesomeIcon icon={faCalendarAlt} /> Holiday: {selectedDayHoliday}
+        
+        {/* Holiday Information */}
+        {showHolidayInfo && selectedHoliday && (
+          <div className="holiday-info-parish">
+            <div className="holiday-info-header-parish">
+              <FontAwesomeIcon icon={faInfoCircle} className="holiday-info-icon-parish" />
+              <h3>Holiday Information</h3>
             </div>
-          )}
-          
-          <div className="selected-date-content-parish">
-            {selectedDayDetails.appointments.length === 0 && selectedDayDetails.events.length === 0 ? (
-              <p className="no-events-message-parish">No appointments or events scheduled for this day.</p>
-            ) : (
-              <>
-                {selectedDayDetails.appointments.length > 0 && (
-                  <div className="selected-date-appointments-parish">
-                    <h4>Appointments</h4>
-                    <ul>
-                      {selectedDayDetails.appointments.map(appointment => (
-                        <li key={appointment.id}>
-                          <span>{appointment.time} - {appointment.sacramentType}</span>
-                          <span>{appointment.firstName} {appointment.lastName}</span>
-                          <span className={`status-pill-parish ${appointment.status.toLowerCase()}-parish`}>
-                            {appointment.status}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                {selectedDayDetails.events.length > 0 && (
-                  <div className="selected-date-events-parish">
-                    <h4>Events</h4>
-                    <ul>
-                      {selectedDayDetails.events.map(event => (
-                        <li key={event.id}>
-                          <span>{event.time} - {event.name}</span>
-                          <span>{event.location}</span>
-                          <span className={`status-pill-parish ${event.status.toLowerCase()}-parish`}>
-                            {event.status}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </>
+            <div className="holiday-info-content-parish">
+              <p><strong>Date:</strong> {formatDate(selectedHoliday.date)}</p>
+              <p><strong>Holiday:</strong> {selectedHoliday.name}</p>
+              <p><strong>Type:</strong> <span className={`holiday-type-parish ${selectedHoliday.type.toLowerCase()}-holiday-parish`}>{selectedHoliday.type} Holiday</span></p>
+            </div>
+          </div>
+        )}
+        
+        {/* Selected Date Details */}
+        {selectedDate && (
+          <div className="selected-date-info-parish">
+            <h3>
+              <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#b3701f' }} />
+              {formatDate(selectedDate)}
+            </h3>
+            
+            {getAppointmentsForSelectedDate().length > 0 && (
+              <div className="selected-date-appointments-sec">
+                <h4>Appointments:</h4>
+                <ul className="appointment-list-parish">
+                  {getAppointmentsForSelectedDate().map(appointment => (
+                    <li key={appointment.id} className="appointment-item-parish">
+                      <div className="appointment-time-parish">{appointment.time}</div>
+                      <div className="appointment-details-parish">
+                        <span className="appointment-name-parish">{appointment.firstName} {appointment.lastName}</span>
+                        <span className="appointment-type-parish">{appointment.sacramentType}</span>
+                        <span className={`appointment-status-parish ${appointment.status.toLowerCase()}-parish`}>
+                          {getStatusIcon(appointment.status)}
+                          {appointment.status}
+                        </span>
+                      </div>
+                      <button 
+                        className="view-btn-parish" 
+                        onClick={() => viewAppointmentDetails(appointment)}
+                      >
+                        <FontAwesomeIcon icon={faEye} /> View
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {getEventsForSelectedDate().length > 0 && (
+              <div className="selected-date-events-parish">
+                <h4>Events:</h4>
+                <ul className="event-list-parish">
+                  {getEventsForSelectedDate().map(activity => (
+                    <li key={activity.activityID} className="event-item-parish">
+                      <div className="event-time-parish">{activity.startTime}</div>
+                      <div className="event-details-parish">
+                        <span className="event-name-parish">{activity.title}</span>
+                        <span className="event-organizer-parish">{activity.proposedBy || activity.organizer}</span>
+                        <span className="event-location-parish">{activity.location}</span>
+                        <span className={`event-status-parish ${activity.status.toLowerCase()}-parish`}>
+                          {getStatusIcon(activity.status)}
+                          {activity.status}
+                        </span>
+                      </div>
+                      <button 
+                        className="view-btn-parish event-view-btn-parish" 
+                        onClick={() => viewEventDetails(activity.activityID)}
+                      >
+                        <FontAwesomeIcon icon={faEye} /> View
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {getAppointmentsForSelectedDate().length === 0 && getEventsForSelectedDate().length === 0 && (
+              <p className="no-appointments-message-parish">
+                No appointments or events scheduled for this date.
+              </p>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
       
       {/* Tables Section */}
-      <div className="tables-container-parish">
-        {/* Appointments Table - Previously Masses Table */}
-        <div className="table-section-parish appointments-table-section-parish">
+      <div className="tables-container-sec">
+        {/* Appointments Table */}
+        <div className="table-section-sec appointments-table-section-sec">
           <h2 className="section-title-parish">
-            <FontAwesomeIcon icon={faPrayingHands} className="section-icon-parish" />
+            <FontAwesomeIcon icon={faClipboardList} className="section-icon-parish" />
             Appointments for {formatMonthYear(currentDate)}
           </h2>
-          <div className="data-table-container-parish">
-            <table className="data-table-parish">
+          <div className="data-table-container">
+            <table className="appointment-table-sa">
               <thead>
                 <tr>
-                  <th>No.</th>
+                  <th>ID</th>
                   <th>First Name</th>
                   <th>Last Name</th>
                   <th>Sacrament Type</th>
                   <th>Date</th>
                   <th>Time</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {getCurrentMonthAppointments().length > 0 ? (
-                  getCurrentMonthAppointments().map((appointment) => (
+                {appointments.length > 0 ? (
+                  appointments.map((appointment) => (
                     <tr key={appointment.id}>
                       <td>{appointment.id}</td>
                       <td>{appointment.firstName}</td>
                       <td>{appointment.lastName}</td>
                       <td>{appointment.sacramentType}</td>
-                      <td>{formatDate(appointment.date)}</td>
+                      <td>{formatDateShort(appointment.date)}</td>
                       <td>{appointment.time}</td>
-                      <td>
-                        <span className={`status-parish ${appointment.status.toLowerCase()}-parish`}>
-                          {appointment.status}
-                        </span>
+                      <td className={`status-${appointment.status?.toLowerCase()}`}>
+                        {appointment.status}
                       </td>
-                      <td>
+                      <td className="actions-cell-sa">
                         <button
-                          className="view-btn-parish"
-                          onClick={() => viewAppointmentDetails(appointment.id)}
+                          className="view-btn-sa"
+                          onClick={() => viewAppointmentDetails(appointment)}
+                          title="View Details"
                         >
-                          <FontAwesomeIcon icon={faEye} /> View
+                          View
                         </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="no-data-parish">
-                      No appointments for this month
+                    <td colSpan="8" style={{ textAlign: "center" }}>
+                      {loading ? 'Loading appointments...' : 'No approved appointments for this month'}
                     </td>
                   </tr>
                 )}
@@ -548,56 +863,56 @@ const viewAppointmentDetails = (appointmentId) => {
         </div>
         
         {/* Events Table */}
-        <div className="table-section-parish events-table-section-parish">
+        <div className="table-section-sec events-table-section-sec">
           <h2 className="section-title-parish">
             <FontAwesomeIcon icon={faHandshake} className="section-icon-parish" />
-            Parish Events for {formatMonthYear(currentDate)}
+            Community Events for {formatMonthYear(currentDate)}
           </h2>
-          <div className="data-table-container-parish">
-            <table className="data-table-parish">
+          <div className="data-table-container">
+            <table className="event-table-sae">
               <thead>
                 <tr>
                   <th>No.</th>
-                  <th>Event</th>
-                  <th>Organizer</th>
+                  <th>Title</th>
+                  <th>Description</th>
                   <th>Category</th>
-                  <th>Date</th>
-                  <th>Time</th>
+                  <th>Start Date</th>
+                  <th>Start Time</th>
                   <th>Location</th>
+                  <th>Organizer</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {getCurrentMonthEvents().length > 0 ? (
-                  getCurrentMonthEvents().map((event) => (
-                    <tr key={event.id}>
-                      <td>{event.id}</td>
-                      <td>{event.name}</td>
-                      <td>{event.organizer}</td>
-                      <td>{event.type}</td>
-                      <td>{formatDate(event.date)}</td>
-                      <td>{event.time}</td>
-                      <td>{event.location}</td>
-                      <td>
-                        <span className={`status-parish ${event.status.toLowerCase()}-parish`}>
-                          {event.status}
-                        </span>
+                {activities.length > 0 ? (
+                  activities.map((activity, index) => (
+                    <tr key={activity.activityID}>
+                      <td>{index + 1}</td>
+                      <td>{activity.title}</td>
+                      <td>{activity.description}</td>
+                      <td>{activity.category}</td>
+                      <td>{formatDateShort(activity.date)}</td>
+                      <td>{activity.startTime}</td>
+                      <td>{activity.location}</td>
+                      <td>{activity.proposedBy}</td>
+                      <td className={`status-${activity.status?.toLowerCase()}`}>
+                        {activity.status}
                       </td>
                       <td>
                         <button
-                          className="view-btn-parish event-view-btn-parish"
-                          onClick={() => viewEventDetails(event.id)}
+                          className="sae-details"
+                          onClick={() => viewEventDetails(activity.activityID)}
                         >
-                          <FontAwesomeIcon icon={faEye} /> View
+                          View
                         </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="no-data-parish">
-                      No events for this month
+                    <td colSpan="10" style={{ textAlign: "center" }}>
+                      {loading ? 'Loading events...' : 'No approved events for this month'}
                     </td>
                   </tr>
                 )}
@@ -609,58 +924,64 @@ const viewAppointmentDetails = (appointmentId) => {
 
       {/* Event Modal */}
       {showEventModal && selectedEventData && (
-        <div className="modal-backdrop-parish">
-          <div className="modal-content-parish">
+        <div className="modal-backdrop-sae">
+          <div className="modal-content-sae">
             <h2>Event & Activity Details</h2>
-            <hr className="custom-hr-parish"/>
-            <div className="view-details-parish">
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Title:</div>
-                <div className="detail-value-parish">{selectedEventData.name}</div>
+            <hr className="custom-hr-sum"/>
+            <div className="view-details-sae">
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Title:</div>
+                <div className="detail-value-sae">{selectedEventData.title}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Description:</div>
+                <div className="detail-value-sae">{selectedEventData.description}</div>
               </div>
               <div className="detail-row-parish">
-                <div className="detail-label-parish">Description:</div>
-                <div className="detail-value-parish">{selectedEventData.description}</div>
+                <div className="detail-label-sae">Category:</div>
+                <div className="detail-value-sae">{selectedEventData.category}</div>
               </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Category:</div>
-                <div className="detail-value-parish">{selectedEventData.type}</div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Start Date:</div>
+                <div className="detail-value-sae">{formatDateShort(selectedEventData.date)}</div>
               </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Start Date:</div>
-                <div className="detail-value-parish">{selectedEventData.start_date}</div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Start Time:</div>
+                <div className="detail-value-sae">{selectedEventData.startTime}</div>
               </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">End Date:</div>
-                <div className="detail-value-parish">{selectedEventData.end_date}</div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Location:</div>
+                <div className="detail-value-sae">{selectedEventData.location}</div>
               </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Start Time:</div>
-                <div className="detail-value-parish">{selectedEventData.time}</div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Organizer:</div>
+                <div className="detail-value-sae">{selectedEventData.organizer || selectedEventData.proposedBy}</div>
               </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Location:</div>
-                <div className="detail-value-parish">{selectedEventData.location}</div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Status:</div>
+                <div className={`detail-value-sae status-${selectedEventData.status.toLowerCase()}`}>
+                  {selectedEventData.status}
+                </div>
               </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Organizer:</div>
-                <div className="detail-value-parish">{selectedEventData.organizer}</div>
-              </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Status:</div>
-                <div className="detail-value-parish">{selectedEventData.status}</div>
-              </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Created At:</div>
-                <div className="detail-value-parish">{selectedEventData.created_at}</div>
-              </div>
-              <div className="detail-row-parish">
-                <div className="detail-label-parish">Updated At:</div>
-                <div className="detail-value-parish">{selectedEventData.updated_at}</div>
-              </div>
+              {selectedEventData.created_at && (
+                <div className="detail-row-sae">
+                  <div className="detail-label-sae">Created At:</div>
+                  <div className="detail-value-sae">
+                    {new Date(selectedEventData.created_at).toLocaleString()}
+                  </div>
+                </div>
+              )}
+              {selectedEventData.updated_at && (
+                <div className="detail-row-sae">
+                  <div className="detail-label-sae">Updated At:</div>
+                  <div className="detail-value-sae">
+                    {new Date(selectedEventData.updated_at).toLocaleString()}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="modal-actions-parish">
-              <button onClick={() => setShowEventModal(false)} className="cancel-btn-parish">
+            <div className="modal-actions-sae">
+              <button onClick={() => setShowEventModal(false)} className="cancel-btn-sae">
                 Close
               </button>
             </div>

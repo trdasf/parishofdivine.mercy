@@ -234,7 +234,8 @@
 .client-marital-view-options {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 15px;
+  margin-top: 10px;
 }
 
 .client-view-pms-label {
@@ -246,6 +247,18 @@
   font-weight: 600;
   font-size: 14px;
   margin-right: 20px;
+  padding: 8px 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+/* Add a highlight for the selected marital status option */
+.client-view-selected-status {
+  background-color: rgba(179, 112, 31, 0.1);
+  border-color: #b3701f;
+  box-shadow: 0 0 3px rgba(179, 112, 31, 0.3);
 }
 
 /* Checkbox styling for view-only mode */
@@ -256,12 +269,15 @@
   border-radius: 4px;
   display: inline-block;
   position: relative;
+  transition: all 0.2s ease;
 }
 
 /* Checked state for view-only checkbox */
 .client-view-checked {
   background-color: #b3701f;
   border-color: #b3701f;
+  box-shadow: 0 0 5px rgba(179, 112, 31, 0.5);
+  transform: scale(1.1);
 }
 
 .client-view-checked::after {

@@ -1,4 +1,3 @@
-// ClientSidebar.jsx
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,9 +12,14 @@ import "./clientsidebar.css";
 const ClientSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Get clientID from localStorage
+  const user = JSON.parse(localStorage.getItem('user'));
+  const clientID = user?.clientID;
 
   const handleLogout = () => {
-    navigate("/"); // Redirect to login or home page
+    localStorage.removeItem('user');
+    navigate("/");
   };
 
   return (
@@ -27,6 +31,7 @@ const ClientSidebar = () => {
       <nav className="client-sidebar-menu">
         <Link
           to="/client-dashboard"
+          state={{ clientID }}
           className={`client-menu-item ${
             location.pathname === "/client-dashboard" ? "active" : ""
           }`}
@@ -34,19 +39,9 @@ const ClientSidebar = () => {
           <FontAwesomeIcon icon={faClipboardList} />
           <span>Dashboard</span>
         </Link>
-
-        <Link
-          to="/client-profile"
-          className={`client-menu-item ${
-            location.pathname === "/client-profile" ? "active" : ""
-          }`}
-        >
-          <FontAwesomeIcon icon={faUser} />
-          <span>Profile</span>
-        </Link>
-
         <Link
           to="/client-appointment"
+          state={{ clientID }}
           className={`client-menu-item ${
             location.pathname === "/client-appointment" ? "active" : ""
           }`}

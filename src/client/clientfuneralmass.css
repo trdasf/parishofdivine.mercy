@@ -111,7 +111,7 @@
   /* Input Styling */
   .client-funeral-field-date input,
   .client-funeral-field-time input,   .client-funeral-field-date select,
-  .client-funeral-field-time select {
+  .client-funeral-field-time select{
     padding: 8px;
     background-color: #ffffff;
     color: #000;
@@ -168,7 +168,7 @@
     font-family: roboto;
   }
   
-  .client-funeral-field input {
+  .client-funeral-field input, .client-funeral-field select {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -189,7 +189,7 @@
     font-family: Roboto, sans-serif;
   }
   
-  .client-funeral-field-ga input {
+  .client-funeral-field-ga input, .client-funeral-field-ga select {
     width: 105px; /* Shorter input for Gender and Age */
     padding: 8px;
     border: 1px solid #ccc;
@@ -510,5 +510,87 @@
     height: 2px;
     background: linear-gradient(to right, #710808, #ffcccc);
     width: 100%;
+  }
+  
+  .client-funeral-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    height: 60px;
+    width: 100%;
+  }
+  
+  .client-funeral-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #b3701f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Error styling */
+  .error-field input, 
+  .error-field select, 
+  .error-field textarea {
+    border: 2px solid #ff3b30 !important;
+    background-color: rgba(255, 59, 48, 0.05);
+  }
+  
+  .error-field label {
+    color: #ff3b30;
+  }
+  
+  .error-message {
+    color: #ff3b30;
+    font-size: 12px;
+    margin-top: 2px;
+    margin-bottom: 5px;
+  }
+  
+  .document-error {
+    border: 2px solid #ff3b30 !important;
+    background-color: rgba(255, 59, 48, 0.05);
+  }
+  
+  .required-marker {
+    color: #ff3b30;
+    margin-left: 2px;
+  }
+  
+  .client-funeral-error-summary {
+    color: #ff3b30;
+    background-color: rgba(255, 59, 48, 0.1);
+    border: 1px solid #ff3b30;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    font-size: 14px;
+  }
+  
+  /* Uploading state styles */
+  .client-funeral-status-uploading {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-color: #6c757d;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .client-funeral-upload-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
   }
   

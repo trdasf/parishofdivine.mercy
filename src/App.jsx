@@ -1,17 +1,23 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./landingpage/homepage";
+
+import pdmLogo from "./assets/pdmlogo.png";
+
+import ParishLogin from "./landingpage/parishlogin";
+import SecretaryLogin from "./landingpage/secretarylogin";
+import MinistryLogin from "./landingpage/ministrylogin";
+import ClientLogin from "./landingpage/clientlogin";
 
 // Sidebar imports
 import ParishSidebar from "./sidebar/parishsidebar";
-import CommunitySidebar from "./sidebar/communitysidebar";
+import CommunitySidebar from "./sidebar/ministrysidebar";
 import SecretarySidebar from "./sidebar/secretarysidebar";
 import ClientSidebar from "./sidebar/clientsidebar";
 
-
-import CommunityDashboard from "./community/communitydashboard";
-import CommunityProfile from "./community/communityprofile";
-import CommunityActivitiesEvent from "./community/communityactivitiesevent";
+import MinistryDashboard from "./ministry/ministrydashboard";
+import MinistryProfile from "./ministry/ministryprofile";
+import MinistryActivitiesEvent from "./ministry/ministryactivitiesevent";
 
 import ParishDashboard from "./parish/parishdashboard";
 import ParishAppointment from "./parish/parishappointment";
@@ -22,6 +28,7 @@ import FuneralMassView from "./parish/funeralmassview";
 import ConfirmationView from "./parish/confirmationview";
 import CommunionView from "./parish/communionview";
 import BlessingView from "./parish/blessingview";
+import AnointingOfTheSickView from "./parish/anointingofthesickview";
 
 import SecretaryDashboard from "./secretary/secretarydashboard";
 import SecretarySchedule from "./secretary/secretaryschedule";
@@ -42,7 +49,15 @@ import SecretaryMarriageView from "./secretary/secretarymarriageview";
 import SecretaryCommunionView from "./secretary/secretarycommunionview";
 import SecretaryFuneralMassView from "./secretary/secretaryfuneralmassview";
 import SecretaryBlessingView from "./secretary/secretaryblessingview";
-
+import SecretaryAnointingOfTheSick from "./secretary/secretaryanointingofthesick";
+import SecretaryAnointingOfTheSickView from "./secretary/secretaryanointingofthesickview";
+import Baptism from "./secretary/appointmentinterface/baptism";
+import Marriage from "./secretary/appointmentinterface/marriage";
+import FuneralMass from "./secretary/appointmentinterface/funeralmass";
+import Blessing from "./secretary/appointmentinterface/blessing";
+import Communion from "./secretary/appointmentinterface/communion";
+import AnointingOfTheSick from "./secretary/appointmentinterface/anointingofthesick";
+import Confirmation from "./secretary/appointmentinterface/confirmation";
 
 
 import ClientDashboard from "./client/clientdashboard";
@@ -50,27 +65,46 @@ import ClientProfile from "./client/clientprofile";
 import ClientAppointment from "./client/clientappointment";
 import ClientBaptism from "./client/clientbaptism";
 import ClientMarriage from "./client/clientmarriage";
-import ClientKumpil from "./client/clientkumpil";
+import ClientConfirmation from "./client/clientconfirmation";
 import ClientCommunion from "./client/clientcommunion";
 import ClientFuneralMass from "./client/clientfuneralmass";
 import ClientBlessing from "./client/clientblessing";
 import ClientBaptismView from "./client/clientbaptismview";
 import ClientMarriageView from "./client/clientmarriageview";
 import ClientCommunionView from "./client/clientcommunionview";
-import ClientKumpilView from "./client/clientkumpilview";
+import ClientConfirmationView from "./client/clientconfirmationview";
 import ClientBlessingView from "./client/clientblessingview";
 import ClientFuneralMassView from "./client/clientfuneralmassview";
+import ClientAnointingOfTheSick from "./client/clientanointingofthesick";
+import ClientAnointingOfTheSickView from "./client/clientanointingofthesickview";
 
 import "./App.css";
+
+// Login Page Component for handling all login types
+const LoginPage = () => {
+  const location = useLocation();
+  const loginType = location.pathname.split('/')[1]; // Get login type from path
+
+  return (
+    <div className="login-page-container">
+      <div className="login-form-wrapper">
+        {loginType === "parish-login" ? <ParishLogin /> :
+         loginType === "secretary-login" ? <SecretaryLogin /> :
+         loginType === "ministry-login" ? <MinistryLogin /> :
+         <ClientLogin />}
+      </div>
+    </div>
+  );
+};
 
 // Main Page Component
 const MainPage = () => {
   const location = useLocation();
 
-  const isCommunityRoute = location.pathname.startsWith("/community");
+  const isCommunityRoute = location.pathname.startsWith("/ministry");
   const isSecretaryRoute = location.pathname.startsWith("/secretary");
   const isClientRoute = location.pathname.startsWith("/client");
-  
+  const isParishRoute = location.pathname.startsWith("/parish");
   // Helper function to determine which sidebar to show based on route and state
   const getSidebar = () => {
     // Check if we're on a view page and check the state source
@@ -79,6 +113,7 @@ const MainPage = () => {
         location.pathname === "/funeral-mass-view" || 
         location.pathname === "/confirmation-view" || 
         location.pathname === "/communion-view" || 
+        location.pathname === "/anointing-of-the-sick-view" || 
         location.pathname === "/blessing-view") {
       
       // Check location state for source information
@@ -101,21 +136,23 @@ const MainPage = () => {
       return <SecretarySidebar />;
     } else if (isClientRoute) {
       return <ClientSidebar />;
-    } else {
+    } else if (isParishRoute) {
       return <ParishSidebar />;
+    } else {
+      return <SecretarySidebar />;
     }
   };
 
   return (
     <div className="main-container">
       <div className="sidebar-container">
-      <div className="logo-container">
-  <img src="/src/assets/pdmlogo.png" alt="Parish Logo" className="sidebar-logo" />
-  <div className="logo-text">
-    <h1 className="logo-title">PARISH OF THE DIVINE MERCY</h1>
-    <h2 className="logo-subtitle">Management Information System</h2>
-  </div>
-</div>
+        <div className="logo-container">
+          <img src={pdmLogo} alt="Parish Logo" className="sidebar-logo" />
+          <div className="logo-text">
+            <h1 className="logo-title">PARISH OF THE DIVINE MERCY</h1>
+            <h2 className="logo-subtitle">Management Information System</h2>
+          </div>
+        </div>
 
         {getSidebar()}
       </div>
@@ -129,10 +166,11 @@ const MainPage = () => {
         : location.pathname === "/confirmation-view" ? <ConfirmationView/>
         : location.pathname === "/communion-view" ? <CommunionView/>
         : location.pathname === "/blessing-view" ? <BlessingView/>
+        : location.pathname === "/anointing-of-the-sick-view" ? <AnointingOfTheSickView/>
 
-        : location.pathname === "/community-dashboard" ? <CommunityDashboard />
-        : location.pathname === "/community-profile" ? <CommunityProfile />
-        : location.pathname === "/community-activities-event" ? <CommunityActivitiesEvent />
+        : location.pathname === "/ministry-dashboard" ? <MinistryDashboard />
+        : location.pathname === "/ministry-profile" ? <MinistryProfile />
+        : location.pathname === "/ministry-activities-event" ? <MinistryActivitiesEvent />
 
         : location.pathname === "/secretary-dashboard" ? <SecretaryDashboard />
         : location.pathname === "/secretary-schedule" ? <SecretarySchedule />
@@ -153,22 +191,33 @@ const MainPage = () => {
         : location.pathname === "/secretary-communion-view" ? <SecretaryCommunionView />
         : location.pathname === "/secretary-funeral-mass-view" ? <SecretaryFuneralMassView />
         : location.pathname === "/secretary-blessing-view" ? <SecretaryBlessingView />
+        : location.pathname === "/secretary-anointing-of-the-sick" ? <SecretaryAnointingOfTheSick />
+        : location.pathname === "/secretary-anointing-of-the-sick-view" ? <SecretaryAnointingOfTheSickView />
+        : location.pathname === "/baptism" ? <Baptism />
+        : location.pathname === "/marriage" ? <Marriage />
+        : location.pathname === "/funeral-mass" ? <FuneralMass />
+        : location.pathname === "/blessing" ? <Blessing />
+        : location.pathname === "/communion" ? <Communion />
+        : location.pathname === "/confirmation" ? <Confirmation />
+        : location.pathname === "/anointing-of-the-sick" ? <AnointingOfTheSick />
 
         : location.pathname === "/client-dashboard" ? <ClientDashboard />
-        : location.pathname === "/client-profile" ? <ClientProfile />
+        : location.pathname === "/client-profile" ? <ClientProfile />        
         : location.pathname === "/client-appointment" ? <ClientAppointment />
         : location.pathname === "/client-baptism" ? <ClientBaptism />
         : location.pathname === "/client-baptism-view" ? <ClientBaptismView />
         : location.pathname === "/client-marriage" ? <ClientMarriage />
         : location.pathname === "/client-marriage-view" ? <ClientMarriageView />
-        : location.pathname === "/client-kumpil" ? <ClientKumpil />
-        : location.pathname === "/client-kumpil-view" ? <ClientKumpilView />
+        : location.pathname === "/client-confirmation" ? <ClientConfirmation />
+        : location.pathname === "/client-confirmation-view" ? <ClientConfirmationView />
         : location.pathname === "/client-communion" ? <ClientCommunion />
         : location.pathname === "/client-communion-view" ? <ClientCommunionView />
         : location.pathname === "/client-funeral-mass" ? <ClientFuneralMass />
         : location.pathname === "/client-funeral-mass-view" ? <ClientFuneralMassView />
         : location.pathname === "/client-blessing" ? <ClientBlessing />
         : location.pathname === "/client-blessing-view" ? <ClientBlessingView />
+        : location.pathname === "/client-anointing-of-the-sick" ? <ClientAnointingOfTheSick />
+        : location.pathname === "/client-anointing-of-the-sick-view" ? <ClientAnointingOfTheSickView />
         : <HomePage />}
       </div>
       <div className="main-divider"></div>
@@ -182,6 +231,12 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        
+        {/* Login Routes */}
+        <Route path="/parish-login" element={<LoginPage />} />
+        <Route path="/secretary-login" element={<LoginPage />} />
+        <Route path="/ministry-login" element={<LoginPage />} />
+        <Route path="/client-login" element={<LoginPage />} />
 
         <Route path="/parish-dashboard" element={<MainPage />} />
         <Route path="/parish-appointment" element={<MainPage />} />
@@ -192,10 +247,11 @@ const App = () => {
         <Route path="/confirmation-view" element={<MainPage />} />
         <Route path="/communion-view" element={<MainPage />} />
         <Route path="/blessing-view" element={<MainPage />} />
+        <Route path="/anointing-of-the-sick-view" element={<MainPage />} />
 
-        <Route path="/community-dashboard" element={<MainPage />} />
-        <Route path="/community-profile" element={<MainPage />} />
-        <Route path="/community-activities-event" element={<MainPage />} />
+        <Route path="/ministry-dashboard" element={<MainPage />} />
+        <Route path="/ministry-profile" element={<MainPage />} />
+        <Route path="/ministry-activities-event" element={<MainPage />} />
 
         <Route path="/secretary-dashboard" element={<MainPage />} />
         <Route path="/secretary-schedule" element={<MainPage />} />
@@ -216,6 +272,15 @@ const App = () => {
         <Route path="/secretary-communion-view" element={<MainPage />} />
         <Route path="/secretary-funeral-mass-view" element={<MainPage />} />
         <Route path="/secretary-blessing-view" element={<MainPage />} />
+        <Route path="/secretary-anointing-of-the-sick" element={<MainPage />} />
+        <Route path="/secretary-anointing-of-the-sick-view" element={<MainPage />} />
+        <Route path="/baptism" element={<MainPage />} />
+        <Route path="/marriage" element={<MainPage />} />
+        <Route path="/funeral-mass" element={<MainPage />} />
+        <Route path="/blessing" element={<MainPage />} />
+        <Route path="/communion" element={<MainPage />} />
+        <Route path="/confirmation" element={<MainPage />} />
+        <Route path="/anointing-of-the-sick" element={<MainPage />} />
 
         <Route path="/client-dashboard" element={<MainPage />} />
         <Route path="/client-profile" element={<MainPage />} />        
@@ -224,14 +289,16 @@ const App = () => {
         <Route path="/client-baptism-view" element={<MainPage />} />
         <Route path="/client-marriage" element={<MainPage />} />
         <Route path="/client-marriage-view" element={<MainPage />} />
-        <Route path="/client-kumpil" element={<MainPage />} />
-        <Route path="/client-kumpil-view" element={<MainPage />} />
+        <Route path="/client-confirmation" element={<MainPage />} />
+        <Route path="/client-confirmation-view" element={<MainPage />} />
         <Route path="/client-communion" element={<MainPage />} />
         <Route path="/client-communion-view" element={<MainPage />} />
         <Route path="/client-funeral-mass" element={<MainPage />} />
         <Route path="/client-funeral-mass-view" element={<MainPage />} />
         <Route path="/client-blessing" element={<MainPage />} />
         <Route path="/client-blessing-view" element={<MainPage />} />
+        <Route path="/client-anointing-of-the-sick" element={<MainPage />} />
+        <Route path="/client-anointing-of-the-sick-view" element={<MainPage />} />
       </Routes>
     </Router>
   );

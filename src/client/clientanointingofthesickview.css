@@ -1,0 +1,348 @@
+/* Main container styling */
+.client-anointing-view-container {
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 20px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.client-anointing-view-container::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.client-anointing-view-container::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.client-anointing-view-container::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+/* Header styling */
+.client-anointing-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.client-anointing-view-left-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.client-anointing-view-back-button {
+  background-color: transparent;
+  color: #710808;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-family: Roboto;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.client-anointing-view-back-icon {
+  font-size: 22px;
+  margin-right: 5px;
+  font-weight: 700;
+}
+
+.client-anointing-view-back-button:hover {
+  color: #5a0606;
+}
+
+.client-anointing-view-title {
+  font-size: 35px;
+  font-weight: 800;
+  color: #573901;
+  font-family: Montserrat;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Anointing data section */
+.client-anointing-view-data h2 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #b3701f;
+  font-family: Roboto;
+  letter-spacing: 1px;
+}
+
+.client-anointing-view-row-date {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+/* Info cards */
+.client-anointing-view-bypart {
+  margin-top: 40px;
+}
+
+/* Add info card styling to match baptism view */
+.client-anointing-view-info-card {
+  background-color: #fff;
+  border-top: 1px solid #f8d7da;
+  border-right: 1px solid #f8d7da;
+  border-bottom: 1px solid #f8d7da;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #b3701f;
+}
+
+.client-anointing-view-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+/* Label & Value in a row */
+.client-anointing-view-field-date,
+.client-anointing-view-field-time {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+/* Labels Styling */
+.client-anointing-view-field-date label,
+.client-anointing-view-field-time label {
+  font-weight: 600;
+  font-size: 16px;
+  color: #573901;
+  min-width: 180px;
+  text-align: left;
+  margin-top: 0;
+  font-family: Roboto;
+}
+
+/* Value styling for read-only fields */
+.client-anointing-view-value {
+  padding: 8px;
+  background-color: #f9f9f9;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 16px;
+  min-width: 200px;
+  font-family: Roboto;
+}
+
+.client-anointing-view-sub-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  text-align: left;
+  margin-bottom: 15px;
+  margin-top: 40px;
+}
+
+/* Row styling */
+.client-anointing-view-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.client-anointing-view-field label,
+.client-anointing-view-field-ga label,
+.client-anointing-view-field-fpob label,
+.client-anointing-view-field-wide label
+ {
+  font-weight: 600;
+  font-size: 14px;
+  color: #573901;
+  display: block;
+  margin-bottom: 5px;
+  font-family: Roboto;
+}
+
+.client-anointing-view-field-ga {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 200px;
+}
+
+.client-anointing-view-field-fpob {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 280px;
+}
+
+.client-anointing-view-field-wide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+/* Checkbox container styling for view-only */
+.client-anointing-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.client-anointing-checkbox-container label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #573901;
+  font-family: Roboto;
+}
+
+/* Checkbox styling for view-only mode */
+.client-anointing-view-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+}
+
+/* Checked state for view-only checkbox */
+.client-anointing-view-checked {
+  background-color: #b3701f;
+  border-color: #b3701f;
+}
+
+.client-anointing-view-checked::after {
+  content: "✓";
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Requirements container styling */
+.client-anointing-requirements-view-container {
+  width: 100%;
+  margin: 40px auto 20px;
+  font-family: "Roboto", sans-serif;
+}
+
+.client-anointing-requirements-view-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #b36b09;
+  margin-bottom: 15px;
+  font-family: Montserrat;
+}
+
+.client-anointing-requirements-view-box {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.client-anointing-view-section-header {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  font-family: Montserrat;
+  border-bottom: 2px solid #b3701f;
+  padding-bottom: 8px;
+  width: fit-content;
+  margin-left: 0;
+}
+
+.client-anointing-view-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 0;
+  margin-bottom: 30px;
+}
+
+.client-anointing-requirement-view-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  border-left: 3px solid #b3701f;
+}
+
+.client-anointing-view-requirement-name {
+  font-size: 15px;
+  color: #333;
+  font-family: Roboto;
+  flex: 1;
+}
+
+/* Status indicators */
+.client-anointing-view-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
+}
+
+.client-anointing-view-submitted {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.client-anointing-view-not-submitted {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Info lists styling */
+.client-anointing-info-view-list {
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #710808;
+}
+
+.client-anointing-info-view-item {
+  background-color: #f9f9f9;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.client-anointing-info-view-item p {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+  font-family: Roboto;
+  font-weight: 400;
+}

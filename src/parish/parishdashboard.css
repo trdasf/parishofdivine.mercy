@@ -1,756 +1,886 @@
 /* Main container */
 .dashboard-container-parish {
-    padding: 20px 50px;
-    width: 100%;
-    height: 100vh;
-    overflow-y: auto;
-    font-family: 'Roboto', sans-serif;
+  padding: 20px 50px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  font-family: 'Roboto', sans-serif;
+}
+
+.dashboard-container-parish::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.dashboard-container-parish::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.dashboard-container-parish::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+/* Add today indicator */
+.today-parish {
+  border: 2px solid #4285f4 !important;
+  box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+  position: relative;
+}
+
+.today-parish::after {
+  content: 'Today';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  font-size: 8px;
+  color: #4285f4;
+  font-weight: bold;
+}
+
+/* Title styling */
+.title-parish {
+  font-size: 35px;
+  font-weight: 800;
+  color: #573901;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  margin-bottom: 40px;
+}
+
+/* Summary Cards styling */
+.summary-container-parish {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.card-parish {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  width: 48%;
+  transition: all 0.3s ease;
+}
+
+.card-parish:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-icon-parish {
+  font-size: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.appointments-card-parish .card-icon-parish {
+  background-color: #fdf8e8;
+  color: #b3701f;
+}
+
+.events-card-parish .card-icon-parish {
+  background-color: #fdf8e8;
+  color: #573901;
+}
+
+.card-content-parish {
+  flex-grow: 1;
+}
+
+.card-title-parish {
+  margin: 0;
+  color: #573901;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.card-count-parish {
+  margin: 5px 0 0;
+  font-size: 36px;
+  font-weight: 800;
+  color: #b3701f;
+}
+
+/* Calendar section styling */
+.calendar-section-parish {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.calendar-header-parish {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.month-year-parish {
+  font-size: 24px;
+  font-weight: 700;
+  color: #573901;
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+}
+
+.nav-btn-parish {
+  background: #b3701f;
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(179, 112, 31, 0.3);
+}
+
+.nav-btn-parish:hover {
+  background: #d19a15;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(179, 112, 31, 0.4);
+}
+
+.nav-btn-parish:active {
+  transform: translateY(0);
+}
+
+/* Calendar grid */
+.calendar-grid-parish {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.weekday-parish {
+  text-align: center;
+  font-weight: 600;
+  color: #573901;
+  padding: 12px 0;
+  background-color: #fdf8e8;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+.calendar-day-parish {
+  position: relative;
+  height: 80px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.calendar-day-parish:hover {
+  background-color: #fdf8e8;
+  border-color: #b3701f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-day-parish {
+  background-color: #f5f5f5;
+  cursor: default;
+  border: none;
+}
+
+.empty-day-parish:hover {
+  background-color: #f5f5f5;
+  border: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.day-number-parish {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Holiday styling */
+.holiday-day-parish {
+  background-color: #fff7df;
+  border: 1px solid #f8d7da;
+}
+
+.holiday-indicator-parish {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3px 0;
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.holiday-dot-parish {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.holiday-name-parish {
+  font-size: 8px;
+  font-weight: 600;
+  color: #573901;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}
+
+/* Appointment indicator */
+.appointment-dot-parish {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  background-color: #b3701f;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px white;
+}
+
+/* Event indicator */
+.event-dot-parish {
+  position: absolute;
+  top: 10px;
+  right: 24px;
+  width: 10px;
+  height: 10px;
+  background-color: #573901;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px white;
+}
+
+.has-appointment-parish {
+  background-color: #fff7df;
+  border: 2px solid #b3701f;
+}
+
+.has-event-parish {
+  background-color: #fff7df;
+  border: 2px solid #573901;
+}
+
+.selected-day-parish {
+  background-color: #b3701f !important;
+  border-color: #b3701f !important;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(179, 112, 31, 0.3);
+}
+
+.selected-day-parish .day-number-parish {
+  color: white;
+}
+
+.selected-day-parish .holiday-indicator-parish {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.selected-day-parish .holiday-name-parish {
+  color: white;
+}
+
+/* Legend */
+.calendar-legend-parish {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.legend-item-parish {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+.legend-item-parish span {
+  color: #333;
+}
+
+.legend-dot-parish {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.appointment-legend-parish {
+  background-color: #b3701f;
+  box-shadow: 0 0 0 2px white;
+}
+
+.event-legend-parish {
+  background-color: #573901;
+  box-shadow: 0 0 0 2px white;
+}
+
+/* Holiday info section */
+.holiday-info-parish {
+  background-color: #fff7df;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 20px;
+  border-left: 4px solid #e74c3c;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.holiday-info-header-parish {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.holiday-info-header-parish h3 {
+  color: #000;
+  margin: 0;
+}
+
+.holiday-info-icon-parish {
+  color: #e74c3c;
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+.holiday-info-content-parish {
+  padding-left: 28px;
+}
+
+.holiday-info-content-parish p {
+  margin: 5px 0;
+  color: #333;
+}
+
+.holiday-type-parish {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.regular-holiday-parish {
+  background-color: #ffecec;
+  color: #e74c3c;
+}
+
+.special-holiday-parish {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Selected date section */
+.selected-date-info-parish {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.selected-date-info-parish h3 {
+  color: #573901;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ececec;
+}
+
+.selected-date-info-parish h4 {
+  color: #b3701f;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.appointment-list-parish, .event-list-parish {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.appointment-item-parish, .event-item-parish {
+  display: flex;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  align-items: center;
+}
+
+.appointment-item-parish:hover, .event-item-parish:hover {
+  background-color: #fdf8e8;
+  transform: translateX(3px);
+}
+
+.appointment-time-parish, .event-time-parish {
+  width: 80px;
+  font-weight: 600;
+  color: #b3701f;
+}
+
+.appointment-details-parish, .event-details-parish {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.appointment-name-parish, .event-name-parish {
+  font-weight: 600;
+  color: #333;
+}
+
+.appointment-type-parish, .event-organizer-parish, .event-location-parish {
+  font-size: 13px;
+  color: #666;
+}
+
+.appointment-status-parish, .event-status-parish {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.pending-parish {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.approved-parish {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.cancelled-parish {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.completed-parish {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.no-appointments-message-parish {
+  color: #777;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Tables container */
+.tables-container-parish {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.data-table-container-parish {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table-container-parish::-webkit-scrollbar {
+  height: 8px;
+}
+
+.data-table-container-parish::-webkit-scrollbar-thumb {
+  background-color: #b3701f;
+  border-radius: 10px;
+}
+
+.data-table-container-parish::-webkit-scrollbar-track {
+  background-color: #f8f9fa;
+}
+
+/* Tables section styling */
+.table-section-parish {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.section-title-parish {
+  font-size: 22px;
+  font-weight: 700;
+  color: #573901;
+  font-family: 'Montserrat', sans-serif;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.section-icon-parish {
+  margin-right: 10px;
+  color: #b3701f;
+}
+
+/* Data table styling */
+.data-table-parish {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 10px;
+}
+
+.data-table-parish thead tr {
+  background-color: #fdf8e8;
+}
+
+.data-table-parish th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 700;
+  color: #573901;
+  border-bottom: 2px solid #b3701f;
+}
+
+.data-table-parish td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ececec;
+}
+
+.data-table-parish tbody tr:hover {
+  background-color: #fdf8e8;
+}
+
+/* Status styling */
+.status-parish {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+/* View button styling */
+.view-btn-parish {
+  background-color: #573901;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.view-btn-parish:hover {
+  background-color: #b3701f;
+}
+
+.event-view-btn-parish {
+  background-color: #856404;
+}
+
+.event-view-btn-parish:hover {
+  background-color: #a97b05;
+}
+
+/* No data message */
+.no-data-parish {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #777;
+}
+
+/* Modal styling */
+.modal-backdrop-parish {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content-parish {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 25px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content-parish h2 {
+  color: #573901;
+  margin-top: 0;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.custom-hr-parish {
+  border: none;
+  height: 2px;
+  background-color: #b3701f;
+  margin-bottom: 20px;
+}
+
+.view-details-parish {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.detail-row-parish {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.detail-label-parish {
+  width: 120px;
+  font-weight: 600;
+  color: #573901;
+}
+
+.detail-value-parish {
+  flex: 1;
+  color: #333;
+}
+
+.modal-actions-parish {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.cancel-btn-parish {
+  background-color: #573901;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn-parish:hover {
+  background-color: #b3701f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .dashboard-container-parish {
+    padding: 15px;
   }
   
-  .dashboard-container-parish::-webkit-scrollbar {
-    width: 5px;
-    background-color: #ffffff;
-  }
-  
-  .dashboard-container-parish::-webkit-scrollbar-thumb {
-    background-color: #dbdbdb;
-    border-radius: 5px;
-  }
-  
-  .dashboard-container-parish::-webkit-scrollbar-track {
-    background-color: #ffffff;
-  }
-  
-  /* Title styling */
-  .title-parish {
-    font-size: 35px;
-    font-weight: 800;
-    color: #573901;
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 1px;
-    margin-bottom: 40px;
-  }
-  
-  /* Summary Cards styling */
-  .summary-container-parish {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    width: 100%;
-    max-width: 1000px;
-  }
-  
-  .card-parish {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 35%; /* Slightly less than 50% to account for spacing */
-    display: flex;
-    align-items: center;
-  }
-  
-  .card-icon-parish {
-    font-size: 24px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 20px;
-    flex-shrink: 0;
-  }
-  
-  .masses-card-parish .card-icon-parish {
-    background-color: #fdf8e8;
-    color: #b3701f;
-  }
-  
-  .events-card-parish .card-icon-parish {
-    background-color: #fdf8e8;
-    color: #573901;
-  }
-  
-  .card-content-parish {
-    flex-grow: 1;
-  }
-  
-  .card-title-parish {
-    margin: 0;
-    color: #333;
-    font-size: 20px;
-    font-weight: 700;
-  }
-  
-  .card-count-parish {
-    margin: 5px 0 0;
-    font-size: 40px;
-    margin-right: 30px;
-    text-align: center;
-    font-weight: 800;
-    color: #573901;
-  }
-  
-  /* Calendar section styling */
-  .calendar-section-parish {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 30px;
-  }
-  
-  .calendar-header-parish {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .month-year-parish {
-    font-size: 24px;
-    font-weight: 700;
-    color: #573901;
-    font-family: 'Montserrat', sans-serif;
-    margin: 0;
-  }
-  
-  .nav-btn-parish {
-    background: #b3701f;
-    border: none;
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .nav-btn-parish:hover {
-    background: #d19a15;
-  }
-  
-  /* Calendar grid */
   .calendar-grid-parish {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
     gap: 8px;
   }
   
-  .weekday-parish {
-    text-align: center;
-    font-weight: 600;
-    color: #573901;
-    padding: 10px 0;
-    background-color: #fdf8e8;
-    border-radius: 5px;
+  .calendar-day-parish {
+    height: 70px;
+  }
+}
+
+@media (max-width: 992px) {
+  .title-parish {
+    font-size: 24px;
   }
   
   .calendar-day-parish {
-    position: relative;
-    height: 80px;
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .calendar-day-parish:hover {
-    background-color: #fdf8e8;
-    border-color: #b3701f;
-  }
-  
-  .empty-day-parish {
-    background-color: #f9f9f9;
-    cursor: default;
-  }
-  
-  .empty-day-parish:hover {
-    background-color: #f9f9f9;
-    border-color: #e0e0e0;
+    height: 65px;
+    padding-top: 8px;
   }
   
   .day-number-parish {
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
-  }
-  
-  .indicator-container-parish {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-top: 4px;
-  }
-  
-  .holiday-indicator-parish {
-    display: flex;
-    align-items: center;
-    margin-top: 2px;
-  }
-  
-  .holiday-dot-parish {
-    width: 8px;
-    height: 8px;
-    background-color: #721c24;
-    border-radius: 50%;
-    margin-right: 3px;
+    font-size: 16px;
   }
   
   .holiday-name-parish {
-    font-size: 0.7rem;
-    color: #333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 80%;
+    font-size: 7px;
   }
   
-  .mass-dot-parish {
-    width: 8px;
-    height: 8px;
-    background-color: #b3701f;
-    border-radius: 50%;
-  }
-  
-  .event-dot-parish {
-    width: 8px;
-    height: 8px;
-    background-color: #573901;
-    border-radius: 50%;
-  }
-  
-  .has-mass-parish {
-    background-color: #fff7df;
-    border: 1px solid #b3701f;
-  }
-  
-  .has-event-parish {
-    background-color: #fff7df;
-    border: 1px solid #573901;
-  }
-  
-  .selected-day-parish {
-    background-color: #b3701f !important;
-    border-color: #b3701f !important;
-  }
-  
-  .selected-day-parish .day-number-parish {
-    color: white;
-  }
-  
-  .selected-day-parish .holiday-name-parish {
-    color: white;
-  }
-  
-  /* Calendar Legend */
-  .calendar-legend-parish {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 15px;
-  }
-  
-  .legend-item-parish {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-  }
-  
-  .legend-color-holiday-parish {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #721c24;
-    margin-right: 5px;
-  }
-  
-  .legend-color-mass-parish {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #b3701f;
-    margin-right: 5px;
-  }
-  
-  .legend-color-event-parish {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #573901;
-    margin-right: 5px;
-  }
-  
-  .legend-item-parish span {
-    color: #333;
-  }
-  
-  /* Selected Date Details Section */
-  .selected-date-details-parish {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 30px;
-    color: #333;
-  }
-  
-  .selected-date-title-parish {
-    font-size: 18px;
-    font-weight: 700;
-    color: #573901;
-    margin-top: 0;
-    margin-bottom: 15px;
-  }
-  
-  .holiday-alert-parish {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 500;
-  }
-  
-  .selected-date-content-parish {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  
-  .selected-date-masses-parish,
-  .selected-date-events-parish {
-    flex: 1;
-    min-width: 300px;
-  }
-  
-  .selected-date-masses-parish h4,
-  .selected-date-events-parish h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #573901;
-    margin-bottom: 10px;
-  }
-  
-  .selected-date-masses-parish ul,
-  .selected-date-events-parish ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .selected-date-masses-parish li,
-  .selected-date-events-parish li {
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .status-pill-parish {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
-  .scheduled-parish {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .pending-parish {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  .approved-parish {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .planning-parish {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  .completed-parish {
-    background-color: #cce5ff;
-    color: #004085;
-  }
-  
-  .cancelled-parish {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  .no-events-message-parish {
-    text-align: center;
-    padding: 20px;
-    font-style: italic;
-    color: #777;
-    width: 100%;
-  }
-  
-  /* Tables container */
-  .tables-container-parish {
-    display: flex;
+  .summary-container-parish {
     flex-direction: column;
-    gap: 30px;
   }
   
-  .data-table-container-parish {
+  .card-parish {
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container-parish {
+    padding: 10px;
   }
   
-  .data-table-container-parish::-webkit-scrollbar {
-    height: 3px; /* height for horizontal scrollbar */
-  }
-  
-  .data-table-container-parish::-webkit-scrollbar-track {
-    background: #f1f1f1; /* track color */
-    border-radius: 10px;
-  }
-  
-  .data-table-container-parish::-webkit-scrollbar-thumb {
-    background: #f1f1f1; /* thumb color */
-    border-radius: 3px;
-  }
-  
-  .data-table-container-parish::-webkit-scrollbar-thumb:hover {
-    background: #555; /* thumb color on hover */
-  }
-  
-  /* Tables section styling */
-  .table-section-parish {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-  }
-  
-  .section-title-parish {
+  .title-parish {
     font-size: 22px;
-    font-weight: 700;
-    color: #b3701f;
-    font-family: 'Montserrat', sans-serif;
     margin-bottom: 20px;
-    display: flex;
-    align-items: center;
   }
   
-  .section-icon-parish {
-    margin-right: 10px;
-    color: #b3701f;
+  .calendar-section-parish {
+    padding: 15px;
   }
   
-  /* Data table styling */
-  .data-table-parish {
+  .calendar-grid-parish {
+    gap: 5px;
+  }
+  
+  .calendar-day-parish {
+    height: 60px;
+    border-radius: 8px;
+  }
+  
+  .weekday-parish {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  
+  .day-number-parish {
+    font-size: 14px;
+  }
+  
+  .appointment-dot-parish, .event-dot-parish {
+    width: 8px;
+    height: 8px;
+    top: 8px;
+  }
+  
+  .holiday-indicator-parish {
+    padding: 2px 0;
+  }
+  
+  .holiday-name-parish {
+    display: none; /* Hide holiday names on mobile */
+  }
+  
+  .holiday-dot-parish {
+    margin-right: 0;
+  }
+  
+  .appointment-item-parish, .event-item-parish {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .appointment-time-parish, .event-time-parish {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 1px;
-    margin-top: 15px;
+    margin-bottom: 5px;
   }
   
-  .data-table-parish thead tr {
-    background: #fff7df;
-    font-family: 'Roboto', sans-serif;
-    font-size: 14px;
+  .appointment-details-parish, .event-details-parish {
+    width: 100%;
+    gap: 8px;
   }
   
-  .data-table-parish thead tr th:first-child {
-    border-top-left-radius: 10px;
-  }
-  
-  .data-table-parish thead tr th:last-child {
-    border-top-right-radius: 10px;
-  }
-  
-  .data-table-parish th,
-  .data-table-parish td {
-    padding: 12px 15px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  
-  .data-table-parish th {
-    background: #fdf8e8;
-    color: #333;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 900;
-    font-size: 15px;
-    border: none;
-  }
-  
-  .data-table-parish td {
-    background: #fff;
-    color: #333;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    border: 1px solid #ececec;
-  }
-  
-  .data-table-parish tbody tr {
-    border-top: 0.1px solid #e7e7e7;
-  }
-  
-  /* Status styling */
-  .status-parish {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
-  .scheduled-parish {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .pending-parish {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  .approved-parish {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .planning-parish {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  /* View button styling */
   .view-btn-parish {
-    background-color: #573901;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .view-btn-parish:hover {
-    background-color: #b3701f;
-  }
-  
-  .event-view-btn-parish {
-    background-color: #856404;
-  }
-  
-  .event-view-btn-parish:hover {
-    background-color: #a97b05;
-  }
-  
-  /* No data message */
-  .no-data-parish {
-    text-align: center;
-    padding: 20px;
-    font-style: italic;
-    color: #777;
-  }
-  
-  /* Modal styles */
-  .modal-backdrop-parish {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
+    margin-top: 10px;
+    width: 100%;
     justify-content: center;
-    align-items: center;
-    z-index: 1000;
   }
   
   .modal-content-parish {
-    background-color: white;
-    border-radius: 10px;
-    padding: 25px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
-  .modal-content-parish h2 {
-    color: #573901;
-    margin-top: 0;
-    font-size: 24px;
-    font-weight: 700;
-  }
-  
-  .custom-hr-parish {
-    margin: 15px 0;
-    border: 0;
-    height: 1px;
-    background-color: #e0e0e0;
-  }
-  
-  .view-details-parish {
-    margin: 20px 0;
+    padding: 15px;
+    width: 95%;
   }
   
   .detail-row-parish {
-    display: flex;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #f5f5f5;
-    padding-bottom: 10px;
+    flex-direction: column;
+    gap: 5px;
   }
   
   .detail-label-parish {
-    font-weight: 600;
-    width: 30%;
-    color: #573901;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .title-parish {
+    font-size: 20px;
   }
   
-  .detail-value-parish {
-    width: 70%;
-    color: #333;
+  .calendar-day-parish {
+    height: 50px;
+    border-radius: 6px;
   }
   
-  .modal-actions-parish {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+  .weekday-parish {
+    font-size: 12px;
+    padding: 6px 0;
   }
   
-  .cancel-btn-parish {
-    background-color: #573901;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  .day-number-parish {
+    font-size: 13px;
+    margin-bottom: 3px;
   }
   
-  .cancel-btn-parish:hover {
-    background-color: #b3701f;
+  .section-title-parish {
+    font-size: 18px;
   }
   
-  /* Responsive adjustments */
-  @media (max-width: 1200px) {
-    .calendar-grid-parish {
-      gap: 5px;
-    }
-    
-    .calendar-day-parish {
-      height: 60px;
-    }
-    
-    .summary-container-parish {
-      flex-direction: column;
-    }
-    
-    .card-parish {
-      width: 100%;
-      margin-bottom: 15px;
-    }
+  .card-count-parish {
+    font-size: 28px;
   }
   
-  @media (max-width: 992px) {
-    .dashboard-container-parish {
-      padding: 20px 30px;
-    }
-    
-    .day-number-parish {
-      font-size: 16px;
-    }
-    
-    .selected-date-content-parish {
-      flex-direction: column;
-    }
+  .card-title-parish {
+    font-size: 16px;
   }
   
-  @media (max-width: 768px) {
-    .calendar-day-parish {
-      height: 50px;
-    }
-    
-    .weekday-parish {
-      font-size: 14px;
-    }
-    
-    .data-table-parish {
-      display: block;
-      overflow-x: auto;
-    }
+  .card-icon-parish {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
   }
-  
-  @media (max-width: 576px) {
-    .dashboard-container-parish {
-      padding: 15px;
-    }
-    
-    .title-parish {
-      font-size: 28px;
-      margin-bottom: 25px;
-    }
-    
-    .calendar-day-parish {
-      height: 40px;
-    }
-    
-    .day-number-parish {
-      font-size: 14px;
-    }
-    
-    .indicator-container-parish {
-      bottom: 5px;
-    }
-    
-    .holiday-dot-parish,
-    .mass-dot-parish,
-    .event-dot-parish {
-      width: 4px;
-      height: 4px;
-    }
-  }
-  /* Add these missing classes */
-.appointment-dot-parish {
-    width: 8px;
-    height: 8px;
-    background-color: #b3701f;
-    border-radius: 50%;
-  }
-  
-  .has-appointment-parish {
-    background-color: #fff7df;
-    border: 1px solid #b3701f;
-  }
-  
-  .legend-color-appointment-parish {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: #b3701f;
-    margin-right: 5px;
-  }
-  
-  /* The rest of your CSS remains the same */
+}

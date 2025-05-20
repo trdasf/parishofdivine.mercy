@@ -167,7 +167,7 @@
     font-family: roboto;
   }
   
-  .client-kumpil-field input {
+  .client-kumpil-field input, .client-kumpil-field select {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -474,34 +474,29 @@
   
   .client-kumpil-modal {
     background-color: white;
-    margin: 0;
-    padding: 0;
+    padding: 20px;
     border-radius: 8px;
     width: 400px;
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
   
   .client-kumpil-modal h2 {
-    margin-top: 0;
     color: #573901;
-    font-family: Montserrat;
+    font-family: Montserrat, sans-serif;
     margin-bottom: 20px;
-    margin-top: 20px;
   }
   
   .client-kumpil-modal p {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 20px;
-    font-family: Roboto;
-    color: #000;
+    margin-bottom: 20px;
+    font-family: Roboto, sans-serif;
+    color: #333;
   }
   
   .client-kumpil-modal-buttons {
     display: flex;
     justify-content: center;
-    gap: 40px;
-    margin-bottom: 30px;
+    gap: 20px;
   }
   
   .client-kumpil-yes-btn {
@@ -512,8 +507,7 @@
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    font-family: Roboto;
-    width: 120px;
+    width: 100px;
   }
   
   .client-kumpil-yes-btn:hover {
@@ -528,17 +522,60 @@
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    font-family: Roboto;
-    width: 120px;
+    width: 100px;
   }
   
   .client-kumpil-modal-no-btn:hover {
     background-color: #c82333;
   }
+  
+  .client-kumpil-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    height: 60px;
+    width: 100%;
+  }
+  
+  .client-kumpil-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #b3701f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
   .client-kumpil-custom-hr {
     border: none;
     height: 2px;
     background: linear-gradient(to right, #710808, #ffcccc);
     width: 100%;
+  }
+  
+  /* Uploading state styles */
+  .client-kumpil-status-uploading {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-color: #6c757d;
+    animation: pulse 1.5s infinite;
+  }
+  
+  .client-kumpil-upload-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
   }
   

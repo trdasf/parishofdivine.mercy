@@ -1,161 +1,101 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./secretaryblessing.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faDownload} from "@fortawesome/free-solid-svg-icons";
 
 const SecretaryBlessing = () => {
   const navigate = useNavigate();
+  const [blessingAppointments, setBlessingAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Sample data with different blessing types
-  const blessingData = [
-    {
-      id: 201,
-      firstName: "Maria",
-      middleName: "Santos",
-      lastName: "Garcia",
-      date: "05/15/2025",
-      time: "10:00 AM",
-      blessingType: "house",
-      status: "PENDING",
-      createdAt: "04/10/2025",
-      gender: "Female",
-      age: "35",
-      dateOfBirth: "1990-03-12",
-      contactNumber: "09123456789",
-      emailAddress: "maria.garcia@example.com",
-      street: "123 Main St.",
-      municipality: "Makati City",
-      province: "Metro Manila",
-      location: "456 New Home Street, Makati City",
-      purpose: "New Home Blessing",
-      notes: "Family would like to have the blessing before moving in.",
-      priestName: "Fr. John Doe",
-      certificate: {
-        registerNumber: "1",
-        pageNumber: "97",
-        lineNumber: "6",
-        dateIssued: "May 15, 2025",
-        purposeOf: "Documentation"
-      },
-      requirements: {
-        valid_id: {
-          submitted: true,
-          fileName: "ValidID_MariaGarcia.pdf"
-        },
-        proof_of_ownership: {
-          submitted: true,
-          fileName: "ProofOfOwnership_House.pdf"
-        },
-        barangay_clearance: {
-          submitted: false,
-          fileName: ""
-        }
+  useEffect(() => {
+    fetchBlessingAppointments();
+  }, []);
+
+  const fetchBlessingAppointments = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("https://parishofdivinemercy.com/backend/fetch_approved_blessings.php");
+      const data = await response.json();
+
+      if (data.success) {
+        setBlessingAppointments(data.appointments);
+      } else {
+        setError(data.message || "Failed to fetch blessing appointments");
       }
-    },
-    {
-      id: 202,
-      firstName: "Carlos",
-      middleName: "Reyes",
-      lastName: "Mendoza",
-      date: "05/20/2025",
-      time: "2:00 PM",
-      blessingType: "business",
-      status: "APPROVED",
-      createdAt: "04/15/2025",
-      gender: "Male",
-      age: "42",
-      dateOfBirth: "1983-07-22",
-      contactNumber: "09187654321",
-      emailAddress: "carlos.mendoza@example.com",
-      street: "567 Commerce Ave.",
-      municipality: "Taguig City",
-      province: "Metro Manila",
-      location: "Unit 10-B, Sunrise Business Center, Taguig City",
-      purpose: "Mendoza Computer Shop",
-      notes: "Opening day is scheduled for May 25, 2025.",
-      priestName: "Fr. Michael Santos",
-      certificate: {
-        registerNumber: "2",
-        pageNumber: "98",
-        lineNumber: "3",
-        dateIssued: "May 20, 2025",
-        purposeOf: "Business Documentation"
-      },
-      requirements: {
-        valid_id: {
-          submitted: true,
-          fileName: "ValidID_CarlosMendoza.pdf"
-        },
-        business_permit: {
-          submitted: true,
-          fileName: "BusinessPermit_MendozaComputerShop.pdf"
-        }
-      }
-    },
-    {
-      id: 203,
-      firstName: "Aira",
-      middleName: "Cruz",
-      lastName: "Santos",
-      date: "05/25/2025",
-      time: "3:00 PM",
-      blessingType: "car",
-      status: "PENDING",
-      createdAt: "04/20/2025",
-      gender: "Female",
-      age: "29",
-      dateOfBirth: "1996-09-15",
-      contactNumber: "09156789012",
-      emailAddress: "aira.santos@example.com",
-      street: "789 Sunset Drive",
-      municipality: "Pasig City",
-      province: "Metro Manila",
-      location: "Divine Mercy Parish Parking Area",
-      purpose: "Toyota Innova 2025 (ABC-1234)",
-      notes: "First family vehicle, would like special prayers for safe travels.",
-      priestName: "Fr. James Reyes",
-      certificate: {
-        registerNumber: "3",
-        pageNumber: "99",
-        lineNumber: "7",
-        dateIssued: "May 25, 2025",
-        purposeOf: "Vehicle Documentation"
-      },
-      requirements: {
-        valid_id: {
-          submitted: true,
-          fileName: "ValidID_AiraSantos.pdf"
-        },
-        vehicle_registration: {
-          submitted: true,
-          fileName: "VehicleRegistration_ToyotaInnova.pdf"
-        }
-      }
+    } catch (error) {
+      console.error("Error fetching blessing appointments:", error);
+      setError("An error occurred while fetching data");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   // Filter data based on blessing type and search term
-  const filteredData = blessingData.filter(blessing => {
+  const filteredData = blessingAppointments.filter(blessing => {
     const matchesType = filterType === "" || blessing.blessingType === filterType;
     const matchesSearch = searchTerm === "" || 
-      blessing.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blessing.lastName.toLowerCase().includes(searchTerm.toLowerCase());
+      blessing.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blessing.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blessing.date?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blessing.status?.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesType && matchesSearch;
   });
 
   const viewBlessingDetails = (blessing) => {
     navigate("/secretary-blessing-view", {
-      state: { viewOnly: true, blessingData: blessing }
+      state: { 
+        blessingID: blessing.id,
+        status: blessing.status 
+      }
     });
+  };
+
+  const handleDownload = () => {
+    // Create headers for CSV
+    const headers = [
+      "No.",
+      "First Name",
+      "Last Name",
+      "Blessing Type",
+      "Date",
+      "Time",
+      "Created At",
+    ];
+
+    // Map appointments to rows
+    const rows = blessingAppointments.map(appointment => [
+      appointment.id,
+      appointment.firstName,
+      appointment.lastName,
+      appointment.blessingType.charAt(0).toUpperCase() + appointment.blessingType.slice(1) + " Blessing",
+      appointment.date,
+      appointment.time,
+      appointment.createdAt
+    ]);
+
+    // Combine headers and rows
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "blessing_appointments.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <div className="blessing-container-sb">
-      <h1 className="title-sb">BLESSING APPOINTMENTS</h1>
+      <h1 className="title-sb">BLESSING</h1>
       <div className="blessing-actions-sb">
         <div className="search-bar-sb">
           <input 
@@ -173,51 +113,65 @@ const SecretaryBlessing = () => {
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
-            <option value="">All Blessing Types</option>
+            <option value="">Blessing Types</option>
             <option value="house">House Blessing</option>
             <option value="business">Business Blessing</option>
             <option value="car">Car Blessing</option>
           </select>
+          <button className="download-button-sb" onClick={handleDownload}>
+            <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
+            Download
+          </button>
         </div>
       </div>
 
-      <table className="blessing-table-sb">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Blessing Type</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Status</th>
-            <th>Created At</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((blessing) => (
-            <tr key={blessing.id}>
-              <td>{blessing.id}</td>
-              <td>{blessing.firstName}</td>
-              <td>{blessing.lastName}</td>
-              <td>{blessing.blessingType.charAt(0).toUpperCase() + blessing.blessingType.slice(1)} Blessing</td>
-              <td>{blessing.date}</td>
-              <td>{blessing.time}</td>
-              <td>{blessing.status}</td>
-              <td>{blessing.createdAt}</td>
-              <td>
-                <button
-                  className="sb-details"
-                  onClick={() => viewBlessingDetails(blessing)}
-                >
-                  View
-                </button>
-              </td>
+      {loading ? (
+        <div className="loading-container-sb">Loading blessing appointments...</div>
+      ) : error ? (
+        <div className="error-container-sb">{error}</div>
+      ) : (
+        <table className="blessing-table-sb">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Blessing Type</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Created At</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredData.length === 0 ? (
+              <tr>
+                <td colSpan="9" className="no-data-sb">No blessing appointments found</td>
+              </tr>
+            ) : (
+              filteredData.map((blessing) => (
+                <tr key={blessing.id}>
+                  <td>{blessing.id}</td>
+                  <td>{blessing.firstName}</td>
+                  <td>{blessing.lastName}</td>
+                  <td>{blessing.blessingType.charAt(0).toUpperCase() + blessing.blessingType.slice(1)} Blessing</td>
+                  <td>{blessing.date}</td>
+                  <td>{blessing.time}</td>
+                  <td>{blessing.createdAt}</td>
+                  <td>
+                    <button
+                      className="sb-details"
+                      onClick={() => viewBlessingDetails(blessing)}
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

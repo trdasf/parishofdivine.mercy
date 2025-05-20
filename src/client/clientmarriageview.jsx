@@ -1,481 +1,429 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai"; 
-import "./ClientMarriageView.css";
+import { useLocation, useNavigate } from "react-router-dom";
+import "./clientmarriageview.css";
 
-const ClientMarriageView = ({ marriageData }) => {
-  // Sample data structure if no data is passed
-  const defaultData = {
-    // Basic info
-    date: "June 15, 2025",
-    time: "3:00 PM",
-    priest: "Fr. John Santos",
-    
-    // Groom info
-    groom: {
-      firstName: "Juan",
-      middleName: "Reyes",
-      lastName: "Garcia",
-      age: "32",
-      birthDate: "April 12, 1993",
-      baptismDate: "May 10, 1993",
-      baptismChurch: "St. Peter Parish",
-      birthPlace: "Manila",
-      address: {
-        barangay: "barangay",
-        street: "Rizal Street",
-        municipality: "Makati City",
-        province: "Metro Manila"
+const ClientMarriageView = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [marriageData, setMarriageData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Check if we have necessary state data (marriageID and clientID)
+    const marriageID = location.state?.marriageID;
+    const clientID = location.state?.clientID;
+
+    if (!marriageID || !clientID) {
+      setError("Missing marriage information. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    // Fetch the marriage details
+    fetchMarriageDetails(marriageID);
+  }, [location]);
+
+  const fetchMarriageDetails = async (marriageID) => {
+    try {
+      const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_marriage_details.php?marriageID=${marriageID}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setMarriageData(data.data);
+      } else {
+        setError(data.message || "Failed to fetch marriage details");
       }
-    },
-    
-    // Bride info
-    bride: {
-      firstName: "Maria",
-      middleName: "Santos",
-      lastName: "Reyes",
-      age: "30",
-      birthDate: "June 23, 1995",
-      baptismDate: "July 15, 1995",
-      baptismChurch: "Holy Trinity Church",
-      birthPlace: "Quezon City",
-      address: {
-        barangay: "barangay",
-        street: "Mabini Avenue",
-        municipality: "Quezon City",
-        province: "Metro Manila"
-      }
-    },
-    
-    // Witnesses
-    witnesses: [
-      {
-        firstName: "Pedro",
-        middleName: "Lim",
-        lastName: "Santos",
-        gender: "Male",
-        age: "35",
-        birthDate: "March 8, 1990",
-        contactNumber: "09123456789",
-        address: {
-          barangay: "barangay",
-          street: "Bonifacio Street",
-          municipality: "Pasig City",
-          province: "Metro Manila"
-        }
-      },
-      {
-        firstName: "Ana",
-        middleName: "Cruz",
-        lastName: "Mendoza",
-        gender: "Female",
-        age: "33",
-        birthDate: "November 12, 1992",
-        contactNumber: "09987654321",
-        address: {
-          barangay: "barangay",
-          street: "Legaspi Street",
-          municipality: "Makati City",
-          province: "Metro Manila"
-        }
-      }
-    ],
-    
-    // Requirements status
-    requirements: {
-      baptismalCert: "Submitted",
-      confirmationCert: "Submitted",
-      birthCert: "Submitted",
-      marriageLicense: "Submitted",
-      cenomar: "Submitted",
-      bannsPublication: "Submitted",
-      parishPermit: "Submitted",
-      preCana: "Submitted",
-      sponsorsList: "Submitted",
-      practiceSchedule: "Submitted",
-      canonicalInterview: "Submitted"
+    } catch (error) {
+      console.error("Error fetching marriage details:", error);
+      setError("An error occurred while fetching the data");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Use provided data or default data
-  const data = marriageData || defaultData;
+  // Function to render read-only input field
+  const renderReadOnlyField = (value) => {
+    return <div className="client-view-value">{value || "N/A"}</div>;
+  };
 
-  // Function to render a status badge
-  const renderStatusBadge = (status) => {
-    const isSubmitted = status === "Submitted";
+  if (loading) {
     return (
-      <div className={`client-marriage-view-status-badge ${isSubmitted ? 'client-marriage-view-status-submitted' : 'client-marriage-view-status-not-submitted'}`}>
-        {status}
+      <div className="client-marriage-view-container">
+        <div className="client-marriage-view-loading">Loading marriage details...</div>
       </div>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <div className="client-marriage-view-container">
+        <div className="client-marriage-view-error">
+          <p>{error}</p>
+          <button onClick={() => navigate('/client-appointment')}>Back to Appointments</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!marriageData) {
+    return (
+      <div className="client-marriage-view-container">
+        <div className="client-marriage-view-error">
+          <p>No marriage data found.</p>
+          <button onClick={() => navigate('/client-appointment')}>Back to Appointments</button>
+        </div>
+      </div>
+    );
+  }
+
+  const { marriage, groomAddress, brideAddress, firstWitness, secondWitness } = marriageData;
 
   return (
     <div className="client-marriage-view-container">
       {/* Header */}
       <div className="client-marriage-view-header">
-        <div className="client-marriage-view-left-section">
-          <button className="client-marriage-view-back-button" onClick={() => window.history.back()}>
-            <AiOutlineArrowLeft className="client-marriage-view-back-icon" /> Back
+        <div className="client-view-left-section">
+          <button className="client-view-back-button" onClick={() => navigate('/client-appointment')}>
+            <AiOutlineArrowLeft className="client-view-back-icon" /> Back
           </button>
         </div>
       </div>
-      <h1 className="client-marriage-view-title">Marriage Application Details</h1>
+      <h1 className="client-view-title">Marriage Application Details</h1>
       
-      {/* Matrimony Data Section */}
+      {/* Wedding Information */}
       <div className="client-marriage-view-data">
-        <div className="client-marriage-view-row-date">
-          <div className="client-marriage-view-field-date">
-            <label>Date of Holy Matrimony:</label>
-            <div className="client-marriage-view-value">{data.date}</div>
-          </div>
-          
-          <div className="client-marriage-view-field-time">
-            <label>Time of Holy Matrimony:</label>
-            <div className="client-marriage-view-value">{data.time}</div>
+        <div className="client-view-bypart">
+          <h3 className="client-view-sub-title">Wedding Information</h3>
+          <div className="client-marriage-view-info-card">
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Date of Appointment:</label>
+                {renderReadOnlyField(marriage.date)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Time of Appointment:</label>
+                {renderReadOnlyField(marriage.time)}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="client-marriage-view-field-date">
-          <label>Name of the Priest:</label>
-          <div className="client-marriage-view-value">{data.priest}</div>
-        </div>
-        
-        <div className="client-marriage-view-bypart">
-          <h3 className="client-marriage-view-sub-title">Groom Information</h3>
+        {/* Groom's Information */}
+        <div className="client-view-bypart">
+          <h3 className="client-view-sub-title">Groom's Information</h3>
           <div className="client-marriage-view-info-card">
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>First Name:</label>
-                <div className="client-marriage-view-value">{data.groom.firstName}</div>
+                {renderReadOnlyField(marriage.groom_first_name)}
               </div>
               <div className="client-marriage-view-field">
                 <label>Middle Name:</label>
-                <div className="client-marriage-view-value">{data.groom.middleName}</div>
+                {renderReadOnlyField(marriage.groom_middle_name)}
               </div>
               <div className="client-marriage-view-field">
                 <label>Last Name:</label>
-                <div className="client-marriage-view-value">{data.groom.lastName}</div>
-              </div>
-              <div className="client-marriage-view-field-ga">
-                <label>Age:</label>
-                <div className="client-marriage-view-value">{data.groom.age}</div>
+                {renderReadOnlyField(marriage.groom_last_name)}
               </div>
             </div>
-
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
-                <label>Date of Birth:</label>
-                <div className="client-marriage-view-value">{data.groom.birthDate}</div>
+                <label>Age:</label>
+                {renderReadOnlyField(marriage.groom_age)}
               </div>
               <div className="client-marriage-view-field">
-                <label>Date of Baptism:</label>
-                <div className="client-marriage-view-value">{data.groom.baptismDate}</div>
-              </div>
-              <div className="client-marriage-view-field-dob">
-                <label>Church of Baptism:</label>
-                <div className="client-marriage-view-value">{data.groom.baptismChurch}</div>
-              </div>
-              <div className="client-marriage-view-field-dob">
-                <label>Place of Birth:</label>
-                <div className="client-marriage-view-value">{data.groom.birthPlace}</div>
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(marriage.groom_dateOfBirth)}
               </div>
             </div>
-            
-            <div className="client-marriage-view-row client-marriage-view-address-row">
-            <div className="client-marriage-view-field">
-                <label>Barangay:</label>
-                <div className="client-marriage-view-value">{data.groom.address.barangay}</div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Date of Baptism:</label>
+                {renderReadOnlyField(marriage.groom_dateOfBaptism)}
               </div>
               <div className="client-marriage-view-field">
-                <label>Street:</label>
-                <div className="client-marriage-view-value">{data.groom.address.street}</div>
+                <label>Church of Baptism:</label>
+                {renderReadOnlyField(marriage.groom_churchOfBaptism)}
               </div>
               <div className="client-marriage-view-field">
-                <label>Municipality:</label>
-                <div className="client-marriage-view-value">{data.groom.address.municipality}</div>
-              </div>
-              <div className="client-marriage-view-field">
-                <label>Province:</label>
-                <div className="client-marriage-view-value">{data.groom.address.province}</div>
+                <label>Place of Birth:</label>
+                {renderReadOnlyField(marriage.groom_placeOfBirth)}
               </div>
             </div>
           </div>
+        </div>
 
-          <h3 className="client-marriage-view-sub-title">Bride Information</h3>
+        {/* Groom's Address */}
+        <div className="client-view-bypart">
+          <h3 className="client-view-sub-title">Groom's Address</h3>
+          <div className="client-marriage-view-info-card">
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Street:</label>
+                {renderReadOnlyField(groomAddress.street)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(groomAddress.barangay)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Municipality:</label>
+                {renderReadOnlyField(groomAddress.municipality)}
+              </div>
+            </div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Province:</label>
+                {renderReadOnlyField(groomAddress.province)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Region:</label>
+                {renderReadOnlyField(groomAddress.region)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bride's Information */}
+        <div className="client-view-bypart">
+          <h3 className="client-view-sub-title">Bride's Information</h3>
           <div className="client-marriage-view-info-card">
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>First Name:</label>
-                <div className="client-marriage-view-value">{data.bride.firstName}</div>
+                {renderReadOnlyField(marriage.bride_first_name)}
               </div>
               <div className="client-marriage-view-field">
                 <label>Middle Name:</label>
-                <div className="client-marriage-view-value">{data.bride.middleName}</div>
+                {renderReadOnlyField(marriage.bride_middle_name)}
               </div>
               <div className="client-marriage-view-field">
                 <label>Last Name:</label>
-                <div className="client-marriage-view-value">{data.bride.lastName}</div>
-              </div>
-              <div className="client-marriage-view-field">
-                <label>Age:</label>
-                <div className="client-marriage-view-value">{data.bride.age}</div>
+                {renderReadOnlyField(marriage.bride_last_name)}
               </div>
             </div>
-
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
-                <label>Date of Birth:</label>
-                <div className="client-marriage-view-value">{data.bride.birthDate}</div>
+                <label>Age:</label>
+                {renderReadOnlyField(marriage.bride_age)}
               </div>
               <div className="client-marriage-view-field">
-                <label>Date of Baptism:</label>
-                <div className="client-marriage-view-value">{data.bride.baptismDate}</div>
-              </div>
-              <div className="client-marriage-view-field-dob">
-                <label>Church of Baptism:</label>
-                <div className="client-marriage-view-value">{data.bride.baptismChurch}</div>
-              </div>
-              <div className="client-marriage-view-field-dob">
-                <label>Place of Birth:</label>
-                <div className="client-marriage-view-value">{data.bride.birthPlace}</div>
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(marriage.bride_dateOfBirth)}
               </div>
             </div>
-          
-            <div className="client-marriage-view-row client-marriage-view-address-row">
-            <div className="client-marriage-view-field">
-                <label>Barangay:</label>
-                <div className="client-marriage-view-value">{data.bride.address.barangay}</div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Date of Baptism:</label>
+                {renderReadOnlyField(marriage.bride_dateOfBaptism)}
               </div>
               <div className="client-marriage-view-field">
-                <label>Street:</label>
-                <div className="client-marriage-view-value">{data.bride.address.street}</div>
+                <label>Church of Baptism:</label>
+                {renderReadOnlyField(marriage.bride_churchOfBaptism)}
               </div>
               <div className="client-marriage-view-field">
-                <label>Municipality:</label>
-                <div className="client-marriage-view-value">{data.bride.address.municipality}</div>
-              </div>
-              <div className="client-marriage-view-field">
-                <label>Province:</label>
-                <div className="client-marriage-view-value">{data.bride.address.province}</div>
+                <label>Place of Birth:</label>
+                {renderReadOnlyField(marriage.bride_placeOfBirth)}
               </div>
             </div>
           </div>
+        </div>
 
-          <h3 className="client-marriage-view-sub-title">Witness Information</h3>
+        {/* Bride's Address */}
+        <div className="client-view-bypart">
+          <h3 className="client-view-sub-title">Bride's Address</h3>
           <div className="client-marriage-view-info-card">
-            {data.witnesses.map((witness, index) => (
-              <div key={index}>
-                <h4 className="client-marriage-view-witness-header">Witness {index + 1}</h4>
-                <div className="client-marriage-view-row">
-                  <div className="client-marriage-view-field">
-                    <label>First Name:</label>
-                    <div className="client-marriage-view-value">{witness.firstName}</div>
-                  </div>
-                  <div className="client-marriage-view-field">
-                    <label>Middle Name:</label>
-                    <div className="client-marriage-view-value">{witness.middleName}</div>
-                  </div>
-                  <div className="client-marriage-view-field">
-                    <label>Last Name:</label>
-                    <div className="client-marriage-view-value">{witness.lastName}</div>
-                  </div>
-                </div>
-                
-                <div className="client-marriage-view-row">
-                <div className="client-marriage-view-field-ga">
-                    <label>Gender:</label>
-                    <div className="client-marriage-view-value">{witness.gender}</div>
-                  </div>
-                  <div className="client-marriage-view-field-ga">
-                    <label>Age:</label>
-                    <div className="client-marriage-view-value">{witness.age}</div>
-                  </div>
-                  <div className="client-marriage-view-field-pob">
-                    <label>Date of Birth:</label>
-                    <div className="client-marriage-view-value">{witness.birthDate}</div>
-                  </div>
-                  <div className="client-marriage-view-field-pob">
-                    <label>Contact Number:</label>
-                    <div className="client-marriage-view-value">{witness.contactNumber}</div>
-                  </div>
-                  </div>
-                
-                <div className="client-marriage-view-row">
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Street:</label>
+                {renderReadOnlyField(brideAddress.street)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(brideAddress.barangay)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Municipality:</label>
+                {renderReadOnlyField(brideAddress.municipality)}
+              </div>
+            </div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Province:</label>
+                {renderReadOnlyField(brideAddress.province)}
+              </div>
+              <div className="client-marriage-view-field">
+                <label>Region:</label>
+                {renderReadOnlyField(brideAddress.region)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Witnesses */}
+        <div className="client-view-bypart">
+          <h3 className="client-view-sub-title">Witnesses</h3>
+          <div className="client-marriage-view-info-card">
+            {/* First Witness */}
+            <div className="client-witness-section">
+              <h4 className="client-witness-header">First Witness</h4>
+              <div className="client-marriage-view-row">
                 <div className="client-marriage-view-field">
-                    <label>Barangay:</label>
-                    <div className="client-marriage-view-value">{witness.address.barangay}</div>
-                  </div>
-                  <div className="client-marriage-view-field">
-                    <label>Street:</label>
-                    <div className="client-marriage-view-value">{witness.address.street}</div>
-                  </div>
-                  <div className="client-marriage-view-field">
-                    <label>Municipality:</label>
-                    <div className="client-marriage-view-value">{witness.address.municipality}</div>
-                  </div>
-                  <div className="client-marriage-view-field">
-                    <label>Province:</label>
-                    <div className="client-marriage-view-value">{witness.address.province}</div>
-                  </div>
+                  <label>First Name:</label>
+                  {renderReadOnlyField(firstWitness.first_name)}
                 </div>
-                {index < data.witnesses.length - 1 && <hr className="client-marriage-view-witness-divider" />}
+                <div className="client-marriage-view-field">
+                  <label>Middle Name:</label>
+                  {renderReadOnlyField(firstWitness.middle_name)}
+                </div>
+                <div className="client-marriage-view-field">
+                  <label>Last Name:</label>
+                  {renderReadOnlyField(firstWitness.last_name)}
+                </div>
               </div>
-            ))}
+              <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                  <label>Date of Birth:</label>
+                  {renderReadOnlyField(firstWitness.dateOfBirth)}
+                </div>
+              <div className="client-marriage-view-field">
+                  <label>Age:</label>
+                  {renderReadOnlyField(firstWitness.age)}
+                </div>
+                <div className="client-marriage-view-field">
+                  <label>Gender:</label>
+                  {renderReadOnlyField(firstWitness.gender)}
+                </div>
+              </div>
+              <div className="client-marriage-view-row">
+                <div className="client-marriage-view-field">
+                  <label>Contact Number:</label>
+                  {renderReadOnlyField(firstWitness.contact_number)}
+                </div>
+              </div>
+              <div className="client-marriage-view-row">
+                <div className="client-marriage-view-field">
+                  <label>Address:</label>
+                  {renderReadOnlyField(
+                    `${firstWitness.street}, ${firstWitness.barangay}, ${firstWitness.municipality}, ${firstWitness.province}, ${firstWitness.region}`
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <hr className="client-witness-divider" />
+
+            {/* Second Witness */}
+            <div className="client-witness-section">
+              <h4 className="client-witness-header">Second Witness</h4>
+              <div className="client-marriage-view-row">
+                <div className="client-marriage-view-field">
+                  <label>First Name:</label>
+                  {renderReadOnlyField(secondWitness.first_name)}
+                </div>
+                <div className="client-marriage-view-field">
+                  <label>Middle Name:</label>
+                  {renderReadOnlyField(secondWitness.middle_name)}
+                </div>
+                <div className="client-marriage-view-field">
+                  <label>Last Name:</label>
+                  {renderReadOnlyField(secondWitness.last_name)}
+                </div>
+              </div>
+              <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                  <label>Date of Birth:</label>
+                  {renderReadOnlyField(secondWitness.dateOfBirth)}
+                </div>
+                <div className="client-marriage-view-field">
+                  <label>Age:</label>
+                  {renderReadOnlyField(secondWitness.age)}
+                </div>
+                <div className="client-marriage-view-field">
+                  <label>Gender:</label>
+                  {renderReadOnlyField(secondWitness.gender)}
+                </div>
+              </div>
+              <div className="client-marriage-view-row">
+                <div className="client-marriage-view-field">
+                  <label>Contact Number:</label>
+                  {renderReadOnlyField(secondWitness.contact_number)}
+                </div>
+              </div>
+              <div className="client-marriage-view-row">
+                <div className="client-marriage-view-field">
+                  <label>Address:</label>
+                  {renderReadOnlyField(
+                    `${secondWitness.street}, ${secondWitness.barangay}, ${secondWitness.municipality}, ${secondWitness.province}, ${secondWitness.region}`
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        {/* Requirements section */}
-        <div className="client-marriage-view-requirements-container">
-          <h2 className="client-marriage-view-requirements-title">Requirements</h2>
-          <div className="client-marriage-view-requirements-box">
-            <h3 className="client-marriage-view-section-header">Documents Status</h3>
-            <div className="client-marriage-view-requirements-list">
-              {/* Baptismal Certificate */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Baptismal Certificate (Recent copy, issued within 6 months)
-                </div>
-                {renderStatusBadge(data.requirements.baptismalCert)}
+
+        {/* Requirements */}
+        <div className="client-requirements-view-container">
+          <h2 className="client-requirements-view-title">Requirements</h2>
+          <h3 className="client-view-section-header">Documents Requirements(Bring the following documents)</h3>
+            <div className="client-info-view-list">
+            <div className="client-info-view-item">
+                <p>Certificate of Baptism</p>
               </div>
-              
-              {/* Confirmation Certificate */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Confirmation Certificate (Proof of receiving the Sacrament of Confirmation)
-                </div>
-                {renderStatusBadge(data.requirements.confirmationCert)}
+              <div className="client-info-view-item">
+                <p>Certificate of Confirmation</p>
               </div>
-              
-              {/* Birth Certificate */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Birth Certificate (For age verification and legal purposes)
-                </div>
-                {renderStatusBadge(data.requirements.birthCert)}
+              <div className="client-info-view-item">
+                <p>Birth Certificate</p>
               </div>
-              
-              {/* Marriage License */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Marriage License (Issued by the civil registry)
-                </div>
-                {renderStatusBadge(data.requirements.marriageLicense)}
+              <div className="client-info-view-item">
+                <p>Certificate of No Marriage</p>
               </div>
-              
-              {/* CENOMAR */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Certificate of No Marriage (CENOMAR, issued by PSA)
-                </div>
-                {renderStatusBadge(data.requirements.cenomar)}
+              <div className="client-info-view-item">
+                <p>Publication of Banns</p>
               </div>
-              
-              {/* Publication of Banns */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Publication of Banns (Announcements made in the parish)
-                </div>
-                {renderStatusBadge(data.requirements.bannsPublication)}
+              <div className="client-info-view-item">
+                <p>Permit from Proper Parish</p>
               </div>
-              
-              {/* Permit from Proper Parish */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Permit from Proper Parish (If wedding is held outside couple's parish)
-                </div>
-                {renderStatusBadge(data.requirements.parishPermit)}
+              <div className="client-info-view-item">
+                <p>Pre-Cana Seminar or Marriage Preparation Program</p>
               </div>
-              
-              {/* Pre-Cana Seminar */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Pre-Cana Seminar Certificate (Marriage preparation program)
-                </div>
-                {renderStatusBadge(data.requirements.preCana)}
+              <div className="client-info-view-item">
+                <p>Complete list of sponsors</p>
               </div>
-              
-              {/* Complete List of Sponsors */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Complete List of Sponsors (Ninong & Ninang)
-                </div>
-                {renderStatusBadge(data.requirements.sponsorsList)}
+              <div className="client-info-view-item">
+                <p>Canonical Interview/Examination</p>
               </div>
-              
-              {/* Practice Schedule */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Practice Schedule (1 day before the marriage)
-                </div>
-                {renderStatusBadge(data.requirements.practiceSchedule)}
-              </div>
-              
-              {/* Canonical Interview/Examination */}
-              <div className="client-marriage-view-requirement-item">
-                <div className="client-marriage-view-requirement-name">
-                  Canonical Interview/Examination Record
-                </div>
-                {renderStatusBadge(data.requirements.canonicalInterview)}
+              <div className="client-info-view-item">
+                <p>Certificate of Permission (if outside the Parish)</p>
               </div>
             </div>
-
-            <h3 className="client-marriage-view-section-header">Requirements for the Couple</h3>
-            <div className="client-marriage-view-info-list">
-              <div className="client-marriage-view-info-item">
-                <p>Must be a baptized Catholic (at least one of the partners)</p>
+            <h3 className="client-view-section-header">Marriage Requirements Information</h3>
+            <div className="client-info-view-list">
+              <div className="client-info-view-item">
+                <p>Both parties must be free to marry in the Catholic Church</p>
               </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must have received the Sacrament of Confirmation</p>
+              <div className="client-info-view-item">
+                <p>At least one party must be Catholic</p>
               </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must undergo a Pre-Cana Seminar or Marriage Preparation Program</p>
+              <div className="client-info-view-item">
+                <p>Completion of Pre-Cana (Pre-Marriage) Seminar</p>
               </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must be of legal age (as required by civil law)</p>
+              <div className="client-info-view-item">
+                <p>Valid government-issued marriage license</p>
               </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must provide proof of freedom to marry (e.g., no previous valid marriage in the Church)</p>
+              <div className="client-info-view-item">
+                <p>Canonical interview with the parish priest</p>
               </div>
-            </div>
-
-            <h3 className="client-marriage-view-section-header">Parish Requirements</h3>
-            <div className="client-marriage-view-info-list">
-              <div className="client-marriage-view-info-item">
-                <p>Must schedule an interview with the parish priest</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must submit all required documents at least 3 months before the wedding</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must attend marriage banns (announcements made in the parish for three consecutive Sundays)</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must choose sponsors (Ninong & Ninang) who are practicing Catholics</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must attend rehearsal/practice (1 day before the marriage)</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Must complete canonical interview/examination</p>
-              </div>
-            </div>
-
-            <h3 className="client-marriage-view-section-header">Dress Code (If Specified by Parish)</h3>
-            <div className="client-marriage-view-info-list">
-              <div className="client-marriage-view-info-item">
-                <p>Groom: Formal attire (barong or suit)</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Bride: Modest wedding gown (with sleeves or shawl for Church ceremony)</p>
-              </div>
-              <div className="client-marriage-view-info-item">
-                <p>Sponsors: Formal attire, respectful and modest</p>
+              <div className="client-info-view-item">
+                <p>Two witnesses present at the ceremony</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

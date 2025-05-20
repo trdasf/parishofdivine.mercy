@@ -1,8 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { AiOutlineArrowLeft, AiOutlineEye, AiOutlineDownload } from "react-icons/ai"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import "./SecretaryMarriageView.css";
+import "./success-modal.css";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+
+import pdmLogo from "../assets/pdmlogo.png";
+import church2Img from "../assets/church2.jpg";
 
 const SecretaryMarriageView = () => {
   // State for status and document viewing
@@ -12,154 +17,422 @@ const SecretaryMarriageView = () => {
   const [currentCertificatePage, setCurrentCertificatePage] = useState(1);
   const certificateRef = useRef(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [marriageData, setMarriageData] = useState(null);
+  const [error, setError] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Sample data (in a real app, this would come from props or API)
-  const marriageData = {
-    date: "May 15, 2025",
-    time: "2:00 PM",
-    priest: "Fr. José Chito M. Estrella",
-    groom: {
-      firstName: "Juan",
-      middleName: "Dela",
-      lastName: "Cruz",
-      age: "28",
-      dateOfBirth: "June 12, 1997",
-      placeOfBirth: "Manila City",
-      dateOfBaptism: "August 30, 1997",
-      churchOfBaptism: "San Agustin Church",
-      address: {
-        street: "Rizal Street",
-        municipality: "Manila City",
-        province: "Metro Manila"
-      }
-    },
-    bride: {
-      firstName: "Maria",
-      middleName: "Santos",
-      lastName: "Reyes",
-      age: "26",
-      dateOfBirth: "April 15, 1999",
-      placeOfBirth: "Quezon City",
-      dateOfBaptism: "June 20, 1999",
-      churchOfBaptism: "Quiapo Church",
-      address: {
-        street: "Mabini Avenue",
-        municipality: "Quezon City",
-        province: "Metro Manila"
-      }
-    },
-    witnesses: [
-      {
-        firstName: "Pedro",
-        middleName: "Garcia",
-        lastName: "Santos",
-        gender: "Male",
-        age: "35",
-        dateOfBirth: "March 3, 1990",
-        contact: "09123456789",
-        address: {
-          street: "Quezon Boulevard",
-          municipality: "Manila City",
-          province: "Metro Manila"
-        }
-      },
-      {
-        firstName: "Ana",
-        middleName: "Lopez",
-        lastName: "Tan",
-        gender: "Female",
-        age: "32",
-        dateOfBirth: "September 10, 1993",
-        contact: "09876543210",
-        address: {
-          street: "Recto Avenue",
-          municipality: "Manila City",
-          province: "Metro Manila"
-        }
-      }
-    ],
-    requirements: {
-      baptismalCert: {
-        submitted: true,
-        fileName: "BaptismalCertificates_CoupleNames.pdf"
-      },
-      confirmationCert: {
-        submitted: true,
-        fileName: "ConfirmationCertificates_CoupleNames.pdf"
-      },
-      birthCert: {
-        submitted: true,
-        fileName: "BirthCertificates_CoupleNames.pdf"
-      },
-      marriageLicense: {
-        submitted: true,
-        fileName: "MarriageLicense_CoupleNames.pdf"
-      },
-      cenomar: {
-        submitted: true,
-        fileName: "CENOMAR_CoupleNames.pdf"
-      },
-      // Add these entries to the requirements object in marriageData
+  // State for modals
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-publicationBanns: {
-  submitted: true,
-  fileName: "PublicationOfBanns_CoupleNames.pdf"
-},
-permitFromParish: {
-  submitted: false,
-  fileName: "ParishPermit_CoupleNames.pdf"
-},
-preCana: {
-  submitted: true,
-  fileName: "PreCanaSeminar_CoupleNames.pdf"
-},
-sponsorsList: {
-  submitted: true,
-  fileName: "SponsorsList_CoupleNames.pdf"
-},
-weddingPractice: {
-  submitted: false,
-  fileName: "WeddingPracticeConfirmation.pdf"
-},
-canonicalInterview: {
-  submitted: true,
-  fileName: "CanonicalInterview_CoupleNames.pdf"
-}
+  // State for schedule fields
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTime, setAppointmentTime] = useState("");
+  const [selectedPriest, setSelectedPriest] = useState("");
+  
+  // API base URL that can be easily changed
+  const API_BASE_URL = "https://parishofdivinemercy.com/backend";
+
+  useEffect(() => {
+    // Check if we have necessary state data (marriageID)
+    const marriageID = location.state?.marriageID;
+    const statusFromNav = location.state?.status;
+
+    if (!marriageID) {
+      setError("Missing marriage information. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    // Set initial status from navigation
+    if (statusFromNav) {
+      setStatus(statusFromNav);
+    }
+
+    // Fetch the marriage details
+    fetchMarriageDetails(marriageID);
+  }, [location]);
+
+  /**
+   * Fetches marriage application details from the server
+   * @param {string} marriageID - The ID of the marriage application to fetch
+   */
+  const fetchMarriageDetails = async (marriageID) => {
+    try {
+      setLoading(true);
+      const url = `${API_BASE_URL}/fetch_marriage_details.php?marriageID=${marriageID}`;
       
-    },
-    
-    // Certificate details
-    certificate: {
-      registerNumber: "2025-0123",
-      pageNumber: "45",
-      lineNumber: "12",
-      dateIssued: "May 20, 2025",
-      registry: {
-        province: "Camarines Norte",
-        city: "Daet",
-        registryNo: "2025-M-0123",
-      },
-      solemnizer: {
-        name: "Fr. José Chito M. Estrella",
-        position: "Parish Priest",
-        address: "Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte"
+      const response = await fetch(url);
+      
+      // Check if response is OK
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Transform the data into the expected format
+        const transformedData = transformMarriageData(data.data);
+        
+        setMarriageData(transformedData);
+        setStatus(transformedData.status || status);
+        
+        // Initialize schedule fields from fetched data
+        setAppointmentDate(transformedData.date || "");
+        setAppointmentTime(transformedData.time || "");
+        setSelectedPriest(transformedData.priest || "");
+
+        // If it's approved, also fetch schedule details from approved_appointments table
+        if (transformedData.status === "Approved") {
+          fetchApprovedAppointmentDetails(marriageID);
+        }
+        
+        console.log("Marriage data loaded successfully:", transformedData);
+      } else {
+        setError(data.message || "Failed to fetch marriage details");
+        console.error("API error:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching marriage details:", error);
+      setError("An error occurred while fetching the data: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Fetches approved appointment details for the marriage application
+   * @param {string} marriageID - The ID of the marriage application
+   */
+  const fetchApprovedAppointmentDetails = async (marriageID) => {
+    try {
+      const url = `${API_BASE_URL}/fetch_approved_appointment.php?sacramentID=${marriageID}&sacrament_type=Marriage`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.appointment) {
+        // Update ONLY the schedule fields with data from approved_appointments
+        setAppointmentDate(data.appointment.date || "");
+        setAppointmentTime(data.appointment.time || "");
+        setSelectedPriest(data.appointment.priest || "");
+        console.log("Approved appointment details loaded:", data.appointment);
+      } else {
+        console.log("No approved appointment schedule found or there was an error");
+      }
+    } catch (error) {
+      console.error("Error fetching approved appointment schedule:", error);
+    }
+  };
+
+  /**
+   * Transforms the raw marriage data from the API into the expected format
+   * @param {Object} data - The raw marriage data from the API
+   * @returns {Object} - The transformed marriage data
+   */
+  const transformMarriageData = (data) => {
+    // Check if necessary data exists
+    if (!data || !data.marriage) {
+      console.error("Invalid data structure received from API", data);
+      throw new Error("Invalid data structure received from API");
     }
     
+    // Get all data objects from the API response
+    const { marriage, groomAddress, brideAddress, firstWitness, secondWitness, requirements } = data;
+    
+    // Create a fallback/sample data if requirements is missing
+    const req = requirements || {};
+    
+    const transformedData = {
+      date: marriage.date || '',
+      time: marriage.time || '',
+      priest: marriage.priest || '',
+      status: marriage.status || 'PENDING',
+      marriageID: marriage.marriageID,
+      clientID: marriage.clientID || null, // Make sure to capture client ID for notifications
+      groom: {
+        firstName: marriage.groom_first_name || '',
+        middleName: marriage.groom_middle_name || '',
+        lastName: marriage.groom_last_name || '',
+        age: marriage.groom_age || '',
+        dateOfBirth: marriage.groom_dateOfBirth || '',
+        placeOfBirth: marriage.groom_placeOfBirth || '',
+        dateOfBaptism: marriage.groom_dateOfBaptism || '',
+        churchOfBaptism: marriage.groom_churchOfBaptism || '',
+        email: marriage.groom_email || '', // Include email for notifications
+        address: {
+          street: groomAddress?.street || '',
+          barangay: groomAddress?.barangay || '',
+          municipality: groomAddress?.municipality || '',
+          province: groomAddress?.province || ''
+        }
+      },
+      bride: {
+        firstName: marriage.bride_first_name || '',
+        middleName: marriage.bride_middle_name || '',
+        lastName: marriage.bride_last_name || '',
+        age: marriage.bride_age || '',
+        dateOfBirth: marriage.bride_dateOfBirth || '',
+        placeOfBirth: marriage.bride_placeOfBirth || '',
+        dateOfBaptism: marriage.bride_dateOfBaptism || '',
+        churchOfBaptism: marriage.bride_churchOfBaptism || '',
+        email: marriage.bride_email || '', // Include email for notifications
+        address: {
+          street: brideAddress?.street || '',
+          barangay: brideAddress?.barangay || '',
+          municipality: brideAddress?.municipality || '',
+          province: brideAddress?.province || ''
+        }
+      },
+      witnesses: [
+        {
+          firstName: firstWitness?.first_name || '',
+          middleName: firstWitness?.middle_name || '',
+          lastName: firstWitness?.last_name || '',
+          gender: firstWitness?.gender || '',
+          age: firstWitness?.age || '',
+          dateOfBirth: firstWitness?.dateOfBirth || '',
+          contact: firstWitness?.contact_number || '',
+          address: {
+            street: firstWitness?.street || '',
+            barangay: firstWitness?.barangay || '',
+            municipality: firstWitness?.municipality || '',
+            province: firstWitness?.province || ''
+          }
+        },
+        {
+          firstName: secondWitness?.first_name || '',
+          middleName: secondWitness?.middle_name || '',
+          lastName: secondWitness?.last_name || '',
+          gender: secondWitness?.gender || '',
+          age: secondWitness?.age || '',
+          dateOfBirth: secondWitness?.dateOfBirth || '',
+          contact: secondWitness?.contact_number || '',
+          address: {
+            street: secondWitness?.street || '',
+            barangay: secondWitness?.barangay || '',
+            municipality: secondWitness?.municipality || '',
+            province: secondWitness?.province || ''
+          }
+        }
+      ],
+      requirements: {
+        baptismalCert: {
+          submitted: req.baptism_cert_status === 'Submitted',
+          fileName: req.baptism_cert ? req.baptism_cert.split('/').pop() : 'N/A'
+        },
+        confirmationCert: {
+          submitted: req.confirmation_cert_status === 'Submitted',
+          fileName: req.confirmation_cert ? req.confirmation_cert.split('/').pop() : 'N/A'
+        },
+        birthCert: {
+          submitted: req.birth_cert_status === 'Submitted',
+          fileName: req.birth_cert ? req.birth_cert.split('/').pop() : 'N/A'
+        },
+        marriageLicense: {
+          submitted: req.marriage_license_status === 'Submitted',
+          fileName: req.marriage_license ? req.marriage_license.split('/').pop() : 'N/A'
+        },
+        cenomar: {
+          submitted: req.cenomar_status === 'Submitted',
+          fileName: req.cenomar ? req.cenomar.split('/').pop() : 'N/A'
+        },
+        publicationBanns: {
+          submitted: req.publication_banns_status === 'Submitted',
+          fileName: req.publication_banns ? req.publication_banns.split('/').pop() : 'N/A'
+        },
+        permitFromParish: {
+          submitted: req.parish_permit_status === 'Submitted',
+          fileName: req.parish_permit ? req.parish_permit.split('/').pop() : 'N/A'
+        },
+        preCana: {
+          submitted: req.pre_cana_status === 'Submitted',
+          fileName: req.pre_cana ? req.pre_cana.split('/').pop() : 'N/A'
+        },
+        sponsorsList: {
+          submitted: req.sponsors_list_status === 'Submitted',
+          fileName: req.sponsors_list ? req.sponsors_list.split('/').pop() : 'N/A'
+        },
+        canonicalInterview: {
+          submitted: req.canonical_interview_status === 'Submitted',
+          fileName: req.canonical_interview ? req.canonical_interview.split('/').pop() : 'N/A'
+        }
+      },
+      // Certificate details
+      certificate: {
+        registerNumber: "2025-0123",
+        pageNumber: "45",
+        lineNumber: "12",
+        dateIssued: new Date().toISOString().split('T')[0],
+        registry: {
+          province: "Camarines Norte",
+          city: "Daet",
+          registryNo: "2025-M-0123",
+        },
+        solemnizer: {
+          name: marriage.priest || "Fr. José Chito M. Estrella",
+          position: "Parish Priest",
+          address: "Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte"
+        }
+      }
+    };
+    
+    return transformedData;
   };
-  
 
-  // Handle form submission
-  const handleSubmit = () => {
-    // Here you would typically send an API request to update the status
-    alert(`Application status has been changed to: ${status}`);
+  /**
+   * Handles the initial approval action when the Approve button is clicked
+   * Shows a confirmation modal with the appointment details
+   */
+  const handleApprove = async () => {
+    if (!marriageData || !marriageData.marriageID) {
+      alert("No marriage data available to approve.");
+      return;
+    }
+
+    // Validate required fields
+    if (!appointmentDate) {
+      alert("Please select a date for the appointment.");
+      return;
+    }
+    
+    if (!appointmentTime) {
+      alert("Please select a time for the appointment.");
+      return;
+    }
+    
+    if (!selectedPriest) {
+      alert("Please enter the name of the priest for the ceremony.");
+      return;
+    }
+
+    // Show the confirmation modal instead of proceeding directly
+    setShowConfirmModal(true);
+  };
+
+  /**
+   * Handles the confirmation of the approval process
+   * Saves appointment details, updates status, and sends notification email
+   */
+  const handleConfirmApproval = async () => {
+    setShowConfirmModal(false);
+    
+    try {
+      // 1. Save to approved_appointments table
+      const appointmentData = {
+        sacramentID: marriageData.marriageID,
+        sacrament_type: "Marriage",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest,
+        clientID: marriageData.clientID // Include clientID if available
+      };
+      
+      console.log("Saving appointment data:", appointmentData);
+      
+      const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(appointmentData),
+      });
+      
+      if (!appointmentResponse.ok) {
+        throw new Error(`Server responded with status: ${appointmentResponse.status}`);
+      }
+      
+      const appointmentResult = await appointmentResponse.json();
+      
+      if (!appointmentResult.success) {
+        throw new Error(appointmentResult.message || "Failed to save appointment details");
+      }
+      
+      console.log("Appointment saved successfully:", appointmentResult);
+      
+      // 2. Update the marriage application status
+      const updateData = {
+        marriageID: marriageData.marriageID,
+        status: "Approved",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest,
+        // Include email details for notification
+        groomEmail: marriageData.groom?.email,
+        brideEmail: marriageData.bride?.email,
+        groomName: `${marriageData.groom?.firstName} ${marriageData.groom?.lastName}`,
+        brideName: `${marriageData.bride?.firstName} ${marriageData.bride?.lastName}`,
+        clientID: marriageData.clientID
+      };
+      
+      console.log("Updating marriage status with data:", updateData);
+      
+      const response = await fetch(`${API_BASE_URL}/update_marriage_status.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      console.log("Status update response:", result);
+      
+      if (result.success) {
+        // Update local state to reflect changes
+        setStatus("Approved");
+        setSuccessMessage(result.message || "Marriage application has been approved successfully! An email notification has been sent to the client.");
+        setShowSuccessModal(true);
+        
+        // Update the marriageData to reflect the changes
+        setMarriageData({
+          ...marriageData,
+          date: appointmentDate,
+          time: appointmentTime,
+          priest: selectedPriest,
+          status: "Approved"
+        });
+      } else {
+        const errorMessage = result.message || "Failed to approve marriage application";
+        setSuccessMessage(errorMessage);
+        setShowSuccessModal(true);
+      }
+    } catch (error) {
+      console.error("Error approving marriage application:", error);
+      setSuccessMessage("An error occurred while approving the marriage application: " + error.message);
+      setShowSuccessModal(true);
+    }
+  };
+
+  // Handle date, time and priest changes
+  const handleDateChange = (value) => {
+    setAppointmentDate(value);
+  };
+
+  const handleTimeChange = (value) => {
+    setAppointmentTime(value);
+  };
+
+  const handlePriestChange = (value) => {
+    setSelectedPriest(value);
   };
 
   // Handle cancel action
   const handleCancel = () => {
-    // Reset the status to previous value or redirect
-    setStatus("PENDING");
-    alert("Action cancelled");
+    navigate(-1);
   };
 
   // Function to handle download certificate
@@ -207,7 +480,9 @@ canonicalInterview: {
 
   // Function to download the certificate as PDF
   const downloadCertificateAsPDF = async () => {
-    if (!certificateRef.current) return;
+    if (!certificateRef.current) {
+      return;
+    }
     
     setIsDownloading(true);
     
@@ -227,7 +502,7 @@ canonicalInterview: {
       
       // For first page
       setCurrentCertificatePage(1);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for page to render
+      await new Promise(resolve => setTimeout(resolve, 500)); // Delay for page to render
 
       let canvas = await html2canvas(certificateRef.current, {
         scale: 2,
@@ -248,7 +523,7 @@ canonicalInterview: {
       
       // For second page
       setCurrentCertificatePage(2);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for page to render
+      await new Promise(resolve => setTimeout(resolve, 500)); // Delay for page to render
       
       canvas = await html2canvas(certificateRef.current, {
         scale: 2,
@@ -267,6 +542,25 @@ canonicalInterview: {
       // Save the PDF
       const fileName = `Marriage_Certificate_${marriageData.groom.lastName}_${marriageData.bride.lastName}.pdf`;
       pdf.save(fileName);
+      
+      // Record certificate download
+      try {
+        await fetch(`${API_BASE_URL}/log_certificate_download.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sacramentID: marriageData.marriageID,
+            sacrament_type: "Marriage",
+            filename: fileName,
+            downloadedBy: "Secretary" // Could be dynamic if user info is available
+          }),
+        });
+      } catch (logError) {
+        console.error("Error logging certificate download:", logError);
+        // Non-critical error, don't interrupt the flow
+      }
       
       setShowCertificateModal(false);
       alert(`Certificate downloaded successfully!`);
@@ -302,9 +596,31 @@ canonicalInterview: {
     );
   };
 
+  // Function to get document URL based on environment and server configuration
+  const getDocumentUrl = (fileName) => {
+    // Determine base URL depending on environment
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (isLocalhost) {
+      // For local development
+      return `/uploads/marriage_requirements/${fileName}`;
+    } else {
+      // For production server - based on Hostinger file structure
+      return `/uploads/marriage_requirements/${fileName}`;
+    }
+  };
+
   // Document viewer modal
   const renderDocumentViewer = () => {
     if (!viewingDocument) return null;
+
+    // Determine file type by extension
+    const fileExtension = viewingDocument.split('.').pop().toLowerCase();
+    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
+    const isPdf = fileExtension === 'pdf';
+    
+    // Get document URL using the utility function
+    const documentUrl = getDocumentUrl(viewingDocument);
 
     return (
       <div className="secretary-marriage-document-viewer-overlay">
@@ -319,432 +635,84 @@ canonicalInterview: {
             </button>
           </div>
           <div className="secretary-marriage-document-viewer-content">
-            {/* In a real application, this would display the actual document */}
-            <div className="secretary-marriage-document-placeholder">
-              <p>Document preview would be displayed here.</p>
-              <p>Filename: {viewingDocument}</p>
-            </div>
+            {isImage && (
+              <img 
+                src={documentUrl} 
+                alt={viewingDocument}
+                style={{ maxWidth: '100%', maxHeight: '70vh' }}
+                onError={(e) => {
+                  console.error(`Failed to load image: ${documentUrl}`);
+                  e.target.src = 'https://via.placeholder.com/500x300?text=Image+Not+Found';
+                  e.target.alt = 'Document not found';
+                }}
+              />
+            )}
+            {isPdf && (
+              <iframe
+                src={`${documentUrl}#toolbar=0`}
+                title={viewingDocument}
+                width="100%"
+                height="600px"
+                style={{ border: 'none' }}
+                onError={(e) => {
+                  console.error(`Failed to load PDF: ${documentUrl}`);
+                  e.target.src = 'about:blank';
+                }}
+              />
+            )}
+            {!isImage && !isPdf && (
+              <div className="secretary-marriage-document-placeholder">
+                <p>Document preview not available for this file type.</p>
+                <p>Filename: {viewingDocument}</p>
+                <a 
+                  href={documentUrl}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="secretary-marriage-document-download-link"
+                >
+                  Download to view
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
     );
   };
 
-  // Certificate download modal
-  const renderCertificateModal = () => {
-    if (!showCertificateModal) return null;
-
-    // Extract month and day from marriage date
-    const { month, day } = extractMonthDayFromDate(marriageData.date);
-    const year = new Date(marriageData.date).getFullYear();
-
+  // Confirmation Modal
+  const renderConfirmModal = () => {
+    if (!showConfirmModal) return null;
+    
     return (
-      <div className="secretary-marriage-document-viewer-overlay">
-        <div className="secretary-marriage-certificate-modal-container">
-          <div className="secretary-marriage-document-viewer-header">
-            <h3>Marriage Certificate</h3>
+ <div className="secretary-document-viewer-overlay">
+        <div className="secretary-confirm-modal-container">
+          <div className="secretary-confirm-header">
+            <h3>Confirm Approval</h3>
             <button 
-              className="secretary-marriage-document-close-btn"
-              onClick={() => setShowCertificateModal(false)}
+              className="secretary-document-close-btn"
+              onClick={() => setShowConfirmModal(false)}
             >
               ×
             </button>
           </div>
-          <div className="secretary-marriage-certificate-modal-content">
-            <div className="secretary-marriage-certificate-page-tabs">
+          <div className="secretary-confirm-content">
+            <div className="secretary-confirm-icon">?</div>
+            <p>Are you sure you want to approve this marriage appointment?</p>
+            <p>Date: {appointmentDate}</p>
+            <p>Time: {appointmentTime}</p>
+            <p>Priest: {selectedPriest}</p>
+            <p>An email notification will be sent to the client.</p>
+            <div className="secretary-confirm-buttons">
               <button 
-                className={`secretary-marriage-certificate-page-tab ${currentCertificatePage === 1 ? 'active' : ''}`}
-                onClick={() => handleSwitchPage(1)}
+                className="secretary-confirm-yes-btn"
+                onClick={handleConfirmApproval}
               >
-                Page 1
+                Yes, Approve
               </button>
               <button 
-                className={`secretary-marriage-certificate-page-tab ${currentCertificatePage === 2 ? 'active' : ''}`}
-                onClick={() => handleSwitchPage(2)}
-              >
-                Page 2
-              </button>
-            </div>
-            
-            {/* Certificate Preview */}
-            <div ref={certificateRef} className="marriage-certificate-preview">
-              {currentCertificatePage === 1 ? (
-                <div className="marriage-certificate-page-1">
-                  <div className="marriage-certificate-header">
-                  <div className="marriage-certificate-logos">
-                  <div className="marriage-parish-logo-left">
-                  <img src="/src/assets/church2.jpg" alt="Parish Logo Left" />
-                </div>
-                    <div className="marriage-certificate-title-section">
-                      <div className="republic-title">REPUBLIC OF THE PHILIPPINES</div>
-                      <div className="office-title">OFFICE OF THE CIVIL REGISTRAR GENERAL</div>
-                      <div className="certificate-title">CERTIFICATE OF MARRIAGE</div>
-                    </div>
-                <div className="marriage-parish-logo-right">
-                  <img src="/src/assets/pdmlogo.png" alt="Parish Logo Right" />
-                </div>
-                </div>
-                    <div className="marriage-certificate-registry-info">
-                      <div className="registry-fields">
-                        <div className="registry-field">
-                          <span className="registry-label">Registry No.: </span>
-                          <span className="registry-value">{marriageData.certificate.registry.registryNo}</span>
-                        </div>
-                        <div className="registry-field">
-                          <span className="registry-label">Province: </span>
-                          <span className="registry-value">{marriageData.certificate.registry.province}</span>
-                        </div>
-                        <div className="registry-field">
-                          <span className="registry-label">City/Municipality: </span>
-                          <span className="registry-value">{marriageData.certificate.registry.city}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="marriage-certificate-main-content">
-                    <div className="marriage-certificate-section husband-wife-section">
-                      <div className="husband-section">
-                        <div className="section-title">HUSBAND</div>
-                        <div className="person-fields">
-                          <div className="person-field">
-                            <span className="field-label">1. Name of Contracting Party</span>
-                            <div className="name-parts">
-                              <div className="name-part">
-                                <span className="name-value">{marriageData.groom.firstName}</span>
-                                <span className="name-label">(First)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value">{marriageData.groom.middleName}</span>
-                                <span className="name-label">(Middle)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value">{marriageData.groom.lastName}</span>
-                                <span className="name-label">(Last)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">2. Date of Birth</span>
-                            <div className="date-parts">
-                              <div className="date-part">
-                                <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getDate()}</span>
-                                <span className="date-label">(Day)</span>
-                              </div>
-                              <div className="date-part">
-                                <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getMonth() + 1}</span>
-                                <span className="date-label">(Month)</span>
-                              </div>
-                              <div className="date-part">
-                                <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getFullYear()}</span>
-                                <span className="date-label">(Year)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">3. Place of Birth</span>
-                            <span className="field-value">{marriageData.groom.placeOfBirth}</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">4. Citizenship</span>
-                            <span className="field-value">Filipino</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">5. Residence</span>
-                            <span className="field-value">{`${marriageData.groom.address.street}, ${marriageData.groom.address.municipality}, ${marriageData.groom.address.province}`}</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">6. Religion/Religious Sect</span>
-                            <span className="field-value">Roman Catholic</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">7. Civil Status</span>
-                            <span className="field-value">Single</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">8. Name of Father</span>
-                            <div className="name-parts">
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(First)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Middle)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Last)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">9. Citizenship</span>
-                            <span className="field-value">Filipino</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">10. Mother's Maiden Name</span>
-                            <div className="name-parts">
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(First)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Middle)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Last)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">11. Citizenship</span>
-                            <span className="field-value">Filipino</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="wife-section">
-                        <div className="section-title">WIFE</div>
-                        <div className="person-fields">
-                          <div className="person-field">
-                            <span className="field-label">1. Name of Contracting Party</span>
-                            <div className="name-parts">
-                              <div className="name-part">
-                                <span className="name-value">{marriageData.bride.firstName}</span>
-                                <span className="name-label">(First)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value">{marriageData.bride.middleName}</span>
-                                <span className="name-label">(Middle)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value">{marriageData.bride.lastName}</span>
-                                <span className="name-label">(Last)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">2. Date of Birth</span>
-                            <div className="date-parts">
-                              <div className="date-part">
-                                <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getDate()}</span>
-                                <span className="date-label">(Day)</span>
-                              </div>
-                              <div className="date-part">
-                                <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getMonth() + 1}</span>
-                                <span className="date-label">(Month)</span>
-                              </div>
-                              <div className="date-part">
-                                <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getFullYear()}</span>
-                                <span className="date-label">(Year)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">3. Place of Birth</span>
-                            <span className="field-value">{marriageData.bride.placeOfBirth}</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">4. Citizenship</span>
-                            <span className="field-value">Filipino</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">5. Residence</span>
-                            <span className="field-value">{`${marriageData.bride.address.street}, ${marriageData.bride.address.municipality}, ${marriageData.bride.address.province}`}</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">6. Religion/Religious Sect</span>
-                            <span className="field-value">Roman Catholic</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">7. Civil Status</span>
-                            <span className="field-value">Single</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">8. Name of Father</span>
-                            <div className="name-parts">
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(First)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Middle)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Last)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">9. Citizenship</span>
-                            <span className="field-value">Filipino</span>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">10. Mother's Maiden Name</span>
-                            <div className="name-parts">
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(First)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Middle)</span>
-                              </div>
-                              <div className="name-part">
-                                <span className="name-value"></span>
-                                <span className="name-label">(Last)</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="person-field">
-                            <span className="field-label">11. Citizenship</span>
-                            <span className="field-value">Filipino</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="marriage-certificate-section marriage-details-section">
-                      <div className="marriage-field">
-                        <span className="field-label">12. Place of Marriage</span>
-                        <span className="field-value">Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte</span>
-                      </div>
-                      
-                      <div className="marriage-field">
-                        <span className="field-label">13. Date of Marriage</span>
-                        <div className="date-parts">
-                          <div className="date-part">
-                            <span className="date-value">{day}</span>
-                            <span className="date-label">(Day)</span>
-                          </div>
-                          <div className="date-part">
-                            <span className="date-value">{new Date(marriageData.date).getMonth() + 1}</span>
-                            <span className="date-label">(Month)</span>
-                          </div>
-                          <div className="date-part">
-                            <span className="date-value">{year}</span>
-                            <span className="date-label">(Year)</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="marriage-certificate-page-2">
-                  <div className="marriage-certificate-header">
-                    <div className="marriage-certificate-title-section">
-                      <div className="certificate-page-title">CERTIFICATE OF MARRIAGE</div>
-                    </div>
-                  </div>
-                  
-                  <div className="marriage-certificate-main-content">
-                    <div className="marriage-certificate-section certification-section">
-                      <div className="certification-header">
-                        <h3>I CERTIFY THAT THE ABOVE-NAMED PARTIES</h3>
-                      </div>
-                      
-                      <div className="certification-statement">
-                        <p>
-                          This is to certify that <strong>{marriageData.groom.firstName} {marriageData.groom.middleName} {marriageData.groom.lastName}</strong> and <strong>{marriageData.bride.firstName} {marriageData.bride.middleName} {marriageData.bride.lastName}</strong>, both of legal age, were united in the Holy Sacrament of Matrimony on the <strong>{day}th</strong> day of <strong>{month}</strong> in the year <strong>{year}</strong>, at the Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte, Philippines, according to the rites of the Roman Catholic Church.
-                        </p>
-                        <p>
-                          The marriage was solemnized by <strong>{marriageData.certificate.solemnizer.name}</strong>, {marriageData.certificate.solemnizer.position}, in the presence of witnesses <strong>{marriageData.witnesses[0].firstName} {marriageData.witnesses[0].middleName} {marriageData.witnesses[0].lastName}</strong> and <strong>{marriageData.witnesses[1].firstName} {marriageData.witnesses[1].middleName} {marriageData.witnesses[1].lastName}</strong>.
-                        </p>
-                      </div>
-                      
-                      <div className="certification-signatures">
-                        <div className="signature-section">
-                          <div className="signature-placeholder">
-                            <p>Signature of Husband</p>
-                            <div className="signature-line"></div>
-                            <p>{marriageData.groom.firstName} {marriageData.groom.middleName} {marriageData.groom.lastName}</p>
-                          </div>
-                          
-                          <div className="signature-placeholder">
-                            <p>Signature of Wife</p>
-                            <div className="signature-line"></div>
-                            <p>{marriageData.bride.firstName} {marriageData.bride.middleName} {marriageData.bride.lastName}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="witness-signatures">
-                          <div className="signature-placeholder">
-                            <p>Witness</p>
-                            <div className="signature-line"></div>
-                            <p>{marriageData.witnesses[0].firstName} {marriageData.witnesses[0].middleName} {marriageData.witnesses[0].lastName}</p>
-                          </div>
-                          
-                          <div className="signature-placeholder">
-                            <p>Witness</p>
-                            <div className="signature-line"></div>
-                            <p>{marriageData.witnesses[1].firstName} {marriageData.witnesses[1].middleName} {marriageData.witnesses[1].lastName}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="solemnizer-signature">
-                          <div className="signature-placeholder">
-                            <p>Solemnizing Officer</p>
-                            <div className="signature-line"></div>
-                            <p>{marriageData.certificate.solemnizer.name}</p>
-                            <p>{marriageData.certificate.solemnizer.position}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="certification-footer">
-                        <div className="registry-details">
-                          <p><strong>Registry No:</strong> {marriageData.certificate.registry.registryNo}</p>
-                          <p><strong>Date Issued:</strong> {formatDate(marriageData.certificate.dateIssued)}</p>
-                        </div>
-                        
-                        <div className="parish-seal">
-                          <p>Parish Seal</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="secretary-marriage-certificate-modal-actions">
-              <button 
-                className="secretary-marriage-certificate-download-btn"
-                onClick={downloadCertificateAsPDF}
-                disabled={isDownloading}
-              >
-                {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
-              </button>
-              <button 
-                className="secretary-marriage-certificate-cancel-btn"
-                onClick={() => setShowCertificateModal(false)}
-                disabled={isDownloading}
+                className="secretary-confirm-no-btn"
+                onClick={() => setShowConfirmModal(false)}
               >
                 Cancel
               </button>
@@ -755,41 +723,537 @@ canonicalInterview: {
     );
   };
 
+  // Success Modal
+  const renderSuccessModal = () => {
+    if (!showSuccessModal) return null;
+    
+    // Determine if it's a success or error message
+    const isSuccess = !successMessage.includes("error") && !successMessage.includes("failed");
+    
+    return (
+      <div className="secretary-document-viewer-overlay">
+        <div className="secretary-document-modal-container">
+          <div className="secretary-document-header">
+          <h3>{isSuccess ? "Success!" : "Error"}</h3>
+          </div>
+          <div className="secretary-document-content">
+            <div className={isSuccess ? "secretary-success-icon" : "secretary-error-icon"}>
+              {isSuccess ? "✓" : "!"}
+            </div>
+            <p>{successMessage}</p>
+            <button 
+              className="secretary-confirm-yes-btn"
+              onClick={() => {
+                setShowSuccessModal(false);
+                if (isSuccess) {
+                  navigate("/secretary-marriage");
+                }
+              }}
+            >
+              {isSuccess ? "Back to Marriage List" : "Close"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  if (loading) {
+    return (
+      <div className="secretary-marriage-view-container">
+        <div className="secretary-marriage-view-loading">Loading marriage details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="secretary-marriage-view-container">
+        <div className="secretary-marriage-view-error">
+          <p>{error}</p>
+          <button onClick={() => navigate(-1)}>Back</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!marriageData) {
+    return (
+      <div className="secretary-marriage-view-container">
+        <div className="secretary-marriage-view-error">
+          <p>No marriage data found.</p>
+          <button onClick={() => navigate(-1)}>Back</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="secretary-marriage-view-container">
       {/* Document Viewer Modal */}
       {renderDocumentViewer()}
       
-      {/* Certificate Download Modal */}
-      {renderCertificateModal()}
+      {/* Certificate Download Modal - Direct Implementation */}
+      {showCertificateModal && marriageData && (() => {
+        // Extract month and day from marriage date
+        const { month, day } = extractMonthDayFromDate(appointmentDate || marriageData.date);
+        const year = new Date(appointmentDate || marriageData.date).getFullYear();
+        
+        return (
+          <div className="secretary-marriage-document-viewer-overlay">
+            <div className="secretary-marriage-certificate-modal-container">
+              <div className="secretary-marriage-document-viewer-header">
+                <h3>Marriage Certificate</h3>
+                <button 
+                  className="secretary-marriage-document-close-btn"
+                  onClick={() => setShowCertificateModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="secretary-marriage-certificate-modal-content">
+                <div className="secretary-marriage-certificate-page-tabs">
+                  <button 
+                    className={`secretary-marriage-certificate-page-tab ${currentCertificatePage === 1 ? 'active' : ''}`}
+                    onClick={() => handleSwitchPage(1)}
+                  >
+                    Page 1
+                  </button>
+                  <button 
+                    className={`secretary-marriage-certificate-page-tab ${currentCertificatePage === 2 ? 'active' : ''}`}
+                    onClick={() => handleSwitchPage(2)}
+                  >
+                    Page 2
+                  </button>
+                </div>
+                
+                {/* Certificate Preview */}
+                <div ref={certificateRef} className="marriage-certificate-preview">
+                  {currentCertificatePage === 1 ? (
+                    <div key="page-1" className="marriage-certificate-page-1">
+                      <div className="marriage-certificate-header">
+                        <div className="marriage-certificate-logos">
+                          <div className="marriage-parish-logo-left">
+                            <img 
+                              src={church2Img} 
+                              alt="Parish Logo Left" 
+                              onError={(e) => {
+                                console.error("Failed to load church image");
+                                e.target.src = "https://via.placeholder.com/70x70?text=Church";
+                              }}
+                            />
+                          </div>
+                          <div className="marriage-certificate-title-section">
+                            <div className="republic-title">REPUBLIC OF THE PHILIPPINES</div>
+                            <div className="office-title">OFFICE OF THE CIVIL REGISTRAR GENERAL</div>
+                            <div className="certificate-title">CERTIFICATE OF MARRIAGE</div>
+                            <div className="certificate-id">Marriage ID: {marriageData.marriageID}</div>
+                          </div>
+                          <div className="marriage-parish-logo-right">
+                            <img 
+                              src={pdmLogo} 
+                              alt="Parish Logo Right" 
+                              onError={(e) => {
+                                console.error("Failed to load PDM logo");
+                                e.target.src = "https://via.placeholder.com/80x80?text=PDM";
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div className="marriage-certificate-registry-info">
+                          <div className="registry-fields">
+                            <div className="registry-field">
+                              <span className="registry-label">Registry No.: </span>
+                              <span className="registry-value">{marriageData.certificate.registry.registryNo}</span>
+                            </div>
+                            <div className="registry-field">
+                              <span className="registry-label">Province: </span>
+                              <span className="registry-value">{marriageData.certificate.registry.province}</span>
+                            </div>
+                            <div className="registry-field">
+                              <span className="registry-label">City/Municipality: </span>
+                              <span className="registry-value">{marriageData.certificate.registry.city}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="marriage-certificate-main-content">
+                        <div className="marriage-certificate-section husband-wife-section">
+                          <div className="husband-section">
+                            <div className="section-title">HUSBAND</div>
+                            <div className="person-fields">
+                              <div className="person-field">
+                                <span className="field-label">1. Name of Contracting Party</span>
+                                <div className="name-parts">
+                                  <div className="name-part">
+                                    <span className="name-value">{marriageData.groom.firstName}</span>
+                                    <span className="name-label">(First)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value">{marriageData.groom.middleName}</span>
+                                    <span className="name-label">(Middle)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value">{marriageData.groom.lastName}</span>
+                                    <span className="name-label">(Last)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">2. Date of Birth</span>
+                                <div className="date-parts">
+                                  <div className="date-part">
+                                    <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getDate() || "-"}</span>
+                                    <span className="date-label">(Day)</span>
+                                  </div>
+                                  <div className="date-part">
+                                    <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getMonth() + 1 || "-"}</span>
+                                    <span className="date-label">(Month)</span>
+                                  </div>
+                                  <div className="date-part">
+                                    <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getFullYear() || "-"}</span>
+                                    <span className="date-label">(Year)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">3. Place of Birth</span>
+                                <span className="field-value">{marriageData.groom.placeOfBirth}</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">4. Citizenship</span>
+                                <span className="field-value">Filipino</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">5. Residence</span>
+                                <span className="field-value">{`${marriageData.groom.address.street}, ${marriageData.groom.address.municipality}, ${marriageData.groom.address.province}`}</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">6. Religion/Religious Sect</span>
+                                <span className="field-value">Roman Catholic</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">7. Civil Status</span>
+                                <span className="field-value">Single</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">8. Name of Father</span>
+                                <div className="name-parts">
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(First)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Middle)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Last)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">9. Citizenship</span>
+                                <span className="field-value">Filipino</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">10. Mother's Maiden Name</span>
+                                <div className="name-parts">
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(First)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Middle)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Last)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">11. Citizenship</span>
+                                <span className="field-value">Filipino</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="wife-section">
+                            <div className="section-title">WIFE</div>
+                            <div className="person-fields">
+                              <div className="person-field">
+                                <span className="field-label">1. Name of Contracting Party</span>
+                                <div className="name-parts">
+                                  <div className="name-part">
+                                    <span className="name-value">{marriageData.bride.firstName}</span>
+                                    <span className="name-label">(First)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value">{marriageData.bride.middleName}</span>
+                                    <span className="name-label">(Middle)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value">{marriageData.bride.lastName}</span>
+                                    <span className="name-label">(Last)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">2. Date of Birth</span>
+                                <div className="date-parts">
+                                  <div className="date-part">
+                                    <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getDate() || "-"}</span>
+                                    <span className="date-label">(Day)</span>
+                                  </div>
+                                  <div className="date-part">
+                                    <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getMonth() + 1 || "-"}</span>
+                                    <span className="date-label">(Month)</span>
+                                  </div>
+                                  <div className="date-part">
+                                    <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getFullYear() || "-"}</span>
+                                    <span className="date-label">(Year)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">3. Place of Birth</span>
+                                <span className="field-value">{marriageData.bride.placeOfBirth}</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">4. Citizenship</span>
+                                <span className="field-value">Filipino</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">5. Residence</span>
+                                <span className="field-value">{`${marriageData.bride.address.street}, ${marriageData.bride.address.municipality}, ${marriageData.bride.address.province}`}</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">6. Religion/Religious Sect</span>
+                                <span className="field-value">Roman Catholic</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">7. Civil Status</span>
+                                <span className="field-value">Single</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">8. Name of Father</span>
+                                <div className="name-parts">
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(First)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Middle)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Last)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">9. Citizenship</span>
+                                <span className="field-value">Filipino</span>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">10. Mother's Maiden Name</span>
+                                <div className="name-parts">
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(First)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Middle)</span>
+                                  </div>
+                                  <div className="name-part">
+                                    <span className="name-value"></span>
+                                    <span className="name-label">(Last)</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="person-field">
+                                <span className="field-label">11. Citizenship</span>
+                                <span className="field-value">Filipino</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="marriage-certificate-section marriage-details-section">
+                          <div className="marriage-field">
+                            <span className="field-label">12. Place of Marriage</span>
+                            <span className="field-value">Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte</span>
+                          </div>
+                          
+                          <div className="marriage-field">
+                            <span className="field-label">13. Date of Marriage</span>
+                            <div className="date-parts">
+                              <div className="date-part">
+                                <span className="date-value">{day}</span>
+                                <span className="date-label">(Day)</span>
+                              </div>
+                              <div className="date-part">
+                                <span className="date-value">{month}</span>
+                                <span className="date-label">(Month)</span>
+                              </div>
+                              <div className="date-part">
+                                <span className="date-value">{year}</span>
+                                <span className="date-label">(Year)</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div key="page-2" className="marriage-certificate-page-2">
+                      <div className="marriage-certificate-header">
+                        <div className="marriage-certificate-title-section">
+                          <div className="certificate-page-title">CERTIFICATE OF MARRIAGE</div>
+                          <div className="certificate-id">Marriage ID: {marriageData.marriageID}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="marriage-certificate-main-content">
+                        <div className="marriage-certificate-section certification-section">
+                          <div className="certification-header">
+                            <h3>I CERTIFY THAT THE ABOVE-NAMED PARTIES</h3>
+                          </div>
+                          
+                          <div className="certification-statement">
+                            <p>
+                              This is to certify that <strong>{marriageData.groom.firstName} {marriageData.groom.middleName} {marriageData.groom.lastName}</strong> and <strong>{marriageData.bride.firstName} {marriageData.bride.middleName} {marriageData.bride.lastName}</strong>, both of legal age, were united in the Holy Sacrament of Matrimony on the <strong>{day}th</strong> day of <strong>{month}</strong> in the year <strong>{year}</strong>, at the Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte, Philippines, according to the rites of the Roman Catholic Church.
+                            </p>
+                            <p>
+                              The marriage was solemnized by <strong>{selectedPriest || marriageData.certificate.solemnizer.name}</strong>, {marriageData.certificate.solemnizer.position}, in the presence of witnesses <strong>{marriageData.witnesses[0].firstName} {marriageData.witnesses[0].middleName} {marriageData.witnesses[0].lastName}</strong> and <strong>{marriageData.witnesses[1].firstName} {marriageData.witnesses[1].middleName} {marriageData.witnesses[1].lastName}</strong>.
+                            </p>
+                          </div>
+                          
+                          <div className="certification-signatures">
+                            <div className="signature-section">
+                              <div className="signature-placeholder">
+                                <p>Signature of Husband</p>
+                                <div className="signature-line"></div>
+                                <p>{marriageData.groom.firstName} {marriageData.groom.middleName} {marriageData.groom.lastName}</p>
+                              </div>
+                              
+                              <div className="signature-placeholder">
+                                <p>Signature of Wife</p>
+                                <div className="signature-line"></div>
+                                <p>{marriageData.bride.firstName} {marriageData.bride.middleName} {marriageData.bride.lastName}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="witness-signatures">
+                              <div className="signature-placeholder">
+                                <p>Witness</p>
+                                <div className="signature-line"></div>
+                                <p>{marriageData.witnesses[0].firstName} {marriageData.witnesses[0].middleName} {marriageData.witnesses[0].lastName}</p>
+                              </div>
+                              
+                              <div className="signature-placeholder">
+                                <p>Witness</p>
+                                <div className="signature-line"></div>
+                                <p>{marriageData.witnesses[1].firstName} {marriageData.witnesses[1].middleName} {marriageData.witnesses[1].lastName}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="solemnizer-signature">
+                              <div className="signature-placeholder">
+                                <p>Solemnizing Officer</p>
+                                <div className="signature-line"></div>
+                                <p>{selectedPriest || marriageData.certificate.solemnizer.name}</p>
+                                <p>{marriageData.certificate.solemnizer.position}</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="certification-footer">
+                            <div className="registry-details">
+                              <p><strong>Registry No:</strong> {marriageData.certificate.registry.registryNo}</p>
+                              <p><strong>Date Issued:</strong> {formatDate(marriageData.certificate.dateIssued)}</p>
+                              <p><strong>Marriage ID:</strong> {marriageData.marriageID}</p>
+                            </div>
+                            
+                            <div className="parish-seal">
+                              <p>Parish Seal</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="secretary-marriage-certificate-modal-actions">
+                  <button 
+                    className="secretary-marriage-certificate-download-btn"
+                    onClick={downloadCertificateAsPDF}
+                    disabled={isDownloading}
+                  >
+                    {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
+                  </button>
+                  <button 
+                    className="secretary-marriage-certificate-cancel-btn"
+                    onClick={() => setShowCertificateModal(false)}
+                    disabled={isDownloading}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+      
+      {/* Confirmation Modal */}
+      {renderConfirmModal()}
+      
+      {/* Success Modal */}
+      {renderSuccessModal()}
       
       {/* Header */}
       <div className="secretary-marriage-view-header">
         <div className="secretary-marriage-view-left-section">
-          <button className="secretary-marriage-view-back-button" onClick={() => window.history.back()}>
+          <button className="secretary-marriage-view-back-button" onClick={() => navigate(-1)}>
             <AiOutlineArrowLeft className="secretary-marriage-view-back-icon" /> Back
           </button>
         </div>
         <div className="secretary-marriage-view-right-section">
-          <div className="secretary-marriage-view-status-selector">
-            <label htmlFor="status-select">Status:</label>
-            <select 
-              id="status-select" 
-              className="secretary-marriage-status-dropdown"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
+          {status === "Approved" && (
+            <button 
+              className="secretary-marriage-download-certificate-btn"
+              onClick={handleDownloadCertificate}
             >
-              <option value="PENDING">PENDING</option>
-              <option value="APPROVED">APPROVED</option>
-              <option value="COMPLETED">COMPLETED</option>
-            </select>
-          </div>
-          <button 
-            className="secretary-marriage-download-certificate-btn"
-            onClick={handleDownloadCertificate}
-          >
-            <AiOutlineDownload /> Download Certificate
-          </button>
+              <AiOutlineDownload /> Download Certificate
+            </button>
+          )}
         </div>
       </div>
       <h1 className="secretary-marriage-view-title">Holy Matrimony Application Details</h1>
@@ -798,19 +1262,14 @@ canonicalInterview: {
       <div className="secretary-marriage-view-data">
         <div className="secretary-marriage-view-row-date">
           <div className="secretary-marriage-view-field-date">
-            <label>Date of Holy Matrimony:</label>
+            <label>Date of Appointment:</label>
             {renderReadOnlyField(formatDate(marriageData.date))}
           </div>
           
           <div className="secretary-marriage-view-field-time">
-            <label>Time of Holy Matrimony:</label>
+            <label>Time of Appointment:</label>
             {renderReadOnlyField(marriageData.time)}
           </div>
-        </div>
-
-        <div className="secretary-marriage-view-field-date">
-          <label>Name of the Priest:</label>
-          {renderReadOnlyField(marriageData.priest)}
         </div>
         
         <div className="secretary-marriage-view-bypart">
@@ -840,37 +1299,41 @@ canonicalInterview: {
                 <label>Date of Birth:</label>
                 {renderReadOnlyField(formatDate(marriageData.groom.dateOfBirth))}
               </div>
-              <div className="secretary-marriage-view-field">
-                <label>Place of Birth:</label>
-                {renderReadOnlyField(marriageData.groom.placeOfBirth)}
+               <div className="client-marriage-view-field">
+                <label>Date of Baptism:</label>
+                <div className="client-marriage-view-value">{marriageData.groom.dateOfBaptism}</div>
+              </div>
+              <div className="client-marriage-view-field-dob">
+                <label>Church of Baptism:</label>
+                <div className="client-marriage-view-value">{marriageData.groom.churchOfBaptism}</div>
               </div>
             </div>
+            <label className="mini-view">Place of Birth</label>
             
             <div className="secretary-marriage-view-row">
               <div className="secretary-marriage-view-field">
-                <label>Date of Baptism:</label>
-                {renderReadOnlyField(formatDate(marriageData.groom.dateOfBaptism))}
-              </div>
-              <div className="secretary-marriage-view-field">
-                <label>Church of Baptism:</label>
-                {renderReadOnlyField(marriageData.groom.churchOfBaptism)}
+                <label>Place of Birth:</label>
+                <div className="secretary-marriage-view-value">{marriageData.groom.placeOfBirth}</div>
               </div>
             </div>
             
             {/* Address Fields */}
+            <label className="mini-view">Home Address</label>
             <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
             <div className="secretary-marriage-view-field">
-                <label>Barangay:</label>
-                {renderReadOnlyField(marriageData.groom.address.barangay)}
-              </div>
-              <div className="secretary-marriage-view-field">
                 <label>Street:</label>
                 {renderReadOnlyField(marriageData.groom.address.street)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(marriageData.groom.address.barangay)}
               </div>
               <div className="secretary-marriage-view-field">
                 <label>Municipality:</label>
                 {renderReadOnlyField(marriageData.groom.address.municipality)}
               </div>
+            </div>
+            <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
               <div className="secretary-marriage-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(marriageData.groom.address.province)}
@@ -895,23 +1358,16 @@ canonicalInterview: {
                 {renderReadOnlyField(marriageData.bride.lastName)}
               </div>
               <div className="secretary-marriage-view-field">
-                <label>Age:</label>
-                {renderReadOnlyField(marriageData.bride.age)}
-              </div>
-            </div>
-            
-            <div className="secretary-marriage-view-row">
-              <div className="secretary-marriage-view-field">
                 <label>Date of Birth:</label>
                 {renderReadOnlyField(formatDate(marriageData.bride.dateOfBirth))}
               </div>
-              <div className="secretary-marriage-view-field">
-                <label>Place of Birth:</label>
-                {renderReadOnlyField(marriageData.bride.placeOfBirth)}
-              </div>
             </div>
             
             <div className="secretary-marriage-view-row">
+            <div className="secretary-marriage-view-field">
+                <label>Age:</label>
+                {renderReadOnlyField(marriageData.bride.age)}
+              </div>
               <div className="secretary-marriage-view-field">
                 <label>Date of Baptism:</label>
                 {renderReadOnlyField(formatDate(marriageData.bride.dateOfBaptism))}
@@ -921,10 +1377,17 @@ canonicalInterview: {
                 {renderReadOnlyField(marriageData.bride.churchOfBaptism)}
               </div>
             </div>
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Place of Birth:</label>
+                {renderReadOnlyField(marriageData.bride.placeOfBirth)}
+              </div>
+            </div>
             
             {/* Address Fields */}
+            <label className="mini-view">Home Address</label>
             <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
-            <div className="secretary-marriage-view-field">
+              <div className="secretary-marriage-view-field">
                 <label>Barangay:</label>
                 {renderReadOnlyField(marriageData.bride.address.barangay)}
               </div>
@@ -936,13 +1399,15 @@ canonicalInterview: {
                 <label>Municipality:</label>
                 {renderReadOnlyField(marriageData.bride.address.municipality)}
               </div>
+            </div>
+            <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
               <div className="secretary-marriage-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(marriageData.bride.address.province)}
               </div>
             </div>
           </div>
-          
+
           <h3 className="secretary-marriage-view-sub-title">Witness Information</h3>
           {/* First Witness Information */}
           <div className="secretary-marriage-view-info-card">
@@ -960,20 +1425,20 @@ canonicalInterview: {
                 <label>Last Name:</label>
                 {renderReadOnlyField(marriageData.witnesses[0].lastName)}
               </div>
+              <div className="secretary-marriage-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(formatDate(marriageData.witnesses[0].dateOfBirth))}
+              </div>
             </div>
             
             <div className="secretary-marriage-view-row">
-              <div className="secretary-marriage-view-field">
-                <label>Gender:</label>
-                {renderReadOnlyField(marriageData.witnesses[0].gender)}
-              </div>
               <div className="secretary-marriage-view-field">
                 <label>Age:</label>
                 {renderReadOnlyField(marriageData.witnesses[0].age)}
               </div>
               <div className="secretary-marriage-view-field">
-                <label>Date of Birth:</label>
-                {renderReadOnlyField(formatDate(marriageData.witnesses[0].dateOfBirth))}
+                <label>Gender:</label>
+                {renderReadOnlyField(marriageData.witnesses[0].gender)}
               </div>
               <div className="secretary-marriage-view-field">
                 <label>Contact Number:</label>
@@ -984,12 +1449,12 @@ canonicalInterview: {
             {/* Address Fields */}
             <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
             <div className="secretary-marriage-view-field">
-                <label>Barangay:</label>
-                {renderReadOnlyField(marriageData.witnesses[0].address.barangay)}
-              </div>
-              <div className="secretary-marriage-view-field">
                 <label>Street:</label>
                 {renderReadOnlyField(marriageData.witnesses[0].address.street)}
+              </div>
+            <div className="secretary-marriage-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(marriageData.witnesses[0].address.barangay)}
               </div>
               <div className="secretary-marriage-view-field">
                 <label>Municipality:</label>
@@ -1018,20 +1483,20 @@ canonicalInterview: {
                 <label>Last Name:</label>
                 {renderReadOnlyField(marriageData.witnesses[1].lastName)}
               </div>
+              <div className="secretary-marriage-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(formatDate(marriageData.witnesses[1].dateOfBirth))}
+              </div>
             </div>
             
             <div className="secretary-marriage-view-row">
-              <div className="secretary-marriage-view-field">
-                <label>Gender:</label>
-                {renderReadOnlyField(marriageData.witnesses[1].gender)}
-              </div>
               <div className="secretary-marriage-view-field">
                 <label>Age:</label>
                 {renderReadOnlyField(marriageData.witnesses[1].age)}
               </div>
               <div className="secretary-marriage-view-field">
-                <label>Date of Birth:</label>
-                {renderReadOnlyField(formatDate(marriageData.witnesses[1].dateOfBirth))}
+                <label>Gender:</label>
+                {renderReadOnlyField(marriageData.witnesses[1].gender)}
               </div>
               <div className="secretary-marriage-view-field">
                 <label>Contact Number:</label>
@@ -1042,12 +1507,12 @@ canonicalInterview: {
             {/* Address Fields */}
             <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
             <div className="secretary-marriage-view-field">
-                <label>Barangay:</label>
-                {renderReadOnlyField(marriageData.witnesses[1].address.barangay)}
-              </div>
-              <div className="secretary-marriage-view-field">
                 <label>Street:</label>
                 {renderReadOnlyField(marriageData.witnesses[1].address.street)}
+              </div>
+            <div className="secretary-marriage-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(marriageData.witnesses[1].address.barangay)}
               </div>
               <div className="secretary-marriage-view-field">
                 <label>Municipality:</label>
@@ -1061,185 +1526,107 @@ canonicalInterview: {
           </div>
         </div>
         
+        {/* Requirements Section */}
         <div className="secretary-marriage-requirements-view-container">
           <h2 className="secretary-marriage-requirements-view-title">Requirements</h2>
           <div className="secretary-marriage-requirements-view-box">
-            <h3 className="secretary-marriage-view-section-header">Documents Status</h3>
+            <h3 className="secretary-marriage-view-section-header">Documents Required(All documents must be submitted to the Parish Office)</h3>
             <div className="secretary-marriage-view-checkbox-list">
-              {/* Baptismal Certificate */}
-              <div className="secretary-marriage-requirement-view-item">
-                <div className="secretary-marriage-view-requirement-name">
-                  Baptismal Certificate (Recent copy, issued within 6 months)
-                </div>
-                {renderDocumentStatus(
-                  marriageData.requirements.baptismalCert.submitted, 
-                  marriageData.requirements.baptismalCert.fileName
-                )}
-              </div>
-              
-              {/* Confirmation Certificate */}
-              <div className="secretary-marriage-requirement-view-item">
-                <div className="secretary-marriage-view-requirement-name">
-                  Confirmation Certificate (Proof of receiving the Sacrament of Confirmation)
-                </div>
-                {renderDocumentStatus(
-                  marriageData.requirements.confirmationCert.submitted, 
-                  marriageData.requirements.confirmationCert.fileName
-                )}
-              </div>
-              
-              {/* Birth Certificate */}
-              <div className="secretary-marriage-requirement-view-item">
-                <div className="secretary-marriage-view-requirement-name">
-                  Birth Certificate (For age verification and legal purposes)
-                </div>
-                {renderDocumentStatus(
-                  marriageData.requirements.birthCert.submitted, 
-                  marriageData.requirements.birthCert.fileName
-                )}
-              </div>
-              
-              {/* Marriage License */}
               <div className="secretary-marriage-requirement-view-item">
                 <div className="secretary-marriage-view-requirement-name">
                   Marriage License (Issued by the civil registry)
                 </div>
-                {renderDocumentStatus(
-                  marriageData.requirements.marriageLicense.submitted, 
-                  marriageData.requirements.marriageLicense.fileName
-                )}
               </div>
               
-              {/* CENOMAR */}
               <div className="secretary-marriage-requirement-view-item">
                 <div className="secretary-marriage-view-requirement-name">
                   Certificate of No Marriage (CENOMAR, issued by PSA)
                 </div>
-                {renderDocumentStatus(
-                  marriageData.requirements.cenomar.submitted, 
-                  marriageData.requirements.cenomar.fileName
-                )}
               </div>
-              // Add this inside the marriage-view-checkbox-list div, after the CENOMAR entry
 
-{/* Publication of Banns */}
-<div className="secretary-marriage-requirement-view-item">
-  <div className="secretary-marriage-view-requirement-name">
-    Publication of Banns (Announcements made in the parish for three consecutive Sundays)
-  </div>
-  {renderDocumentStatus(
-    marriageData.requirements.publicationBanns?.submitted || false, 
-    marriageData.requirements.publicationBanns?.fileName || "PublicationOfBanns.pdf"
-  )}
-</div>
-
-{/* Permit from Proper Parish */}
-<div className="secretary-marriage-requirement-view-item">
-  <div className="secretary-marriage-view-requirement-name">
-    Permit from Proper Parish (If wedding is held outside couple's parish)
-  </div>
-  {renderDocumentStatus(
-    marriageData.requirements.permitFromParish?.submitted || false, 
-    marriageData.requirements.permitFromParish?.fileName || "ParishPermit.pdf"
-  )}
-</div>
-
-{/* Pre-Cana Seminar */}
-<div className="secretary-marriage-requirement-view-item">
-  <div className="secretary-marriage-view-requirement-name">
-    Pre-Cana Seminar (Marriage Preparation Program certificate)
-  </div>
-  {renderDocumentStatus(
-    marriageData.requirements.preCana?.submitted || false, 
-    marriageData.requirements.preCana?.fileName || "PreCanaSeminar.pdf"
-  )}
-</div>
-
-{/* List of Sponsors */}
-<div className="secretary-marriage-requirement-view-item">
-  <div className="secretary-marriage-view-requirement-name">
-    Complete List of Sponsors (Ninong & Ninang)
-  </div>
-  {renderDocumentStatus(
-    marriageData.requirements.sponsorsList?.submitted || false, 
-    marriageData.requirements.sponsorsList?.fileName || "SponsorsList.pdf"
-  )}
-</div>
-
-{/* Wedding Practice */}
-<div className="secretary-marriage-requirement-view-item">
-  <div className="secretary-marriage-view-requirement-name">
-    Practice (1 day before the marriage)
-  </div>
-  {renderDocumentStatus(
-    marriageData.requirements.weddingPractice?.submitted || false, 
-    marriageData.requirements.weddingPractice?.fileName || "WeddingPracticeConfirmation.pdf"
-  )}
-</div>
-
-{/* Canonical Interview */}
-<div className="secretary-marriage-requirement-view-item">
-  <div className="secretary-marriage-view-requirement-name">
-    Canonical Interview/Examination (Required interview with parish priest)
-  </div>
-  {renderDocumentStatus(
-    marriageData.requirements.canonicalInterview?.submitted || false, 
-    marriageData.requirements.canonicalInterview?.fileName || "CanonicalInterview.pdf"
-  )}
-</div>
-            </div>
-
-            <h3 className="secretary-marriage-view-section-header">Requirements for the Couple</h3>
-            <div className="secretary-marriage-info-view-list">
-              <div className="secretary-marriage-info-view-item">
-                <p>Must be a baptized Catholic (at least one of the partners)</p>
+              <div className="secretary-marriage-requirement-view-item">
+                <div className="secretary-marriage-view-requirement-name">
+                  Publication of Banns (Announcements made in the parish for three consecutive Sundays)
+                </div>
               </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must have received the Sacrament of Confirmation</p>
+
+              <div className="secretary-marriage-requirement-view-item">
+                <div className="secretary-marriage-view-requirement-name">
+                  Permit from Proper Parish (If wedding is held outside couple's parish)
+                </div>
               </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must undergo a Pre-Cana Seminar or Marriage Preparation Program</p>
+
+              <div className="secretary-marriage-requirement-view-item">
+                <div className="secretary-marriage-view-requirement-name">
+                  Pre-Cana Seminar (Marriage Preparation Program certificate)
+                </div>
               </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must be of legal age (as required by civil law)</p>
+
+              <div className="secretary-marriage-requirement-view-item">
+                <div className="secretary-marriage-view-requirement-name">
+                  Complete List of Sponsors (Ninong & Ninang)
+                </div>
               </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must provide proof of freedom to marry (e.g., no previous valid marriage in the Church)</p>
+
+              <div className="secretary-marriage-requirement-view-item">
+                <div className="secretary-marriage-view-requirement-name">
+                  Canonical Interview/Examination (Required interview with parish priest)
+                </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <h3 className="secretary-marriage-view-section-header">Parish Requirements</h3>
-            <div className="secretary-marriage-info-view-list">
-              <div className="secretary-marriage-info-view-item">
-                <p>Must schedule an interview with the parish priest</p>
-              </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must submit all required documents at least 3 months before the wedding</p>
-              </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must attend marriage banns (announcements made in the parish for three consecutive Sundays)</p>
-              </div>
-              <div className="secretary-marriage-info-view-item">
-                <p>Must choose sponsors (Ninong & Ninang) who are practicing Catholics</p>
-              </div>
+        {/* Schedule Selection Section */}
+        <div className="secretary-marriage-view-info-card">
+          <h2 className="secretary-marriage-view-sub-title">Schedule Selection</h2>
+          <div className="secretary-marriage-view-row">
+            <div className="secretary-marriage-view-field">
+              <label>Date of Holy Matrimony:</label>
+              <input
+                type="date"
+                className="secretary-view-input"
+                value={appointmentDate}
+                onChange={(e) => handleDateChange(e.target.value)}
+                disabled={status === "Approved"}
+              />
+            </div>
+            <div className="secretary-marriage-view-field">
+              <label>Time of Holy Matrimony:</label>
+              <input
+                type="time"
+                className="secretary-view-input"
+                value={appointmentTime}
+                onChange={(e) => handleTimeChange(e.target.value)}
+                disabled={status === "Approved"}
+              />
+            </div>
+          </div>
+          <div className="secretary-marriage-view-row">
+            <div className="secretary-marriage-view-field">
+              <label>Name of the Priest:</label>
+              <input
+                type="text"
+                className="secretary-view-input"
+                value={selectedPriest}
+                onChange={(e) => handlePriestChange(e.target.value)}
+                placeholder="Enter priest's name"
+                disabled={status === "Approved"}
+              />
             </div>
           </div>
         </div>
 
         {/* Action Buttons Section */}
         <div className="secretary-marriage-action-buttons">
-          <button 
-            className="secretary-marriage-submit-button"
-            onClick={handleSubmit}
-          >
-            Submit
-          </button>
-          <button 
-            className="secretary-marriage-cancel-button"
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
+          {status !== "Approved" && (
+            <button 
+              className="secretary-marriage-submit-button"
+              onClick={handleApprove}
+            >
+              Approve
+            </button>
+          )}
         </div>
       </div>
     </div>

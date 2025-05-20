@@ -1,161 +1,110 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./ClientBlessingView.css";
 
-const ClientBlessingView = ({ blessingData = {} }) => {
-  // Default data for demonstration if none is provided
-  const data = {
-    preferredDate: "2025-05-15",
-    preferredTime: "10:00",
-    priestName: "Fr. John Doe",
-    firstName: "Maria",
-    middleName: "Santos",
-    lastName: "Garcia",
-    gender: "Female",
-    age: "35",
-    dateOfBirth: "1990-03-12",
-    contactNumber: "09123456789",
-    emailAddress: "maria.garcia@example.com",
-    barangay: "barangay",
-    street: "123 Main St.",
-    municipality: "Makati City",
-    province: "Metro Manila",
-    blessingType: "house",
-    location: "456 New Home Street, Makati City",
-    purpose: "New Home Blessing",
-    notes: "Family would like to have the blessing before moving in.",
-    ...blessingData
-  };
+const ClientBlessingView = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { clientID, blessingID, viewOnly, appointmentData } = location.state || {};
+  
+  const [loading, setLoading] = useState(true);
+  const [blessingData, setBlessingData] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Define requirements statuses
-  const requirementsStatus = {
-    valid_id: "Submitted",
-    proof_of_ownership: "Submitted",
-    barangay_clearance: "Not Submitted",
-    business_permit: "Submitted",
-    vehicle_registration: "Not Submitted"
-  };
-
-  // Function to render requirements based on blessing type
-  const renderRequirements = () => {
-    // Create requirements based on blessing type
-    switch(data.blessingType) {
-      case "house":
-        return (
-          <>
-            <h3 className="client-blessing-view-section-header">Documents Needed</h3>
-            <div className="client-blessing-view-requirements-list">
-              {/* Valid ID */}
-              <div className="client-blessing-view-requirement-item">
-                <div className="client-blessing-view-requirement-name">
-                  Valid ID of the Requester
-                </div>
-                <div className={`client-blessing-view-status-badge client-blessing-view-status-${requirementsStatus.valid_id === 'Submitted' ? 'submitted' : 'not-submitted'}`}>
-                  {requirementsStatus.valid_id}
-                </div>
-              </div>
-              
-              {/* Proof of Ownership */}
-              <div className="client-blessing-view-requirement-item">
-                <div className="client-blessing-view-requirement-name">
-                  Proof of Ownership
-                </div>
-                <div className={`client-blessing-view-status-badge client-blessing-view-status-${requirementsStatus.proof_of_ownership === 'Submitted' ? 'submitted' : 'not-submitted'}`}>
-                  {requirementsStatus.proof_of_ownership}
-                </div>
-              </div>
-              
-              {/* Barangay Clearance */}
-              <div className="client-blessing-view-requirement-item">
-                <div className="client-blessing-view-requirement-name">
-                  Barangay Clearance
-                </div>
-                <div className={`client-blessing-view-status-badge client-blessing-view-status-${requirementsStatus.barangay_clearance === 'Submitted' ? 'submitted' : 'not-submitted'}`}>
-                  {requirementsStatus.barangay_clearance}
-                </div>
-              </div>
-            </div>
-
-            <h3 className="client-blessing-view-section-header">House Blessing Requirements</h3>
-            <div className="client-blessing-view-info-list">
-              <div className="client-blessing-view-info-item">
-                <p>The house must be <strong>ready for occupancy</strong></p>
-              </div>
-              <div className="client-blessing-view-info-item">
-                <p>All <strong>family members should be present</strong> if possible</p>
-              </div>
-              <div className="client-blessing-view-info-item">
-                <p>Prepare basic blessing items</p>
-              </div>
-              <div className="client-blessing-view-info-item">
-                <p>Some parishes ask that you <strong>belong to the parish community</strong> or register in the parish</p>
-              </div>
-            </div>
-          </>
-        );
-      
-      case "business":
-        return (
-          <>
-            <h3 className="client-blessing-view-section-header">Documents Needed</h3>
-            <div className="client-blessing-view-requirements-list">
-              {/* Business Permit / DTI Registration */}
-              <div className="client-blessing-view-requirement-item">
-                <div className="client-blessing-view-requirement-name">
-                  Business Permit / DTI Registration
-                </div>
-                <div className={`client-blessing-view-status-badge client-blessing-view-status-${requirementsStatus.business_permit === 'Submitted' ? 'submitted' : 'not-submitted'}`}>
-                  {requirementsStatus.business_permit}
-                </div>
-              </div>
-            </div>
-
-            <h3 className="client-blessing-view-section-header">Business Blessing Requirements</h3>
-            <div className="client-blessing-view-info-list">
-              <div className="client-blessing-view-info-item">
-                <p>Business must have the <strong>necessary permits</strong> (may be checked informally)</p>
-              </div>
-              <div className="client-blessing-view-info-item">
-                <p>Owner or authorized representative must be present</p>
-              </div>
-              <div className="client-blessing-view-info-item">
-                <p>Staff may be included in prayer or ceremony</p>
-              </div>
-            </div>
-          </>
-        );
-      
-      case "car":
-        return (
-          <>
-            <h3 className="client-blessing-view-section-header">Documents Needed</h3>
-            <div className="client-blessing-view-requirements-list">
-              {/* Vehicle OR/CR */}
-              <div className="client-blessing-view-requirement-item">
-                <div className="client-blessing-view-requirement-name">
-                  Vehicle OR/CR (Official Receipt / Certificate of Registration) if required
-                </div>
-                <div className={`client-blessing-view-status-badge client-blessing-view-status-${requirementsStatus.vehicle_registration === 'Submitted' ? 'submitted' : 'not-submitted'}`}>
-                  {requirementsStatus.vehicle_registration}
-                </div>
-              </div>
-            </div>
-
-            <h3 className="client-blessing-view-section-header">Car Blessing Requirements</h3>
-            <div className="client-blessing-view-info-list">
-              <div className="client-blessing-view-info-item">
-                <p>Must bring the <strong>actual vehicle</strong> to the venue or church</p>
-              </div>
-              <div className="client-blessing-view-info-item">
-                <p>The car should be clean and parked properly</p>
-              </div>
-            </div>
-          </>
-        );
-      
-      default:
-        return null;
+  useEffect(() => {
+    if (blessingID) {
+      fetchBlessingDetails();
+    } else {
+      setLoading(false);
     }
+  }, [blessingID]);
+
+  const fetchBlessingDetails = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_blessing_details.php?blessingID=${blessingID}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setBlessingData(data.data);
+      } else {
+        setError(data.message || "Failed to fetch blessing details");
+      }
+    } catch (error) {
+      console.error("Error fetching blessing details:", error);
+      setError("Error fetching blessing details. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="client-blessing-view-container">
+        <div className="client-blessing-view-loading">
+          <p>Loading blessing details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="client-blessing-view-container">
+        <div className="client-blessing-view-error">
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button 
+            className="client-blessing-view-back-button" 
+            onClick={() => navigate('/client-appointment')}
+          >
+            Back to Appointments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If no data is available, use appointment data or default values
+  const data = blessingData ? {
+    preferredDate: blessingData.blessing.preferredDate,
+    preferredTime: blessingData.blessing.preferredTime,
+    firstName: blessingData.blessing.firstName,
+    middleName: blessingData.blessing.middleName,
+    lastName: blessingData.blessing.lastName,
+    contactNumber: blessingData.blessing.contactNumber,
+    emailAddress: blessingData.blessing.emailAddress,
+    placeOfBirth: blessingData.blessing.placeOfBirth,
+    status: blessingData.blessing.status,
+    dateCreated: blessingData.blessing.dateCreated,
+    
+    // Address data
+    street: blessingData.address?.street || "",
+    barangay: blessingData.address?.barangay || "",
+    municipality: blessingData.address?.municipality || "",
+    province: blessingData.address?.province || "",
+    
+    // Blessing type data
+    blessingType: blessingData.type?.blessing_type || "house",
+    purpose: blessingData.type?.purpose || "",
+    notes: blessingData.type?.note || ""
+  } : appointmentData || {
+    preferredDate: "Not specified",
+    preferredTime: "Not specified",
+    firstName: "Not specified",
+    middleName: "",
+    lastName: "Not specified",
+    contactNumber: "Not specified",
+    emailAddress: "Not specified",
+    placeOfBirth: "Not specified",
+    blessingType: "house",
+    street: "Not specified",
+    barangay: "Not specified",
+    municipality: "Not specified",
+    province: "Not specified",
+    purpose: "Not specified",
+    notes: ""
   };
 
   return (
@@ -163,31 +112,33 @@ const ClientBlessingView = ({ blessingData = {} }) => {
       {/* Header */}
       <div className="client-blessing-view-header">
         <div className="client-blessing-view-left-section">
-          <button className="client-blessing-view-back-button" onClick={() => window.history.back()}>
+          <button className="client-blessing-view-back-button" onClick={() => navigate('/client-appointment')}>
             <AiOutlineArrowLeft className="client-blessing-view-back-icon" /> Back
           </button>
         </div>
       </div>
       <h1 className="client-blessing-view-title">Blessing Ceremony Application Details</h1>
       
+      {/* Status Badge */}
+      <div className="client-blessing-view-status-container">
+        <span className={`client-blessing-view-application-status client-blessing-view-status-${data.status?.toLowerCase() || 'pending'}`}>
+          {data.status || 'Pending'}
+        </span>
+      </div>
+      
       {/* Blessing Data Section */}
       <div className="client-blessing-view-data">
         <div className="client-blessing-view-info-card">
           <div className="client-blessing-view-row-date">
             <div className="client-blessing-view-field-date">
-              <label>Preferred Date of Blessing Ceremony:</label>
+              <label>Date of Appointment:</label>
               <div className="client-blessing-view-value">{data.preferredDate}</div>
             </div>
             
             <div className="client-blessing-view-field-time">
-              <label>Preferred Time of Blessing Ceremony:</label>
+              <label>Time of Appointment:</label>
               <div className="client-blessing-view-value">{data.preferredTime}</div>
             </div>
-          </div>
-
-          <div className="client-blessing-view-field-date">
-            <label>Name of the Priest:</label>
-            <div className="client-blessing-view-value">{data.priestName}</div>
           </div>
         </div>
         
@@ -212,21 +163,6 @@ const ClientBlessingView = ({ blessingData = {} }) => {
 
             <div className="client-blessing-view-row">
               <div className="client-blessing-view-field">
-                <label>Gender</label>
-                <div className="client-blessing-view-value">{data.gender}</div>
-              </div>
-              <div className="client-blessing-view-field">
-                <label>Age</label>
-                <div className="client-blessing-view-value">{data.age}</div>
-              </div>
-              <div className="client-blessing-view-field">
-                <label>Date of Birth</label>
-                <div className="client-blessing-view-value">{data.dateOfBirth}</div>
-              </div>
-            </div>
-
-            <div className="client-blessing-view-row">
-              <div className="client-blessing-view-field">
                 <label>Contact Number</label>
                 <div className="client-blessing-view-value">{data.contactNumber}</div>
               </div>
@@ -234,24 +170,9 @@ const ClientBlessingView = ({ blessingData = {} }) => {
                 <label>Email Address</label>
                 <div className="client-blessing-view-value">{data.emailAddress}</div>
               </div>
-            </div>
-            
-            <div className="client-blessing-view-row client-blessing-view-address-row">
-            <div className="client-blessing-view-field">
-                <label>Barangay</label>
-                <div className="client-blessing-view-value">{data.barangay}</div>
-              </div>
               <div className="client-blessing-view-field">
-                <label>Street</label>
-                <div className="client-blessing-view-value">{data.street}</div>
-              </div>
-              <div className="client-blessing-view-field">
-                <label>Municipality</label>
-                <div className="client-blessing-view-value">{data.municipality}</div>
-              </div>
-              <div className="client-blessing-view-field">
-                <label>Province</label>
-                <div className="client-blessing-view-value">{data.province}</div>
+                <label>Place of Birth</label>
+                <div className="client-blessing-view-value">{data.placeOfBirth}</div>
               </div>
             </div>
           </div>
@@ -259,6 +180,26 @@ const ClientBlessingView = ({ blessingData = {} }) => {
           <h2 className="client-blessing-view-sub-title">Blessing Details</h2>
           
           <div className="client-blessing-view-info-card">
+            <label className="sub-mini-cc">Location</label>
+            <div className="client-blessing-view-row">
+            <div className="client-blessing-view-field">
+                <label>Street</label>
+                <div className="client-blessing-view-value-add">{data.street}</div>
+              </div>
+              <div className="client-blessing-view-field">
+                <label>Barangay</label>
+                <div className="client-blessing-view-value-add">{data.barangay}</div>
+              </div>
+              <div className="client-blessing-view-field">
+                <label>Municipality</label>
+                <div className="client-blessing-view-value-add">{data.municipality}</div>
+              </div>
+              <div className="client-blessing-view-field">
+                <label>Province</label>
+                <div className="client-blessing-view-value-add">{data.province}</div>
+              </div>
+            </div>
+
             <div className="client-blessing-view-row">
               <div className="client-blessing-view-field">
                 <label>Blessing Type</label>
@@ -266,13 +207,6 @@ const ClientBlessingView = ({ blessingData = {} }) => {
                   {data.blessingType.charAt(0).toUpperCase() + data.blessingType.slice(1)} Blessing
                 </div>
               </div>
-              <div className="client-blessing-view-field">
-                <label>Location</label>
-                <div className="client-blessing-view-value">{data.location}</div>
-              </div>
-            </div>
-
-            <div className="client-blessing-view-row">
               <div className="client-blessing-view-field">
                 <label>Purpose</label>
                 <div className="client-blessing-view-value">{data.purpose}</div>
@@ -285,14 +219,6 @@ const ClientBlessingView = ({ blessingData = {} }) => {
                 <div className="client-blessing-view-value">{data.notes || "No additional notes provided."}</div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* Requirements section */}
-        <div className="client-blessing-view-requirements-container">
-          <h2 className="client-blessing-view-requirements-title">Requirements</h2>
-          <div className="client-blessing-view-requirements-box">
-            {renderRequirements()}
           </div>
         </div>
       </div>

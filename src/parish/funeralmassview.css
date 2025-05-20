@@ -31,65 +31,32 @@
   
   /* Download Certificate Button */
   .funeral-download-certificate-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #573901;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 15px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-family: Roboto;
-  }
-  
-  .funeral-download-certificate-btn:hover {
-    background-color: #422b01;
+    display: none;
   }
   
   /* Status Display */
   .funeral-view-status-display {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: none;
   }
   
   .funeral-view-status-label {
-    font-weight: 600;
-    color: #573901;
-    font-family: Roboto;
+    display: none;
   }
   
   .funeral-view-status-value {
-    padding: 6px 10px;
-    border: 1px solid #b36b09;
-    border-radius: 4px;
-    font-family: Roboto;
-    font-size: 14px;
-    background-color: #ffff;
-    color: #333;
-    font-weight: 700;
+    display: none;
   }
   
   .funeral-status-pending {
-    color: #856404;
-    background-color: #fff3cd;
-    border-color: #ffeeba;
+    display: none;
   }
   
   .funeral-status-approved {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+    display: none;
   }
   
   .funeral-status-completed {
-    color: #0c5460;
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
+    display: none;
   }
   
   .funeral-view-title {
@@ -294,15 +261,11 @@
   }
   
   .funeral-view-submitted {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    display: none;
   }
   
   .funeral-view-not-submitted {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    display: none;
   }
   
   /* Info lists */
@@ -331,433 +294,203 @@
   
   /* Document status container */
   .funeral-document-status-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: none;
   }
   
   /* View document button */
   .funeral-view-document-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .funeral-view-document-btn:hover {
-    background-color: #5a6268;
+    display: none;
   }
   
   /* Document viewer modal */
   .funeral-document-viewer-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    display: none;
   }
   
   .funeral-document-viewer-container {
-    background-color: white;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 800px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .funeral-certificate-modal-container {
-    background-color: white;
-    border-radius: 8px;
-    width: 60%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .funeral-certificate-modal-container::-webkit-scrollbar {
-    width: 5px;
-    background-color: #ffffff;
-  }
-  
-  .funeral-certificate-modal-container::-webkit-scrollbar-thumb {
-    background-color: #dbdbdb;
-    border-radius: 5px;
-  }
-  
-  .funeral-certificate-modal-container::-webkit-scrollbar-track {
-    background-color: #ffffff;
+    display: none;
   }
   
   .funeral-document-viewer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background-color: #573901;
-    color: white;
-  }
-  
-  .funeral-document-viewer-header h3 {
-    margin: 0;
-    font-family: Montserrat;
-    font-size: 18px;
-  }
-  
-  .funeral-document-close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
+    display: none;
   }
   
   .funeral-document-viewer-content {
-    padding: 20px;
-    overflow-y: auto;
-    max-height: calc(90vh - 60px);
+    display: none;
   }
   
   .funeral-document-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 400px;
-    text-align: center;
-    color: #6c757d;
+    display: none;
+  }
+  
+  .funeral-document-close-btn {
+    display: none;
   }
   
   /* Certificate modal styles */
+  .funeral-certificate-modal-container {
+    display: none;
+  }
+  
   .funeral-certificate-modal-content {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: none;
+  }
+  
+  .funeral-certificate-preview {
+    display: none;
   }
   
   .funeral-certificate-modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 45px;
-    margin-top: 1px;
-    margin-bottom: 10px;
+    display: none;
   }
   
   .funeral-certificate-download-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #b3701f;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 15px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-family: Montserrat;
-    width: 120px;
-  }
-  
-  .funeral-certificate-download-btn:hover {
-    background-color: #8a5618;
+    display: none;
   }
   
   .funeral-certificate-cancel-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 15px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-family: Montserrat;
-    width: 120px;
-  }
-  
-  .funeral-certificate-cancel-btn:hover {
-    background-color: #5a6268;
-  }
-  
-  /* Confirmation Certificate Styling */
-  .funeral-certificate-preview {
-    width: 100%;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    padding: 30px;
-    margin: 20px 0;
-    position: relative;
-    font-family: "Times New Roman", serif;
-    color: #000;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    display: none;
   }
   
   /* Certificate watermark effect */
   .funeral-certificate-preview::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('/parish-logo.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 40%;
-    opacity: 0.05;
-    pointer-events: none;
-    z-index: 1;
+    display: none;
   }
   
   /* Certificate header section */
   .funeral-certificate-header {
-    text-align: center;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 2;
+    display: none;
   }
   
   .funeral-certificate-logos {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    display: none;
   }
   
   .funeral-parish-logo-left {
-    width: 60px;
-    height: 60px;
-    margin-right: 10px;
-    border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #ccc; /* optional border */
+    display: none;
   }
   
   .funeral-parish-logo-left img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    display: none;
   }
   
   .funeral-parish-logo-right {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: none;
   }
   
   .funeral-parish-logo-right img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    display: none;
   }
   
   .diocese-title {
-    font-size: 16px;
-    color: #720808;
-    font-weight: bold;
-    margin-bottom: 5px;
+    display: none;
   }
   
   .parish-title {
-    text-align: center;
-    flex-grow: 1;
+    display: none;
   }
   
   .parish-name {
-    font-size: 20px;
-    color: #720808;
-    font-weight: bold;
-    margin-bottom: 5px;
+    display: none;
   }
   
   .parish-address {
-    font-size: 14px;
-    font-style: italic;
+    display: none;
   }
   
   .certificate-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 15px 0 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    display: none;
   }
   
   .certificate-subtitle {
-    font-size: 9px;
-    line-height: 1.5;
-    margin-bottom: 10px;
-    font-style: italic;
+    display: none;
   }
   
   /* Certificate details */
   .funeral-certificate-details {
-    padding: 10px 20px;
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: none;
   }
   
   .cert-field {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 10px;
+    display: none;
   }
   
   .cert-value {
-    font-size: 16px;
-    border-bottom: 1px dotted #000;
-    min-width: 100px;
-    text-align: center;
-    padding: 0 10px;
-    margin: 0 5px;
+    display: none;
   }
   
   .cert-label {
-    font-size: 12px;
-    color: #666;
-    margin-top: 2px;
+    display: none;
   }
   
   .cert-prefix {
-    font-size: 14px;
-    margin: 0 5px;
+    display: none;
   }
   
   /* Special field styling */
   .name-field {
-    margin-bottom: 20px;
+    display: none;
   }
   
   .name-field .cert-value {
-    font-size: 18px;
-    font-weight: bold;
-    min-width: 300px;
+    display: none;
   }
   
   .residence-field, .baptism-field {
-    margin-bottom: 15px;
+    display: none;
   }
   
   .residence-field .cert-value, .baptism-field .cert-value {
-    min-width: 300px;
+    display: none;
   }
   
   .funeral-date-field, .rites-field, .minister-field, .burial-field, .register-field, .requester-field {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 12px;
+    display: none;
   }
   
   .date-issued-field {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    margin-top: 20px;
-    margin-bottom: 25px;
-    justify-content: flex-start;
+    display: none;
   }
   
   .signature-field {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 30px;
+    display: none;
   }
   
   .signature-line {
-    font-weight: bold;
-    margin-top: 30px;
-    border-top: 1px solid #000;
-    padding-top: 5px;
-    min-width: 250px;
-    text-align: center;
+    display: none;
   }
   
   .parish-seal {
-    font-style: italic;
-    color: #999;
-    border: 1px dashed #999;
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    font-size: 12px;
+    display: none;
   }
   
   /* Scrollbar styling */
   .funeral-view-container::-webkit-scrollbar {
-    width: 5px;
-    background-color: #ffffff;
+    display: none;
   }
   
   .funeral-view-container::-webkit-scrollbar-thumb {
-    background-color: #dbdbdb;
-    border-radius: 5px;
+    display: none;
   }
   
   .funeral-view-container::-webkit-scrollbar-track {
-    background-color: #ffffff;
+    display: none;
   }
   
   /* Header styling */
   .funeral-view-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 40px;
-    margin-top: 20px;
+    display: none;
   }
   
   .funeral-view-left-section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    display: none;
   }
   
   .funeral-view-right-section {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    display: none;
   }
   
   /* Address specific row styling */
   .funeral-address-view-row {
-    flex-wrap: wrap;
+    display: none;
   }

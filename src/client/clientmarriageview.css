@@ -132,6 +132,26 @@
     min-width: 200px;
     font-family: roboto;
   }
+    .mini-view {
+    font-size: 16px;
+    font-weight: 600;
+    color: #573901;
+    font-family: Roboto;
+    text-align: left;
+    margin-bottom: 15px;
+    margin-top: 60px;
+  }
+  
+    .client-marriage-view-value-add {
+    padding: 8px;
+    background-color: #f9f9f9;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 16px;
+    min-width: 100px;
+    font-family: roboto;
+  }
   
   .client-marriage-view-bypart {
     margin-top: 40px;
@@ -329,3 +349,128 @@
     font-family: Roboto;
     font-weight: 400;
   }
+
+.marriage-view-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.marriage-view-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.marriage-details,
+.groom-details,
+.groom-address,
+.bride-details,
+.bride-address,
+.witnesses,
+.requirements {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.marriage-view-container h2 {
+  color: #444;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.detail-row span:first-child {
+  font-weight: bold;
+  width: 200px;
+  color: #666;
+}
+
+.detail-row span:last-child {
+  flex: 1;
+  color: #333;
+}
+
+.witness-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.witness-section h3 {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.requirement-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border-left: 4px solid #4CAF50;
+}
+
+.requirement-item span:first-child {
+  font-weight: 500;
+  color: #666;
+}
+
+.requirement-item span:last-child {
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.button-container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.button-container button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.button-container button:hover {
+  background-color: #45a049;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 4px;
+  margin: 20px 0;
+}

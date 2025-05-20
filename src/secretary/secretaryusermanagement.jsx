@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faPlus, faTimes, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faPlus, faTimes, faUpload, faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import "./secretaryusermanagement.css";
+
+const API_URL = "http://parishofdivinemercy.com/backend";
 
 const SecretaryUserManagement = () => {
   const [showModal, setShowModal] = useState(false);
@@ -10,40 +12,83 @@ const SecretaryUserManagement = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [showCredentials, setShowCredentials] = useState(true);
   const fileInputRef = useRef(null);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [positionFilter, setPositionFilter] = useState("");
+  
+  // States for handling messages in the modal
+  const [formError, setFormError] = useState(null);
+  const [formSuccess, setFormSuccess] = useState(null);
+  const [formProcessing, setFormProcessing] = useState(false);
 
-  // Sample user data - in a real app, this would come from an API/database
-  const [users, setUsers] = useState([
-    {
-      id: 101,
-      firstName: "John",
-      middleName: "",
-      lastName: "Smith",
-      profile: null, // Normally this would be an image URL
-      gender: "male",
-      dateOfBirth: "1990-05-15",
-      contactNumber: "+63 912 345 6789",
-      nationality: "Filipino",
-      religion: "Catholic",
-      email: "john.smith@example.com",
-      street: "123 Main St",
-      municipality: "Makati",
-      province: "Metro Manila",
-      position: "Youth Ministry", // Changed from Organizer to Youth Ministry
-      membershipStatus: "active",
-      joinedDate: "2024-01-15",
-      username: "johnsmith",
-      password: "password123" // In a real app, this would be hashed
+  // Helper function to ensure base64 images have proper format
+  const ensureBase64Format = (imageData) => {
+    if (!imageData) return null;
+    
+    // If the image already has the data:image prefix, return as is
+    if (imageData.startsWith('data:image')) {
+      return imageData;
     }
-  ]);
+    
+    // Otherwise, add the prefix
+    return `data:image/jpeg;base64,${imageData}`;
+  };
+
+  // Fetch users from the API
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      let url = `${API_URL}/user_management.php`;
+      
+      if (positionFilter) {
+        url += `?position=${encodeURIComponent(positionFilter)}`;
+      }
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Process all user profile images to ensure they have the correct format
+        const processedUsers = data.users.map(user => ({
+          ...user,
+          profile: user.profile ? ensureBase64Format(user.profile) : null
+        }));
+        setUsers(processedUsers);
+      } else {
+        throw new Error(data.message || "Failed to fetch users");
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load users when component mounts or when position filter changes
+  useEffect(() => {
+    fetchUsers();
+  }, [positionFilter]);
 
   const toggleModal = (user = null) => {
+    // Reset all form states when opening/closing modal
+    setFormError(null);
+    setFormSuccess(null);
+    setFormProcessing(false);
+    
     if (user) {
       setIsEditing(true);
       setCurrentUser(user);
-      // Always show credentials regardless of position
       setShowCredentials(true);
       if (user.profile) {
-        setPreviewImage(user.profile);
+        setPreviewImage(ensureBase64Format(user.profile));
       } else {
         setPreviewImage(null);
       }
@@ -51,7 +96,7 @@ const SecretaryUserManagement = () => {
       setIsEditing(false);
       setCurrentUser(null);
       setPreviewImage(null);
-      setShowCredentials(true); // Always show credentials for new users
+      setShowCredentials(true);
     }
     setShowModal(!showModal);
   };
@@ -59,6 +104,12 @@ const SecretaryUserManagement = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setFormError("Image size should not exceed 5MB");
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -76,16 +127,59 @@ const SecretaryUserManagement = () => {
     setShowCredentials(true);
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = (formData) => {
+    // Validate password and confirm password match
+    const password = formData.get('password');
+    const confirmPassword = formData.get('confirmPassword');
+    
+    if (!isEditing || (password && password.length > 0)) {
+      if (password !== confirmPassword) {
+        return "Passwords do not match.";
+      }
+      
+      if (password.length < 6) {
+        return "Password should be at least 6 characters long.";
+      }
+    }
+    
+    // Email validation
+    const email = formData.get('email');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address.";
+    }
+    
+    // Contact number validation
+    const contactNumber = formData.get('contactNumber');
+    const contactRegex = /^[0-9+\-\s()]+$/;
+    if (!contactRegex.test(contactNumber)) {
+      return "Please enter a valid contact number.";
+    }
+    
+    return null; // No errors
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Reset previous messages
+    setFormError(null);
+    setFormSuccess(null);
+    setFormProcessing(true);
+    
     const formData = new FormData(e.target);
     
-    const position = formData.get('position');
+    // Validate form
+    const validationError = validateForm(formData);
+    if (validationError) {
+      setFormError(validationError);
+      setFormProcessing(false);
+      return;
+    }
     
     const userData = {
-      id: isEditing ? currentUser.id : Date.now(), // Generate a new ID for new users
       firstName: formData.get('firstName'),
-      middleName: formData.get('middleName'),
+      middleName: formData.get('middleName') || "",
       lastName: formData.get('lastName'),
       profile: previewImage,
       gender: formData.get('gender'),
@@ -95,29 +189,117 @@ const SecretaryUserManagement = () => {
       religion: formData.get('religion'),
       email: formData.get('email'),
       street: formData.get('street'),
+      barangay: formData.get('barangay'),
       municipality: formData.get('municipality'),
       province: formData.get('province'),
-      position: position,
+      position: formData.get('position'),
       membershipStatus: formData.get('membershipStatus'),
       joinedDate: formData.get('joinedDate'),
-      username: formData.get('username'),
       password: formData.get('password')
     };
 
-    if (isEditing) {
-      // Update existing user
-      const updatedUsers = users.map(user => 
-        user.id === currentUser.id ? userData : user
-      );
-      setUsers(updatedUsers);
-    } else {
-      // Add new user
-      setUsers([...users, userData]);
-    }
+    try {
+      let response;
+      
+      if (isEditing) {
+        // Update existing user
+        userData.userID = currentUser.userID;
+        
+        // Don't send password if it's empty (no change)
+        if (!userData.password) {
+          delete userData.password;
+        }
+        
+        response = await fetch(`${API_URL}/user_management.php`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData)
+        });
+      } else {
+        // Add new user
+        response = await fetch(`${API_URL}/user_management.php`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData)
+        });
+      }
 
-    // Close modal and reset state
-    toggleModal();
+      const data = await response.json();
+      
+      if (data.success) {
+        // Refresh the user list
+        fetchUsers();
+        
+        // Show success message
+        setFormSuccess(isEditing ? "User updated successfully!" : "User added successfully!");
+        
+        // After 2 seconds, close the modal
+        setTimeout(() => {
+          toggleModal();
+        }, 2000);
+      } else {
+        // Handle specific errors
+        if (data.error === "email_exists") {
+          setFormError("An account with this email already exists.");
+        } else if (data.error === "invalid_email") {
+          setFormError("Invalid email format.");
+        } else if (data.error === "invalid_contact") {
+          setFormError("Invalid contact number format.");
+        } else if (data.error === "invalid_password") {
+          setFormError("Password must be at least 6 characters long.");
+        } else if (data.error === "invalid_image") {
+          setFormError("Invalid image file. Please try another image.");
+        } else {
+          setFormError(data.message || "Operation failed. Please try again.");
+        }
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setFormError("An error occurred. Please try again.");
+    } finally {
+      setFormProcessing(false);
+    }
   };
+
+  const handleDeleteUser = async (userID) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        const response = await fetch(`${API_URL}/user_management.php?userID=${userID}`, {
+          method: 'DELETE',
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          fetchUsers();
+          alert("User deleted successfully");
+        } else {
+          alert(data.message || "Delete operation failed");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("An error occurred. Please try again.");
+      }
+    }
+  };
+
+  const handlePositionFilterChange = (e) => {
+    setPositionFilter(e.target.value);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Filter users based on search term
+  const filteredUsers = users.filter(user => {
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  });
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -133,16 +315,25 @@ const SecretaryUserManagement = () => {
       <h1 className="title-sum">USER MANAGEMENT</h1>
       <div className="user-actions-sum">
         <div className="search-bar-sum">
-          <input type="text" placeholder="Search" />
+          <input 
+            type="text" 
+            placeholder="Search" 
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
           <FontAwesomeIcon icon={faSearch} className="search-icon-sum" />
         </div>
 
         <div className="filter-add-container-sum">
-          <select className="filter-select-sum">
-            <option value="">Position</option>
-            <option value="youth-ministry">Youth Ministry</option>
-            <option value="music-ministry">Music Ministry</option>
-            <option value="outreach-ministry">Outreach Ministry</option>
+          <select 
+            className="filter-select-sum"
+            value={positionFilter}
+            onChange={handlePositionFilterChange}
+          >
+            <option value="">All Positions</option>
+            <option value="Youth Ministry">Youth Ministry</option>
+            <option value="Music Ministry">Music Ministry</option>
+            <option value="Outreach Ministry">Outreach Ministry</option>
           </select>
 
           <button className="add-btn-sum" onClick={() => toggleModal()}>
@@ -151,42 +342,56 @@ const SecretaryUserManagement = () => {
         </div>
       </div>
 
-      <table className="user-table-sum">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Profile</th>
-            <th>Name</th>
-            <th>Contact Number</th>
-            <th>Organizer</th>
-            <th>Joined Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>
-                <div className="profile-placeholder-sum">
-                  {user.profile ? (
-                    <img src={user.profile} alt="Profile" />
-                  ) : (
-                    <span>{user.firstName.charAt(0)}</span>
-                  )}
-                </div>
-              </td>
-              <td>{`${user.firstName} ${user.lastName}`}</td>
-              <td>{user.contactNumber}</td>
-              <td>{user.position}</td>
-              <td>{formatDate(user.joinedDate)}</td>
-              <td>
-                <button className="sum-details" onClick={() => toggleModal(user)}>Edit</button>
-              </td>
+      {loading ? (
+        <p>Loading users...</p>
+      ) : error ? (
+        <p>Error: {error}</p>
+      ) : (
+        <table className="user-table-sum">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Profile</th>
+              <th>Name</th>
+              <th>Contact Number</th>
+              <th>Organizer</th>
+              <th>Joined Date</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user, index) => (
+              <tr key={user.userID}>
+                <td>{index + 1}</td>
+                <td>
+                  <div className="profile-placeholder-sum">
+                    {user.profile ? (
+                      <img 
+                        src={ensureBase64Format(user.profile)} 
+                        alt="Profile" 
+                      />
+                    ) : (
+                      <span>{user.firstName.charAt(0)}</span>
+                    )}
+                  </div>
+                </td>
+                <td>{`${user.firstName} ${user.lastName}`}</td>
+                <td>{user.contactNumber}</td>
+                <td>{user.position}</td>
+                <td>{formatDate(user.joinedDate)}</td>
+                <td>
+                  <button className="sum-details" onClick={() => toggleModal(user)}>Edit</button>
+                </td>
+              </tr>
+            ))}
+            {filteredUsers.length === 0 && (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>No users found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
 
       {/* User Registration/Edit Modal */}
       {showModal && (
@@ -201,6 +406,22 @@ const SecretaryUserManagement = () => {
             <div>
               <hr className="custom-hr-sum"/>
             </div>
+            
+            {/* Form messages */}
+            {formError && (
+              <div className="form-message-sum error-message-sum">
+                <FontAwesomeIcon icon={faExclamationCircle} />
+                <p>{formError}</p>
+              </div>
+            )}
+            
+            {formSuccess && (
+              <div className="form-message-sum success-message-sum">
+                <FontAwesomeIcon icon={faCheckCircle} />
+                <p>{formSuccess}</p>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="user-form-sum">
               <div className="profile-upload-sum">
                 <div 
@@ -319,13 +540,13 @@ const SecretaryUserManagement = () => {
               </div>
 
               <div className="form-row-sum">
-              <div className="form-group-sum">
+                <div className="form-group-sum">
                   <label>Barangay</label>
                   <input 
                     type="text" 
-                    name="street" 
+                    name="barangay" 
                     required 
-                    defaultValue={currentUser?.street || ''}
+                    defaultValue={currentUser?.barangay || ''}
                   />
                 </div>
                 <div className="form-group-sum">
@@ -399,21 +620,13 @@ const SecretaryUserManagement = () => {
               {/* Always show credentials section regardless of position */}
               <div className="form-row-sum">
                 <div className="form-group-sum">
-                  <label>Username</label>
-                  <input 
-                    type="text" 
-                    name="username" 
-                    required
-                    defaultValue={currentUser?.username || ''}
-                  />
-                </div>
-                <div className="form-group-sum">
                   <label>Password</label>
                   <input 
                     type="password" 
                     name="password" 
-                    required
-                    defaultValue={currentUser?.password || ''}
+                    required={!isEditing} // Required for new users, optional for editing
+                    defaultValue={''} // Never show existing password
+                    placeholder={isEditing ? "Leave blank to keep current" : ""}
                   />
                 </div>
                 <div className="form-group-sum">
@@ -421,17 +634,27 @@ const SecretaryUserManagement = () => {
                   <input 
                     type="password" 
                     name="confirmPassword" 
-                    required
-                    defaultValue={currentUser?.password || ''}
+                    required={!isEditing} // Required for new users, optional for editing
+                    defaultValue={''}
+                    placeholder={isEditing ? "Leave blank to keep current" : ""}
                   />
                 </div>
               </div>
 
               <div className="form-actions-sum">
-                <button type="submit" className="submit-btn-sum">
-                  {isEditing ? 'Update' : 'Save'}
+                <button 
+                  type="submit" 
+                  className="submit-btn-sum"
+                  disabled={formProcessing}
+                >
+                  {formProcessing ? 'Processing...' : (isEditing ? 'Update' : 'Save')}
                 </button>
-                <button type="button" className="cancel-btn-sum" onClick={() => toggleModal()}>
+                <button 
+                  type="button" 
+                  className="cancel-btn-sum" 
+                  onClick={() => toggleModal()}
+                  disabled={formProcessing}
+                >
                   Cancel
                 </button>
               </div>

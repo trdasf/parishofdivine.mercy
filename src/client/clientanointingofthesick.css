@@ -1,0 +1,707 @@
+/* Main container styling */
+.aos-container {
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 20px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.aos-container::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.aos-container::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.aos-container::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+/* Header styling */
+.aos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.aos-left-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.aos-back-button {
+  background-color: transparent;
+  color: #710808;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-family: Roboto;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.aos-back-icon {
+  font-size: 22px;
+  margin-right: 5px;
+  font-weight: 700;
+}
+
+.aos-back-button:hover {
+  color: #5a0606;
+}
+
+.aos-title {
+  font-size: 35px;
+  font-weight: 800;
+  color: #573901;
+  font-family: Montserrat;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Anointing data section */
+.aos-data h2 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #b3701f;
+  font-family: Roboto;
+  letter-spacing: 1px;
+}
+
+.aos-row-date {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+/* Label & Input in a row */
+.aos-field-date,
+.aos-field-time {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Labels Styling */
+.aos-field-date label,
+.aos-field-time label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  min-width: 120px;
+  text-align: left;
+  margin-top: 22px;
+  font-family: Roboto;
+}
+
+/* Input Styling */
+.aos-field-date input,
+.aos-field-time input,
+.aos-field-date select,
+.aos-field-time select {
+  padding: 8px;
+  background-color: #ffffff;
+  color: #000;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  outline: none;
+  font-size: 16px;
+  width: 200px;
+}
+
+/* Name of the Priest input styling */
+.aos-notp {
+  width: 250px;
+  padding: 8px;
+  border: none;
+  border-bottom: 2px solid #b3701f;
+  outline: none;
+  font-size: 16px;
+}
+
+.aos-section {
+  margin-top: 40px;
+}
+
+.aos-sub-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  text-align: left;
+  margin-bottom: 15px;
+  margin-top: 40px;
+}
+
+/* Row styling */
+.aos-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.aos-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.aos-field-wide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.aos-field-wide label{
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+
+.aos-field-wide textarea {
+  width: 100%;
+  padding: 8px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+  font-family: Roboto, sans-serif;
+  color: #000;
+}
+
+.aos-field-ga {
+  display: flex;
+  flex-direction: column;
+}
+
+.aos-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+.aos-checkbox-container label{
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+
+.aos-checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    appearance: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+ .aos-checkbox-container input[type="checkbox"]:checked {
+    background-color: #b3701f;
+    border-color: #d19a15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .aos-checkbox-container input[type="checkbox"]:checked::after {
+    content: "✓";
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+.aos-field-ga label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+.aos-field-ga input, .aos-field-ga select {
+  width: 105px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.aos-field label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: roboto;
+}
+
+.aos-field input, .aos-field select, .aos-field textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.date-input {
+  position: relative;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  color: #333;
+  appearance: none; /* hide default styles */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+  height: 10px;
+  width: 10px;
+}
+
+.aos-field-pob {
+  display: flex;
+  flex-direction: column;
+}
+
+.aos-field-pob label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+.aos-field-pob input {
+  width: 270px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+/* Address row and dropdown styling */
+.aos-address-row {
+  margin-top: 20px;
+}
+
+/* Additional CSS for location dropdowns */
+.aos-location-dropdown-container {
+  position: relative;
+}
+
+.aos-location-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aos-location-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: Roboto;
+  font-size: 14px;
+  color: #000;
+  border-bottom: 1px solid #eee;
+}
+
+.aos-location-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.aos-location-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+/* Requirements container styling */
+.aos-requirements-container {
+  width: 100%;
+  margin: 20px auto;
+  font-family: "Roboto", sans-serif;
+}
+
+.aos-requirements-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #b36b09;
+  margin-bottom: 10px;
+  font-family: Montserrat;
+}
+
+.aos-requirements-box {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.aos-section-header {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-family: Montserrat;
+  margin-left: 20px;
+}
+
+.aos-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 60px;
+  margin-bottom: 30px;
+}
+
+.aos-checkbox-list label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #000;
+  font-family: Roboto;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.aos-checkbox-list input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-right: 10px;
+}
+
+.aos-checkbox-list input[type="checkbox"]:checked {
+  background-color: #b3701f;
+  border-color: #d19a15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aos-checkbox-list input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Requirement item with upload buttons */
+.aos-requirement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.aos-upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.aos-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aos-upload-button {
+  background-color: #b3701f;
+  color: white;
+  border: 1px solid #b3701f;
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-family: Roboto, sans-serif;
+  font-size: 14px;
+}
+
+.aos-upload-button:hover {
+  background-color: #d19a15;
+  border-color: #d19a15;
+}
+
+.aos-status-dropdown {
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.aos-status-not-submitted {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.aos-status-submitted {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.aos-file-preview {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #666;
+  padding-left: 24px;
+  width: 100%;
+}
+
+.aos-info-list {
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #710808; /* Styling line */
+}
+
+.aos-info-item {
+  background-color: #f9f9f9;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.aos-info-item p {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+  font-family: Roboto;
+  font-weight: 400;
+}
+
+/* Button styling */
+.aos-button-container {
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+  margin-top: 50px;
+  margin-bottom: 70px;
+}
+
+.aos-submit-btn, .aos-cancel-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: "Roboto", sans-serif;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 120px;
+  text-align: center;
+}
+
+.aos-submit-btn {
+  background-color: #b3701f;
+  color: white;
+}
+
+.aos-submit-btn:hover {
+  background-color: #d19a15;
+}
+
+.aos-cancel-btn {
+  background-color: #a32835;
+  color: white;
+}
+
+.aos-cancel-btn:hover {
+  background-color: #c82333;
+}
+
+/* Modal styling */
+.aos-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.aos-modal {
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+}
+
+.aos-modal h2 {
+  margin-top: 0;
+  color: #573901;
+  font-family: Montserrat;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.aos-modal p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 20px;
+  font-family: Roboto;
+  color: #000;
+}
+
+.aos-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.aos-yes-btn {
+  background-color: #b3701f;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  width: 120px;
+}
+
+.aos-yes-btn:hover {
+  background-color: #d19a15;
+}
+
+.aos-modal-no-btn {
+  background-color: #a32835;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  width: 120px;
+}
+
+.aos-modal-no-btn:hover {
+  background-color: #c82333;
+}
+
+/* Custom hr styling */
+.custom-hr-aos {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, #710808, #ffcccc);
+  width: 100%;
+}
+
+.mini-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #573901;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: block;
+  font-family: Montserrat, sans-serif;
+}
+
+.client-anointing-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  height: 60px;
+  width: 100%;
+}
+
+.client-anointing-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #b3701f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Uploading state styles */
+.aos-status-uploading {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #6c757d;
+  animation: pulse 1.5s infinite;
+}
+
+.aos-upload-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

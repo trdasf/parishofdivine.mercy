@@ -165,6 +165,16 @@
     margin-bottom: 15px;
     margin-top: 40px;
   }
+  .client-sub-title-pob {
+    font-size: 14px;
+    font-weight: 900;
+    color: #573901;
+    font-family: Roboto;
+    letter-spacing: 1px;
+    text-align: left;
+    margin-bottom: 5px;
+    margin-top: 5px;
+  }
   
   .client-baptismal-row-pms {
     display: flex;
@@ -301,7 +311,7 @@
     font-family: Roboto, sans-serif;
   }
   
-  .client-baptismal-field-ga input {
+  .client-baptismal-field-ga input, .client-baptismal-field-ga select {
     width: 105px;
     padding: 8px;
     border: 1px solid #ccc;
@@ -325,6 +335,25 @@
     background-color: #ffffff;
     color: #000;
   }
+  .date-input {
+    position: relative;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    color: #333;
+    appearance: none; /* hide default styles */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+  
+  .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+  }
+  
+  
   
   .client-baptismal-field-pob {
     display: flex;
@@ -340,7 +369,7 @@
   }
   
   .client-baptismal-field-pob input {
-    width: 240px;
+    width: 270px;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -694,4 +723,189 @@
   height: 2px;
   background: linear-gradient(to right, #710808, #ffcccc);
   width: 100%;
+}
+/* Additional CSS for location dropdowns */
+.location-dropdown-container {
+  position: relative;
+}
+
+.location-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.location-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.location-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+/* Radio button styling for marital status */
+.client-marital-options input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-right: 10px;
+}
+
+.client-marital-options input[type="radio"]:checked {
+  background-color: #b3701f;
+  border-color: #d19a15;
+}
+
+.client-marital-options input[type="radio"]:checked::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Godparent list styling */
+.added-godparent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 8px 12px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.added-godparent span {
+  color: #000;
+  font-family: Roboto;
+  font-size: 14px;
+}
+
+.remove-godparent-btn {
+  background: none;
+  border: none;
+  color: #a32835;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.remove-godparent-btn:hover {
+  color: #c82333;
+}
+
+.client-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  height: 60px;
+  width: 100%;
+}
+
+.client-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #b3701f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error styling for form validation */
+.client-error-input {
+  border: 1px solid #dc3545 !important;
+  background-color: #fff8f8 !important;
+}
+
+.client-error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.client-not-married-option {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.client-not-married-option label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  color: #666;
+}
+
+.client-status-not-required {
+  background-color: #e2e3e5 !important;
+  color: #383d41 !important;
+  border-color: #d6d8db !important;
+}
+
+.client-error-summary {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.client-error-summary ul {
+  margin-top: 5px;
+  padding-left: 20px;
+}
+
+/* Uploading state styles */
+.client-status-uploading {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border-color: #6c757d;
+  animation: pulse 1.5s infinite;
+}
+
+.client-upload-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }

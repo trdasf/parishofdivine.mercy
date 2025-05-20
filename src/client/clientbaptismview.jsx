@@ -1,77 +1,108 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import "./ClientBaptismView.css";
 
 const ClientBaptismView = () => {
-  // Sample data (in a real app, this would come from props or API)
-  const baptismData = {
-    date: "May 15, 2025",
-    time: "10:00 AM",
-    priest: "Fr. John Smith",
-    child: {
-      firstName: "Maria",
-      middleName: "Santos",
-      lastName: "Cruz",
-      gender: "Female",
-      age: "1",
-      dateOfBirth: "April 10, 2024",
-      placeOfBirth: "St. Luke's Medical Center, Manila"
-    },
-    father: {
-      firstName: "Roberto",
-      middleName: "Garcia",
-      lastName: "Cruz",
-      placeOfBirth: "Quezon City",
-      dateOfBirth: "June 5, 1990",
-      education: "College Graduate",
-      occupation: "Software Engineer",
-      contact: "0917-123-4567"
-    },
-    mother: {
-      firstName: "Elena",
-      middleName: "Reyes",
-      lastName: "Cruz",
-      placeOfBirth: "Makati City",
-      dateOfBirth: "August 12, 1992",
-      education: "College Graduate",
-      occupation: "Accountant",
-      contact: "0918-765-4321"
-    },
-    maritalStatus: {
-      type: "Catholic", // Catholic, Civil, or Living Together
-      yearsMarried: "4"
-    },
-    address: {
-      street: "123 Sampaguita St.",
-      municipality: "Quezon City",
-      province: "Metro Manila"
-    },
-    godParents: [
-      {
-        name: "Antonio Mendoza",
-        sacraments: "Baptism, Confirmation",
-        address: "456 Orchid St., Pasig City"
-      },
-      {
-        name: "Maria Lourdes Santos",
-        sacraments: "Baptism, Confirmation",
-        address: "789 Rose St., Mandaluyong City"
-      }
-    ],
-    requirements: {
-      birthCert: {
-        submitted: true,
-        fileName: "BirthCertificate_MariaCruz.pdf"
-      },
-      marriageCert: {
-        submitted: true,
-        fileName: "MarriageCertificate_RobertoElena.pdf"
-      },
-      validIds: {
-        submitted: true,
-        fileName: "ValidIDs_AllParties.pdf"
-      }
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [baptismData, setBaptismData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Check if we have necessary state data (baptismID and clientID)
+    const baptismID = location.state?.baptismID;
+    const clientID = location.state?.clientID;
+
+    if (!baptismID || !clientID) {
+      setError("Missing baptism information. Please try again.");
+      setLoading(false);
+      return;
     }
+
+    // Fetch the baptism details
+    fetchBaptismDetails(baptismID);
+  }, [location]);
+
+  const fetchBaptismDetails = async (baptismID) => {
+    try {
+      const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_baptism_details.php?baptismID=${baptismID}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Transform the data into the expected format
+        const transformedData = transformBaptismData(data.data);
+        setBaptismData(transformedData);
+      } else {
+        setError(data.message || "Failed to fetch baptism details");
+      }
+    } catch (error) {
+      console.error("Error fetching baptism details:", error);
+      setError("An error occurred while fetching the data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformBaptismData = (data) => {
+    // Format the data from PHP API response to match the component's expected format
+    const { baptism, parents, marital, address, godFathers, godMothers } = data;
+
+    return {
+      date: baptism.dateOfBaptism,
+      time: baptism.timeOfBaptism,
+      status: baptism.status,
+      createdAt: baptism.created_at ? new Date(baptism.created_at).toLocaleDateString() : 'N/A',
+      child: {
+        firstName: baptism.firstName,
+        middleName: baptism.middleName,
+        lastName: baptism.lastName,
+        gender: baptism.sex,
+        age: baptism.age,
+        dateOfBirth: baptism.dateOfBirth,
+        placeOfBirth: baptism.placeOfBirth,
+        regionOfBirth: baptism.region || 'N/A'
+      },
+      father: {
+        firstName: parents?.fatherFirstName || 'N/A',
+        middleName: parents?.fatherMiddleName || 'N/A',
+        lastName: parents?.fatherLastName || 'N/A',
+        placeOfBirth: parents?.fatherPlaceOfBirth || 'N/A',
+        dateOfBirth: parents?.fatherDateOfBirth || 'N/A',
+        contact: parents?.fatherContact || 'N/A'
+      },
+      mother: {
+        firstName: parents?.motherFirstName || 'N/A',
+        middleName: parents?.motherMiddleName || 'N/A',
+        lastName: parents?.motherLastName || 'N/A',
+        placeOfBirth: parents?.motherPlaceOfBirth || 'N/A',
+        dateOfBirth: parents?.motherDateOfBirth || 'N/A',
+        contact: parents?.motherContact || 'N/A'
+      },
+      maritalStatus: {
+        type: marital?.maritalStatus || 'N/A',
+        yearsMarried: marital?.yearsMarried || 'N/A'
+      },
+      address: {
+        street: address?.street || 'N/A',
+        barangay: address?.barangay || 'N/A',
+        municipality: address?.municipality || 'N/A',
+        province: address?.province || 'N/A',
+        region: address?.region || 'N/A'
+      },
+      godParents: [
+        // Format godparents from the API response
+        ...godFathers.map(name => ({
+          name,
+          type: 'godfather'
+        })),
+        ...godMothers.map(name => ({
+          name,
+          type: 'godmother'
+        }))
+      ]
+    };
   };
 
   // Function to render read-only input field
@@ -79,21 +110,42 @@ const ClientBaptismView = () => {
     return <div className="client-view-value">{value || "N/A"}</div>;
   };
 
-  // Function to render document status
-  const renderDocumentStatus = (isSubmitted, fileName) => {
+  if (loading) {
     return (
-      <div className={`client-view-status ${isSubmitted ? 'client-view-submitted' : 'client-view-not-submitted'}`}>
-        {isSubmitted ? `Submitted: ${fileName}` : "Not Submitted"}
+      <div className="client-baptism-view-container">
+        <div className="client-baptism-view-loading">Loading baptism details...</div>
       </div>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <div className="client-baptism-view-container">
+        <div className="client-baptism-view-error">
+          <p>{error}</p>
+          <button onClick={() => navigate('/client-appointment')}>Back to Appointments</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!baptismData) {
+    return (
+      <div className="client-baptism-view-container">
+        <div className="client-baptism-view-error">
+          <p>No baptism data found.</p>
+          <button onClick={() => navigate('/client-appointment')}>Back to Appointments</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="client-baptism-view-container">
       {/* Header */}
       <div className="client-baptism-view-header">
         <div className="client-view-left-section">
-          <button className="client-view-back-button" onClick={() => window.history.back()}>
+          <button className="client-view-back-button" onClick={() => navigate('/client-appointment')}>
             <AiOutlineArrowLeft className="client-view-back-icon" /> Back
           </button>
         </div>
@@ -104,19 +156,14 @@ const ClientBaptismView = () => {
       <div className="client-baptismal-view-data">
         <div className="client-baptismal-view-row-date">
           <div className="client-baptismal-view-field-date">
-            <label>Date of Baptism:</label>
+            <label>Date of Appointment:</label>
             {renderReadOnlyField(baptismData.date)}
           </div>
           
           <div className="client-baptismal-view-field-time">
-            <label>Time of Baptism:</label>
+            <label>Time of Appointment:</label>
             {renderReadOnlyField(baptismData.time)}
           </div>
-        </div>
-
-        <div className="client-baptismal-view-field-date">
-          <label>Name of the Priest:</label>
-          {renderReadOnlyField(baptismData.priest)}
         </div>
         
         <div className="client-view-bypart">
@@ -135,24 +182,31 @@ const ClientBaptismView = () => {
                 <label>Last Name of the Baptized:</label>
                 {renderReadOnlyField(baptismData.child.lastName)}
               </div>
+            </div>
+            
+            <div className="client-baptismal-view-row">
+            <div className="client-baptismal-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(baptismData.child.dateOfBirth)}
+              </div>
               <div className="client-baptismal-view-field">
+                <label>Age:</label>
+                {renderReadOnlyField(baptismData.child.age)}
+              </div>
+               <div className="client-baptismal-view-field">
                 <label>Gender:</label>
                 {renderReadOnlyField(baptismData.child.gender)}
               </div>
             </div>
             
             <div className="client-baptismal-view-row">
-              <div className="client-baptismal-view-field-ga">
-                <label>Age:</label>
-                {renderReadOnlyField(baptismData.child.age)}
-              </div>
-              <div className="client-baptismal-view-field-ga">
-                <label>Date of Birth:</label>
-                {renderReadOnlyField(baptismData.child.dateOfBirth)}
-              </div>
-              <div className="client-baptismal-view-field">
+            <div className="client-baptismal-view-field">
                 <label>Place of Birth:</label>
                 {renderReadOnlyField(baptismData.child.placeOfBirth)}
+              </div>
+               <div className="client-baptismal-view-field">
+                <label>Region of Birth:</label>
+                {renderReadOnlyField(baptismData.child.regionOfBirth)}
               </div>
             </div>
           </div>
@@ -176,28 +230,17 @@ const ClientBaptismView = () => {
             </div>
             
             <div className="client-baptismal-view-row">
-              <div className="client-baptismal-view-field">
-                <label>Father's Place of Birth:</label>
-                {renderReadOnlyField(baptismData.father.placeOfBirth)}
-              </div>
-              <div className="client-baptismal-view-field-fpob">
+            <div className="client-baptismal-view-field">
                 <label>Father's Date of Birth:</label>
                 {renderReadOnlyField(baptismData.father.dateOfBirth)}
-              </div>
-            </div>
-
-            <div className="client-baptismal-view-row">
-              <div className="client-baptismal-view-field">
-                <label>Father's Educational Attainment:</label>
-                {renderReadOnlyField(baptismData.father.education)}
-              </div>
-              <div className="client-baptismal-view-field">
-                <label>Father's Occupation:</label>
-                {renderReadOnlyField(baptismData.father.occupation)}
               </div>
               <div className="client-baptismal-view-field">
                 <label>Father's Contact Number:</label>
                 {renderReadOnlyField(baptismData.father.contact)}
+              </div>
+              <div className="client-baptismal-view-field">
+                <label>Father's Place of Birth:</label>
+                {renderReadOnlyField(baptismData.father.placeOfBirth)}
               </div>
             </div>
           </div>
@@ -221,28 +264,17 @@ const ClientBaptismView = () => {
             </div>
 
             <div className="client-baptismal-view-row">
-              <div className="client-baptismal-view-field">
-                <label>Mother's Place of Birth:</label>
-                {renderReadOnlyField(baptismData.mother.placeOfBirth)}
-              </div>
-              <div className="client-baptismal-view-field-fpob">
+            <div className="client-baptismal-view-field-fpob">
                 <label>Mother's Date of Birth:</label>
                 {renderReadOnlyField(baptismData.mother.dateOfBirth)}
-              </div>
-            </div>
-
-            <div className="client-baptismal-view-row">
-              <div className="client-baptismal-view-field">
-                <label>Mother's Educational Attainment:</label>
-                {renderReadOnlyField(baptismData.mother.education)}
-              </div>
-              <div className="client-baptismal-view-field">
-                <label>Mother's Occupation:</label>
-                {renderReadOnlyField(baptismData.mother.occupation)}
               </div>
               <div className="client-baptismal-view-field">
                 <label>Mother's Contact Number:</label>
                 {renderReadOnlyField(baptismData.mother.contact)}
+              </div>
+              <div className="client-baptismal-view-field">
+                <label>Mother's Place of Birth:</label>
+                {renderReadOnlyField(baptismData.mother.placeOfBirth)}
               </div>
             </div>
           </div>
@@ -253,15 +285,15 @@ const ClientBaptismView = () => {
               <div className="client-marital-view-status">
                 <label className="client-view-section-label">Parents' marital status:</label>
                 <div className="client-marital-view-options">
-                  <div className="client-view-pms-label">
-                    <span className={`client-view-checkbox ${baptismData.maritalStatus.type === 'Catholic' ? 'client-view-checked' : ''}`}></span>
-                    <label>Catholic</label>
+                  <div className={`client-view-pms-label ${baptismData.maritalStatus.type === 'Married' ? 'client-view-selected-status' : ''}`}>
+                    <span className={`client-view-checkbox ${baptismData.maritalStatus.type === 'Married' ? 'client-view-checked' : ''}`}></span>
+                    <label>Married</label>
                   </div>
-                  <div className="client-view-pms-label">
+                  <div className={`client-view-pms-label ${baptismData.maritalStatus.type === 'Civil' ? 'client-view-selected-status' : ''}`}>
                     <span className={`client-view-checkbox ${baptismData.maritalStatus.type === 'Civil' ? 'client-view-checked' : ''}`}></span>
                     <label>Civil</label>
                   </div>
-                  <div className="client-view-pms-label">
+                  <div className={`client-view-pms-label ${baptismData.maritalStatus.type === 'Living Together' ? 'client-view-selected-status' : ''}`}>
                     <span className={`client-view-checkbox ${baptismData.maritalStatus.type === 'Living Together' ? 'client-view-checked' : ''}`}></span>
                     <label>Living Together</label>
                   </div>
@@ -277,20 +309,26 @@ const ClientBaptismView = () => {
             {/* Address Fields - As read-only displays */}
             <div className="client-baptismal-view-row client-address-view-row">
             <div className="client-baptismal-view-field">
-                <label>Barangay:</label>
-                {renderReadOnlyField(baptismData.address.barangay)}
-              </div>
-              <div className="client-baptismal-view-field">
                 <label>Street:</label>
                 {renderReadOnlyField(baptismData.address.street)}
+              </div>
+              <div className="client-baptismal-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(baptismData.address.barangay)}
               </div>
               <div className="client-baptismal-view-field">
                 <label>Municipality:</label>
                 {renderReadOnlyField(baptismData.address.municipality)}
               </div>
+            </div>
+            <div className="client-baptismal-view-row client-address-view-row">
               <div className="client-baptismal-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(baptismData.address.province)}
+              </div>
+              <div className="client-baptismal-view-field">
+                <label>Region:</label>
+                {renderReadOnlyField(baptismData.address.region)}
               </div>
             </div>
           </div>
@@ -301,11 +339,11 @@ const ClientBaptismView = () => {
             {baptismData.godParents.map((godparent, index) => (
               <div key={index} className="client-godparent-item">
                 <h4 className="client-baptismal-view-godparent-header">
-                  {index === 0 ? "Godfather (Ninong)" : "Godmother (Ninang)"}
+                  {godparent.type === 'godfather' ? "Godfather (Ninong)" : "Godmother (Ninang)"}
                 </h4>
                 <div className="client-baptismal-view-row">
                   <div className="client-baptismal-view-field">
-                    <label>{index === 0 ? "Godfather's Name:" : "Godmother's Name:"}</label>
+                    <label>{godparent.type === 'godfather' ? "Godfather's Name:" : "Godmother's Name:"}</label>
                     {renderReadOnlyField(godparent.name)}
                   </div>
                 </div>
@@ -318,40 +356,20 @@ const ClientBaptismView = () => {
         
         <div className="client-requirements-view-container">
           <h2 className="client-requirements-view-title">Requirements</h2>
-          <div className="client-requirements-view-box">
-            <h3 className="client-view-section-header">Documents Status</h3>
-            <div className="client-view-checkbox-list">
-              {/* Birth Certificate */}
-              <div className="client-requirement-view-item">
-                <div className="client-view-requirement-name">
-                  Birth Certificate of the Child (PSA or local civil registrar copy)
-                </div>
-                {renderDocumentStatus(
-                  baptismData.requirements.birthCert.submitted, 
-                  baptismData.requirements.birthCert.fileName
-                )}
+
+          <h3 className="client-view-section-header">Documents Required</h3>
+            <div className="client-info-view-list">
+              <div className="client-info-view-item">
+                <p>Birth Certificate of the Child (PSA or local civil registrar copy)</p>
               </div>
-              
-              {/* Marriage Certificate */}
-              <div className="client-requirement-view-item">
-                <div className="client-view-requirement-name">
-                  Parents' Marriage Certificate (If married in the Church)
-                </div>
-                {renderDocumentStatus(
-                  baptismData.requirements.marriageCert.submitted, 
-                  baptismData.requirements.marriageCert.fileName
-                )}
+              <div className="client-info-view-item">
+                <p>Parents' Marriage Certificate (If married in the Church)</p>
               </div>
-              
-              {/* Valid IDs */}
-              <div className="client-requirement-view-item">
-                <div className="client-view-requirement-name">
-                  Valid IDs of Parents and Godparents
-                </div>
-                {renderDocumentStatus(
-                  baptismData.requirements.validIds.submitted, 
-                  baptismData.requirements.validIds.fileName
-                )}
+              <div className="client-info-view-item">
+                <p>Valid IDs of Parents and Godparents</p>
+              </div>
+              <div className="client-info-view-item">
+                <p>Certificate of Permission(If outside the Parish)</p>
               </div>
             </div>
 
@@ -385,11 +403,13 @@ const ClientBaptismView = () => {
               <div className="client-info-view-item">
                 <p>Confirmation Certificate (Some parishes require this for proof of faith practice)</p>
               </div>
+              <div className="client-info-view-item">
+                <p>Certificate of Permission (if outside the Parish)</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

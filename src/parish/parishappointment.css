@@ -32,11 +32,12 @@
     justify-content: space-between;
     margin: 20px 0;
     align-items: center;
+    gap: 10px;
   }
   
   .search-bar-pa {
     position: relative;
-    width: 650px;
+    width: 100%;
   }
   
   .search-bar-pa input {
@@ -73,10 +74,10 @@
     border-radius: 5px;
     cursor: pointer;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 14px;
     font-family: Roboto;
     letter-spacing: 0.5px;
-    min-width: 180px;
+    min-width: 150px;
   }
   
   /* New styles for sacrament filter buttons */
@@ -84,7 +85,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin: 20px 0;
+    margin: 15px 8px;
   }
   
   .sacrament-filter-btn {
@@ -94,6 +95,7 @@
     padding: 8px 15px;
     border-radius: 10px;
     cursor: pointer;
+    font-size: 13px;
     font-weight: 700;
     font-family: Roboto;
     letter-spacing: 0.5px;

@@ -1,48 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faPlus, faTimes, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faPlus, faTimes, faCalendarAlt, faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import "./secretaryschedule.css";
+
+const API_URL = "http://parishofdivinemercy.com/backend";
 
 const SecretarySchedule = () => {
   const [showModal, setShowModal] = useState(false);
-  const [showParishModal, setShowParishModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentSchedule, setCurrentSchedule] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [parishFilter, setParishFilter] = useState("");
   const [sacramentTypeFilter, setSacramentTypeFilter] = useState("");
-  const [newParishName, setNewParishName] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
-  // Sample schedule data - in a real app, this would come from an API/database
-  const [schedules, setSchedules] = useState([
-    {
-      id: 2001,
-      sacramentType: "Communion",
-      parishName: "St. Joseph Parish",
-      date: "2025-05-05",
-      time: "08:00",
-      createdAt: "2025-04-20T08:30:00",
-      scheduleCode: "SCH-2025-0001"
-    },
-    {
-      id: 2002,
-      sacramentType: "Marriage",
-      parishName: "Holy Family Church",
-      date: "2025-05-10",
-      time: "14:00",
-      createdAt: "2025-04-22T14:45:00",
-      scheduleCode: "SCH-2025-0002"
-    }
-  ]);
-
-  // Parish list
-  const [parishes, setParishes] = useState([
-    "St. Joseph Parish",
-    "Holy Family Church",
-    "Sacred Heart Parish",
-    "Our Lady of Peace",
-    "Christ the King Cathedral"
-  ]);
+  // Store data from API
+  const [schedules, setSchedules] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [nextScheduleNumber, setNextScheduleNumber] = useState(1);
 
   // Sacrament Types list
   const sacramentTypes = [
@@ -51,8 +28,126 @@ const SecretarySchedule = () => {
     "Funeral Mass",
     "Confirmation",
     "Communion",
-    "Blessing"
+    "Blessing",
+    "Anointing of the Sick and Viaticum"
   ];
+
+  // Fetch schedules on component mount
+  useEffect(() => {
+    fetchSchedules();
+  }, []);
+
+  // Generate schedule code in the format SCH-YYYY-NNNN
+  const generateScheduleCode = (index) => {
+    const currentYear = new Date().getFullYear();
+    
+    // Find the highest existing code number to avoid duplication
+    let highestNumber = 0;
+    
+    schedules.forEach(schedule => {
+      if (schedule.scheduleCode && schedule.scheduleCode.startsWith(`SCH-${currentYear}-`)) {
+        const parts = schedule.scheduleCode.split('-');
+        if (parts.length === 3) {
+          const codeNumber = parseInt(parts[2], 10);
+          if (!isNaN(codeNumber) && codeNumber > highestNumber) {
+            highestNumber = codeNumber;
+          }
+        }
+      }
+    });
+    
+    // Use the highest number + 1 to ensure uniqueness
+    const nextNumber = Math.max(highestNumber + 1, index);
+    const paddedNumber = String(nextNumber).padStart(4, '0');
+    
+    return `SCH-${currentYear}-${paddedNumber}`;
+  };
+
+  // Fetch schedules from API
+  const fetchSchedules = async () => {
+    setIsLoading(true);
+    try {
+      console.log("Fetching schedules from:", `${API_URL}/secretary_schedule.php`);
+      const response = await fetch(`${API_URL}/secretary_schedule.php`);
+      
+      const responseText = await response.text();
+      console.log("Raw response from schedules fetch:", responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Error parsing JSON response:", parseError);
+        showError("Server returned invalid data. Check console for details.");
+        setIsLoading(false);
+        return;
+      }
+      
+      if (data.success) {
+        // Process schedules and generate sequential schedule codes
+        const processedSchedules = data.schedules.map((schedule, index) => ({
+          ...schedule,
+          // Ensure date is in correct format
+          date: schedule.date || '',
+          // Ensure time is in correct format
+          time: schedule.time || '',
+          // Use existing schedule code or generate a unique one
+          scheduleCode: schedule.scheduleCode || generateUniqueScheduleCode(index + 1, data.schedules),
+        }));
+        
+        setSchedules(processedSchedules);
+        
+        // Calculate next schedule number based on the highest existing code number
+        let highestNumber = 0;
+        const currentYear = new Date().getFullYear();
+        
+        processedSchedules.forEach(schedule => {
+          if (schedule.scheduleCode && schedule.scheduleCode.startsWith(`SCH-${currentYear}-`)) {
+            const parts = schedule.scheduleCode.split('-');
+            if (parts.length === 3) {
+              const codeNumber = parseInt(parts[2], 10);
+              if (!isNaN(codeNumber) && codeNumber > highestNumber) {
+                highestNumber = codeNumber;
+              }
+            }
+          }
+        });
+        
+        setNextScheduleNumber(highestNumber + 1);
+        
+        // Log for debugging
+        console.log("Fetched schedules:", processedSchedules);
+        console.log("Next schedule number will be:", highestNumber + 1);
+      } else {
+        console.error("Failed to fetch schedules:", data);
+        showError(data.error || data.message || "Failed to fetch schedules. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+      showError("Error connecting to the server. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Generate a unique schedule code that doesn't exist in the schedules array
+  const generateUniqueScheduleCode = (index, existingSchedules) => {
+    const currentYear = new Date().getFullYear();
+    let number = index;
+    let code = `SCH-${currentYear}-${String(number).padStart(4, '0')}`;
+    
+    // Check if this code already exists in the schedules
+    let codeExists = existingSchedules.some(s => s.scheduleCode === code);
+    
+    // Keep incrementing the number until we find a unique code
+    while (codeExists) {
+      number++;
+      code = `SCH-${currentYear}-${String(number).padStart(4, '0')}`;
+      codeExists = existingSchedules.some(s => s.scheduleCode === code);
+    }
+    
+    return code;
+  };
 
   const toggleModal = (schedule = null) => {
     if (schedule) {
@@ -60,13 +155,32 @@ const SecretarySchedule = () => {
       setCurrentSchedule(schedule);
     } else {
       setIsEditing(false);
-      setCurrentSchedule(null);
+      // For new schedule, pre-generate the next code
+      setCurrentSchedule({
+        scheduleCode: generateScheduleCode(nextScheduleNumber)
+      });
     }
     setShowModal(!showModal);
   };
 
-  const toggleParishModal = () => {
-    setShowParishModal(!showParishModal);
+  // Show success modal
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
+    // Auto-close after 3 seconds
+    setTimeout(() => {
+      setShowSuccessModal(false);
+    }, 3000);
+  };
+
+  // Show error modal
+  const showError = (message) => {
+    setErrorMessage(message);
+    setShowErrorModal(true);
+    // Auto-close after 4 seconds
+    setTimeout(() => {
+      setShowErrorModal(false);
+    }, 4000);
   };
 
   // Handle search input change
@@ -74,93 +188,108 @@ const SecretarySchedule = () => {
     setSearchTerm(e.target.value);
   };
 
-  // Handle parish filter change
-  const handleParishFilterChange = (e) => {
-    setParishFilter(e.target.value);
-  };
-
   // Handle sacrament type filter change
   const handleSacramentTypeFilterChange = (e) => {
     setSacramentTypeFilter(e.target.value);
   };
 
-  // Handle new parish name change
-  const handleNewParishChange = (e) => {
-    setNewParishName(e.target.value);
-  };
-
-  // Add new parish
-  const handleAddParish = (e) => {
-    e.preventDefault();
-    if (newParishName.trim() && !parishes.includes(newParishName.trim())) {
-      setParishes([...parishes, newParishName.trim()]);
-      setNewParishName("");
-      toggleParishModal();
-    }
-  };
-
   // Filter schedules based on search term and filters
   const filteredSchedules = schedules.filter(schedule => {
-    const sacramentTypeMatch = schedule.sacramentType.toLowerCase().includes(searchTerm.toLowerCase());
-    const parishNameMatch = schedule.parishName.toLowerCase().includes(searchTerm.toLowerCase());
-    const scheduleCodeMatch = schedule.scheduleCode.toLowerCase().includes(searchTerm.toLowerCase());
+    const sacramentTypeMatch = schedule.sacramentType?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const scheduleCodeMatch = schedule.scheduleCode?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
     
-    const matchesSearch = searchTerm === "" || sacramentTypeMatch || parishNameMatch || scheduleCodeMatch;
-    
-    const matchesParish = parishFilter === "" || schedule.parishName === parishFilter;
+    const matchesSearch = searchTerm === "" || sacramentTypeMatch || scheduleCodeMatch;
     const matchesSacramentType = sacramentTypeFilter === "" || schedule.sacramentType === sacramentTypeFilter;
     
-    return matchesSearch && matchesParish && matchesSacramentType;
+    return matchesSearch && matchesSacramentType;
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     
-    // Generate schedule code for new schedules
-    let scheduleCode = formData.get('scheduleCode');
-    if (!isEditing) {
-      const currentDate = new Date();
-      const year = currentDate.getFullYear();
-      const count = schedules.length + 1;
-      scheduleCode = `SCH-${year}-${String(count).padStart(4, '0')}`;
+    // Make sure date is in YYYY-MM-DD format
+    const dateValue = formData.get('date');
+    const timeValue = formData.get('time');
+    
+    // Validate date format
+    if (!dateValue || !timeValue) {
+      showError("Date and time are required");
+      return;
     }
-
+    
     const scheduleData = {
-      id: isEditing ? currentSchedule.id : Date.now(),
       sacramentType: formData.get('sacramentType'),
-      parishName: formData.get('parishName'),
-      date: formData.get('date'),
-      time: formData.get('time'),
-      createdAt: isEditing ? currentSchedule.createdAt : new Date().toISOString(),
-      scheduleCode: scheduleCode
+      date: dateValue,
+      time: timeValue,
+      scheduleCode: formData.get('scheduleCode') || generateScheduleCode(nextScheduleNumber)
     };
 
-    if (isEditing) {
-      // Update existing schedule
-      const updatedSchedules = schedules.map(schedule => 
-        schedule.id === currentSchedule.id ? scheduleData : schedule
-      );
-      setSchedules(updatedSchedules);
-    } else {
-      // Add new schedule
-      setSchedules([...schedules, scheduleData]);
+    console.log("Submitting schedule data:", scheduleData);
+
+    try {
+      let response;
+      
+      if (isEditing) {
+        // Update existing schedule
+        console.log("Updating schedule with ID:", currentSchedule.id);
+        response = await fetch(`${API_URL}/secretary_schedule.php`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...scheduleData,
+            id: currentSchedule.id
+          }),
+        });
+      } else {
+        // Add new schedule
+        console.log("Adding new schedule");
+        response = await fetch(`${API_URL}/secretary_schedule.php`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(scheduleData),
+        });
+      }
+      
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Error parsing JSON response:", parseError);
+        showError("Server returned invalid data. Check console for details.");
+        return;
+      }
+      
+      if (data.success) {
+        if (!isEditing) {
+          // Increment the next schedule number after adding
+          setNextScheduleNumber(prevNumber => prevNumber + 1);
+        }
+        
+        // Refresh schedules list
+        fetchSchedules();
+        toggleModal();
+        showSuccess(isEditing ? "Schedule updated successfully!" : "Schedule added successfully!");
+      } else {
+        console.error("Failed to save schedule:", data);
+        // Show specific error message for date/time conflict
+        if (data.error === "date_time_conflict") {
+          showError("A schedule with this date and time already exists. Please choose a different time.");
+        } else {
+          showError(data.error || data.message || "Failed to save schedule. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving schedule:", error);
+      showError("Error connecting to the server. Please try again later.");
     }
-
-    // Close modal
-    toggleModal();
-  };
-
-  const formatDateTime = (dateTimeString) => {
-    const date = new Date(dateTimeString);
-    return date.toLocaleString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
   };
 
   const formatDate = (dateString) => {
@@ -173,16 +302,56 @@ const SecretarySchedule = () => {
   };
 
   const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(':');
-    const time = new Date();
-    time.setHours(parseInt(hours));
-    time.setMinutes(parseInt(minutes));
+    try {
+      // Handle different time formats
+      let hours, minutes;
+      
+      if (timeString.includes(':')) {
+        [hours, minutes] = timeString.split(':');
+      } else if (timeString.includes('T')) {
+        const timePart = timeString.split('T')[1];
+        [hours, minutes] = timePart.split(':');
+      } else {
+        return timeString; // Return as is if format is unrecognized
+      }
+      
+      const time = new Date();
+      time.setHours(parseInt(hours));
+      time.setMinutes(parseInt(minutes));
+      
+      return time.toLocaleString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      console.error("Error formatting time:", e);
+      return timeString; // Return original string on error
+    }
+  };
+
+  // Function to check if date/time is already taken
+  const isDateTimeTaken = (date, time, excludeId = null) => {
+    return schedules.some(schedule => 
+      schedule.date === date && 
+      schedule.time === time && 
+      (excludeId === null || schedule.id !== excludeId)
+    );
+  };
+
+  // Validate the form before submitting
+  const validateScheduleForm = (formData) => {
+    const date = formData.get('date');
+    const time = formData.get('time');
     
-    return time.toLocaleString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+    // Check if this date and time combination already exists
+    const currentId = isEditing ? currentSchedule.id : null;
+    if (isDateTimeTaken(date, time, currentId)) {
+      showError("A schedule with this date and time already exists. Please choose a different time.");
+      return false;
+    }
+    
+    return true;
   };
 
   return (
@@ -195,7 +364,7 @@ const SecretarySchedule = () => {
         <div className="search-bar-ssc">
           <input 
             type="text" 
-            placeholder="Search by sacrament type, parish or schedule code" 
+            placeholder="Search by sacrament type or schedule code" 
             value={searchTerm} 
             onChange={handleSearchChange}
           />
@@ -203,17 +372,6 @@ const SecretarySchedule = () => {
         </div>
 
         <div className="filter-add-container-ssc">
-          <select 
-            className="filter-select-ssc"
-            value={parishFilter}
-            onChange={handleParishFilterChange}
-          >
-            <option value="">All Parishes</option>
-            {parishes.map((parish, index) => (
-              <option key={index} value={parish}>{parish}</option>
-            ))}
-          </select>
-
           <select 
             className="filter-select-ssc"
             value={sacramentTypeFilter}
@@ -224,10 +382,6 @@ const SecretarySchedule = () => {
               <option key={index} value={type}>{type}</option>
             ))}
           </select>
-
-          <button className="add-btn-ssc" onClick={toggleParishModal}>
-            <FontAwesomeIcon icon={faPlus} /> ADD PARISH
-          </button>
 
           <button className="add-btn-ssc" onClick={() => toggleModal()}>
             <FontAwesomeIcon icon={faPlus} /> ADD
@@ -240,23 +394,23 @@ const SecretarySchedule = () => {
           <tr>
             <th>Schedule Code</th>
             <th>Sacrament Type</th>
-            <th>Parish Name</th>
             <th>Date</th>
             <th>Time</th>
-            <th>Created At</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {filteredSchedules.length > 0 ? (
-            filteredSchedules.map(schedule => (
+          {isLoading ? (
+            <tr>
+              <td colSpan="5" className="loading-ssc">Loading schedules...</td>
+            </tr>
+          ) : filteredSchedules.length > 0 ? (
+            filteredSchedules.map((schedule, index) => (
               <tr key={schedule.id}>
                 <td>{schedule.scheduleCode}</td>
                 <td>{schedule.sacramentType}</td>
-                <td>{schedule.parishName}</td>
                 <td>{formatDate(schedule.date)}</td>
                 <td>{formatTime(schedule.time)}</td>
-                <td>{formatDateTime(schedule.createdAt)}</td>
                 <td>
                   <button className="ssc-details" onClick={() => toggleModal(schedule)}>
                     Edit
@@ -266,7 +420,7 @@ const SecretarySchedule = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="no-results-ssc">No schedules found</td>
+              <td colSpan="5" className="no-results-ssc">No schedules found</td>
             </tr>
           )}
         </tbody>
@@ -286,27 +440,17 @@ const SecretarySchedule = () => {
               <hr className="custom-hr-ssc"/>
             </div>
             <form onSubmit={handleSubmit} className="schedule-form-ssc">
-              {isEditing && (
-                <div className="form-row-ssc">
-                  <div className="form-group-ssc">
-                    <label>Schedule Code</label>
-                    <input 
-                      type="text" 
-                      name="scheduleCode"
-                      defaultValue={currentSchedule?.scheduleCode || ''}
-                      readOnly
-                    />
-                  </div>
-                  <div className="form-group-ssc">
-                    <label>Created At</label>
-                    <input 
-                      type="text" 
-                      defaultValue={currentSchedule ? formatDateTime(currentSchedule.createdAt) : ''}
-                      readOnly
-                    />
-                  </div>
+              <div className="form-row-ssc">
+                <div className="form-group-ssc">
+                  <label>Schedule Code</label>
+                  <input 
+                    type="text" 
+                    name="scheduleCode"
+                    defaultValue={currentSchedule?.scheduleCode || ''}
+                    readOnly
+                  />
                 </div>
-              )}
+              </div>
 
               <div className="form-row-ssc">
                 <div className="form-group-ssc">
@@ -326,28 +470,12 @@ const SecretarySchedule = () => {
 
               <div className="form-row-ssc">
                 <div className="form-group-ssc">
-                  <label>Parish Name</label>
-                  <select 
-                    name="parishName" 
-                    required 
-                    defaultValue={currentSchedule?.parishName || ''}
-                  >
-                    <option value="">Select Parish</option>
-                    {parishes.map((parish, index) => (
-                      <option key={index} value={parish}>{parish}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row-ssc">
-                <div className="form-group-ssc">
                   <label>Date</label>
                   <input 
                     type="date" 
                     name="date" 
                     required 
-                    defaultValue={currentSchedule?.date || ''}
+                    defaultValue={currentSchedule?.date ? currentSchedule.date.split('T')[0] : ''}
                   />
                 </div>
               </div>
@@ -359,7 +487,7 @@ const SecretarySchedule = () => {
                     type="time" 
                     name="time" 
                     required 
-                    defaultValue={currentSchedule?.time || ''}
+                    defaultValue={currentSchedule?.time ? currentSchedule.time.split('T')[1]?.substring(0, 5) : currentSchedule?.time || ''}
                   />
                 </div>
               </div>
@@ -376,43 +504,23 @@ const SecretarySchedule = () => {
           </div>
         </div>
       )}
-
-      {/* Add Parish Modal */}
-      {showParishModal && (
-        <div className="schedule-modal-overlay-ssc">
-          <div className="schedule-modal-ssc" style={{ maxWidth: '500px' }}>
-            <div className="schedule-modal-header-ssc">
-              <h2>Add New Parish</h2>
-              <button className="close-modal-btn-ssc" onClick={toggleParishModal}>
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            </div>
-            <div>
-              <hr className="custom-hr-ssc"/>
-            </div>
-            <form onSubmit={handleAddParish} className="schedule-form-ssc">
-              <div className="form-row-ssc">
-                <div className="form-group-ssc">
-                  <label>Parish Name</label>
-                  <input 
-                    type="text" 
-                    value={newParishName}
-                    onChange={handleNewParishChange}
-                    required 
-                    placeholder="Enter parish name"
-                  />
-                </div>
-              </div>
-
-              <div className="form-actions-ssc">
-                <button type="submit" className="submit-btn-ssc">
-                  Add Parish
-                </button>
-                <button type="button" className="cancel-btn-ssc" onClick={toggleParishModal}>
-                  Cancel
-                </button>
-              </div>
-            </form>
+      
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="notification-modal success-modal">
+          <div className="notification-content success">
+            <FontAwesomeIcon icon={faCheckCircle} className="notification-icon" />
+            <p>{successMessage}</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="notification-modal error-modal">
+          <div className="notification-content error">
+            <FontAwesomeIcon icon={faExclamationCircle} className="notification-icon" />
+            <p>{errorMessage}</p>
           </div>
         </div>
       )}

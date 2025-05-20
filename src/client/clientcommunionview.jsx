@@ -1,74 +1,91 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import "./ClientCommunionView.css";
 
 const ClientCommunionView = () => {
-  // Sample data for view mode
-  const communionData = {
-    date: "June 15, 2025",
-    time: "9:00 AM",
-    priestName: "Fr. Michael Rodriguez",
-    childInfo: {
-      firstName: "Maria",
-      middleName: "Elena",
-      lastName: "Santos",
-      gender: "Female",
-      age: "8",
-      dateOfBirth: "March 10, 2017",
-      dateOfBaptism: "April 15, 2017",
-      churchOfBaptism: "St. Peter's Parish",
-      placeOfBirth: "Manila City Hospital",
-      address: {
-        barangay: "barangay 1",
-        street: "123 Maple Street",
-        municipality: "Quezon City",
-        province: "Metro Manila"
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [communionData, setCommunionData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Check if we have necessary state data (communionID and clientID)
+    const communionID = location.state?.communionID;
+    const clientID = location.state?.clientID;
+
+    if (!communionID || !clientID) {
+      setError("Missing communion information. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    // Fetch the communion details
+    fetchCommunionDetails(communionID);
+  }, [location]);
+
+  const fetchCommunionDetails = async (communionID) => {
+    try {
+      const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_communion_details.php?communionID=${communionID}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setCommunionData(data.data);
+      } else {
+        setError(data.message || "Failed to fetch communion details");
       }
-    },
-    fatherInfo: {
-      firstName: "Juan",
-      middleName: "Carlos",
-      lastName: "Santos",
-      dateOfBirth: "May 5, 1985",
-      placeOfBirth: "Cebu City",
-      education: "Bachelor's Degree",
-      occupation: "Engineer",
-      contactNumber: "0917-123-4567"
-    },
-    motherInfo: {
-      firstName: "Ana",
-      middleName: "Marie",
-      lastName: "Reyes",
-      dateOfBirth: "September 12, 1987",
-      placeOfBirth: "Makati City",
-      education: "Master's Degree",
-      occupation: "Teacher",
-      contactNumber: "0918-765-4321"
-    },
-    requirements: {
-      baptismalCert: "Submitted",
-      firstCommunionCert: "Not Submitted",
-      birthCert: "Submitted"
+    } catch (error) {
+      console.error("Error fetching communion details:", error);
+      setError("An error occurred while fetching the data");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Render view-only status
-  const renderStatus = (status) => {
-    const isSubmitted = status === "Submitted";
-    
+  // Function to render read-only input field
+  const renderReadOnlyField = (value) => {
+    return <div className="client-view-value">{value || "N/A"}</div>;
+  };
+
+  if (loading) {
     return (
-      <div className={`client-communion-view-status ${isSubmitted ? 'client-communion-view-submitted' : 'client-communion-view-not-submitted'}`}>
-        {status}
+      <div className="client-communion-view-container">
+        <div className="loading">Loading communion details...</div>
       </div>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <div className="client-communion-view-container">
+        <div className="error">
+          <p>{error}</p>
+          <button onClick={() => navigate('/client-appointment')}>Back to Appointments</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!communionData) {
+    return (
+      <div className="client-communion-view-container">
+        <div className="error">
+          <p>No communion data found.</p>
+          <button onClick={() => navigate('/client-appointment')}>Back to Appointments</button>
+        </div>
+      </div>
+    );
+  }
+
+  const { communion, address, father, mother } = communionData;
 
   return (
     <div className="client-communion-view-container">
       {/* Header */}
       <div className="client-communion-view-header">
         <div className="client-view-left-section">
-          <button className="client-view-back-button" onClick={() => window.history.back()}>
+          <button className="client-view-back-button" onClick={() => navigate('/client-appointment')}>
             <AiOutlineArrowLeft className="client-view-back-icon" /> Back
           </button>
         </div>
@@ -80,19 +97,14 @@ const ClientCommunionView = () => {
         <div className="client-communion-view-info-card">
           <div className="client-communion-view-row-date">
             <div className="client-communion-view-field-date">
-              <label>Date of Holy Communion:</label>
-              <div className="client-view-value">{communionData.date}</div>
+              <label>Date of Appointment:</label>
+              {renderReadOnlyField(communion.date)}
             </div>
             
             <div className="client-communion-view-field-time">
-              <label>Time of Holy Communion:</label>
-              <div className="client-view-value">{communionData.time}</div>
+              <label>Time of Appointment:</label>
+              {renderReadOnlyField(communion.time)}
             </div>
-          </div>
-
-          <div className="client-communion-view-field-date">
-            <label>Name of the Priest:</label>
-            <div className="client-view-value">{communionData.priestName}</div>
           </div>
         </div>
         
@@ -102,64 +114,66 @@ const ClientCommunionView = () => {
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>First Name</label>
-                <div className="client-view-value">{communionData.childInfo.firstName}</div>
+                {renderReadOnlyField(communion.first_name)}
               </div>
               <div className="client-communion-view-field">
                 <label>Middle Name</label>
-                <div className="client-view-value">{communionData.childInfo.middleName}</div>
+                {renderReadOnlyField(communion.middle_name)}
               </div>
               <div className="client-communion-view-field">
                 <label>Last Name</label>
-                <div className="client-view-value">{communionData.childInfo.lastName}</div>
+                {renderReadOnlyField(communion.last_name)}
               </div>
               <div className="client-communion-view-field">
-                <label>Gender</label>
-                <div className="client-view-value">{communionData.childInfo.gender}</div>
+                <label>Date of Birth</label>
+                {renderReadOnlyField(communion.dateOfBirth)}
               </div>
             </div>
 
             <div className="client-communion-view-row">
-            <div className="client-communion-view-field-ga">
+              <div className="client-communion-view-field">
                 <label>Age</label>
-                <div className="client-view-value">{communionData.childInfo.age}</div>
+                {renderReadOnlyField(communion.age)}
               </div>
               <div className="client-communion-view-field">
-                <label>Date of Birth</label>
-                <div className="client-view-value">{communionData.childInfo.dateOfBirth}</div>
+                <label>Gender</label>
+                {renderReadOnlyField(communion.gender)}
               </div>
               <div className="client-communion-view-field">
                 <label>Date of Baptism</label>
-                <div className="client-view-value">{communionData.childInfo.dateOfBaptism}</div>
+                {renderReadOnlyField(communion.dateOfBaptism)}
+              </div>
+              <div className="client-communion-view-field">
+                <label>Church of Baptism</label>
+                {renderReadOnlyField(communion.churchOfBaptism)}
               </div>
             </div>
-            
             <div className="client-communion-view-row">
-            <div className="client-communion-view-field">
-                <label>Church of Baptism</label>
-                <div className="client-view-value">{communionData.childInfo.churchOfBaptism}</div>
-              </div>
               <div className="client-communion-view-field">
                 <label>Place of Birth</label>
-                <div className="client-view-value">{communionData.childInfo.placeOfBirth}</div>
+                {renderReadOnlyField(communion.placeOfBirth)}
               </div>
             </div>
-            
             <div className="client-communion-view-row">
             <div className="client-communion-view-field">
-                <label>Barangay</label>
-                <div className="client-view-value">{communionData.childInfo.address.barangay}</div>
+                <label>Street</label>
+                <div className="client-view-value-add">{address.street}</div>
               </div>
               <div className="client-communion-view-field">
-                <label>Street</label>
-                <div className="client-view-value">{communionData.childInfo.address.street}</div>
+                <label>Barangay</label>
+                <div className="client-view-value-add">{address.barangay}</div>
               </div>
               <div className="client-communion-view-field">
                 <label>Municipality</label>
-                <div className="client-view-value">{communionData.childInfo.address.municipality}</div>
+                <div className="client-view-value-add">{address.municipality}</div>
               </div>
               <div className="client-communion-view-field">
                 <label>Province</label>
-                <div className="client-view-value">{communionData.childInfo.address.province}</div>
+                <div className="client-view-value-add">{address.province}</div>
+              </div>
+              <div className="client-communion-view-field">
+                <label>Region</label>
+                <div className="client-view-value-add">{address.region}</div>
               </div>
             </div>
           </div>
@@ -170,41 +184,30 @@ const ClientCommunionView = () => {
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>Father's First Name</label>
-                <div className="client-view-value">{communionData.fatherInfo.firstName}</div>
+                {renderReadOnlyField(father.first_name)}
               </div>
               <div className="client-communion-view-field">
                 <label>Father's Middle Name</label>
-                <div className="client-view-value">{communionData.fatherInfo.middleName}</div>
+                {renderReadOnlyField(father.middle_name)}
               </div>
               <div className="client-communion-view-field">
                 <label>Father's Last Name</label>
-                <div className="client-view-value">{communionData.fatherInfo.lastName}</div>
+                {renderReadOnlyField(father.last_name)}
               </div>
             </div>
             
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>Father's Date of Birth</label>
-                <div className="client-view-value">{communionData.fatherInfo.dateOfBirth}</div>
-              </div>
-              <div className="client-communion-view-field">
-                <label>Father's Place of Birth</label>
-                <div className="client-view-value">{communionData.fatherInfo.placeOfBirth}</div>
-              </div>
-            </div>
-            
-            <div className="client-communion-view-row">
-              <div className="client-communion-view-field">
-                <label>Father's Educational Attainment</label>
-                <div className="client-view-value">{communionData.fatherInfo.education}</div>
-              </div>
-              <div className="client-communion-view-field">
-                <label>Father's Occupation</label>
-                <div className="client-view-value">{communionData.fatherInfo.occupation}</div>
+                {renderReadOnlyField(father.dateOfBirth)}
               </div>
               <div className="client-communion-view-field">
                 <label>Father's Contact Number</label>
-                <div className="client-view-value">{communionData.fatherInfo.contactNumber}</div>
+                {renderReadOnlyField(father.contact_number)}
+              </div>
+              <div className="client-communion-view-field">
+                <label>Father's Place of Birth</label>
+                {renderReadOnlyField(father.placeOfBirth)}
               </div>
             </div>
           </div>
@@ -215,41 +218,30 @@ const ClientCommunionView = () => {
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>Mother's First Name</label>
-                <div className="client-view-value">{communionData.motherInfo.firstName}</div>
+                {renderReadOnlyField(mother.first_name)}
               </div>
               <div className="client-communion-view-field">
                 <label>Mother's Middle Name</label>
-                <div className="client-view-value">{communionData.motherInfo.middleName}</div>
+                {renderReadOnlyField(mother.middle_name)}
               </div>
               <div className="client-communion-view-field">
                 <label>Mother's Last Name</label>
-                <div className="client-view-value">{communionData.motherInfo.lastName}</div>
+                {renderReadOnlyField(mother.last_name)}
               </div>
             </div>
             
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>Mother's Date of Birth</label>
-                <div className="client-view-value">{communionData.motherInfo.dateOfBirth}</div>
-              </div>
-              <div className="client-communion-view-field">
-                <label>Mother's Place of Birth</label>
-                <div className="client-view-value">{communionData.motherInfo.placeOfBirth}</div>
-              </div>
-            </div>
-            
-            <div className="client-communion-view-row">
-              <div className="client-communion-view-field">
-                <label>Mother's Educational Attainment</label>
-                <div className="client-view-value">{communionData.motherInfo.education}</div>
-              </div>
-              <div className="client-communion-view-field">
-                <label>Mother's Occupation</label>
-                <div className="client-view-value">{communionData.motherInfo.occupation}</div>
+                {renderReadOnlyField(mother.dateOfBirth)}
               </div>
               <div className="client-communion-view-field">
                 <label>Mother's Contact Number</label>
-                <div className="client-view-value">{communionData.motherInfo.contactNumber}</div>
+                {renderReadOnlyField(mother.contact_number)}
+              </div>
+              <div className="client-communion-view-field">
+                <label>Mother's Place of Birth</label>
+                {renderReadOnlyField(mother.placeOfBirth)}
               </div>
             </div>
           </div>
@@ -260,29 +252,18 @@ const ClientCommunionView = () => {
           <h2 className="client-requirements-view-title">Requirements</h2>
           <div className="client-requirements-view-box">
             <h3 className="client-view-section-header">Documents Status</h3>
-            <div className="client-view-checkbox-list">
-              {/* Baptismal Certificate */}
-              <div className="client-requirement-view-item">
-                <div className="client-view-req-label">
-                  <span className="client-view-requirement-name">Baptismal Certificate (Proof of Catholic Baptism)</span>
-                </div>
-                {renderStatus(communionData.requirements.baptismalCert)}
+            <div className="client-info-view-list">
+              <div className="client-info-view-item">
+                <p>Certificate of Baptism(Proof of Catholic Baptism)</p>
               </div>
-              
-              {/* First Communion Certificate */}
-              <div className="client-requirement-view-item">
-                <div className="client-view-req-label">
-                  <span className="client-view-requirement-name">First Communion Certificate (If applicable, for record purposes)</span>
-                </div>
-                {renderStatus(communionData.requirements.firstCommunionCert)}
+              <div className="client-info-view-item">
+              <p>First Communion Certificate(If Applicable, for record purposes)</p>
               </div>
-              
-              {/* Birth Certificate */}
-              <div className="client-requirement-view-item">
-                <div className="client-view-req-label">
-                  <span className="client-view-requirement-name">Birth Certificate (For age verification, required in some parishes)</span>
-                </div>
-                {renderStatus(communionData.requirements.birthCert)}
+              <div className="client-info-view-item">
+              <p>Birth Certificate(For verification purposes)</p>
+              </div>
+              <div className="client-info-view-item">
+              <p>Certificate of Permission(If outside the Parish)</p>
               </div>
             </div>
 

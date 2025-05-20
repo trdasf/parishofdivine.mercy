@@ -1,107 +1,210 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./secretaryactivitiesevent.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
 const SecretaryActivitiesEvent = () => {
   const navigate = useNavigate();
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewEventData, setViewEventData] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // Sample data
-  const sampleEvent = {
-    id: 101,
-    title: "Annual Student Assembly",
-    description: "Yearly gathering of all students for announcements and activities",
-    category: "Assembly",
-    start_date: "05/15/2025",
-    end_date: "05/15/2025",
-    start_time: "09:00 AM",
-    location: "Main Auditorium",
-    organizer: "Youth Ministry",
-    status: "Upcoming",
-    created_at: "03/10/2025",
-    updated_at: "04/05/2025"
+  // Fetch activities on component mount
+  useEffect(() => {
+    fetchActivities();
+  }, []);
+
+  // Fetch activities from the server
+  const fetchActivities = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('https://parishofdivinemercy.com/backend/fetch_activities.php');
+      if (response.data.success) {
+        setActivities(response.data.activities);
+      } else {
+        setMessage({ text: "Failed to fetch activities", type: "error" });
+      }
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      setMessage({ text: "An error occurred while fetching activities", type: "error" });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Handle view button click
   const handleViewClick = (eventData) => {
     setViewEventData(eventData);
     setShowViewModal(true);
   };
 
-  const handleApprove = () => {
-    // Here you would typically update the event status in your database
-    console.log("Event approved:", viewEventData);
-    // Close the modal
-    setShowViewModal(false);
-    // Reset view data
-    setViewEventData(null);
+  // Handle approve button click
+  const handleApprove = async () => {
+    if (!viewEventData || !viewEventData.activityID) {
+      setMessage({ text: "Activity data is missing", type: "error" });
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      setMessage({ text: "", type: "" });
+      
+      // Prepare data for API
+      const updateData = {
+        activityID: viewEventData.activityID,
+        status: "Approved"
+      };
+      
+      const response = await axios.put(
+        "https://parishofdivinemercy.com/backend/fetch_activities.php",
+        updateData
+      );
+      
+      if (response.data.success) {
+        // Update local state
+        const updatedActivity = {...viewEventData, status: "Approved"};
+        setViewEventData(updatedActivity);
+        
+        // Update activities list
+        setActivities(prevActivities => 
+          prevActivities.map(activity => 
+            activity.activityID === updatedActivity.activityID ? updatedActivity : activity
+          )
+        );
+        
+        setMessage({ text: "Activity approved successfully", type: "success" });
+      } else {
+        setMessage({ text: response.data.message || "Failed to approve activity", type: "error" });
+      }
+    } catch (error) {
+      console.error("Error approving activity:", error);
+      setMessage({ 
+        text: error.response?.data?.message || "An error occurred while approving the activity", 
+        type: "error" 
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
+
+  // Filter activities based on status and search term
+  const filteredActivities = activities.filter(activity => {
+    const matchesStatus = statusFilter ? activity.status === statusFilter : true;
+    const matchesSearch = searchTerm 
+      ? activity.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.proposedBy?.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+    return matchesStatus && matchesSearch;
+  });
 
   return (
     <div className="event-container-sae">
       <h1 className="title-sae">EVENTS & ACTIVITIES</h1>
+      
+      {message.text && (
+        <div className={`message ${message.type}`}>
+          {message.text}
+        </div>
+      )}
+      
       <div className="event-actions-sae">
         <div className="search-bar-sae">
-          <input type="text" placeholder="Search" />
+          <input 
+            type="text" 
+            placeholder="Search" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <FontAwesomeIcon icon={faSearch} className="search-icon-sae" />
         </div>
 
         <div className="filter-container-sae">
-          <select className="filter-select-sae">
-            <option value="">Filter Status</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="ongoing">Ongoing</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+          <select 
+            className="filter-select-sae"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="Approved">Approved</option>
+            <option value="Pending">Pending</option>
+           
           </select>
         </div>
       </div>
       <div className="event-table-sae-container">
-        <table className="event-table-sae">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Start Time</th>
-              <th>Location</th>
-              <th>Organizer</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Updated At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{sampleEvent.id}</td>
-              <td>{sampleEvent.title}</td>
-              <td>{sampleEvent.description}</td>
-              <td>{sampleEvent.category}</td>
-              <td>{sampleEvent.start_date}</td>
-              <td>{sampleEvent.end_date}</td>
-              <td>{sampleEvent.start_time}</td>
-              <td>{sampleEvent.location}</td>
-              <td>{sampleEvent.organizer}</td>
-              <td>{sampleEvent.status}</td>
-              <td>{sampleEvent.created_at}</td>
-              <td>{sampleEvent.updated_at}</td>
-              <td>
-                <button
-                  className="sae-details"
-                  onClick={() => handleViewClick(sampleEvent)}
-                >
-                  View
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {loading ? (
+          <div className="loading-container-sb">Loading activities...</div>
+        ) : (
+          <table className="event-table-sae">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Start Date</th>
+                <th>Start Time</th>
+                <th>Location</th>
+                <th>Organizer</th>
+                <th>Proposed By</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredActivities.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="no-data-sb">
+                    No activities found {searchTerm && "for the current search"}
+                  </td>
+                </tr>
+              ) : (
+                filteredActivities.map((activity, index) => (
+                  <tr key={activity.activityID}>
+                    <td>{index + 1}</td>
+                    <td>{activity.title}</td>
+                    <td>{activity.description}</td>
+                    <td>{activity.category}</td>
+                    <td>{formatDate(activity.startDate)}</td>
+                    <td>{activity.startTime}</td>
+                    <td>{activity.location}</td>
+                    <td>{activity.organizer}</td>
+                    <td>{activity.proposedBy}</td>
+                    <td className={`status-${activity.status.toLowerCase()}`}>{activity.status}</td>
+                    <td>
+                      <button
+                        className="sae-details"
+                        onClick={() => handleViewClick(activity)}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Modal for viewing event details */}
@@ -125,15 +228,11 @@ const SecretaryActivitiesEvent = () => {
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Start Date:</div>
-                <div className="detail-value-sae">{viewEventData.start_date}</div>
-              </div>
-              <div className="detail-row-sae">
-                <div className="detail-label-sae">End Date:</div>
-                <div className="detail-value-sae">{viewEventData.end_date}</div>
+                <div className="detail-value-sae">{formatDate(viewEventData.startDate)}</div>
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Start Time:</div>
-                <div className="detail-value-sae">{viewEventData.start_time}</div>
+                <div className="detail-value-sae">{viewEventData.startTime}</div>
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Location:</div>
@@ -144,24 +243,40 @@ const SecretaryActivitiesEvent = () => {
                 <div className="detail-value-sae">{viewEventData.organizer}</div>
               </div>
               <div className="detail-row-sae">
+                <div className="detail-label-sae">Proposed By:</div>
+                <div className="detail-value-sae">{viewEventData.proposedBy}</div>
+              </div>
+              <div className="detail-row-sae">
                 <div className="detail-label-sae">Status:</div>
-                <div className="detail-value-sae">{viewEventData.status}</div>
+                <div className={`detail-value-sae status-${viewEventData.status.toLowerCase()}`}>
+                  {viewEventData.status}
+                </div>
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Created At:</div>
-                <div className="detail-value-sae">{viewEventData.created_at}</div>
+                <div className="detail-value-sae">
+                  {viewEventData.created_at ? new Date(viewEventData.created_at).toLocaleString() : ""}
+                </div>
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Updated At:</div>
-                <div className="detail-value-sae">{viewEventData.updated_at}</div>
+                <div className="detail-value-sae">
+                  {viewEventData.updated_at ? new Date(viewEventData.updated_at).toLocaleString() : ""}
+                </div>
               </div>
             </div>
             <div className="modal-actions-sae">
-              <button onClick={handleApprove} className="approve-btn-sae">
-                Approve
-              </button>
+              {viewEventData.status === "Pending" && (
+                <button 
+                  onClick={handleApprove} 
+                  className="approve-btn-sae"
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? "Approving..." : "Approve"}
+                </button>
+              )}
               <button onClick={() => setShowViewModal(false)} className="cancel-btn-sae">
-                Cancel
+                Close
               </button>
             </div>
           </div>

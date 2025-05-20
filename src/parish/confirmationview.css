@@ -727,3 +727,38 @@
     align-items: center;
     gap: 15px;
   }
+  
+  /* Schedule container styling */
+  .conf-view-schedule-container {
+    margin-bottom: 30px;
+  }
+  
+  .conf-view-schedule-container .conf-view-info-card {
+    background-color: #fff;
+    border-top: 1px solid #f8d7da;
+    border-right: 1px solid #f8d7da;
+    border-bottom: 1px solid #f8d7da;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #b3701f;
+  }
+  
+  /* Priest container styling */
+  .conf-view-priest-container {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+  
+  .conf-view-priest-container .conf-view-info-card {
+    background-color: #fff;
+    border-top: 1px solid #f8d7da;
+    border-right: 1px solid #f8d7da;
+    border-bottom: 1px solid #f8d7da;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #b3701f;
+  }
