@@ -126,9 +126,9 @@ try {
         
         error_log('[BLESSING_EMAIL] Preparing to send approval email to: ' . $userEmail . ' (' . $fullName . ')');
 
-        // Get the blessing details
+        // Get the blessing details (for blessing type, purpose, location, etc.)
         $stmt = $conn->prepare("
-            SELECT b.firstName, b.middleName, b.lastName, b.preferredDate, b.preferredTime, b.priestName,
+            SELECT b.firstName, b.middleName, b.lastName,
                 bt.blessing_type, bt.purpose, bt.note,
                 ba.street, ba.barangay, ba.municipality, ba.province
             FROM blessing_application b 
@@ -148,6 +148,26 @@ try {
         }
         
         $blessingData = $blessingResult->fetch_assoc();
+
+        // Get the approved appointment details (this is the key fix!)
+        $stmt = $conn->prepare("
+            SELECT date, time, priest 
+            FROM approved_appointments 
+            WHERE sacramentID = ? AND sacrament_type = 'blessing'");
+        
+        if (!$stmt) {
+            handleError("Prepare statement failed for appointment query", $conn->error);
+        }
+        
+        $stmt->bind_param("i", $blessingID);
+        $stmt->execute();
+        $appointmentResult = $stmt->get_result();
+        
+        if ($appointmentResult->num_rows == 0) {
+            handleError("Approved appointment details not found for blessing ID: " . $blessingID);
+        }
+        
+        $appointmentData = $appointmentResult->fetch_assoc();
         
         // Create new PHPMailer instance
         $mail = new PHPMailer(true);
@@ -169,10 +189,12 @@ try {
             $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
             $mail->addAddress($userEmail, $fullName);
 
-            // Format the date for display
-            $blessingDate = isset($blessingData['preferredDate']) ? date('F j, Y', strtotime($blessingData['preferredDate'])) : '';
-            $blessingTime = isset($blessingData['preferredTime']) ? $blessingData['preferredTime'] : '';
-            $priest = isset($blessingData['priestName']) ? $blessingData['priestName'] : '';
+            // Format the date for display - USE APPOINTMENT DATA instead of blessing data
+            $blessingDate = isset($appointmentData['date']) ? date('F j, Y', strtotime($appointmentData['date'])) : '';
+            $blessingTime = isset($appointmentData['time']) ? $appointmentData['time'] : '';
+            $priest = isset($appointmentData['priest']) ? $appointmentData['priest'] : '';
+            
+            // These remain from blessing data since they don't change
             $blessingType = isset($blessingData['blessing_type']) ? ucfirst($blessingData['blessing_type']) . ' Blessing' : '';
             $purpose = isset($blessingData['purpose']) ? $blessingData['purpose'] : '';
             $note = isset($blessingData['note']) ? $blessingData['note'] : '';

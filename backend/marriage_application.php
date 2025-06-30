@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -24,7 +28,11 @@ if ($conn->connect_error) {
 try {
     $conn->begin_transaction();
 
-    $clientID = $_POST['clientID'];
+    // Extract clientID - if it exists use it, otherwise set to null
+    $clientID = $_POST['clientID'] ?? null;
+    
+    error_log("ClientID: " . ($clientID ?? 'NULL'));
+
     $applicationData = json_decode($_POST['applicationData'], true);
     $groomAddressData = json_decode($_POST['groomAddressData'], true);
     $brideAddressData = json_decode($_POST['brideAddressData'], true);
@@ -41,10 +49,9 @@ try {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
     $stmt->bind_param("issssssssssssssssss", 
-        $clientID, 
+        $clientID,  // This can now be null
         $applicationData['date'], 
         $applicationData['time'], 
-       
         $applicationData['groom_first_name'],
         $applicationData['groom_middle_name'],
         $applicationData['groom_last_name'],
@@ -63,8 +70,13 @@ try {
         $applicationData['bride_placeOfBirth']
     );
     
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting marriage application: " . $stmt->error);
+    }
+    
     $marriageID = $conn->insert_id;
+    error_log("Created marriage application with ID: " . $marriageID);
+    $stmt->close();
 
     // Insert groom's address
     $stmt = $conn->prepare("INSERT INTO marriage_groom_address (
@@ -79,7 +91,11 @@ try {
         $groomAddressData['province'],
         $groomAddressData['region']
     );
-    $stmt->execute();
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting groom address: " . $stmt->error);
+    }
+    $stmt->close();
 
     // Insert bride's address
     $stmt = $conn->prepare("INSERT INTO marriage_bride_address (
@@ -94,7 +110,11 @@ try {
         $brideAddressData['province'],
         $brideAddressData['region']
     );
-    $stmt->execute();
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting bride address: " . $stmt->error);
+    }
+    $stmt->close();
 
     // Insert first witness
     $stmt = $conn->prepare("INSERT INTO marriage_first_witness (
@@ -117,7 +137,11 @@ try {
         $firstWitnessData['province'],
         $firstWitnessData['region']
     );
-    $stmt->execute();
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting first witness: " . $stmt->error);
+    }
+    $stmt->close();
 
     // Insert second witness
     $stmt = $conn->prepare("INSERT INTO marriage_second_witness (
@@ -140,7 +164,11 @@ try {
         $secondWitnessData['province'],
         $secondWitnessData['region']
     );
-    $stmt->execute();
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting second witness: " . $stmt->error);
+    }
+    $stmt->close();
 
     // Handle requirements
     $uploadDir = "../uploads/marriage_requirements/";
@@ -202,13 +230,21 @@ try {
     if (!$stmt->execute()) {
         throw new Exception("Error inserting requirements: " . $stmt->error);
     }
+    $stmt->close();
 
     $conn->commit();
-    $response = ["success" => true, "message" => "Marriage application submitted"];
+    $response = [
+        "success" => true, 
+        "message" => "Marriage application submitted successfully",
+        "marriageID" => $marriageID
+    ];
+    
 } catch (Exception $e) {
     $conn->rollback();
+    error_log("Error: " . $e->getMessage());
     $response = ["success" => false, "message" => $e->getMessage()];
 }
 
 $conn->close();
-echo json_encode($response); 
+echo json_encode($response);
+?>

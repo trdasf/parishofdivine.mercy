@@ -107,8 +107,7 @@ const SecretaryReport = () => {
     return (formValues.amount * formValues.quantity).toFixed(2);
   };
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
+  const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
@@ -133,11 +132,84 @@ const SecretaryReport = () => {
     return date.toLocaleString('default', { month: 'long' });
   };
 
-  // Filter expenses based on search term (local filtering)
+  // Function to format numbers with commas for searching
+  const formatNumberForSearch = (number) => {
+    if (number == null || number === '') return '';
+    return new Intl.NumberFormat('en-US').format(number);
+  };
+
+  // Function to normalize numbers for searching (handles both 5000 and 5,000)
+  const normalizeNumberForSearch = (searchValue) => {
+    // Remove commas and convert to number, then back to string
+    const numberOnly = searchValue.replace(/,/g, '');
+    if (!isNaN(numberOnly) && numberOnly !== '') {
+      return numberOnly;
+    }
+    return searchValue;
+  };
+
+  // Filter expenses based on search term with flexible matching
   const filteredExpenses = expenses.filter(expense => {
-    return searchTerm === "" || 
-      expense.expenseName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      expense.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!searchTerm.trim()) {
+      return true;
+    }
+
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    
+    // Normalize both data and search by trimming and replacing multiple spaces
+    const expenseName = expense.expenseName?.toLowerCase().trim() || '';
+    const category = expense.category?.toLowerCase().trim() || '';
+    const description = expense.description?.toLowerCase().trim() || '';
+    
+    // Handle numeric fields - convert to string and handle both formatted and unformatted numbers
+    const amount = expense.amount?.toString() || '';
+    const amountFormatted = formatNumberForSearch(expense.amount);
+    const quantity = expense.quantity?.toString() || '';
+    const quantityFormatted = formatNumberForSearch(expense.quantity);
+    const totalCost = expense.totalCost?.toString() || '';
+    const totalCostFormatted = formatNumberForSearch(expense.totalCost);
+    
+    // Format date to YYYY-MM-DD
+    const formattedDate = expense.dateOfExpense ? new Date(expense.dateOfExpense).toISOString().split('T')[0] : '';
+    
+    // Normalize search value by replacing multiple spaces with single space
+    const normalizedSearchValue = searchValue.replace(/\s+/g, ' ');
+    // Also normalize for number searching
+    const normalizedNumberSearch = normalizeNumberForSearch(normalizedSearchValue);
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      return (
+        expenseName.startsWith(normalizedSearchValue) ||
+        category.startsWith(normalizedSearchValue) ||
+        description.startsWith(normalizedSearchValue) ||
+        amount.startsWith(normalizedNumberSearch) ||
+        amountFormatted.startsWith(normalizedSearchValue) ||
+        quantity.startsWith(normalizedNumberSearch) ||
+        quantityFormatted.startsWith(normalizedSearchValue) ||
+        totalCost.startsWith(normalizedNumberSearch) ||
+        totalCostFormatted.startsWith(normalizedSearchValue) ||
+        formattedDate.startsWith(normalizedSearchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      return (
+        expenseName.includes(normalizedSearchValue) ||
+        category.includes(normalizedSearchValue) ||
+        description.includes(normalizedSearchValue) ||
+        amount.includes(normalizedNumberSearch) ||
+        amountFormatted.includes(normalizedSearchValue) ||
+        quantity.includes(normalizedNumberSearch) ||
+        quantityFormatted.includes(normalizedSearchValue) ||
+        totalCost.includes(normalizedNumberSearch) ||
+        totalCostFormatted.includes(normalizedSearchValue) ||
+        formattedDate.includes(normalizedSearchValue)
+      );
+    }
   });
 
   const handleSubmit = async (e) => {
@@ -235,11 +307,7 @@ const SecretaryReport = () => {
       // Extract just the date part if the format has time component
       const datePart = dateTimeString.split(' ')[0];
       const date = new Date(datePart);
-      return date.toLocaleString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      });
+      return date.toISOString().split('T')[0]; // Return YYYY-MM-DD format
     } catch (e) {
       return dateTimeString; // Return as is if it can't be parsed
     }
@@ -389,9 +457,9 @@ const SecretaryReport = () => {
         <div className="search-bar-sr">
           <input 
             type="text" 
-            placeholder="Search expenses by name or description" 
+            placeholder="Search expenses by name, category, amount, quantity, total cost, or date" 
             value={searchTerm} 
-            onChange={handleSearchChange}
+            onChange={handleSearch}
           />
           <FontAwesomeIcon icon={faSearch} className="search-icon-sr" />
         </div>
@@ -471,9 +539,6 @@ const SecretaryReport = () => {
           <div className="report-modal-sr">
             <div className="report-modal-header-sr">
               <h2>{isEditing ? 'Edit Expense' : 'Add New Expense'}</h2>
-              <button className="close-modal-btn-sr" onClick={() => toggleModal()}>
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
             </div>
             <div>
               <hr className="custom-hr-sr"/>
@@ -531,7 +596,10 @@ const SecretaryReport = () => {
                     onChange={handleInputChange}
                   />
                 </div>
-                <div className="form-group-sr">
+              </div>
+
+              <div className="form-row-sr">
+                 <div className="form-group-sr">
                   <label>Total Cost (₱)</label>
                   <input 
                     type="number" 
@@ -540,9 +608,6 @@ const SecretaryReport = () => {
                     value={calculateTotalCost()}
                   />
                 </div>
-              </div>
-
-              <div className="form-row-sr">
                 <div className="form-group-sr">
                   <label>Date of Expense</label>
                   {isEditing ? (

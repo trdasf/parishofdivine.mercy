@@ -1,730 +1,735 @@
 /* Main container styling */
 .client-baptism-container {
-    padding-left: 50px;
-    padding-right: 50px;
-    padding-top: 20px;
-    width: 100%;
-    height: 100vh;
-    overflow-y: auto;
-  }
-  
-  /* Scrollbar styling */
-  .client-baptism-container::-webkit-scrollbar {
-    width: 5px;
-    background-color: #ffffff;
-  }
-  
-  .client-baptism-container::-webkit-scrollbar-thumb {
-    background-color: #dbdbdb;
-    border-radius: 5px;
-  }
-  
-  .client-baptism-container::-webkit-scrollbar-track {
-    background-color: #ffffff;
-  }
-  
-  /* Header styling */
-  .client-baptism-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 30px;
-  }
-  
-  .client-left-section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  
-  .client-back-button {
-    background-color: transparent;
-    color: #710808;
-    border: none;
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    font-family: Roboto;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  
-  .client-back-icon {
-    font-size: 22px;
-    margin-right: 5px;
-    font-weight: 700;
-  }
-  
-  .client-back-button:hover {
-    color: #5a0606;
-  }
-  
-  .client-title {
-    font-size: 35px;
-    font-weight: 800;
-    color: #573901;
-    font-family: Montserrat;
-    letter-spacing: 1px;
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  .client-pdf-button {
-    background: #b3701f;
-    border: 1px solid #b3701f;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-family: Roboto;
-    letter-spacing: 1px;
-    width: 130px;
-  }
-  
-  .client-pdf-button:hover {
-    background: #d19a15;
-    border: 1px solid #d19a15;
-    color: white;
-  }
-  
-  /* Baptismal data section */
-  .client-baptismal-data h2 {
-    font-size: 24px;
-    font-weight: 900;
-    color: #b3701f;
-    font-family: Roboto;
-    letter-spacing: 1px;
-  }
-  
-  .client-baptismal-row-date {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 15px;
-    align-items: center;
-  }
-  
-  /* Label & Input in a row */
-  .client-baptismal-field-date,
-  .client-baptismal-field-time {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  /* Labels Styling */
-  .client-baptismal-field-date label,
-  .client-baptismal-field-time label {
-    font-weight: 500;
-    font-size: 14px;
-    color: #000;
-    min-width: 120px;
-    text-align: left;
-    margin-top: 22px;
-    font-family: Roboto;
-  }
-  
-  /* Input Styling */
-  .client-baptismal-field-date input,
-  .client-baptismal-field-time input,   .client-baptismal-field-date select,
-  .client-baptismal-field-time select {
-    padding: 8px;
-    background-color: #ffffff;
-    color: #000;
-    border: none;
-    border-bottom: 2px solid #ccc;
-    outline: none;
-    font-size: 16px;
-    width: 200px;
-  }
-  
-  /* Name of the Priest input styling */
-  .client-notp {
-    width: 250px;
-    padding: 8px;
-    border: none;
-    border-bottom: 2px solid #b3701f;
-    outline: none;
-    font-size: 16px;
-  }
-  
-  .client-bypart {
-    margin-top: 40px;
-  }
-  
-  .client-sub-title {
-    font-size: 18px;
-    font-weight: 900;
-    color: #573901;
-    font-family: Roboto;
-    letter-spacing: 1px;
-    text-align: left;
-    margin-bottom: 15px;
-    margin-top: 40px;
-  }
-  .client-sub-title-pob {
-    font-size: 14px;
-    font-weight: 900;
-    color: #573901;
-    font-family: Roboto;
-    letter-spacing: 1px;
-    text-align: left;
-    margin-bottom: 5px;
-    margin-top: 5px;
-  }
-  
-  .client-baptismal-row-pms {
-    display: flex;
-    align-items: flex-start;
-    gap: 30px;
-    margin-bottom: 10px;
-    width: 100%;
-  }
-  
-  /* Section Label */
-  .client-section-label {
-    font-weight: 100;
-    font-size: 12px;
-    display: flex;
-    margin-bottom: 12px;
-    color: #000;
-    font-family: roboto;
-  }
-  
-  /* Marital Status Section */
-  .client-marital-status {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Marital Options (Checkboxes) */
-  .client-marital-options {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-  }
-  
-  .client-pms-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #000;
-    font-family: "Roboto";
-    font-weight: 200;
-    font-size: 14px;
-    margin-right: 20px;
-  }
-  
-  .client-pms-label label {
-    color: #000;
-    font-family: "Roboto";
-    font-weight: 400;
-    font-size: 14px;
-  }
-  
-  /* Improved Checkbox Design */
-  .client-marital-options input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #000;
-    border-radius: 4px;
-    appearance: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-  
-  /* Centered Checkmark */
-  .client-marital-options input[type="checkbox"]:checked {
-    background-color: #b3701f;
-    border-color: #d19a15;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .client-marital-options input[type="checkbox"]:checked::after {
-    content: "✓";
-    font-size: 14px;
-    color: white;
-    font-weight: bold;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  
-  /* "Number of Years Married" */
-  .client-years-married {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-    margin-top: 30px;
-  }
-  
-  .client-years-married label {
-    color: #000;
-    font-family: "Roboto";
-    font-weight: 400;
-    font-size: 14px;
-  }
-  
-  .client-short-input {
-    width: 60px;
-    border: none;
-    border-bottom: 2px solid #000;
-    outline: none;
-    text-align: center;
-    font-size: 16px;
-    background-color: #ffffff;
-    color: #000;
-  }
-  
-  /* Baptismal row styling */
-  .client-baptismal-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-  }
-  
-  .client-baptismal-field {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .client-baptismal-field-ga {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .client-baptismal-field-ga label {
-    font-weight: 500;
-    font-size: 13px;
-    margin-bottom: 5px;
-    color: #000;
-    font-family: Roboto, sans-serif;
-  }
-  
-  .client-baptismal-field-ga input, .client-baptismal-field-ga select {
-    width: 105px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: #000;
-  }
-  
-  .client-baptismal-field label {
-    font-weight: 500;
-    font-size: 13px;
-    margin-bottom: 5px;
-    color: #000;
-    font-family: roboto;
-  }
-  
-  .client-baptismal-field input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: #000;
-  }
-  .date-input {
-    position: relative;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: white;
-    color: #333;
-    appearance: none; /* hide default styles */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
-  }
-  
-  .date-input::-webkit-calendar-picker-indicator {
-    filter: invert(0.5);
-    cursor: pointer;
-  }
-  
-  
-  
-  .client-baptismal-field-pob {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .client-baptismal-field-pob label {
-    font-weight: 500;
-    font-size: 13px;
-    margin-bottom: 5px;
-    color: #000;
-    font-family: Roboto, sans-serif;
-  }
-  
-  .client-baptismal-field-pob input {
-    width: 270px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: #000;
-  }
-  
-  .client-baptismal-field-fpob {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .client-baptismal-field-fpob label {
-    font-weight: 500;
-    font-size: 13px;
-    margin-bottom: 5px;
-    color: #000;
-    font-family: Roboto, sans-serif;
-  }
-  
-  .client-baptismal-field-fpob input {
-    width: 320px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: #000;
-  }
-  
-  .client-add-button {
-    background-color: #a56a00;
-    color: white;
-    border: none;
-    padding: 2px;
-    width: 50px;
-    height: 35px;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 5px;
-    font-family: roboto;
-    margin-top: 23px;
-  }
-  
-  /* Requirements container styling */
-  .client-requirements-container {
-    width: 100%;
-    margin: 20px auto;
-    font-family: "Roboto", sans-serif;
-  }
-  
-  .client-requirements-title {
-    font-size: 22px;
-    font-weight: bold;
-    color: #b36b09;
-    margin-bottom: 10px;
-    font-family: Montserrat;
-  }
-  
-  .client-requirements-box {
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 5px;
-    background-color: #fff;
-  }
-  
-  .client-section-header {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    margin-top: 15px;
-    margin-bottom: 15px;
-    font-family: Montserrat;
-    margin-left: 20px;
-  }
-  
-  .client-checkbox-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-left: 60px;
-    margin-bottom: 30px;
-  }
-  
-  .client-checkbox-list label {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    color: #000;
-    font-family: Roboto;
-    font-weight: 400;
-    cursor: pointer;
-  }
-  
-  .client-checkbox-list input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #000;
-    border-radius: 4px;
-    appearance: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-right: 10px;
-  }
-  
-  .client-checkbox-list input[type="checkbox"]:checked {
-    background-color: #b3701f;
-    border-color: #d19a15;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .client-checkbox-list input[type="checkbox"]:checked::after {
-    content: "✓";
-    font-size: 14px;
-    color: white;
-    font-weight: bold;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  
-  /* Address row and dropdown styling */
-  .client-address-row {
-    margin-top: 20px;
-  }
-  
-  .client-address-dropdown {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: #333;
-    font-family: Roboto, sans-serif;
-  }
-  
-  /* Requirement item with upload buttons */
-  .client-requirement-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-  
-  .client-upload-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
-  }
-  
-  .client-upload-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .client-upload-button {
-    background-color: #b3701f;
-    color: white;
-    border: 1px solid #b3701f;
-    border-radius: 4px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-family: Roboto, sans-serif;
-    font-size: 14px;
-  }
-  
-  .client-upload-button:hover {
-    background-color: #d19a15;
-    border-color: #d19a15;
-  }
-  
-  .client-status-dropdown {
-    padding: 5px 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    min-width: 120px;
-  }
-  
-  .client-status-not-submitted {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  .client-status-submitted {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .client-file-preview {
-    margin-top: 5px;
-    font-size: 12px;
-    color: #666;
-    padding-left: 24px;
-    width: 100%;
-  }
-  
-  /* Button styling */
-  .client-button-container {
-    display: flex;
-    gap: 100px;
-    justify-content: center;
-    margin-top: 50px;
-    margin-bottom: 70px;
-  }
-  
-  .client-submit-btn, .client-cancel-btn {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    font-family: "Roboto", sans-serif;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 120px;
-    text-align: center;
-  }
-  
-  .client-submit-btn {
-    background-color: #b3701f;
-    color: white;
-  }
-  
-  .client-submit-btn:hover {
-    background-color: #d19a15;
-  }
-  
-  .client-cancel-btn {
-    background-color: #a32835;
-    color: white;
-  }
-  
-  .client-cancel-btn:hover {
-    background-color: #c82333;
-  }
-  
-  /* Modal styling */
-  .client-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .client-modal {
-    background-color: white;
-    margin: 0;
-    padding: 0;
-    border-radius: 8px;
-    width: 400px;
-    text-align: center;
-  }
-  
-  .client-modal h2 {
-    margin-top: 0;
-    color: #573901;
-    font-family: Montserrat;
-    margin-bottom: 20px;
-    margin-top: 20px;
-  }
-  
-  .client-modal p {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 20px;
-    font-family: Roboto;
-    color: #000;
-  }
-  
-  .client-modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-bottom: 30px;
-  }
-  
-  .client-yes-btn {
-    background-color: #b3701f;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-family: Roboto;
-    width: 120px;
-  }
-  
-  .client-yes-btn:hover {
-    background-color: #d19a15;
-  }
-  
-  .client-modal-no-btn {
-    background-color: #a32835;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-family: Roboto;
-    width: 120px;
-  }
-  
-  .client-modal-no-btn:hover {
-    background-color: #c82333;
-  }
-  .client-info-list {
-    margin-left: 1rem;
-    padding-left: 1rem;
-    border-left: 3px solid #710808; /* Optional styling line */
-  }
-  
-  .client-info-item {
-    background-color: #f9f9f9;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  .client-info-item p {
-    margin: 0;
-    font-size: 1rem;
-    color: #555;
-    line-height: 1.5;
-    font-family: Roboto;
-    font-weight: 400;
-  }
-    /* In your CSS */
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 20px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.client-baptism-container::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.client-baptism-container::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.client-baptism-container::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+/* Header styling */
+.client-baptism-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.client-left-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.client-back-button {
+  background-color: transparent;
+  color: #710808;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-family: Roboto;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.client-back-icon {
+  font-size: 22px;
+  margin-right: 5px;
+  font-weight: 700;
+}
+
+.client-back-button:hover {
+  color: #5a0606;
+}
+
+.client-title {
+  font-size: 35px;
+  font-weight: 800;
+  color: #573901;
+  font-family: Montserrat;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.client-pdf-button {
+  background: #b3701f;
+  border: 1px solid #b3701f;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  width: 130px;
+}
+
+.client-pdf-button:hover {
+  background: #d19a15;
+  border: 1px solid #d19a15;
+  color: white;
+}
+
+/* Baptismal data section */
+.client-baptismal-data h2 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #b3701f;
+  font-family: Roboto;
+  letter-spacing: 1px;
+}
+
+.client-baptismal-row-date {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+/* Label & Input in a row */
+.client-baptismal-field-date,
+.client-baptismal-field-time {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Labels Styling */
+.client-baptismal-field-date label,
+.client-baptismal-field-time label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  min-width: 120px;
+  text-align: left;
+  margin-top: 22px;
+  font-family: Roboto;
+}
+
+/* Input Styling */
+.client-baptismal-field-date input,
+.client-baptismal-field-time input,
+.client-baptismal-field-date select,
+.client-baptismal-field-time select {
+  padding: 8px;
+  background-color: #ffffff;
+  color: #000;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  outline: none;
+  font-size: 16px;
+  width: 200px;
+}
+
+/* Name of the Priest input styling */
+.client-notp {
+  width: 250px;
+  padding: 8px;
+  border: none;
+  border-bottom: 2px solid #b3701f;
+  outline: none;
+  font-size: 16px;
+}
+
+.client-bypart {
+  margin-top: 40px;
+}
+
+.client-sub-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  text-align: left;
+  margin-bottom: 15px;
+  margin-top: 40px;
+}
+
+.client-sub-title-pob {
+  font-size: 14px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  text-align: left;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.client-baptismal-row-pms {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+/* Section Label */
+.client-section-label {
+  font-weight: 100;
+  font-size: 12px;
+  display: flex;
+  margin-bottom: 12px;
+  color: #000;
+  font-family: roboto;
+}
+
+/* Marital Status Section */
+.client-marital-status {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Marital Options (Checkboxes) */
+.client-marital-options {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.client-pms-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #000;
+  font-family: "Roboto";
+  font-weight: 200;
+  font-size: 14px;
+  margin-right: 20px;
+}
+
+.client-pms-label label {
+  color: #000;
+  font-family: "Roboto";
+  font-weight: 400;
+  font-size: 14px;
+}
+
+/* Improved Checkbox Design */
+.client-marital-options input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Centered Checkmark */
+.client-marital-options input[type="checkbox"]:checked {
+  background-color: #b3701f;
+  border-color: #d19a15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.client-marital-options input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* "Number of Years Married" */
+.client-years-married {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  margin-top: 30px;
+}
+
+.client-years-married label {
+  color: #000;
+  font-family: "Roboto";
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.client-short-input {
+  width: 60px;
+  border: none;
+  border-bottom: 2px solid #000;
+  outline: none;
+  text-align: center;
+  font-size: 16px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+/* Baptismal row styling */
+.client-baptismal-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.client-baptismal-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.client-baptismal-field-ga {
+  display: flex;
+  flex-direction: column;
+}
+
+.client-baptismal-field-ga label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+.client-baptismal-field-ga input, 
+.client-baptismal-field-ga select {
+  width: 105px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.client-baptismal-field label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: roboto;
+}
+
+.client-baptismal-field input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.date-input {
+  position: relative;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+.client-baptismal-field-pob {
+  display: flex;
+  flex-direction: column;
+}
+
+.client-baptismal-field-pob label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+.client-baptismal-field-pob input {
+  width: 270px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.client-baptismal-field-fpob {
+  display: flex;
+  flex-direction: column;
+}
+
+.client-baptismal-field-fpob label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto, sans-serif;
+}
+
+.client-baptismal-field-fpob input {
+  width: 320px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.client-add-button {
+  background-color: #a56a00;
+  color: white;
+  border: none;
+  padding: 2px;
+  width: 50px;
+  height: 35px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+  font-family: roboto;
+  margin-top: 23px;
+}
+
+/* Requirements container styling */
+.client-requirements-container {
+  width: 100%;
+  margin: 20px auto;
+  font-family: "Roboto", sans-serif;
+}
+
+.client-requirements-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #b36b09;
+  margin-bottom: 10px;
+  font-family: Montserrat;
+}
+
+.client-requirements-box {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.client-section-header {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-family: Montserrat;
+  margin-left: 20px;
+}
+
+.client-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 60px;
+  margin-bottom: 30px;
+}
+
+.client-checkbox-list label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #000;
+  font-family: Roboto;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.client-checkbox-list input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-right: 10px;
+}
+
+.client-checkbox-list input[type="checkbox"]:checked {
+  background-color: #b3701f;
+  border-color: #d19a15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.client-checkbox-list input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Address row and dropdown styling */
+.client-address-row {
+  margin-top: 20px;
+}
+
+.client-address-dropdown {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #333;
+  font-family: Roboto, sans-serif;
+}
+
+/* Requirement item with upload buttons */
+.client-requirement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.client-upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.client-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.client-upload-button {
+  background-color: #b3701f;
+  color: white;
+  border: 1px solid #b3701f;
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-family: Roboto, sans-serif;
+  font-size: 14px;
+}
+
+.client-upload-button:hover {
+  background-color: #d19a15;
+  border-color: #d19a15;
+}
+
+.client-status-dropdown {
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.client-status-not-submitted {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.client-status-submitted {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.client-file-preview {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #666;
+  padding-left: 24px;
+  width: 100%;
+}
+
+/* Button styling */
+.client-button-container {
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+  margin-top: 50px;
+  margin-bottom: 200px;
+}
+
+.client-submit-btn, 
+.client-cancel-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: "Roboto", sans-serif;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 120px;
+  text-align: center;
+}
+
+.client-submit-btn {
+  background-color: #b3701f;
+  color: white;
+}
+
+.client-submit-btn:hover {
+  background-color: #d19a15;
+}
+
+.client-cancel-btn {
+  background-color: #a32835;
+  color: white;
+}
+
+.client-cancel-btn:hover {
+  background-color: #c82333;
+}
+
+/* Modal styling */
+.client-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.client-modal {
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+}
+
+.client-modal h2 {
+  margin-top: 0;
+  color: #573901;
+  font-family: Montserrat;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.client-modal p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 20px;
+  font-family: Roboto;
+  color: #000;
+}
+
+.client-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.client-yes-btn {
+  background-color: #b3701f;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  width: 120px;
+}
+
+.client-yes-btn:hover {
+  background-color: #d19a15;
+}
+
+.client-modal-no-btn {
+  background-color: #a32835;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  width: 120px;
+}
+
+.client-modal-no-btn:hover {
+  background-color: #c82333;
+}
+
+.client-info-list {
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #710808;
+}
+
+.client-info-item {
+  background-color: #f9f9f9;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.client-info-item p {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+  font-family: Roboto;
+  font-weight: 400;
+}
+
 .custom-hr-b {
   border: none;
   height: 2px;
   background: linear-gradient(to right, #710808, #ffcccc);
   width: 100%;
 }
-/* Additional CSS for location dropdowns */
+
+/* Location dropdown styling */
 .location-dropdown-container {
   position: relative;
 }
@@ -908,4 +913,707 @@
   0% { opacity: 0.6; }
   50% { opacity: 1; }
   100% { opacity: 0.6; }
+}
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .client-baptism-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .client-title {
+    font-size: 32px;
+  }
+  
+  .client-baptismal-field-date input,
+  .client-baptismal-field-time input,
+  .client-baptismal-field-date select,
+  .client-baptismal-field-time select {
+    width: 180px;
+  }
+  
+  .client-baptismal-field-pob input {
+    width: 240px;
+  }
+  
+  .client-baptismal-field-fpob input {
+    width: 280px;
+  }
+  
+  .client-button-container {
+    gap: 80px;
+    margin-bottom: 200px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .client-baptism-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .client-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  .client-baptism-header {
+    margin-bottom: 20px;
+  }
+  
+  .client-back-button {
+    font-size: 16px;
+  }
+  
+  .client-back-icon {
+    font-size: 20px;
+  }
+  
+  /* Make date/time row responsive */
+  .client-baptismal-row-date {
+    flex-direction: row;
+    gap: 30px;
+    align-items: stretch;
+  }
+  
+  .client-baptismal-field-date,
+  .client-baptismal-field-time {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .client-baptismal-field-date label,
+  .client-baptismal-field-time label {
+    min-width: auto;
+    white-space: nowrap;
+    margin-top: 0;
+    font-size: 13px;
+  }
+  
+  .client-baptismal-field-date input,
+  .client-baptismal-field-time input,
+  .client-baptismal-field-date select,
+  .client-baptismal-field-time select {
+    width: 140px;
+    font-size: 14px;
+  }
+  
+  /* Make main form rows responsive */
+  .client-baptismal-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .client-baptismal-field-ga input,
+  .client-baptismal-field-ga select {
+    width: 100%;
+  }
+  
+  .client-baptismal-field-pob input {
+    width: 100%;
+  }
+  
+  .client-baptismal-field-fpob input {
+    width: 100%;
+  }
+  
+  /* Marital status responsive */
+  .client-baptismal-row-pms {
+    gap: 20px;
+  }
+  
+  .client-marital-options {
+    gap: 8px;
+  }
+  
+  .client-years-married {
+    margin-top: 30px;
+    justify-content: flex-start;
+  }
+  
+  /* Address row responsive */
+  .client-address-row {
+    gap: 15px;
+  }
+  
+  /* Button container responsive */
+  .client-button-container {
+    gap: 50px;
+    margin-top: 40px;
+    margin-bottom: 200px;
+  }
+  
+  .client-submit-btn,
+  .client-cancel-btn {
+    width: 100px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal responsive */
+  .client-modal {
+    width: 90%;
+    max-width: 350px;
+    margin: 20px;
+  }
+  
+  .client-modal-buttons {
+    gap: 20px;
+  }
+  
+  .client-yes-btn,
+  .client-modal-no-btn {
+    width: 100px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section responsive */
+  .client-section-header {
+    margin-left: 10px;
+    font-size: 16px;
+  }
+  
+  .client-checkbox-list {
+    margin-left: 30px;
+  }
+  
+  .client-info-list {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  
+  /* Godparent section responsive */
+  .client-add-button {
+    width: 60px;
+    height: 40px;
+    font-size: 12px;
+    margin-top: 20px;
+  }
+  
+  .added-godparent {
+    padding: 6px 10px;
+  }
+  
+  .added-godparent span {
+    font-size: 13px;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .client-baptism-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .client-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+    .client-baptismal-row-date {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+    .client-baptismal-field-date,
+  .client-baptismal-field-time {
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-start;
+  }
+    .client-baptismal-field-date label,
+  .client-baptismal-field-time label {
+    font-size: 13px;
+    text-align: left;
+  }
+    .client-baptismal-field-date input,
+  .client-baptismal-field-time input,
+  .client-baptismal-field-date select,
+  .client-baptismal-field-time select {
+    font-size: 12px;
+    width: 180px;
+  }
+  .client-baptism-header {
+    margin-bottom: 15px;
+  }
+  
+  .client-back-button {
+    font-size: 14px;
+  }
+  
+  .client-back-icon {
+    font-size: 18px;
+  }
+  
+  .client-sub-title {
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  
+  .client-bypart {
+    margin-top: 30px;
+  }
+  
+  /* Section labels smaller */
+  .client-section-label {
+    font-size: 11px;
+  }
+  
+  /* Smaller form fields */
+  .client-baptismal-field label {
+    font-size: 12px;
+  }
+  
+  .client-baptismal-field input,
+  .client-baptismal-field select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .client-baptismal-field-ga label {
+    font-size: 12px;
+  }
+  
+  .client-baptismal-field-ga input,
+  .client-baptismal-field-ga select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Date inputs */
+  .date-input {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Marital status options stack vertically */
+  .client-pms-label {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .client-pms-label label {
+    font-size: 13px;
+  }
+  
+  .client-years-married label {
+    margin-top: 15px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .client-short-input {
+    width: 50px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section */
+  .client-section-header {
+    font-size: 15px;
+    margin-left: 5px;
+  }
+  
+  .client-checkbox-list {
+    margin-left: 20px;
+  }
+  
+  .client-checkbox-list label {
+    font-size: 14px;
+  }
+  
+  .client-info-item p {
+    font-size: 0.9rem;
+  }
+  
+  /* Button adjustments */
+  .client-button-container {
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 200px;
+  }
+  
+  .client-submit-btn,
+  .client-cancel-btn {
+    width: 90px;
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+  
+  /* Add button */
+  .client-add-button {
+    width: 50px;
+    height: 35px;
+    font-size: 11px;
+    margin-top: 18px;
+  }
+  
+  /* Modal adjustments */
+  .client-modal {
+    width: 95%;
+    max-width: 320px;
+    margin: 15px;
+  }
+  
+  .client-modal h2 {
+    font-size: 18px;
+  }
+  
+  .client-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .client-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .client-yes-btn,
+  .client-modal-no-btn {
+    width: 80px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown adjustments */
+  .location-dropdown {
+    max-height: 150px;
+  }
+  
+  .location-dropdown-item {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  /* Status dropdown */
+  .client-status-dropdown {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  /* Godparent items */
+  .added-godparent {
+    padding: 5px 8px;
+  }
+  
+  .added-godparent span {
+    font-size: 12px;
+  }
+  
+  .remove-godparent-btn {
+    font-size: 14px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .client-baptism-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .client-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    letter-spacing: 0.3px;
+  }
+  
+  .client-baptism-header {
+    margin-bottom: 12px;
+  }
+  
+  .client-back-button {
+    font-size: 13px;
+  }
+  
+  .client-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .client-sub-title {
+    font-size: 15px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+  }
+  
+  .client-bypart {
+    margin-top: 25px;
+  }
+  
+  /* Even smaller form elements */
+  .client-baptismal-field label,
+  .client-baptismal-field-ga label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .client-baptismal-field input,
+  .client-baptismal-field select,
+  .client-baptismal-field-ga input,
+  .client-baptismal-field-ga select {
+    padding: 5px;
+    font-size: 13px;
+  }
+    .client-baptismal-field-date label,
+  .client-baptismal-field-time label {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+    .client-baptismal-field-date input,
+  .client-baptismal-field-time input,
+  .client-baptismal-field-date select,
+  .client-baptismal-field-time select {
+    width: 150px;
+    font-size: 12px;
+  }
+  
+  .date-input {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  /* Section adjustments */
+  .client-section-label {
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+  
+  /* Marital status */
+  .client-marital-options {
+    gap: 6px;
+  }
+  
+  .client-pms-label {
+    margin-bottom: 6px;
+  }
+  
+  .client-pms-label label {
+    font-size: 12px;
+  }
+  
+  .client-years-married {
+    margin-top: 20px;
+  }
+  
+  .client-years-married label {
+    font-size: 12px;
+    white-space: wrap;
+  }
+  
+  .client-short-input {
+    width: 45px;
+    font-size: 13px;
+  }
+  
+  /* Requirements section */
+  .client-section-header {
+    font-size: 14px;
+    margin-left: 0;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .client-checkbox-list {
+    margin-left: 15px;
+    gap: 6px;
+  }
+  
+  .client-checkbox-list label {
+    font-size: 13px;
+  }
+  
+  .client-info-list {
+    margin-left: 0.25rem;
+    padding-left: 0.25rem;
+  }
+  
+  .client-info-item {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .client-info-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Buttons */
+  .client-button-container {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+  }
+  
+  .client-submit-btn,
+  .client-cancel-btn {
+    width: 120px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  .client-add-button {
+    width: 45px;
+    height: 32px;
+    font-size: 10px;
+    margin-top: 15px;
+  }
+  
+  /* Modal for mobile */
+  .client-modal {
+    width: 95%;
+    max-width: 300px;
+    margin: 10px;
+  }
+  
+  .client-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .client-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .client-modal-buttons {
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .client-yes-btn,
+  .client-modal-no-btn {
+    width: 100px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown improvements for mobile */
+  .location-dropdown {
+    max-height: 120px;
+    font-size: 13px;
+  }
+  
+  .location-dropdown-item {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  /* Status dropdown */
+  .client-status-dropdown {
+    min-width: 90px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  /* Godparent adjustments */
+  .added-godparent {
+    padding: 4px 6px;
+    margin: 3px 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .added-godparent span {
+    font-size: 11px;
+    word-break: break-word;
+  }
+  
+  .remove-godparent-btn {
+    font-size: 12px;
+    align-self: flex-end;
+  }
+  
+  /* Loading spinner adjustment */
+  .client-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+  
+  /* Error input adjustments */
+  .client-error-input {
+    border-width: 1px !important;
+  }
+  
+  .client-error-message {
+    font-size: 11px;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .client-baptism-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .client-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .client-sub-title {
+    font-size: 14px;
+  }
+  
+  .client-baptismal-field label,
+  .client-baptismal-field-ga label {
+    font-size: 10px;
+  }
+  
+  .client-baptismal-field input,
+  .client-baptismal-field select,
+  .client-baptismal-field-ga input,
+  .client-baptismal-field-ga select {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .client-section-header {
+    font-size: 13px;
+  }
+  
+  .client-checkbox-list label {
+    font-size: 12px;
+  }
+  
+  .client-info-item p {
+    font-size: 0.8rem;
+  }
+  
+  .client-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .client-modal h2 {
+    font-size: 15px;
+  }
+  
+  .client-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .location-dropdown-item {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
 }

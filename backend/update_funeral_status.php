@@ -35,7 +35,7 @@ try {
     $funeralID = $data['funeralID'];
     $status = $data['status'];
     
-    // Get optional schedule parameters from request
+    // Get optional schedule parameters from request (these are for the approved appointment, not the original request)
     $date = isset($data['date']) ? $data['date'] : null;
     $time = isset($data['time']) ? $data['time'] : null;
     $priest = isset($data['priest']) ? $data['priest'] : null;
@@ -52,33 +52,11 @@ try {
         throw new Exception("Database connection failed: " . $conn->connect_error);
     }
 
-    // Update status of funeral mass application
-    $sql = "UPDATE funeral_mass_application SET status = ?";
-    $params = [$status];
-    $types = "s";
-    
-    // Add optional parameters to update query if provided
-    if ($date !== null) {
-        $sql .= ", dateOfFuneralMass = ?";
-        $params[] = $date;
-        $types .= "s";
-    }
-    
-    if ($time !== null) {
-        $sql .= ", timeOfFuneralMass = ?";
-        $params[] = $time;
-        $types .= "s";
-    }
-    
-    if ($priest !== null) {
-        $sql .= ", priestName = ?";
-        $params[] = $priest;
-        $types .= "s";
-    }
-    
-    $sql .= " WHERE funeralID = ?";
-    $params[] = $funeralID;
-    $types .= "i";
+    // IMPORTANT FIX: Only update the status, NOT the date/time/priest fields
+    // The original appointment request details should remain unchanged
+    $sql = "UPDATE funeral_mass_application SET status = ? WHERE funeralID = ?";
+    $params = [$status, $funeralID];
+    $types = "si";
     
     $stmt = $conn->prepare($sql);
     
@@ -102,7 +80,7 @@ try {
                 "funeralID" => $funeralID
             ];
             
-            // Add schedule information if provided
+            // Add schedule information if provided (this will be used for the email and saved in approved_appointment table)
             if ($date !== null) {
                 $emailData["date"] = $date;
             }

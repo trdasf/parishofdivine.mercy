@@ -55,6 +55,149 @@ const ParishAppointment = () => {
     fetchAppointments();
   }, []);
 
+  // Helper function to convert date to yyyy-mm-dd format for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    
+    // If already in yyyy-mm-dd format, return as is
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateString;
+    }
+    
+    // If in mm/dd/yyyy format, convert to yyyy-mm-dd
+    if (dateString.includes('/')) {
+      const [month, day, year] = dateString.split('/');
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    
+    // If in dd/mm/yyyy format (less common but possible)
+    if (dateString.includes('/') && dateString.split('/')[2].length === 4) {
+      const parts = dateString.split('/');
+      if (parts[0].length <= 2 && parts[1].length <= 2) {
+        const [day, month, year] = parts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+    }
+    
+    return dateString; // Return original if format not recognized
+  };
+  const normalizeSpaces = (str) => {
+    return str.trim().replace(/\s+/g, ' ');
+  };
+
+  // Helper function to convert 12-hour time to 24-hour for comparison
+  const convertTo24Hour = (timeStr) => {
+    if (!timeStr) return '';
+    
+    // If already in 24-hour format, return as is
+    if (timeStr.match(/^\d{1,2}:\d{2}:\d{2}$/)) {
+      return timeStr;
+    }
+    
+    // Convert 12-hour to 24-hour
+    const time12h = timeStr.toLowerCase().replace(/\s/g, '');
+    let [time, modifier] = time12h.split(/(am|pm)/);
+    
+    if (!modifier) return timeStr; // Not a 12-hour format
+    
+    let [hours, minutes] = time.split(':');
+    if (hours === '12') {
+      hours = '00';
+    }
+    if (modifier === 'pm') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    
+    return `${hours.padStart(2, '0')}:${minutes || '00'}:00`;
+  };
+
+  // Helper function to check if search term matches time (supports both 12h and 24h)
+  const matchesTime = (appointmentTime, searchTerm) => {
+    if (!appointmentTime || !searchTerm) return false;
+    
+    const normalizedSearch = searchTerm.toLowerCase().replace(/\s/g, '');
+    const appointmentTime24 = appointmentTime;
+    
+    // Direct match with appointment time
+    if (appointmentTime24.toLowerCase().includes(normalizedSearch)) {
+      return true;
+    }
+    
+    // Convert appointment time to 12-hour format for comparison
+    const [hours, minutes] = appointmentTime24.split(':');
+    const hour24 = parseInt(hours, 10);
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const ampm = hour24 >= 12 ? 'pm' : 'am';
+    const time12h = `${hour12}:${minutes}${ampm}`;
+    const time12hWithSpace = `${hour12}:${minutes} ${ampm}`;
+    
+    return time12h.includes(normalizedSearch) || 
+           time12hWithSpace.includes(normalizedSearch) ||
+           appointmentTime24.includes(normalizedSearch);
+  };
+
+  // Helper function to check if search term matches date (supports yyyy, yyyy-mm, yyyy-mm-dd with - or /)
+  const matchesDate = (appointmentDate, searchTerm) => {
+    if (!appointmentDate || !searchTerm) return false;
+    
+    const normalizedSearch = searchTerm.replace(/\s/g, '');
+    
+    // Convert appointment date to different formats for comparison
+    const dateFormats = [
+      appointmentDate, // Original format (mm/dd/yyyy or yyyy-mm-dd)
+      appointmentDate.replace(/\//g, '-'), // Convert / to -
+      appointmentDate.replace(/-/g, '/'), // Convert - to /
+    ];
+    
+    // If appointment date is in mm/dd/yyyy format, also create yyyy-mm-dd format
+    if (appointmentDate.includes('/')) {
+      const [month, day, year] = appointmentDate.split('/');
+      dateFormats.push(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+      dateFormats.push(`${year}-${month.padStart(2, '0')}`);
+      dateFormats.push(year);
+    } else if (appointmentDate.includes('-')) {
+      const [year, month, day] = appointmentDate.split('-');
+      dateFormats.push(`${month}/${day}/${year}`);
+      dateFormats.push(`${year}-${month}`);
+      dateFormats.push(year);
+    }
+    
+    return dateFormats.some(format => 
+      format.toLowerCase().includes(normalizedSearch.toLowerCase())
+    );
+  };
+
+  // Handle search input change with automatic sacrament type filtering
+  const handleSearchChange = (e) => {
+    const searchValue = e.target.value;
+    setSearchTerm(searchValue);
+    
+    // Check if the search term matches any sacrament type (only if no filter is selected)
+    if (searchValue.trim() !== "" && activeFilter === "All") {
+      const matchingSacrament = allSacramentTypes.find(sacrament => 
+        sacrament !== "All" && 
+        sacrament.toLowerCase() === searchValue.toLowerCase()
+      );
+      
+      if (matchingSacrament) {
+        setActiveFilter(matchingSacrament);
+      } else {
+        // Check for partial matches with exact sacrament type
+        const partialMatch = allSacramentTypes.find(sacrament => 
+          sacrament !== "All" && 
+          sacrament.toLowerCase().startsWith(searchValue.toLowerCase())
+        );
+        
+        if (partialMatch) {
+          setActiveFilter(partialMatch);
+        }
+      }
+    } else if (searchValue.trim() === "") {
+      // If search is cleared, reset filter to "All" only if no manual filter was selected
+      setActiveFilter("All");
+    }
+  };
+
   // View appointment details
   const viewAppointmentDetails = (appointment) => {
     switch(appointment.sacramentType) {
@@ -120,16 +263,104 @@ const ParishAppointment = () => {
   };
 
   // Filter appointments based on the active filter and search term
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesFilter = activeFilter === "All" || appointment.sacramentType === activeFilter;
-    const matchesSearch = searchTerm === "" || 
-      (appointment.firstName && appointment.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (appointment.lastName && appointment.lastName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      appointment.sacramentType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (appointment.blessingType && appointment.blessingType.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    return matchesFilter && matchesSearch;
-  });
+  const filteredAppointments = React.useMemo(() => {
+    const filtered = appointments.filter(appointment => {
+      const matchesFilter = activeFilter === "All" || appointment.sacramentType === activeFilter;
+      
+      // If no search term, just apply filter
+      if (searchTerm.trim() === "") {
+        return matchesFilter;
+      }
+      
+      const normalizedSearchTerm = normalizeSpaces(searchTerm);
+      
+      // Check if the search term matches any sacrament type for auto-filtering
+      const isSearchingSacramentType = allSacramentTypes.some(sacrament => 
+        sacrament !== "All" && 
+        (sacrament.toLowerCase() === normalizedSearchTerm.toLowerCase() || 
+         sacrament.toLowerCase().startsWith(normalizedSearchTerm.toLowerCase()))
+      );
+      
+      let result = false;
+      let reason = "";
+      
+      if (isSearchingSacramentType && activeFilter !== "All") {
+        // If searching for a specific sacrament type, only show that type
+        result = appointment.sacramentType === activeFilter;
+        reason = result ? 
+          `Included: Sacrament type "${appointment.sacramentType}" matches active filter "${activeFilter}"` :
+          `Excluded: Sacrament type "${appointment.sacramentType}" does not match active filter "${activeFilter}"`;
+      } else {
+        // Enhanced search behavior for names, dates, times, and other fields
+        const firstName = appointment.firstName || '';
+        const lastName = appointment.lastName || '';
+        
+        // Create full name combinations for searching
+        const fullName = normalizeSpaces(`${firstName} ${lastName}`);
+        const reverseFullName = normalizeSpaces(`${lastName} ${firstName}`);
+        
+        // Check various search matches
+        const matchesFirstName = firstName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        const matchesLastName = lastName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        const matchesFullName = fullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        const matchesReverseFullName = reverseFullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        const matchesSacramentType = appointment.sacramentType.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        const matchesBlessingType = appointment.blessingType && appointment.blessingType.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        const matchesDateField = matchesDate(appointment.date, normalizedSearchTerm);
+        const matchesTimeField = matchesTime(appointment.time, normalizedSearchTerm);
+        
+        const matchesSearch = matchesFirstName || matchesLastName || matchesFullName || 
+                             matchesReverseFullName || matchesSacramentType || matchesBlessingType ||
+                             matchesDateField || matchesTimeField;
+        
+        result = matchesFilter && matchesSearch;
+        
+        // Build reason string
+        if (!result) {
+          if (!matchesFilter) {
+            reason = `Excluded: Filter mismatch - Active filter: "${activeFilter}", Appointment sacrament: "${appointment.sacramentType}"`;
+          } else if (!matchesSearch) {
+            reason = `Excluded: Search mismatch - Search term: "${normalizedSearchTerm}" not found in any field`;
+          }
+        } else {
+          let matchReasons = [];
+          if (matchesFirstName) matchReasons.push(`firstName: "${firstName}"`);
+          if (matchesLastName) matchReasons.push(`lastName: "${lastName}"`);
+          if (matchesFullName && !matchesFirstName && !matchesLastName) matchReasons.push(`fullName: "${fullName}"`);
+          if (matchesReverseFullName && !matchesFullName) matchReasons.push(`reverseFullName: "${reverseFullName}"`);
+          if (matchesSacramentType) matchReasons.push(`sacramentType: "${appointment.sacramentType}"`);
+          if (matchesBlessingType) matchReasons.push(`blessingType: "${appointment.blessingType}"`);
+          if (matchesDateField) matchReasons.push(`date: "${appointment.date}"`);
+          if (matchesTimeField) matchReasons.push(`time: "${appointment.time}"`);
+          
+          reason = `Included: Matches ${matchReasons.join(", ")} with search term: "${normalizedSearchTerm}" and filter: "${activeFilter}"`;
+        }
+      }
+      
+      // Console log for debugging
+      console.log(`ID: ${appointment.id} | ${reason}`);
+      
+      return result;
+    });
+
+    // Remove duplicates based on appointment ID
+    const uniqueFiltered = filtered.filter((appointment, index, self) => 
+      index === self.findIndex(apt => apt.id === appointment.id)
+    );
+
+    // Console log summary
+    console.log("=== SEARCH SUMMARY ===");
+    console.log(`Search Term: "${searchTerm}"`);
+    console.log(`Normalized Search Term: "${normalizeSpaces(searchTerm)}"`);
+    console.log(`Active Filter: "${activeFilter}"`);
+    console.log(`Total Appointments: ${appointments.length}`);
+    console.log(`Filtered Results (with duplicates): ${filtered.length}`);
+    console.log(`Unique Filtered Results: ${uniqueFiltered.length}`);
+    console.log("Filtered Appointment IDs:", uniqueFiltered.map(apt => apt.id));
+    console.log("======================");
+
+    return uniqueFiltered;
+  }, [appointments, searchTerm, activeFilter, allSacramentTypes]);
 
   return (
     <div className="appointment-container-pa">
@@ -139,9 +370,9 @@ const ParishAppointment = () => {
         <div className="search-bar-pa">
           <input 
             type="text" 
-            placeholder="Search appointments" 
+            placeholder="Search by name, date (yyyy-mm-dd), time, or sacrament type" 
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
           />
           <FontAwesomeIcon icon={faSearch} className="search-icon-pa" />
         </div>
@@ -190,7 +421,7 @@ const ParishAppointment = () => {
                     <td>{appointment.lastName}</td>
                     <td>{appointment.sacramentType}</td>
                     {activeFilter === "Blessing" && <td>{appointment.blessingType || "N/A"}</td>}
-                    <td>{appointment.date}</td>
+                    <td>{formatDateForDisplay(appointment.date)}</td>
                     <td>{appointment.time}</td>
                     <td className="actions-cell-pa">
                       <button

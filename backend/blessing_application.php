@@ -48,21 +48,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Start transaction
         $conn->begin_transaction();
 
-        // Get form data
-        $clientID = $_POST['clientID'];
+        // Get form data - set clientID to null if not provided
+        $clientID = isset($_POST['clientID']) && !empty($_POST['clientID']) ? $_POST['clientID'] : null;
         $blessingData = json_decode($_POST['blessingData'], true);
         $addressData = json_decode($_POST['addressData'], true);
         $blessingTypeData = json_decode($_POST['blessingTypeData'], true);
  
         // Log decoded data
         error_log("Decoded data:");
-        error_log("clientID: " . $clientID);
+        error_log("clientID: " . ($clientID ?? 'NULL'));
         error_log("blessingData: " . print_r($blessingData, true));
         error_log("addressData: " . print_r($addressData, true));
         error_log("blessingTypeData: " . print_r($blessingTypeData, true));
 
         // Check if there's already a blessing application with the same date and time
-        // FIX: Changed from "sss" to "ss" since only 2 parameters are provided
         $checkStmt = $conn->prepare("SELECT blessingID FROM blessing_application WHERE preferredDate = ? AND preferredTime = ? AND status != 'cancelled' AND status != 'completed'");
         $checkStmt->bind_param("ss", 
             $blessingData['preferredDate'],
@@ -75,8 +74,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception("There is already a blessing scheduled for this date and time. Please select a different schedule.");
         }
 
-        // FIX: Fixed SQL statement to match the number of parameters
-        // Changed from VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending') to VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
         $stmt = $conn->prepare("INSERT INTO blessing_application (clientID, preferredDate, preferredTime, firstName, middleName, lastName, contactNumber, emailAddress, placeOfBirth, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
         
         if (!$stmt) {
@@ -132,21 +129,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Commit transaction
         $conn->commit();
 
-        // Send confirmation email
-        $emailData = [
-            'clientID' => $clientID,
-            'blessingID' => $blessingID,
-            'blessingData' => $blessingData
-        ];
+        // Send confirmation email only if clientID exists
+        if ($clientID !== null) {
+            $emailData = [
+                'clientID' => $clientID,
+                'blessingID' => $blessingID,
+                'blessingData' => $blessingData
+            ];
 
-        $ch = curl_init('http://parishofdivinemercy.com/backend/send_blessing_email.php');
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($emailData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        
-        $emailResponse = curl_exec($ch);
-        curl_close($ch);
+            $ch = curl_init('http://parishofdivinemercy.com/backend/send_blessing_email.php');
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($emailData));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            
+            $emailResponse = curl_exec($ch);
+            curl_close($ch);
+        }
 
         $response["success"] = true;
         $response["message"] = "Blessing application submitted successfully";

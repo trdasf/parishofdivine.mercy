@@ -1,358 +1,618 @@
-/* Main container styling */
+/* Main container styling - Fixed scrolling issues */
 .client-kumpil-view-container {
-    padding-left: 50px;
-    padding-right: 50px;
-    padding-top: 20px;
-    width: 100%;
-    height: 100vh;
-    overflow-y: auto;
+  padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Enhanced scrollbar styling for all devices */
+.client-kumpil-view-container::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.client-kumpil-view-container::-webkit-scrollbar-thumb {
+  background-color: #b3701f;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.client-kumpil-view-container::-webkit-scrollbar-thumb:hover {
+  background-color: #8a5612;
+}
+
+.client-kumpil-view-container::-webkit-scrollbar-track {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+/* Firefox scrollbar */
+.client-kumpil-view-container {
+  scrollbar-width: thin;
+  scrollbar-color: #b3701f #f8f9fa;
+}
+
+/* Header styling */
+.client-kumpil-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  padding: 10px 0;
+  border-radius: 8px;
+}
+
+.client-view-left-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.client-view-back-button {
+  background-color: transparent;
+  color: #710808;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-family: Roboto;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: color 0.2s;
+  touch-action: manipulation;
+}
+
+.client-view-back-icon {
+  font-size: 22px;
+  margin-right: 5px;
+  font-weight: 700;
+}
+
+.client-view-back-button:hover {
+  color: #5a0606;
+  background-color: rgba(113, 8, 8, 0.1);
+}
+
+.client-view-title {
+  font-size: clamp(20px, 4vw, 35px);
+  font-weight: 800;
+  color: #573901;
+  font-family: Montserrat;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 20px;
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+/* Confirmation data section */
+.client-kumpil-view-data {
+  margin-bottom: 40px;
+  position: relative;
+  width: 100%;
+}
+
+.client-kumpil-view-data h2 {
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 900;
+  color: #b3701f;
+  font-family: Roboto;
+  letter-spacing: 1px;
+}
+
+/* Date and Time Row Styling - Grid Layout */
+.client-kumpil-view-row-date {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: start;
+}
+
+/* Info cards */
+.client-kumpil-view-bypart {
+  margin-top: 40px;
+  width: 100%;
+}
+
+/* Add info card styling */
+.client-kumpil-view-info-card {
+  background-color: #fff;
+  border-top: 1px solid #f8d7da;
+  border-right: 1px solid #f8d7da;
+  border-bottom: 1px solid #f8d7da;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #b3701f;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Grid-based row layouts for better responsiveness */
+.client-kumpil-view-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* Label & Value in a row */
+.client-kumpil-view-field-date,
+.client-kumpil-view-field-time {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Labels Styling */
+.client-kumpil-view-field-date label,
+.client-kumpil-view-field-time label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #573901;
+  font-family: Roboto;
+  margin-bottom: 5px;
+}
+
+/* Value styling for read-only fields */
+.client-view-value {
+  padding: 10px;
+  background-color: #f9f9f9;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: Roboto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.client-view-value-add {
+  padding: 10px;
+  background-color: #f9f9f9;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: Roboto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sub-mini-cc {
+  font-size: clamp(14px, 2vw, 16px);
+  font-weight: 700;
+  color: #b3701f;
+  font-family: Roboto;
+  margin-bottom: 15px;
+  margin-top: 20px;
+  display: block;
+}
+
+.client-view-sub-title {
+  font-size: clamp(16px, 2.5vw, 20px);
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  text-align: left;
+  margin-bottom: 15px;
+  margin-top: 30px;
+}
+
+/* Confirmation row styling */
+.client-kumpil-view-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.client-kumpil-view-field label,
+.client-kumpil-view-field-ga label,
+.client-kumpil-view-field-pob label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #573901;
+  margin-bottom: 5px;
+  font-family: Roboto;
+}
+
+.client-kumpil-view-field-ga {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.client-kumpil-view-field-pob {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Requirements container styling */
+.client-requirements-view-container {
+  width: 100%;
+  margin: 40px 0 20px;
+  font-family: "Roboto", sans-serif;
+  box-sizing: border-box;
+}
+
+.client-requirements-view-title {
+  font-size: clamp(18px, 3vw, 22px);
+  font-weight: bold;
+  color: #b36b09;
+  margin-bottom: 15px;
+  font-family: Montserrat;
+}
+
+.client-requirements-view-box {
+  border: 1px solid #ddd;
+  padding: 25px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.client-view-section-header {
+  font-size: clamp(14px, 2.2vw, 18px);
+  font-weight: bold;
+  color: #333;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  font-family: Montserrat;
+  border-bottom: 3px solid #b3701f;
+  padding-bottom: 8px;
+  display: inline-block;
+  position: relative;
+}
+
+.client-view-section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background-color: #710808;
+}
+
+/* Info lists */
+.client-info-view-list {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  width: 100%;
+}
+
+.client-info-view-item {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #b3701f;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.client-info-view-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.client-view-req-label p {
+  margin: 0;
+  font-size: clamp(13px, 1.5vw, 16px);
+  color: #495057;
+  line-height: 1.6;
+  font-family: Roboto;
+  font-weight: 400;
+}
+
+/* Loading and error states */
+.loading, .error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+  font-family: Roboto;
+  color: #573901;
+  min-height: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.loading {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.error {
+  gap: 20px;
+}
+
+.error button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Roboto;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.error button:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-1px);
+}
+
+/* Responsive Breakpoints */
+
+/* Large tablets and small laptops (1024px and below) */
+@media (max-width: 1024px) {
+  .client-kumpil-view-container {
+    padding: 15px;
+    max-height: 100vh;
   }
   
-  /* Scrollbar styling */
-  .client-kumpil-view-container::-webkit-scrollbar {
-    width: 5px;
-    background-color: #ffffff;
-  }
-  
-  .client-kumpil-view-container::-webkit-scrollbar-thumb {
-    background-color: #dbdbdb;
-    border-radius: 5px;
-  }
-  
-  .client-kumpil-view-container::-webkit-scrollbar-track {
-    background-color: #ffffff;
-  }
-  
-  /* Header styling */
-  .client-kumpil-view-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 30px;
-  }
-  
-  .client-kumpil-view-left-section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  
-  .client-kumpil-view-back-button {
-    background-color: transparent;
-    color: #710808;
-    border: none;
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    font-family: Roboto;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  
-  .client-kumpil-view-back-icon {
-    font-size: 22px;
-    margin-right: 5px;
-    font-weight: 700;
-  }
-  
-  .client-kumpil-view-back-button:hover {
-    color: #5a0606;
-  }
-  
-  .client-kumpil-view-title {
-    font-size: 35px;
-    font-weight: 800;
-    color: #573901;
-    font-family: Montserrat;
-    letter-spacing: 1px;
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  /* Confirmation view data section */
-  .client-kumpil-view-data h2 {
-    font-size: 24px;
-    font-weight: 900;
-    color: #b3701f;
-    font-family: Roboto;
-    letter-spacing: 1px;
+  .client-kumpil-view-info-card {
+    padding: 20px;
+    margin-bottom: 15px;
   }
   
   .client-kumpil-view-row-date {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 15px;
-    align-items: center;
-  }
-  
-  /* Info cards */
-  .client-kumpil-view-bypart {
-    margin-top: 40px;
-  }
-  
-  /* Add info card styling */
-  .client-kumpil-view-info-card {
-    background-color: #fff;
-    border-top: 1px solid #f8d7da;
-    border-right: 1px solid #f8d7da;
-    border-bottom: 1px solid #f8d7da;
-    border-radius: 8px;
-    padding: 30px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border-left: 4px solid #b3701f;
+    grid-template-columns: 1fr 1fr;
   }
   
   .client-kumpil-view-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
   
-  /* Label & Value in a row */
+  .client-kumpil-view-field-ga,
+  .client-kumpil-view-field-pob {
+    width: 100%;
+  }
+}
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .client-kumpil-view-container {
+    padding: 12px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .client-kumpil-view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    position: relative;
+    top: auto;
+    background-color: transparent;
+    backdrop-filter: none;
+  }
+  
+  .client-kumpil-view-row-date {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .client-kumpil-view-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
   .client-kumpil-view-field-date,
   .client-kumpil-view-field-time {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
   
-  /* Labels Styling */
   .client-kumpil-view-field-date label,
   .client-kumpil-view-field-time label {
-    font-weight: 600;
-    font-size: 16px;
-    color: #573901;
-    min-width: 180px;
     text-align: left;
-    margin-top: 0;
-    font-family: Roboto;
+    min-width: unset;
   }
   
-  /* Value styling for read-only fields */
-  .client-kumpil-view-value {
-    padding: 8px;
-    background-color: #f9f9f9;
-    color: #333;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    font-size: 16px;
-    min-width: 200px;
-    font-family: Roboto;
-  }
-    .client-view-value-add {
-    padding: 8px;
-    background-color: #f9f9f9;
-    color: #333;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    font-size: 16px;
-    min-width: 100px;
-    font-family: Roboto;
-  }
-      .sub-mini-cc{
-    font-weight: 500;
-    font-size: 14px;
-    color: #000;
-    min-width: 150px;
-    text-align: left;
-    margin-top: 22px;
-    margin-bottom: 20px;
-    font-family: Roboto;
-  }
-  
-  .client-kumpil-view-sub-title {
-    font-size: 20px;
-    font-weight: 900;
-    color: #573901;
-    font-family: Roboto;
-    letter-spacing: 1px;
-    text-align: left;
-    margin-bottom: 15px;
-    margin-top: 40px;
-  }
-  
-  /* Confirmation view row styling */
-  .client-kumpil-view-field {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .client-kumpil-view-field label,
-  .client-kumpil-view-field-ga label,
-  .client-kumpil-view-field-pob label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #573901;
-    display: block;
-    margin-bottom: 5px;
-    font-family: Roboto;
-  }
-  
-  .client-kumpil-view-field-ga {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 220px;
-  }
-  
-  .client-kumpil-view-field-pob {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 300px;
-  }
-  
-  /* Requirements container styling */
-  .client-kumpil-view-requirements-container {
-    width: 100%;
-    margin: 40px auto 20px;
-    font-family: "Roboto", sans-serif;
-  }
-  
-  .client-kumpil-view-requirements-title {
-    font-size: 22px;
-    font-weight: bold;
-    color: #b36b09;
-    margin-bottom: 15px;
-    font-family: Montserrat;
-  }
-  
-  .client-kumpil-view-requirements-box {
-    border: 1px solid #ddd;
+  .client-requirements-view-box {
     padding: 20px;
-    border-radius: 5px;
-    background-color: #fff;
   }
   
-  .client-kumpil-view-section-header {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    margin-top: 20px;
+  .client-info-view-item {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+  }
+}
+
+/* Mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .client-kumpil-view-container {
+    padding: 10px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .client-view-title {
     margin-bottom: 15px;
-    font-family: Montserrat;
-    border-bottom: 2px solid #b3701f;
-    padding-bottom: 8px;
-    width: fit-content;
-    margin-left: 20px;
+    font-size: clamp(18px, 5vw, 24px);
   }
   
-  .client-kumpil-view-checkbox-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-left: 40px;
-    margin-bottom: 30px;
+  .client-kumpil-view-info-card {
+    padding: 15px;
   }
   
-  .client-kumpil-view-requirement-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    border-left: 3px solid #b3701f;
+  .client-requirements-view-box {
+    padding: 15px;
   }
   
-  .client-kumpil-view-req-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .client-info-view-item {
+    padding: 12px 15px;
+    margin-bottom: 8px;
   }
   
-  .client-kumpil-view-req-label p {
-    margin: 0;
-    font-size: 1rem;
-    color: #555;
-    line-height: 1.5;
-    font-family: Roboto;
-    font-weight: 400;
+  .client-view-value,
+  .client-view-value-add {
+    padding: 8px 12px;
+    font-size: 13px;
   }
   
-  .client-kumpil-view-requirement-name {
-    font-size: 15px;
-    color: #333;
-    font-family: Roboto;
-    flex: 1;
+  .client-kumpil-view-field-date label,
+  .client-kumpil-view-field-time label {
+    font-size: 13px;
   }
-  
-  /* Checkbox styling for view-only mode */
-  .client-kumpil-view-checkbox {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    display: inline-block;
-    position: relative;
-  }
-  
-  /* Checked state for view-only checkbox */
-  .client-kumpil-view-checked {
-    background-color: #b3701f;
-    border-color: #b3701f;
-  }
-  
-  .client-kumpil-view-checked::after {
-    content: "✓";
+}
+
+/* Very small mobile devices (360px and below) */
+@media (max-width: 360px) {
+  .client-kumpil-view-container {
+    padding: 8px;
     font-size: 14px;
-    color: white;
-    font-weight: bold;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
   }
   
-  /* Status indicators */
-  .client-kumpil-view-status {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    min-width: 100px;
-    text-align: center;
+  .client-kumpil-view-info-card {
+    padding: 12px;
   }
   
-  .client-kumpil-view-submitted {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+  .client-requirements-view-box {
+    padding: 12px;
   }
   
-  .client-kumpil-view-not-submitted {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+  .client-info-view-item {
+    padding: 10px 12px;
   }
   
-  /* Info lists */
-  .client-kumpil-view-info-list {
-    margin-left: 1rem;
-    padding-left: 1rem;
-    border-left: 3px solid #710808;
+  .client-view-value,
+  .client-view-value-add {
+    padding: 8px 10px;
+    font-size: 12px;
   }
   
-  .client-kumpil-view-info-item {
-    background-color: #f9f9f9;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  .client-kumpil-view-field-date label,
+  .client-kumpil-view-field-time label {
+    font-size: 12px;
+  }
+}
+
+/* Landscape orientation adjustments for tablets */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .client-kumpil-view-container {
+    max-height: 100vh;
+    overflow-y: auto;
   }
   
-  .client-kumpil-view-info-item p {
-    margin: 0;
-    font-size: 1rem;
-    color: #555;
-    line-height: 1.5;
-    font-family: Roboto;
-    font-weight: 400;
+  .client-kumpil-view-row-date {
+    grid-template-columns: 1fr 1fr;
   }
+  
+  .client-kumpil-view-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Portrait orientation adjustments for mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+  .client-kumpil-view-container {
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .client-kumpil-view-row-date,
+  .client-kumpil-view-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-appearance: none) {
+  .client-kumpil-view-container {
+    height: 100vh;
+    height: -webkit-fill-available;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .client-view-back-button,
+  .client-info-view-item {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Focus indicators for better accessibility */
+.client-view-back-button:focus {
+  outline: 3px solid #b3701f;
+  outline-offset: 2px;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .client-view-back-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .client-info-view-item:hover {
+    transform: none;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .client-view-value,
+  .client-view-value-add {
+    font-rendering: optimizeLegibility;
+  }
+}

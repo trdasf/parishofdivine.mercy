@@ -33,37 +33,61 @@ import event5 from "../assets/church2.jpg"; // Replace with actual event images
 const HomePage = () => {
   const navigate = useNavigate();
   const homeRef = useRef(null);
+  const aboutRef = useRef(null);
   const eventRef = useRef(null);
-  const sermonsRef = useRef(null);
   const contactusRef = useRef(null);
 
-  // State for modals, active section, and slider
+  // State for modals, active section, slider, and mobile menu
   const [activeSection, setActiveSection] = useState("home");
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Event images array
   const eventImages = [
     { src: event1, title: "Sunday Mass", date: "Every Sunday", time: "8:00 AM" },
-    { src: event2, title: "Wedding Ceremony", date: "MAR 15", time: "10:00 AM" },
-    { src: event3, title: "Baptism", date: "APR 03", time: "9:00 AM" },
-    { src: event4, title: "Confirmation", date: "APR 20", time: "3:00 PM" },
-    { src: event5, title: "Parish Festival", date: "MAY 10", time: "All Day" }
+    { src: event2, title: "Wedding Ceremony"},
+    { src: event3, title: "Baptism"},
+    { src: event4, title: "Confirmation"},
+    { src: event5, title: "Parish Festival" }
   ];
 
-  // Function to scroll smoothly
+  // Function to toggle mobile menu
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Function to close mobile menu
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Function to scroll smoothly and close mobile menu
   const scrollToSection = (ref, section) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: "smooth" });
       setActiveSection(section);
+      closeMobileMenu(); // Close mobile menu when navigating
     }
+  };
+
+  // Close mobile menu when clicking overlay
+  const handleOverlayClick = () => {
+    closeMobileMenu();
   };
 
   // Function to handle role selection
   const handleRoleSelect = (role) => {
     setIsRoleModalOpen(false);
+    closeMobileMenu();
     // Navigate to the appropriate login page based on role
     navigate(`/${role}-login`);
+  };
+
+  // Open login modal and close mobile menu
+  const handleLoginClick = () => {
+    setIsRoleModalOpen(true);
+    closeMobileMenu();
   };
 
   // Function to navigate to the next slide
@@ -86,8 +110,8 @@ const HomePage = () => {
     const handleScroll = () => {
       const sections = [
         { name: "home", ref: homeRef },
+        { name: "about", ref: aboutRef },
         { name: "events", ref: eventRef },
-        { name: "sermons", ref: sermonsRef },
         { name: "contactus", ref: contactusRef },
       ];
 
@@ -109,28 +133,101 @@ const HomePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu when window is resized to desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobileMenuOpen]);
+
   return (
-    <div className={`home-container ${isRoleModalOpen ? "modal-active" : ""}`}>
+    <div className={`home-container ${isRoleModalOpen ? "modal-active" : ""} ${isMobileMenuOpen ? "menu-open" : ""}`}>
       <header className="header">
         <div className="logo">
           <img src={pdmLogo} alt="Parish Logo" className="home-logo" />
           <span>PARISH OF THE DIVINE MERCY</span>
         </div>
+        
+        {/* Desktop Navigation */}
         <nav className="nav">
           <button className={activeSection === "home" ? "active" : ""} onClick={() => scrollToSection(homeRef, "home")}>
             Home
           </button>
-          <button className={activeSection === "events" ? "active" : ""} onClick={() => scrollToSection(eventRef, "events")}>
+          <button className={activeSection === "about" ? "active" : ""} onClick={() => scrollToSection(aboutRef, "about")}>
             About
+          </button>
+          <button className={activeSection === "events" ? "active" : ""} onClick={() => scrollToSection(eventRef, "events")}>
+            Events
           </button>
           <button className={activeSection === "contactus" ? "active" : ""} onClick={() => scrollToSection(contactusRef, "contactus")}>
             Contact Us
           </button>
         </nav>
+        
+        {/* Desktop Login Button */}
         <button className="login-btn" onClick={() => setIsRoleModalOpen(true)}>
           LOGIN
         </button>
+
+        {/* Hamburger Menu Button */}
+        <div className={`hamburger ${isMobileMenuOpen ? "active" : ""}`} onClick={toggleMobileMenu}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </header>
+
+      {/* Mobile Navigation Overlay */}
+      <div className={`nav-overlay ${isMobileMenuOpen ? "active" : ""}`} onClick={handleOverlayClick}></div>
+
+      {/* Mobile Navigation Menu */}
+      <div className={`nav-mobile ${isMobileMenuOpen ? "active" : ""}`}>
+        <div className="nav-mobile-header">
+          <div className="nav-mobile-logo">
+            <img src={pdmLogo} alt="Parish Logo" />
+            <span>PDM</span>
+          </div>
+          <button className="close-nav" onClick={closeMobileMenu}>
+            ✕
+          </button>
+        </div>
+        
+        <div className="nav-mobile-menu">
+          <button 
+            className={activeSection === "home" ? "active" : ""} 
+            onClick={() => scrollToSection(homeRef, "home")}
+          >
+            Home
+          </button>
+          <button 
+            className={activeSection === "about" ? "active" : ""} 
+            onClick={() => scrollToSection(aboutRef, "about")}
+          >
+            About
+          </button>
+          <button 
+            className={activeSection === "events" ? "active" : ""} 
+            onClick={() => scrollToSection(eventRef, "events")}
+          >
+            Events
+          </button>
+          <button 
+            className={activeSection === "contactus" ? "active" : ""} 
+            onClick={() => scrollToSection(contactusRef, "contactus")}
+          >
+            Contact Us
+          </button>
+        </div>
+        
+        <button className="nav-mobile-login" onClick={handleLoginClick}>
+          LOGIN
+        </button>
+      </div>
 
       {/* Role Selection Modal */}
       {isRoleModalOpen && (
@@ -176,7 +273,6 @@ const HomePage = () => {
             We're happy to have you here. Parish of the Divine Mercy is a place where you can grow in faith, 
             find hope, and connect with a loving community. Join us for Sunday Worship. Everyone is welcome!
           </p>
-          <button className="read-more">Read More</button>
         </div>
         <div className="image-section">
           <div className="main-image">
@@ -189,9 +285,24 @@ const HomePage = () => {
         </div>
       </main>
 
-      {/* Updated Events Section with Image Slider */}
+      {/* About Section */}
+      <section className="about-section" ref={aboutRef}>
+      <h2>About Us</h2>
+        <div className="about-container">
+          <div className="about-image">
+            <img src={church1} alt="Divine Mercy Church" />
+          </div>
+          <div className="about-content">
+            <p>
+              Divine Mercy Church in Alawihao, Daet, Camarines Norte, was established in 2009 and belongs to the Diocese of Daet under the Roman Catholic Archdiocese of Caceres. Its architectural features include a central entrance flanked by windows and a pediment with glass windows depicting the titular, with a bell tower located on the gospel side. The church celebrates the feast of Divine Mercy every April 15.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Events Section with Slider */}
       <section className="events-section" ref={eventRef}>
-        <h2>About</h2>
+        <h2>Events</h2>
         <div className="slider-container">
           <button className="slider-nav prev" onClick={prevSlide}>
             <FontAwesomeIcon icon={faChevronLeft} />
@@ -231,7 +342,6 @@ const HomePage = () => {
           ))}
         </div>
       </section>
-      <hr className="separator"/>
 
       <footer className="footer-section" ref={contactusRef}>
         <div className="footer-circle">

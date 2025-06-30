@@ -44,14 +44,10 @@ try {
     $conn->begin_transaction();
 
     try {
-        // Extract POST data
+        // Extract clientID - if it exists use it, otherwise set to null
         $clientID = $_POST['clientID'] ?? null;
         
-        error_log("ClientID: " . $clientID);
-        
-        if (!$clientID) {
-            throw new Exception("Client ID is required");
-        }
+        error_log("ClientID: " . ($clientID ?? 'NULL'));
 
         // Validate and format dateOfBaptism
         $dateOfBaptism = $_POST['dateOfBaptism'] ?? null;

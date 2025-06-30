@@ -6,104 +6,264 @@ import {
   faChevronRight, 
   faCalendarAlt, 
   faEye, 
-  faUsers,
   faInfoCircle,
   faCircle,
-  faCheckCircle
+  faCheckCircle,
+  faHandshake,
+  faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const MinistryDashboard = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [userData, setUserData] = useState(null);
-  const [userID, setUserID] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [showEventInfo, setShowEventInfo] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
   
-  // Get userID and user data from location state or localStorage
+  // Setting default date to May 2025 as specified
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 17)); // May 17, 2025
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showHolidayInfo, setShowHolidayInfo] = useState(false);
+  const [selectedHoliday, setSelectedHoliday] = useState(null);
+  
+  // State for data
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Added modal state
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedEventData, setSelectedEventData] = useState(null);
+  
+  // API Base URL
+  const API_BASE_URL = 'https://parishofdivinemercy.com/backend';
+  
+  // Function to calculate Easter Sunday (needed for Holy Week calculations)
+  const calculateEaster = (year) => {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-indexed month
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    
+    return new Date(year, month, day);
+  };
+
+  // Function to get the last Monday of a specific month
+  const getLastMondayOfMonth = (year, month) => {
+    const lastDay = new Date(year, month + 1, 0);
+    const lastMonday = new Date(lastDay);
+    while (lastMonday.getDay() !== 1) {
+      lastMonday.setDate(lastMonday.getDate() - 1);
+    }
+    return lastMonday;
+  };
+
+  // Function to calculate Chinese New Year (approximate)
+  const calculateChineseNewYear = (year) => {
+    // This is a simplified calculation. For precise dates, you'd need a lunar calendar API
+    const baseYear = 2024;
+    const baseDate = new Date(2024, 1, 10); // Feb 10, 2024
+    const yearDiff = year - baseYear;
+    const daysToAdd = yearDiff * 354; // Lunar year is approximately 354 days
+    const newDate = new Date(baseDate);
+    newDate.setDate(newDate.getDate() + daysToAdd);
+    
+    // Adjust to ensure it falls between Jan 21 and Feb 20
+    if (newDate.getMonth() === 0 && newDate.getDate() < 21) {
+      newDate.setDate(21);
+    } else if (newDate.getMonth() === 1 && newDate.getDate() > 20) {
+      newDate.setDate(20);
+    }
+    
+    return newDate;
+  };
+
+  // Function to calculate Islamic holidays (approximate)
+  const calculateIslamicHolidays = (year) => {
+    // Islamic calendar is lunar, approximately 11 days shorter than Gregorian
+    // This is a simplified calculation. For precise dates, you'd need an Islamic calendar API
+    const baseYear = 2024;
+    const baseEidAlFitr = new Date(2024, 3, 10); // April 10, 2024
+    const baseEidAlAdha = new Date(2024, 5, 17); // June 17, 2024
+    
+    const yearDiff = year - baseYear;
+    const daysToSubtract = yearDiff * 11; // Islamic year is about 11 days shorter
+    
+    const eidAlFitr = new Date(baseEidAlFitr);
+    eidAlFitr.setDate(eidAlFitr.getDate() - daysToSubtract);
+    
+    const eidAlAdha = new Date(baseEidAlAdha);
+    eidAlAdha.setDate(eidAlAdha.getDate() - daysToSubtract);
+    
+    return { eidAlFitr, eidAlAdha };
+  };
+
+  // Function to get all holidays for a given year
+  const getHolidaysForYear = (year) => {
+    const holidays = [];
+    
+    // Regular holidays (fixed dates)
+    holidays.push({ date: new Date(year, 0, 1), name: "New Year's Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 3, 9), name: "Araw ng Kagitingan", type: "Regular" });
+    holidays.push({ date: new Date(year, 4, 1), name: "Labor Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 5, 12), name: "Independence Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 10, 30), name: "Bonifacio Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 11, 25), name: "Christmas Day", type: "Regular" });
+    holidays.push({ date: new Date(year, 11, 30), name: "Rizal Day", type: "Regular" });
+    
+    // Special non-working holidays (fixed dates)
+    holidays.push({ date: new Date(year, 7, 21), name: "Ninoy Aquino Day", type: "Special" });
+    holidays.push({ date: new Date(year, 10, 1), name: "All Saints' Day", type: "Special" });
+    holidays.push({ date: new Date(year, 10, 2), name: "All Souls' Day", type: "Special" });
+    holidays.push({ date: new Date(year, 11, 8), name: "Immaculate Conception", type: "Special" });
+    holidays.push({ date: new Date(year, 11, 24), name: "Christmas Eve", type: "Special" });
+    holidays.push({ date: new Date(year, 11, 31), name: "New Year's Eve", type: "Special" });
+    
+    // EDSA Revolution Anniversary (February 25)
+    holidays.push({ date: new Date(year, 1, 25), name: "EDSA Revolution", type: "Special" });
+    
+    // Moveable holidays
+    
+    // National Heroes Day (Last Monday of August)
+    const nationalHeroesDay = getLastMondayOfMonth(year, 7);
+    holidays.push({ date: nationalHeroesDay, name: "National Heroes Day", type: "Regular" });
+    
+    // Holy Week (based on Easter)
+    const easter = calculateEaster(year);
+    const holyThursday = new Date(easter);
+    holyThursday.setDate(easter.getDate() - 3);
+    const goodFriday = new Date(easter);
+    goodFriday.setDate(easter.getDate() - 2);
+    const blackSaturday = new Date(easter);
+    blackSaturday.setDate(easter.getDate() - 1);
+    
+    holidays.push({ date: holyThursday, name: "Maundy Thursday", type: "Regular" });
+    holidays.push({ date: goodFriday, name: "Good Friday", type: "Regular" });
+    holidays.push({ date: blackSaturday, name: "Black Saturday", type: "Special" });
+    
+    // Chinese New Year
+    const chineseNewYear = calculateChineseNewYear(year);
+    holidays.push({ date: chineseNewYear, name: "Chinese New Year", type: "Special" });
+    
+    // Islamic holidays
+    const islamicHolidays = calculateIslamicHolidays(year);
+    holidays.push({ date: islamicHolidays.eidAlFitr, name: "Eid'l Fitr", type: "Regular" });
+    holidays.push({ date: islamicHolidays.eidAlAdha, name: "Eid'l Adha", type: "Regular" });
+    
+    return holidays;
+  };
+
+  // Get holidays for the current year
+  const [holidays, setHolidays] = useState([]);
+  
   useEffect(() => {
-    // First try to get from location state
-    if (location.state && location.state.userData) {
-      setUserData(location.state.userData);
-      setUserID(location.state.userID);
-      console.log("Dashboard: User data from location state", location.state.userData);
-      console.log("Dashboard: UserID from location state", location.state.userID);
-    }
-    // If not in location state, try localStorage
-    else {
-      const storedUser = localStorage.getItem("ministry_user");
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUserData(parsedUser);
-        setUserID(parsedUser.userID);
-        console.log("Dashboard: User data from localStorage", parsedUser);
-        console.log("Dashboard: UserID from localStorage", parsedUser.userID);
-      } else {
-        // No user data found, redirect to login
-        console.log("Dashboard: No user data found, redirecting to login");
-        navigate("/");
+    const year = currentDate.getFullYear();
+    setHolidays(getHolidaysForYear(year));
+  }, [currentDate]);
+  
+  // Fetch data when component mounts or currentDate changes
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Get the month and year from currentDate
+        const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+        const year = currentDate.getFullYear();
+        
+        // Fetch activities with status=Approved
+        try {
+          const activitiesResponse = await axios.get(`${API_BASE_URL}/fetch_activities.php?status=Approved`);
+          if (activitiesResponse.data && activitiesResponse.data.success) {
+            // Filter for current month/year
+            const filteredActivities = activitiesResponse.data.activities.filter(activity => {
+              // Try to parse startDate
+              let dateObj;
+              
+              if (activity.startDate) {
+                dateObj = new Date(activity.startDate);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(dateObj.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = activity.startDate.split('/');
+                  if (dateParts.length === 3) {
+                    dateObj = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = activity.startDate.split('-');
+                    if (dashParts.length === 3) {
+                      dateObj = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                return false; // Skip entries without dates
+              }
+              
+              // Filter by month and year
+              return dateObj.getMonth() + 1 === month && 
+                     dateObj.getFullYear() === year;
+            }).map(activity => {
+              // Create a Date object
+              let dateObj;
+              
+              if (activity.startDate) {
+                dateObj = new Date(activity.startDate);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(dateObj.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = activity.startDate.split('/');
+                  if (dateParts.length === 3) {
+                    dateObj = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = activity.startDate.split('-');
+                    if (dashParts.length === 3) {
+                      dateObj = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                dateObj = new Date(); // Default to current date if no date is provided
+              }
+              
+              return {
+                ...activity,
+                date: dateObj,
+                // Create standardized fields if needed
+                time: activity.startTime || '12:00 PM'
+              };
+            });
+            
+            setActivities(filteredActivities);
+          }
+        } catch (err) {
+          console.error('Error fetching activities:', err);
+          setActivities([]);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [location, navigate]);
-
-  // Sample data - in a real app, these would come from an API or database
-  const communityEvents = [
-    { date: new Date(2025, 0, 6), name: "Epiphany Celebration", type: "Liturgical" },
-    { date: new Date(2025, 2, 19), name: "St. Joseph's Feast", type: "Feast Day" },
-    { date: new Date(2025, 3, 20), name: "Easter Vigil", type: "Liturgical" },
-    { date: new Date(2025, 4, 31), name: "Flores de Mayo Closing", type: "Cultural" },
-    { date: new Date(2025, 5, 29), name: "Sts. Peter & Paul Feast", type: "Feast Day" },
-    { date: new Date(2025, 7, 15), name: "Assumption Day", type: "Liturgical" },
-    { date: new Date(2025, 10, 2), name: "All Souls' Day", type: "Liturgical" },
-    { date: new Date(2025, 11, 24), name: "Christmas Eve Mass", type: "Liturgical" },
-  ];
-
-  const communityActivities = [
-    { 
-      id: 1, 
-      name: "Youth Bible Study", 
-      organizer: "Youth Ministry", 
-      type: "Formation", 
-      date: new Date(2025, 3, 12), 
-      time: "4:00 PM", 
-      location: "Parish Hall",
-      status: "Upcoming" 
-    },
-    { 
-      id: 2, 
-      name: "Charity Outreach", 
-      organizer: "Social Services Committee", 
-      type: "Outreach", 
-      date: new Date(2025, 3, 18), 
-      time: "9:00 AM", 
-      location: "Barangay Center",
-      status: "Upcoming" 
-    },
-    { 
-      id: 3, 
-      name: "Choir Practice", 
-      organizer: "Music Ministry", 
-      type: "Formation", 
-      date: new Date(2025, 3, 22), 
-      time: "5:30 PM", 
-      location: "Church",
-      status: "Upcoming" 
-    },
-    { 
-      id: 4, 
-      name: "Community Clean-up", 
-      organizer: "Parish Council", 
-      type: "Service", 
-      date: new Date(2025, 3, 27), 
-      time: "7:00 AM", 
-      location: "Church Grounds",
-      status: "Planning" 
-    }
-  ];
-
+    };
+    
+    fetchData();
+  }, [currentDate, API_BASE_URL]);
+  
   // Navigate to previous month
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -114,65 +274,36 @@ const MinistryDashboard = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  // Check if a date has a community event
-  const hasEvent = (date) => {
-    return communityEvents.some(event => 
-      event.date.getDate() === date.getDate() && 
-      event.date.getMonth() === date.getMonth() && 
-      event.date.getFullYear() === date.getFullYear()
-    );
-  };
-  
-  // Get event for a specific date
-  const getEvent = (date) => {
-    return communityEvents.find(event => 
-      event.date.getDate() === date.getDate() && 
-      event.date.getMonth() === date.getMonth() && 
-      event.date.getFullYear() === date.getFullYear()
+  // Check if a date has a holiday
+  const hasHoliday = (date) => {
+    return holidays.some(holiday => 
+      holiday.date.getDate() === date.getDate() && 
+      holiday.date.getMonth() === date.getMonth() && 
+      holiday.date.getFullYear() === date.getFullYear()
     );
   };
 
-  // Check if a date has an activity
-  const hasActivity = (date) => {
-    return communityActivities.some(activity => 
+  // Get holiday for a specific date
+  const getHoliday = (date) => {
+    return holidays.find(holiday => 
+      holiday.date.getDate() === date.getDate() && 
+      holiday.date.getMonth() === date.getMonth() && 
+      holiday.date.getFullYear() === date.getFullYear()
+    );
+  };
+
+  // Check if a date has an event
+  const hasEvent = (date) => {
+    return activities.some(activity => 
       activity.date.getDate() === date.getDate() && 
       activity.date.getMonth() === date.getMonth() && 
       activity.date.getFullYear() === date.getFullYear()
     );
   };
 
-  // Get activities for the current month
-  const getCurrentMonthActivities = () => {
-    return communityActivities.filter(activity => 
-      activity.date.getMonth() === currentDate.getMonth() &&
-      activity.date.getFullYear() === currentDate.getFullYear()
-    );
-  };
-  
-  // Get activities for selected date
-  const getActivitiesForSelectedDate = () => {
-    if (!selectedDate) return [];
-    
-    return communityActivities.filter(activity => 
-      activity.date.getDate() === selectedDate.getDate() && 
-      activity.date.getMonth() === selectedDate.getMonth() && 
-      activity.date.getFullYear() === selectedDate.getFullYear()
-    );
-  };
-
   // Format date to display in the header
   const formatMonthYear = (date) => {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  };
-  
-  // Format date for display
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-  };
-
-  // Format date for display in the table
-  const formatTableDate = (date) => {
-    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   };
 
   // Generate calendar days
@@ -207,49 +338,58 @@ const MinistryDashboard = () => {
     if (date) {
       setSelectedDate(date);
       
-      // Check if the date has an event
-      if (hasEvent(date)) {
-        setSelectedEvent(getEvent(date));
-        setShowEventInfo(true);
+      // Check if the date has a holiday
+      if (hasHoliday(date)) {
+        setSelectedHoliday(getHoliday(date));
+        setShowHolidayInfo(true);
       } else {
-        setShowEventInfo(false);
-        setSelectedEvent(null);
+        setShowHolidayInfo(false);
+        setSelectedHoliday(null);
       }
     }
   };
 
-  // View activity details
-  const viewActivityDetails = (activityId) => {
-    // Navigate to activity details page based on activity type
-    const activity = communityActivities.find(a => a.id === activityId);
-    if (activity) {
-      navigate("/community-activity-details", { 
-        state: { 
-          viewOnly: true, 
-          activityData: activity,
-          userID: userID,
-          userData: userData
-        } 
-      });
+  // Format date for display
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  // Format date for table display
+  const formatDateShort = (date) => {
+    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  };
+  
+  // View event details - Updated to match SecretaryActivitiesEvent component
+  const viewEventDetails = (eventId) => {
+    const event = activities.find(e => e.activityID === eventId);
+    if (event) {
+      setSelectedEventData(event);
+      setShowEventModal(true);
     }
   };
   
-  // Check if a date is today
-  const isToday = (date) => {
-    const today = new Date();
-    return date.getDate() === today.getDate() && 
-           date.getMonth() === today.getMonth() && 
-           date.getFullYear() === today.getFullYear();
+  const getEventsForSelectedDate = () => {
+    if (!selectedDate) return [];
+    
+    return activities.filter(activity => 
+      activity.date.getDate() === selectedDate.getDate() && 
+      activity.date.getMonth() === selectedDate.getMonth() && 
+      activity.date.getFullYear() === selectedDate.getFullYear()
+    );
   };
-  
-  // Get status icon based on activity status
+
+  // Get status icon based on status
   const getStatusIcon = (status) => {
-    switch(status.toLowerCase()) {
-      case 'upcoming':
-        return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#155724' }} />;
-      case 'planning':
+    const statusLower = status.toLowerCase();
+    
+    switch(statusLower) {
+      case 'approved':
+      case 'confirmed':
+        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#155724' }} />;
+      case 'pending':
         return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#856404' }} />;
       case 'cancelled':
+      case 'rejected':
         return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#721c24' }} />;
       case 'completed':
         return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#004085' }} />;
@@ -258,142 +398,167 @@ const MinistryDashboard = () => {
     }
   };
 
-  // Don't render the dashboard until user data is loaded
-  if (!userData) {
-    return null;
-  }
+  // Check if a date is today
+  const isToday = (date) => {
+    const today = new Date(2025, 4, 17); // May 17, 2025 (hardcoded for the example)
+    return date.getDate() === today.getDate() && 
+           date.getMonth() === today.getMonth() && 
+           date.getFullYear() === today.getFullYear();
+  };
 
   return (
-    <div className="dashboard-container-cd">
-      <h1 className="title-comm">MINISTRY DASHBOARD</h1>
+    <div className="dashboard-container-sec">
+      <h1 className="title-sec">MINISTRY DASHBOARD</h1>
+      
+      {/* Error message */}
+      {error && (
+        <div className="error-message-container">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="error-icon" />
+          <span>{error}</span>
+        </div>
+      )}
       
       {/* Calendar Section */}
-      <div className="calendar-section-cd">
-        <div className="calendar-header-cd">
-          <button className="nav-btn-cd" onClick={prevMonth} aria-label="Previous month">
+      <div className="calendar-section-sec">
+        <div className="calendar-header-sec">
+          <button className="nav-btn-sec" onClick={prevMonth} aria-label="Previous month">
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
-          <h2 className="month-year-cd">
+          <h2 className="month-year-sec">
             <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px' }} />
             {formatMonthYear(currentDate)}
           </h2>
-          <button className="nav-btn-cd" onClick={nextMonth} aria-label="Next month">
+          <button className="nav-btn-sec" onClick={nextMonth} aria-label="Next month">
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
         </div>
         
-        <div className="calendar-grid-cd">
-          {/* Calendar week days */}
-          <div className="weekday-cd">Sun</div>
-          <div className="weekday-cd">Mon</div>
-          <div className="weekday-cd">Tue</div>
-          <div className="weekday-cd">Wed</div>
-          <div className="weekday-cd">Thu</div>
-          <div className="weekday-cd">Fri</div>
-          <div className="weekday-cd">Sat</div>
-          
-          {/* Calendar days */}
-          {generateCalendarDays().map((date, index) => (
-            <div 
-              key={index} 
-              className={`calendar-day-cd 
-                ${!date ? 'empty-day-cd' : ''} 
-                ${date && hasActivity(date) ? 'has-appointment-cd' : ''} 
-                ${date && hasEvent(date) ? 'holiday-day-cd' : ''} 
-                ${date && isToday(date) ? 'today-cd' : ''}
-                ${date && selectedDate && 
-                  date.getDate() === selectedDate.getDate() && 
-                  date.getMonth() === selectedDate.getMonth() && 
-                  date.getFullYear() === selectedDate.getFullYear() 
-                    ? 'selected-day-cd' 
-                    : ''
-                }`}
-              onClick={() => handleDayClick(date)}
-              aria-label={date ? `${date.getDate()}, ${hasEvent(date) ? 'Community Event' : ''} ${hasActivity(date) ? 'Has activity' : ''}` : 'Empty day'}
-            >
-              {date && (
-                <>
-                  <span className="day-number-cd">{date.getDate()}</span>
-                  {hasActivity(date) && <div className="appointment-dot-cd"></div>}
-                  {hasEvent(date) && (
-                    <div className="holiday-indicator-cd">
-                      <div 
-                        className="holiday-dot-cd" 
-                        style={{ 
-                          backgroundColor: getEvent(date).type === "Liturgical" ? "#e74c3c" : "#f39c12" 
-                        }}
-                      ></div>
-                      <span className="holiday-name-cd">{getEvent(date).name}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="loading-calendar">
+            <p>Loading calendar data...</p>
+          </div>
+        ) : (
+          <div className="calendar-grid-sec">
+            {/* Calendar week days */}
+            <div className="weekday-sec">Sun</div>
+            <div className="weekday-sec">Mon</div>
+            <div className="weekday-sec">Tue</div>
+            <div className="weekday-sec">Wed</div>
+            <div className="weekday-sec">Thu</div>
+            <div className="weekday-sec">Fri</div>
+            <div className="weekday-sec">Sat</div>
+            
+            {/* Calendar days */}
+            {generateCalendarDays().map((date, index) => (
+              <div 
+                key={index} 
+                className={`calendar-day-sec 
+                  ${!date ? 'empty-day-sec' : ''} 
+                  ${date && hasEvent(date) ? 'has-event-sec' : ''} 
+                  ${date && hasHoliday(date) ? 'holiday-day-sec' : ''} 
+                  ${date && isToday(date) ? 'today-sec' : ''}
+                  ${date && selectedDate && 
+                    date.getDate() === selectedDate.getDate() && 
+                    date.getMonth() === selectedDate.getMonth() && 
+                    date.getFullYear() === selectedDate.getFullYear() 
+                      ? 'selected-day-sec' 
+                      : ''
+                  }`}
+                onClick={() => handleDayClick(date)}
+                aria-label={date ? `${date.getDate()}, ${hasHoliday(date) ? 'Holiday' : ''} ${hasEvent(date) ? 'Has event' : ''}` : 'Empty day'}
+              >
+                {date && (
+                  <>
+                    <span className="day-number-sec">{date.getDate()}</span>
+                    {hasEvent(date) && <div className="event-dot-sec"></div>}
+                    {hasHoliday(date) && (
+                      <div className="holiday-indicator-sec">
+                        <div 
+                          className="holiday-dot-sec" 
+                          style={{ 
+                            backgroundColor: getHoliday(date).type === "Regular" ? "#e74c3c" : "#f39c12" 
+                          }}
+                        ></div>
+                        <span className="holiday-name-sec">{getHoliday(date).name}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         
         {/* Calendar Legend */}
-        <div className="calendar-legend-cd">
-          <div className="legend-item-cd">
-            <div className="legend-dot-cd" style={{ backgroundColor: "#e74c3c" }}></div>
-            <span>Liturgical Event</span>
+        <div className="calendar-legend-sec">
+          <div className="legend-item-sec">
+            <div className="legend-dot-sec" style={{ backgroundColor: "#e74c3c" }}></div>
+            <span>Regular Holiday</span>
           </div>
-          <div className="legend-item-cd">
-            <div className="legend-dot-cd" style={{ backgroundColor: "#f39c12" }}></div>
-            <span>Other Event</span>
+          <div className="legend-item-sec">
+            <div className="legend-dot-sec" style={{ backgroundColor: "#f39c12" }}></div>
+            <span>Special Holiday</span>
           </div>
-          <div className="legend-item-cd">
-            <div className="legend-dot-cd appointment-legend-cd"></div>
-            <span>Activity Scheduled</span>
+          <div className="legend-item-sec">
+            <div className="legend-dot-sec event-legend-sec"></div>
+            <span>Community Activity</span>
           </div>
         </div>
         
-        {/* Event Information */}
-        {showEventInfo && selectedEvent && (
-          <div className="holiday-info-cd">
-            <div className="holiday-info-header-cd">
-              <FontAwesomeIcon icon={faInfoCircle} className="holiday-info-icon-cd" />
-              <h3>Community Event Information</h3>
+        {/* Holiday Information */}
+        {showHolidayInfo && selectedHoliday && (
+          <div className="holiday-info-sec">
+            <div className="holiday-info-header-sec">
+              <FontAwesomeIcon icon={faInfoCircle} className="holiday-info-icon-sec" />
+              <h3>Holiday Information</h3>
             </div>
-            <div className="holiday-info-content-cd">
-              <p><strong>Date:</strong> {formatDate(selectedEvent.date)}</p>
-              <p><strong>Event:</strong> {selectedEvent.name}</p>
-              <p><strong>Type:</strong> <span className={`holiday-type-cd ${selectedEvent.type === "Liturgical" ? "regular" : "special"}-holiday-cd`}>{selectedEvent.type} Event</span></p>
+            <div className="holiday-info-content-sec">
+              <p><strong>Date:</strong> {formatDate(selectedHoliday.date)}</p>
+              <p><strong>Holiday:</strong> {selectedHoliday.name}</p>
+              <p><strong>Type:</strong> <span className={`holiday-type-sec ${selectedHoliday.type.toLowerCase()}-holiday-sec`}>{selectedHoliday.type} Holiday</span></p>
             </div>
           </div>
         )}
         
-        {/* Selected Date Activities */}
+        {/* Selected Date Details */}
         {selectedDate && (
-          <div className="selected-date-info-cd">
+          <div className="selected-date-info-sec">
             <h3>
               <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#b3701f' }} />
               {formatDate(selectedDate)}
             </h3>
             
-            {getActivitiesForSelectedDate().length > 0 ? (
-              <div className="selected-date-appointments-cd">
-                <h4>Scheduled Activities:</h4>
-                <ul className="appointment-list-cd">
-                  {getActivitiesForSelectedDate().map(activity => (
-                    <li key={activity.id} className="appointment-item-cd">
-                      <div className="appointment-time-cd">{activity.time}</div>
-                      <div className="appointment-details-cd">
-                        <span className="appointment-name-cd">{activity.name}</span>
-                        <span className="appointment-type-cd">{activity.type}</span>
-                        <span className={`appointment-status-cd ${activity.status.toLowerCase()}-cd`}>
+            {getEventsForSelectedDate().length > 0 && (
+              <div className="selected-date-events-sec">
+                <h4>Activities:</h4>
+                <ul className="event-list-sec">
+                  {getEventsForSelectedDate().map(activity => (
+                    <li key={activity.activityID} className="event-item-sec">
+                      <div className="event-time-sec">{activity.startTime}</div>
+                      <div className="event-details-sec">
+                        <span className="event-name-sec">{activity.title}</span>
+                        <span className="event-organizer-sec">{activity.proposedBy || activity.organizer}</span>
+                        <span className="event-location-sec">{activity.location}</span>
+                        <span className={`event-status-sec ${activity.status.toLowerCase()}-sec`}>
                           {getStatusIcon(activity.status)}
                           {activity.status}
                         </span>
                       </div>
+                      <button 
+                        className="view-btn-sec event-view-btn-sec" 
+                        onClick={() => viewEventDetails(activity.activityID)}
+                      >
+                        <FontAwesomeIcon icon={faEye} /> View
+                      </button>
                     </li>
                   ))}
                 </ul>
               </div>
-            ) : (
-              <p className="no-appointments-message-cd">
-                No activities scheduled for this date. 
-                Use the activities section below to plan new ministry activities.
+            )}
+            
+            {getEventsForSelectedDate().length === 0 && (
+              <p className="no-appointments-message-sec">
+                No activities scheduled for this date.
               </p>
             )}
           </div>
@@ -401,62 +566,132 @@ const MinistryDashboard = () => {
       </div>
       
       {/* Activities Table Section */}
-      <div className="activities-section-cd">
-        <h2 className="section-title-cd">
-          <FontAwesomeIcon icon={faUsers} className="section-icon-cd" />
-          Community Activities for {formatMonthYear(currentDate)}
-        </h2>
-        
-        <table className="activities-table-cd">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Title</th>
-              <th>Organizer</th>
-              <th>Category</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Location</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getCurrentMonthActivities().length > 0 ? (
-              getCurrentMonthActivities().map((activity) => (
-                <tr key={activity.id}>
-                  <td>{activity.id}</td>
-                  <td>{activity.name}</td>
-                  <td>{activity.organizer}</td>
-                  <td>{activity.type}</td>
-                  <td>{formatTableDate(activity.date)}</td>
-                  <td>{activity.time}</td>
-                  <td>{activity.location}</td>
-                  <td>
-                    <span className={`status-cd ${activity.status.toLowerCase()}-cd`}>
-                      {activity.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className="view-btn-cd"
-                      onClick={() => viewActivityDetails(activity.id)}
-                    >
-                      <FontAwesomeIcon icon={faEye} /> View
-                    </button>
-                  </td>
+      <div className="tables-container-sec">
+        <div className="table-section-sec events-table-section-sec">
+          <h2 className="section-title-sec">
+            <FontAwesomeIcon icon={faHandshake} className="section-icon-sec" />
+            Community Activities for {formatMonthYear(currentDate)}
+          </h2>
+          <div className="data-table-container">
+            <table className="event-table-sae">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Start Date</th>
+                  <th>Start Time</th>
+                  <th>Location</th>
+                  <th>Organizer</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="no-activities-cd">
-                  No community activities for this month
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {activities.length > 0 ? (
+                  activities.map((activity, index) => (
+                    <tr key={activity.activityID}>
+                      <td>{index + 1}</td>
+                      <td>{activity.title}</td>
+                      <td>{activity.description}</td>
+                      <td>{activity.category}</td>
+                      <td>{formatDateShort(activity.date)}</td>
+                      <td>{activity.startTime}</td>
+                      <td>{activity.location}</td>
+                      <td>{activity.proposedBy}</td>
+                      <td className={`status-${activity.status?.toLowerCase()}`}>
+                        {activity.status}
+                      </td>
+                      <td>
+                        <button
+                          className="sae-details"
+                          onClick={() => viewEventDetails(activity.activityID)}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="10" style={{ textAlign: "center" }}>
+                      {loading ? 'Loading activities...' : 'No approved activities for this month'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+
+      {/* Event Modal */}
+      {showEventModal && selectedEventData && (
+        <div className="modal-backdrop-sae">
+          <div className="modal-content-sae">
+            <h2>Activity Details</h2>
+            <hr className="custom-hr-sum"/>
+            <div className="view-details-sae">
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Title:</div>
+                <div className="detail-value-sae">{selectedEventData.title}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Description:</div>
+                <div className="detail-value-sae">{selectedEventData.description}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Category:</div>
+                <div className="detail-value-sae">{selectedEventData.category}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Start Date:</div>
+                <div className="detail-value-sae">{formatDateShort(selectedEventData.date)}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Start Time:</div>
+                <div className="detail-value-sae">{selectedEventData.startTime}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Location:</div>
+                <div className="detail-value-sae">{selectedEventData.location}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Organizer:</div>
+                <div className="detail-value-sae">{selectedEventData.organizer || selectedEventData.proposedBy}</div>
+              </div>
+              <div className="detail-row-sae">
+                <div className="detail-label-sae">Status:</div>
+                <div className={`detail-value-sae status-${selectedEventData.status.toLowerCase()}`}>
+                  {selectedEventData.status}
+                </div>
+              </div>
+              {selectedEventData.created_at && (
+                <div className="detail-row-sae">
+                  <div className="detail-label-sae">Created At:</div>
+                  <div className="detail-value-sae">
+                    {new Date(selectedEventData.created_at).toLocaleString()}
+                  </div>
+                </div>
+              )}
+              {selectedEventData.updated_at && (
+                <div className="detail-row-sae">
+                  <div className="detail-label-sae">Updated At:</div>
+                  <div className="detail-value-sae">
+                    {new Date(selectedEventData.updated_at).toLocaleString()}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-actions-sae">
+              <button onClick={() => setShowEventModal(false)} className="cancel-btn-sae">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

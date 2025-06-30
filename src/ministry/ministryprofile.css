@@ -1,3 +1,73 @@
+/* Location Dropdown Styles - FIXED */
+.location-dropdown-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative; /* Added to establish positioning context */
+}
+
+.location-dropdown {
+    position: absolute;
+    top: 100%; /* Position below the input */
+    left: 0;
+    right: 0; /* This will make it fill the width of the container */
+    width: 100%; /* Ensure full width */
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 0; /* Remove negative margin */
+}
+
+.location-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 14px;
+}
+
+.location-dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.location-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.location-dropdown::-webkit-scrollbar {
+    width: 5px;
+}
+
+.location-dropdown::-webkit-scrollbar-thumb {
+    background-color: #b3701f;
+    border-radius: 5px;
+}
+
+.location-dropdown::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}
+
+.location-dropdown-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    margin-bottom: 10px;
+    box-sizing: border-box; /* Added to include padding in width calculation */
+}
+
+.location-dropdown-container input:focus {
+    border-color: #b3701f;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.2);
+}
+
+/* Rest of your existing CSS remains the same */
 .community-profile-container {
     padding-left: 65px;
     padding-right: 65px;
@@ -6,19 +76,20 @@
     height: 100vh;
     overflow-y: auto;
 }
+
 .community-profile-container::-webkit-scrollbar {
     width: 5px;
     background-color: #ffffff; 
 }
   
-  .community-profile-container::-webkit-scrollbar-thumb {
+.community-profile-container::-webkit-scrollbar-thumb {
     background-color: #dbdbdb; 
     border-radius: 5px;
-  }
+}
   
-  .community-profile-container::-webkit-scrollbar-track {
+.community-profile-container::-webkit-scrollbar-track {
     background-color: #ffffff; 
-  }
+}
 
 .community-profile-header {
     display: flex;
@@ -38,7 +109,7 @@
     font-weight: 600;
 }
 
-.title-cp {
+.title-mp {
     font-size: 35px;
     font-weight: 900;
     font-family: Montserrat;
@@ -58,9 +129,10 @@
     align-items: center;
     cursor: pointer;
     position: relative;
-  }
+}
   
-  .image-upload-label {
+.image-upload-label {
+    margin-top: 20px;
     width: 180px;
     height: 180px;
     display: flex;
@@ -74,16 +146,16 @@
     font-weight: bold;
     color: #555;
     text-align: center;
-  }
+}
   
-  .image-upload-label img {
+.image-upload-label img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
-  }
+}
   
-  .hidden-file-input {
+.hidden-file-input {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -91,8 +163,7 @@
     cursor: pointer;
     top: 0;
     left: 0;
-  }
-  
+}
 
 .image-placeholder-cp {
     width: 180px;
@@ -130,22 +201,33 @@
     flex-direction: column;
     width: 100%;
 }
-.cp-fields, .cp-fields-sa, .cp-fields-pob{
+
+.cp-fields, .cp-fields-sa, .cp-fields-pob {
     display: flex;
     flex-direction: column;
     width: 100%;
     flex: 1;
-  }
+}
 
-  .cp-fields label, .cp-fields-sa label, .cp-fields-pob label {
+.cp-fields label, .cp-fields-sa label, .cp-fields-pob label {
     font-weight: 500;
     font-size: 13px;
     margin-bottom: 15px;
     color: #000;
     font-family: Roboto, sans-serif;
-  }
+}
+
 .cp-fields input {
     width: 180px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #000;
+}
+
+.community-profile-row-cp div select {
+    width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -161,6 +243,7 @@
     background-color: #ffffff;
     color: #000;
 }
+
 .cp-fields-sa select {
     width: 180px;
     padding: 8px;
@@ -171,7 +254,7 @@
 }
 
 .community-profile-row-cp label {
-   font-weight: 500;
+    font-weight: 500;
     font-size: 13px;
     margin-bottom: 5px;
     color: #000;
@@ -201,7 +284,6 @@
     font-family: roboto;
 }
 
-
 .community-profile-row-cp-full-width textarea {
     width: 100%;
     height: 100px;
@@ -209,75 +291,12 @@
     font-family: roboto;
 }
 
-/* Location Dropdown Styles */
-.location-dropdown-container {
-    position: relative;
-}
-
-.location-dropdown {
-    position: absolute;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: -5px;
-}
-
-.location-dropdown-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    color: #333;
-    font-size: 14px;
-}
-
-.location-dropdown-item:hover {
-    background-color: #f5f5f5;
-}
-
-.location-dropdown-item:last-child {
-    border-bottom: none;
-}
-
-.location-dropdown::-webkit-scrollbar {
-    width: 5px;
-}
-
-.location-dropdown::-webkit-scrollbar-thumb {
-    background-color: #b3701f;
-    border-radius: 5px;
-}
-
-.location-dropdown::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
-}
-
-/* Make sure location search boxes are properly styled */
-.location-dropdown-container input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #ffffff;
-    margin-bottom: 10px;
-}
-
-.location-dropdown-container input:focus {
-    border-color: #b3701f;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.2);
-}
-
 .button-container-cp {
     display: flex;
     justify-content: center;
     gap: 100px;
     margin-top: 20px;
-    margin-bottom: 90px;
+    margin-bottom: 100px;
 }
 
 .update-btn-cp, .clear-btn-cp-1 {
@@ -304,7 +323,7 @@
 }
 
 .clear-btn-cp-1 {
-    background-color: #fff; /* Red */
+    background-color: #fff;
     color: #b3701f;
     border: 1px solid #b3701f;
 }
@@ -314,7 +333,7 @@
 }
 
 .clear-btn-cp-1:hover {
-    background-color: #d7d7d6; /* Darker Red */
+    background-color: #d7d7d6;
     color: #b3701f;
     border: 1px solid #d7d7d6;
 }
@@ -353,4 +372,294 @@
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+/* ============================================= */
+/* RESPONSIVE DESIGN - MEDIA QUERIES */
+/* ============================================= */
+
+/* Small Laptops (1024px - 1366px) */
+@media (max-width: 1366px) {
+    .community-profile-container {
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-top: 30px;
+    }
+    
+    .title-mp {
+        font-size: 28px;
+    }
+    
+    .image-upload-label,
+    .image-placeholder-cp,
+    .profile-image-cp {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .cp-fields input {
+        width: 160px;
+    }
+    
+    .cp-fields select {
+        width: 176px;
+    }
+    
+    .button-container-cp {
+        gap: 80px;
+    }
+}
+
+/* Tablets (768px - 1023px) */
+@media (max-width: 1023px) {
+    .community-profile-container {
+        padding-left: 30px;
+        padding-right: 30px;
+        padding-top: 25px;
+    }
+    
+    .title-mp {
+        font-size: 28px;
+        text-align: center;
+    }
+    
+    .community-profile-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .community-profile-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+    
+    .image-upload-label,
+    .image-placeholder-cp,
+    .profile-image-cp {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .community-profile-fields-cp {
+        width: 100%;
+    }
+    
+    .community-profile-row-cp {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .community-profile-row-cp div {
+        min-width: calc(50% - 7.5px);
+    }
+    
+    .cp-fields input,
+    .cp-fields select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .location-dropdown-container input,
+    .community-profile-row-cp input {
+        width: 100%;
+    }
+    
+    .button-container-cp {
+        gap: 10px;
+        margin-top: 30px;
+        margin-bottom: 300px;
+    }
+    
+    .pdf-button-cp {
+        padding: 12px 25px;
+        font-size: 16px;
+    }
+}
+
+/* Large Mobile Devices (481px - 767px) */
+@media (max-width: 767px) {
+    .community-profile-container {
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-top: 20px;
+    }
+    
+    .title-mp {
+        font-size: 25px;
+        margin-bottom: 15px;
+    }
+    
+    .image-upload-label,
+    .image-placeholder-cp,
+    .profile-image-cp {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .community-profile-row-cp {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .community-profile-row-cp div {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .cp-fields input,
+    .cp-fields select,
+    .cp-fields-sa input,
+    .cp-fields-sa select {
+        width: 100%;
+    }
+    
+    .button-container-cp {
+        gap: 15px;
+        margin-bottom: 250px;
+    }
+    
+    .update-btn-cp,
+    .clear-btn-cp-1 {
+        width: 150px;
+    }
+    
+    .pdf-button-cp {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .community-profile-header {
+        gap: 10px;
+    }
+}
+
+/* Small Mobile Devices (320px - 480px) */
+@media (max-width: 480px) {
+    .community-profile-container {
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 15px;
+    }
+    
+    .title-mp {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    
+    .image-upload-label,
+    .image-placeholder-cp,
+    .profile-image-cp {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .image-placeholder-cp {
+        font-size: 12px;
+    }
+    
+    .community-profile-content {
+        gap: 20px;
+    }
+    
+    .cp-fields label,
+    .cp-fields-sa label,
+    .cp-fields-pob label,
+    .community-profile-row-cp label {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .cp-fields input,
+    .cp-fields select,
+    .community-profile-row-cp input,
+    .location-dropdown-container input {
+        padding: 6px;
+        font-size: 14px;
+    }
+    
+    .community-profile-row-cp {
+        margin-top: 15px;
+    }
+    
+    .button-container-cp {
+        margin-top: 0px;
+        margin-bottom: 250px;
+    }
+    
+    .update-btn-cp,
+    .clear-btn-cp-1 {
+        width: 100%;
+        max-width: 140px;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+    
+    .message {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .location-dropdown-item {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .pdf-button-cp {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+}
+
+/* Extra Small Devices (below 320px) */
+@media (max-width: 319px) {
+    .community-profile-container {
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 10px;
+    }
+    
+    .title-mp {
+        font-size: 18px;
+    }
+    
+    .image-upload-label,
+    .image-placeholder-cp,
+    .profile-image-cp {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .image-placeholder-cp {
+        font-size: 10px;
+    }
+    
+    .cp-fields label,
+    .community-profile-row-cp label {
+        font-size: 11px;
+    }
+    
+    .cp-fields input,
+    .community-profile-row-cp input {
+        padding: 5px;
+        font-size: 13px;
+    }
+    
+    .update-btn-cp,
+    .clear-btn-cp-1 {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+.password-error-message {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 10px;
+  padding: 8px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
 }

@@ -126,9 +126,9 @@ try {
         
         error_log('[CONFIRMATION_EMAIL] Preparing to send approval email to: ' . $userEmail . ' (' . $fullName . ')');
 
-        // Get the confirmation details
+        // Get the confirmation details (candidate info, address, etc.)
         $stmt = $conn->prepare("
-            SELECT c.first_name, c.middle_name, c.last_name, c.date, c.time, c.priest, c.gender, c.age,
+            SELECT c.first_name, c.middle_name, c.last_name, c.gender, c.age,
                    c.dateOfBirth, c.dateOfBaptism, c.churchOfBaptism, c.placeOfBirth,
                    ca.street, ca.barangay, ca.municipality, ca.province, ca.region
             FROM confirmation_application c 
@@ -147,6 +147,26 @@ try {
         }
         
         $confirmationData = $confirmationResult->fetch_assoc();
+
+        // Get the approved appointment details (this is the key fix!)
+        $stmt = $conn->prepare("
+            SELECT date, time, priest 
+            FROM approved_appointments 
+            WHERE sacramentID = ? AND sacrament_type = 'Confirmation'");
+        
+        if (!$stmt) {
+            handleError("Prepare statement failed for appointment query", $conn->error);
+        }
+        
+        $stmt->bind_param("i", $confirmationID);
+        $stmt->execute();
+        $appointmentResult = $stmt->get_result();
+        
+        if ($appointmentResult->num_rows == 0) {
+            handleError("Approved appointment details not found for confirmation ID: " . $confirmationID);
+        }
+        
+        $appointmentData = $appointmentResult->fetch_assoc();
         
         // Create new PHPMailer instance
         $mail = new PHPMailer(true);
@@ -168,10 +188,10 @@ try {
             $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
             $mail->addAddress($userEmail, $fullName);
 
-            // Format the date for display
-            $confirmationDate = isset($confirmationData['date']) ? date('F j, Y', strtotime($confirmationData['date'])) : '';
-            $confirmationTime = isset($confirmationData['time']) ? $confirmationData['time'] : '';
-            $priest = isset($confirmationData['priest']) ? $confirmationData['priest'] : '';
+            // Format the date for display - USE APPOINTMENT DATA instead of confirmation data
+            $confirmationDate = isset($appointmentData['date']) ? date('F j, Y', strtotime($appointmentData['date'])) : '';
+            $confirmationTime = isset($appointmentData['time']) ? $appointmentData['time'] : '';
+            $priest = isset($appointmentData['priest']) ? $appointmentData['priest'] : '';
             
             // Format the candidate's name
             $candidateName = trim(($confirmationData['first_name'] ?? '') . ' ' . 

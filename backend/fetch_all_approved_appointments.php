@@ -123,25 +123,27 @@ try {
     
     safelyExecuteQuery($conn, $funeralSql, "funeral");
     
-    // 4. Fetch all blessing appointments with status Approved
-    $blessingSql = "SELECT 
-                       b.blessingID as id, 
-                       b.firstName as firstName, 
-                       b.lastName as lastName, 
-                       'Blessing' as sacramentType, 
-                       b.blessingType,
-                       b.preferredDate as date, 
-                       b.preferredTime as time, 
-                       b.status,
-                       DATE(b.dateCreated) as createdAt
-                    FROM 
-                       blessing_application b
-                    WHERE 
-                       b.status = 'Approved'
-                    ORDER BY 
-                       b.preferredDate ASC";
-    
-    safelyExecuteQuery($conn, $blessingSql, "blessing");
+    // 4. Fetch all blessing appointments with status Approved - FIXED VERSION
+$blessingSql = "SELECT 
+                   b.blessingID as id, 
+                   b.firstName as firstName, 
+                   b.lastName as lastName, 
+                   'Blessing' as sacramentType, 
+                   bt.blessing_type as blessingType,
+                   b.preferredDate as date, 
+                   b.preferredTime as time, 
+                   b.status,
+                   DATE(b.dateCreated) as createdAt
+                FROM 
+                   blessing_application b
+                LEFT JOIN 
+                   blessing_type bt ON b.blessingID = bt.blessingID
+                WHERE 
+                   b.status = 'Approved'
+                ORDER BY 
+                   b.preferredDate ASC";
+
+safelyExecuteQuery($conn, $blessingSql, "blessing");
     
     // 5. Fetch all communion appointments with status Approved
     $communionSql = "SELECT 

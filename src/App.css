@@ -6,6 +6,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow: hidden;
 }
 
 body {
@@ -27,7 +28,7 @@ body {
   width: 100vw;
   height: 100vh;
   background-color: #ffff;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .sidebar-container {
@@ -44,12 +45,14 @@ body {
   display: flex;
   align-items: center; /* Logo and text are centered vertically */
   gap: 10px;
+  margin-top: 10px;
   padding: 0;
   z-index: 1000;
+  margin-bottom: 10px;
 }
 
 .sidebar-logo {
-  width: 80px;
+  width: 60px;
   margin-bottom: 1px;
 }
 
@@ -60,14 +63,14 @@ body {
 }
 
 .logo-title {
-  font-size: 16px;
+  font-size: 13px;
   font-family: Montserrat;
   font-weight: 900;
   color: #a56a00;
   margin: 0; /* Remove default margin of h1 */
 }
 .logo-subtitle {
-  font-size: 15px;
+  font-size: 12px;
   margin-top: 20px;
   letter-spacing: 1px;
   font-family: Nunito;
@@ -80,7 +83,7 @@ body {
   width: 75%;
   background-color: white;
   padding: 20px;
-  overflow: hidden;
+  overflow-x: hidden;
   border-left: 1px solid #b9b9b9;
   z-index: 1000;
 }
@@ -92,4 +95,112 @@ body {
   position: absolute; /* Position it without affecting other elements */
   top: 0; /* Place it at the bottom of the main container */
   left: 0;
+}
+
+/* Mobile Landscape (481px - 767px) */
+@media screen and (max-width: 1150px) {
+  body {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .main-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .sidebar-container {
+    width: 100%;
+    padding: 15px;
+    border-bottom: 1px solid #b9b9b9;
+  }
+  
+  .form-container {
+    width: 100%;
+    padding: 20px;
+    border-left: none;
+    border-top: 1px solid #b9b9b9;
+  }
+  
+  .logo-container {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .logo-title {
+    font-size: 16px;
+  }
+  
+  .logo-subtitle {
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
+  .sidebar-logo {
+    width: 70px;
+  }
+  
+  .main-divider {
+    display: none;
+  }
+}
+
+/* Mobile Portrait (320px - 480px) */
+@media screen and (max-width: 480px) {
+  .sidebar-container {
+    padding: 12px;
+
+  }
+  
+  .form-container {
+    padding: 15px;
+  }
+  
+  .logo-title {
+    font-size: 15px;
+  }
+  
+  .logo-subtitle {
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  
+  .sidebar-logo {
+    width: 60px;
+  }
+  
+  .logo-container {
+    gap: 6px;
+  }
+}
+
+/* Extra Small Devices (max-width: 320px) */
+@media screen and (max-width: 320px) {
+  .sidebar-container {
+    padding: 10px;
+  }
+  
+  .form-container {
+    padding: 12px;
+  }
+  
+  .logo-title {
+    font-size: 14px;
+  }
+  
+  .logo-subtitle {
+    font-size: 12px;
+    margin-top: 5px;
+    letter-spacing: 0.5px;
+  }
+  
+  .sidebar-logo {
+    width: 50px;
+  }
+  
+  .logo-container {
+    gap: 5px;
+  }
 }

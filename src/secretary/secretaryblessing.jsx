@@ -35,14 +35,52 @@ const SecretaryBlessing = () => {
     }
   };
 
-  // Filter data based on blessing type and search term
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Filter data based on blessing type and search term with flexible matching
   const filteredData = blessingAppointments.filter(blessing => {
     const matchesType = filterType === "" || blessing.blessingType === filterType;
-    const matchesSearch = searchTerm === "" || 
-      blessing.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blessing.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blessing.date?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blessing.status?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (searchTerm === "") {
+      return matchesType;
+    }
+
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    const fullName = `${blessing.firstName} ${blessing.lastName}`.toLowerCase();
+    const blessingTypeFormatted = `${blessing.blessingType.charAt(0).toUpperCase() + blessing.blessingType.slice(1)} Blessing`.toLowerCase();
+    const formattedDate = new Date(blessing.date).toISOString().split('T')[0];
+    const formattedCreatedAt = new Date(blessing.createdAt).toISOString().split('T')[0];
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    let matchesSearch;
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      matchesSearch = (
+        blessing.firstName?.toLowerCase().startsWith(searchValue) ||
+        blessing.lastName?.toLowerCase().startsWith(searchValue) ||
+        fullName.startsWith(searchValue) ||
+        blessingTypeFormatted.startsWith(searchValue) ||
+        formattedDate.startsWith(searchValue) ||
+        formattedCreatedAt.startsWith(searchValue) ||
+        blessing.status?.toLowerCase().startsWith(searchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      matchesSearch = (
+        blessing.firstName?.toLowerCase().includes(searchValue) ||
+        blessing.lastName?.toLowerCase().includes(searchValue) ||
+        fullName.includes(searchValue) ||
+        blessingTypeFormatted.includes(searchValue) ||
+        formattedDate.includes(searchValue) ||
+        formattedCreatedAt.includes(searchValue) ||
+        blessing.status?.toLowerCase().includes(searchValue)
+      );
+    }
     
     return matchesType && matchesSearch;
   });
@@ -96,20 +134,20 @@ const SecretaryBlessing = () => {
   return (
     <div className="blessing-container-sb">
       <h1 className="title-sb">BLESSING</h1>
-      <div className="blessing-actions-sb">
-        <div className="search-bar-sb">
+      <div className="blessing-actions-sb-bless">
+        <div className="search-bar-sb-bless">
           <input 
             type="text" 
             placeholder="Search" 
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearch}
           />
-          <FontAwesomeIcon icon={faSearch} className="search-icon-sb" />
+          <FontAwesomeIcon icon={faSearch} className="search-icon-sb-bless" />
         </div>
 
-        <div className="filter-container-sb">
+        <div className="filter-container-sb-bless">
           <select 
-            className="filter-select-sb"
+            className="filter-select-sb-bless"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -155,9 +193,9 @@ const SecretaryBlessing = () => {
                   <td>{blessing.firstName}</td>
                   <td>{blessing.lastName}</td>
                   <td>{blessing.blessingType.charAt(0).toUpperCase() + blessing.blessingType.slice(1)} Blessing</td>
-                  <td>{blessing.date}</td>
+                  <td>{new Date(blessing.date).toISOString().split('T')[0]}</td>
                   <td>{blessing.time}</td>
-                  <td>{blessing.createdAt}</td>
+                  <td>{new Date(blessing.createdAt).toISOString().split('T')[0]}</td>
                   <td>
                     <button
                       className="sb-details"

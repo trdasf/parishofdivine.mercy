@@ -79,15 +79,38 @@ const SecretaryBaptism = () => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter appointments based on search term
+  // Filter appointments based on search term with flexible matching
   const filteredAppointments = baptismAppointments.filter(appointment => {
-    const searchValue = searchTerm.toLowerCase();
-    return (
-      appointment.firstName?.toLowerCase().includes(searchValue) ||
-      appointment.lastName?.toLowerCase().includes(searchValue) ||
-      appointment.date?.toLowerCase().includes(searchValue) ||
-      appointment.status?.toLowerCase().includes(searchValue)
-    );
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    const fullName = `${appointment.firstName} ${appointment.lastName}`.toLowerCase();
+    const formattedDate = new Date(appointment.date).toISOString().split('T')[0];
+    const formattedCreatedAt = new Date(appointment.createdAt).toISOString().split('T')[0];
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      return (
+        appointment.firstName?.toLowerCase().startsWith(searchValue) ||
+        appointment.lastName?.toLowerCase().startsWith(searchValue) ||
+        fullName.startsWith(searchValue) ||
+        formattedDate.startsWith(searchValue) ||
+        formattedCreatedAt.startsWith(searchValue) ||
+        appointment.status?.toLowerCase().startsWith(searchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      return (
+        appointment.firstName?.toLowerCase().includes(searchValue) ||
+        appointment.lastName?.toLowerCase().includes(searchValue) ||
+        fullName.includes(searchValue) ||
+        formattedDate.includes(searchValue) ||
+        formattedCreatedAt.includes(searchValue) ||
+        appointment.status?.toLowerCase().includes(searchValue)
+      );
+    }
   });
 
   // If we have no real data yet, use sample data
@@ -96,17 +119,17 @@ const SecretaryBaptism = () => {
 
   return (
     <div className="baptism-container-sb">
-      <h1 className="title-sb">BAPTISM</h1>
+      <h1 className="title-sb-sb">BAPTISM</h1>
 
-      <div className="baptism-actions-sb">
-        <div className="search-bar-sb">
+      <div className="baptism-actions-sb-sb">
+        <div className="search-bar-sb-sb">
           <input 
             type="text" 
             placeholder="Search" 
             value={searchTerm}
             onChange={handleSearch}
           />
-          <FontAwesomeIcon icon={faSearch} className="search-icon-sb" />
+          <FontAwesomeIcon icon={faSearch} className="search-icon-sb-sb" />
         </div>
 
         <button className="download-button-sb" onClick={handleDownload}>
@@ -143,9 +166,9 @@ const SecretaryBaptism = () => {
                   <td>{appointment.id}</td>
                   <td>{appointment.firstName}</td>
                   <td>{appointment.lastName}</td>
-                  <td>{appointment.date}</td>
+                  <td>{new Date(appointment.date).toISOString().split('T')[0]}</td>
                   <td>{appointment.time}</td>
-                  <td>{appointment.createdAt}</td>
+                  <td>{new Date(appointment.createdAt).toISOString().split('T')[0]}</td>
                   <td>
                     <button
                       className="sb-details"

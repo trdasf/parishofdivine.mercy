@@ -5,6 +5,7 @@
   height: 100vh;
   overflow-y: auto;
   font-family: 'Roboto', sans-serif;
+  padding-bottom: 100px;
 }
 
 /* Add today indicator */
@@ -566,6 +567,7 @@
 @media (max-width: 1200px) {
   .dashboard-container-cd {
     padding: 15px;
+    overflow: auto;
   }
   
   .calendar-grid-cd {
@@ -574,6 +576,9 @@
   
   .calendar-day-cd {
     height: 70px;
+  }
+  .activities-section-cd {
+    margin-bottom: 300px;
   }
 }
 

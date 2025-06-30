@@ -1,4 +1,4 @@
-/* clientsidebar.css */
+/* Desktop Sidebar Styles */
 .client-sidebar {
     width: 360px;
     background: white;
@@ -11,66 +11,195 @@
     border-radius: 20px;
     margin-top: 15px;
     overflow-y: auto;
-  }
-  
-  .client-sidebar-header {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999; /* Lower z-index so modals can appear above */
+    transition: transform 0.3s ease;
+}
+
+.client-sidebar::-webkit-scrollbar {
+    width: 5px;
+    background-color: #ffffff;
+}
+
+.client-sidebar::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb;
+    border-radius: 5px;
+}
+
+.client-sidebar::-webkit-scrollbar-track {
+    background-color: #ffffff;
+}
+
+/* Desktop Header */
+.client-sidebar-header {
     text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  .client-sidebar-header h2 {
+    margin-bottom: 10px;
+    display: block;
+}
+
+.client-sidebar-header h2 {
     color: #573901;
     font-family: Montserrat;
     font-weight: 800;
-    font-size: 35px;
-  }
-  
-  .client-sidebar-menu   .client-menu-item{
+    font-size: 30px;
+    margin: 0;
+}
+
+/* Mobile Header - Hidden by default */
+.client-sidebar-mobile-header {
+    display: none;
+    justify-content: space-between;
+    margin-top: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.client-sidebar-mobile-header h2 {
+    color: #573901;
+    font-family: Montserrat;
+    font-weight: 800;
+    font-size: 20px;
+    margin: 0;
+}
+
+/* Mobile Toggle Button - Highest z-index */
+.sidebar-toggle-btn {
+    display: none;
+    position: fixed;
+    top: 35px;
+    left: 20px;
+    z-index: 1060; /* Increased z-index to be higher than sidebar */
+    background: #db9005;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    user-select: none;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #c5840a;
+    transform: scale(1.05);
+}
+
+.sidebar-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* Close Button */
+.sidebar-close-btn {
+    background: none;
+    border: none;
+    color: #573901;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.sidebar-close-btn:hover {
+    color: #db9005;
+}
+
+/* Sidebar Menu */
+.client-sidebar-menu .client-menu-item {
     display: flex;
     align-items: center;
-    padding: 10px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
-    justify-content: space-between; /* Ensures spacing between text and dropdown icon */
+    justify-content: flex-start;
     gap: 10px;
     margin-bottom: 2px;
     color: #333;
-  }
-  
-  .client-menu-item span {
-    flex-grow: 1; /* Ensures text takes up remaining space */
-    text-align: left; /* Align text to the left */
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.client-menu-item span {
+    flex-grow: 1;
+    text-align: left;
     font-family: roboto;
     font-weight: 800;
     padding-left: 10px;
     font-size: 18px;
     color: #333;
-  }
-  
-  .client-menu-item:hover,
-  .client-menu-item.active {
+}
+
+/* Active State */
+.client-menu-item.active,
+.client-submenu-item.active {
     background: #db9005;
     border-radius: 5px;
     font-weight: bold;
     color: white;
-  }
-  .client-menu-item:hover span,
-  .client-menu-item.active span {
+}
+
+.client-menu-item.active span {
+    color: white;
+}
+
+.client-menu-item:hover {
     background: #db9005;
     border-radius: 5px;
-    font-weight: bold;
     color: white;
-  }
-  
-  .client-menu-item span {
-    flex-grow: 1;
-  }
-  
-  .client-menu-item-logout {
+}
+
+.client-menu-item:hover span {
+    color: white;
+}
+
+/* Dropdown Submenu */
+.client-submenu {
+    margin-left: 50px;
+    display: flex;
+    flex-direction: column;
+}
+
+.client-submenu-item {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333;
+    font-family: roboto;
+    font-weight: 600;
+    padding-left: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.client-submenu-item:hover {
+    background: #db9005;
+    border-radius: 5px;
+    color: white;
+}
+
+/* Dropdown Icon */
+.dropdown-icon {
+    transition: transform 0.3s ease;
+    margin-left: auto;
+}
+
+.rotate {
+    transform: rotate(180deg);
+}
+
+/* Logout */
+.client-menu-item-logout {
     margin-top: 10px;
-    background: #573901;
+    background: #db9005;
     padding: 10px;
     text-align: center;
     cursor: pointer;
@@ -78,18 +207,397 @@
     font-family: roboto;
     font-weight: 700;
     font-size: 18px;
-    justify-content: center; /* Ensures spacing between text and dropdown icon */
+    justify-content: center;
     gap: 10px;
     display: flex;
     align-items: center;
     color: white;
     height: 35px;
-  }
-  
-  .client-menu-item-logout:hover {
-    background: #db9005;
-    border-radius: 5px;
-    font-weight: bold;
-    color: white;
-  }
-  
+    transition: all 0.3s ease;
+}
+
+.client-menu-item-logout:hover {
+    background: #c5840a;
+    transform: translateY(-2px);
+}
+
+/* ===============================
+   RESPONSIVE DESIGN BREAKPOINTS
+   =============================== */
+
+/* Small Laptop (1366px and below) */
+@media (max-width: 1366px) {
+    .client-sidebar {
+        width: 280px;
+        padding: 18px;
+        border-radius: 18px;
+        margin-top: 12px;
+    }
+    
+    .client-sidebar-header h2 {
+        font-size: 28px;
+    }
+    
+    .client-menu-item {
+        padding: 9px 18px;
+    }
+    
+    .client-menu-item span {
+        font-size: 17px;
+        padding-left: 9px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 17px;
+        height: 34px;
+    }
+}
+
+/* Medium Laptop (1024px and below) */
+@media (max-width: 1024px) {
+    .client-sidebar {
+        width: 260px;
+        padding: 15px;
+        border-radius: 15px;
+        margin-top: 10px;
+    }
+    
+    .client-sidebar-header h2 {
+        font-size: 26px;
+    }
+    
+    .client-menu-item {
+        padding: 8px 15px;
+    }
+    
+    .client-menu-item span {
+        font-size: 16px;
+        padding-left: 8px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 16px;
+        height: 32px;
+    }
+    
+    .client-submenu {
+        margin-left: 40px;
+    }
+}
+
+/* Tablet (1150px and below) - Hamburger Menu Activation */
+@media (max-width: 1150px) {
+    /* Show mobile toggle button */
+    .sidebar-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Hide desktop sidebar by default */
+    .client-sidebar {
+        transform: translateX(-100%);
+        width: 300px;
+        height: 100vh;
+        margin-top: 0;
+        border-radius: 0;
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+        padding: 20px 15px;
+        z-index: 1040; /* Lower than hamburger button */
+    }
+    
+    /* Show sidebar when open */
+    .client-sidebar.open {
+        transform: translateX(0);
+    }
+    
+    /* Hide desktop header, show mobile header */
+    .client-sidebar-header {
+        display: none;
+    }
+    
+    .client-sidebar-mobile-header {
+        display: flex;
+    }
+    
+    /* Adjust menu items for mobile */
+    .client-menu-item {
+        padding: 12px 15px;
+        margin-bottom: 5px;
+    }
+    
+    .client-menu-item span {
+        font-size: 16px;
+        padding-left: 8px;
+    }
+    
+    .client-menu-item-logout {
+        margin-top: 20px;
+        font-size: 16px;
+        height: 40px;
+    }
+    
+    .client-submenu {
+        margin-left: 35px;
+    }
+}
+
+/* Mobile Landscape (640px and below) */
+@media (max-width: 640px) {
+    .sidebar-toggle-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 19px;
+        top: 35px;
+        left: 18px;
+    }
+    
+    .client-sidebar {
+        width: 280px;
+        padding: 18px 14px;
+    }
+    
+    .client-sidebar-mobile-header h2 {
+        font-size: 19px;
+    }
+    
+    .client-menu-item {
+        padding: 11px 14px;
+        margin-bottom: 4px;
+    }
+    
+    .client-menu-item span {
+        font-size: 15px;
+        padding-left: 7px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 15px;
+        height: 38px;
+        margin-top: 18px;
+    }
+}
+
+/* Mobile Portrait (480px and below) */
+@media (max-width: 480px) {
+    .sidebar-toggle-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+        top: 35px;
+        left: 15px;
+    }
+    
+    .client-sidebar {
+        width: 260px;
+        padding: 15px 12px;
+    }
+    
+    .client-sidebar-mobile-header h2 {
+        font-size: 18px;
+    }
+    
+    .sidebar-close-btn {
+        font-size: 20px;
+    }
+    
+    .client-menu-item {
+        padding: 10px 12px;
+        margin-bottom: 3px;
+    }
+    
+    .client-menu-item span {
+        font-size: 14px;
+        padding-left: 6px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 14px;
+        height: 36px;
+        margin-top: 15px;
+    }
+    
+    .client-submenu {
+        margin-left: 30px;
+    }
+    
+    .client-submenu-item {
+        font-size: 13px;
+        padding: 8px;
+    }
+}
+
+/* Small Mobile (400px and below) */
+@media (max-width: 400px) {
+    .sidebar-toggle-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 17px;
+        top: 35px;
+        left: 14px;
+    }
+    
+    .client-sidebar {
+        width: 240px;
+        padding: 14px 11px;
+    }
+    
+    .client-sidebar-mobile-header {
+        margin-bottom: 16px;
+        padding-bottom: 13px;
+    }
+    
+    .client-sidebar-mobile-header h2 {
+        font-size: 17px;
+    }
+    
+    .sidebar-close-btn {
+        font-size: 19px;
+    }
+    
+    .client-menu-item {
+        padding: 9px 11px;
+        margin-bottom: 2px;
+    }
+    
+    .client-menu-item span {
+        font-size: 13px;
+        padding-left: 5px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 13px;
+        height: 34px;
+        margin-top: 14px;
+    }
+}
+
+/* Extra Small Mobile (360px and below) */
+@media (max-width: 360px) {
+    .sidebar-toggle-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+        top: 35px;
+        left: 12px;
+    }
+    
+    .client-sidebar {
+        width: 220px;
+        padding: 12px 10px;
+    }
+    
+    .client-sidebar-mobile-header {
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+    }
+    
+    .client-sidebar-mobile-header h2 {
+        font-size: 16px;
+    }
+    
+    .sidebar-close-btn {
+        font-size: 18px;
+    }
+    
+    .client-menu-item {
+        padding: 8px 10px;
+        margin-bottom: 2px;
+    }
+    
+    .client-menu-item span {
+        font-size: 12px;
+        padding-left: 4px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 12px;
+        height: 32px;
+        margin-top: 12px;
+    }
+    
+    .client-submenu {
+        margin-left: 25px;
+    }
+    
+    .client-submenu-item {
+        font-size: 11px;
+        padding: 6px;
+    }
+}
+
+/* Very Small Mobile (320px and below) */
+@media (max-width: 320px) {
+    .sidebar-toggle-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+        top: 35px;
+        left: 10px;
+    }
+    
+    .client-sidebar {
+        width: 200px;
+        padding: 10px 8px;
+    }
+    
+    .client-sidebar-mobile-header h2 {
+        font-size: 15px;
+    }
+    
+    .sidebar-close-btn {
+        font-size: 16px;
+    }
+    
+    .client-menu-item {
+        padding: 7px 8px;
+        margin-bottom: 1px;
+    }
+    
+    .client-menu-item span {
+        font-size: 11px;
+        padding-left: 3px;
+    }
+    
+    .client-menu-item-logout {
+        font-size: 11px;
+        height: 30px;
+        margin-top: 10px;
+    }
+}
+
+/* Desktop Styles (Above 1150px) */
+@media (min-width: 1151px) {
+    .client-sidebar {
+        position: relative;
+        transform: translateX(0);
+        display: flex;
+        z-index: 999;
+    }
+    
+    .sidebar-toggle-btn {
+        display: none;
+    }
+    
+    .client-sidebar-mobile-header {
+        display: none;
+    }
+    
+    .client-sidebar-header {
+        display: block;
+    }
+}
+
+/* Smooth transitions for all interactive elements */
+.client-sidebar,
+.client-menu-item,
+.client-menu-item-logout,
+.sidebar-toggle-btn {
+    transition: all 0.3s ease;
+}
+
+/* Body scroll lock when sidebar is open on mobile */
+.body-no-scroll {
+    overflow: hidden;
+}

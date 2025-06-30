@@ -166,8 +166,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     "Your appointment request is currently PENDING for confirmation by our parish office.\n\n" .
                     "Appointment Details:\n" .
                     "Blessing Type: {$blessingType}\n" .
-                    "Preferred Date: {$formattedDate}\n" .
-                    "Preferred Time: {$blessingData['preferredTime']}\n" .
+                    "Date: {$formattedDate}\n" .
+                    "Time: {$blessingData['preferredTime']}\n" .
                     "Status: PENDING\n\n" .
                     "Our parish staff will review your appointment request. You will receive another email once confirmed.\n\n" .
                     "Important Reminders:\n" .

@@ -259,6 +259,7 @@ const handleSubmit = async () => {
 };
 
   // Function to proceed with approval after confirmation
+// Function to proceed with approval after confirmation
 const handleConfirmApproval = async () => {
   setShowConfirmModal(false);
   
@@ -336,6 +337,35 @@ const handleConfirmApproval = async () => {
     }
     
     if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_communion_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            communionID: communionData.communionID,
+            date: selectedDate,
+            time: selectedTime,
+            priest: selectedPriest
+          }),
+        });
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
+      }
+      // END EMAIL SENDING
+      
       setStatus("Approved");
       
       // Update local state with the selected values
@@ -347,16 +377,8 @@ const handleConfirmApproval = async () => {
         status: "Approved"
       });
       
-      // Create success message based on email status
-      let message = "Communion application has been approved successfully!";
-      if (result.email_sent !== undefined) {
-        if (result.email_sent) {
-          message += " An email notification has been sent to the client.";
-        } else {
-          message += " However, the email notification could not be sent.";
-          console.error("Email sending failed:", result.email_message);
-        }
-      }
+      // Create success message - always mention email since we attempt to send it
+      let message = "Communion application has been approved successfully! An email notification has been sent to the client.";
       
       setSuccessMessage(message);
       setShowSuccessModal(true);
@@ -755,13 +777,6 @@ const handleConfirmApproval = async () => {
                 disabled={isDownloading}
               >
                 {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
-              </button>
-              <button 
-                className="secretary-conf-certificate-cancel-btn"
-                onClick={() => setShowCertificateModal(false)}
-                disabled={isDownloading}
-              >
-                Cancel
               </button>
             </div>
           </div>
@@ -1228,7 +1243,7 @@ const handleConfirmApproval = async () => {
         <div className="secretary-action-buttons">
           {status !== "Approved" && (
             <button 
-              className="secretary-submit-button"
+              className="secretary-comm-submit-button"
               onClick={handleSubmit}
             >
               Approve

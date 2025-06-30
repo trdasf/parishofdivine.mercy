@@ -126,9 +126,9 @@ try {
         
         error_log('[ANOINTING_EMAIL] Preparing to send approval email to: ' . $userEmail . ' (' . $fullName . ')');
 
-        // Get the anointing details and join with location and contact info
+        // Get the anointing details (patient info, location, contact info, etc.)
         $stmt = $conn->prepare("
-            SELECT a.firstName, a.lastName, a.dateOfAnointing, a.timeOfAnointing, a.priestName,
+            SELECT a.firstName, a.lastName,
                    l.locationType, l.locationName, l.roomNumber, l.street, l.barangay, l.municipality, l.province,
                    c.contactFirstName, c.contactLastName, c.contactPhone
             FROM anointing_application a
@@ -148,6 +148,26 @@ try {
         }
         
         $anointingData = $anointingResult->fetch_assoc();
+
+        // Get the approved appointment details (this is the key fix!)
+        $stmt = $conn->prepare("
+            SELECT date, time, priest 
+            FROM approved_appointments 
+            WHERE sacramentID = ? AND sacrament_type = 'anointing'");
+        
+        if (!$stmt) {
+            handleError("Prepare statement failed for appointment query", $conn->error);
+        }
+        
+        $stmt->bind_param("i", $anointingID);
+        $stmt->execute();
+        $appointmentResult = $stmt->get_result();
+        
+        if ($appointmentResult->num_rows == 0) {
+            handleError("Approved appointment details not found for anointing ID: " . $anointingID);
+        }
+        
+        $appointmentData = $appointmentResult->fetch_assoc();
         
         // Create new PHPMailer instance
         $mail = new PHPMailer(true);
@@ -169,11 +189,12 @@ try {
             $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
             $mail->addAddress($userEmail, $fullName);
 
-            // Format the date for display
-            $anointingDate = isset($anointingData['dateOfAnointing']) ? date('F j, Y', strtotime($anointingData['dateOfAnointing'])) : '';
-            $anointingTime = isset($anointingData['timeOfAnointing']) ? $anointingData['timeOfAnointing'] : '';
-            $priest = isset($anointingData['priestName']) ? $anointingData['priestName'] : '';
+            // Format the date for display - USE APPOINTMENT DATA instead of anointing data
+            $anointingDate = isset($appointmentData['date']) ? date('F j, Y', strtotime($appointmentData['date'])) : '';
+            $anointingTime = isset($appointmentData['time']) ? $appointmentData['time'] : '';
+            $priest = isset($appointmentData['priest']) ? $appointmentData['priest'] : '';
             
+            // These remain from anointing data since they don't change
             $patientName = trim(($anointingData['firstName'] ?? '') . ' ' . 
                         ($anointingData['lastName'] ?? ''));
                         

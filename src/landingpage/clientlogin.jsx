@@ -25,13 +25,15 @@ const ClientLogin = () => {
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
   
-  // Error messages only
+  // Error and success messages
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   
   // Forgot password modal state
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   
   // Form data states
   const [loginData, setLoginData] = useState({
@@ -47,12 +49,20 @@ const ClientLogin = () => {
     password: '',
     confirm_password: ''
   });
+
+  // Forgot password form data
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    email: '',
+    new_password: '',
+    confirm_new_password: ''
+  });
   
   // Handle login submission
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage('');
+    setSuccessMessage('');
     
     try {
       const response = await fetch('http://parishofdivinemercy.com/backend/client_login.php', {
@@ -95,9 +105,36 @@ const ClientLogin = () => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage('');
+    setSuccessMessage('');
     
     if (signupData.password !== signupData.confirm_password) {
       setErrorMessage('Passwords do not match.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password requirements
+    const password = signupData.password;
+    if (password.length < 8) {
+      setErrorMessage('Password must be at least 8 characters long.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setErrorMessage('Password must contain at least one uppercase letter.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setErrorMessage('Password must contain at least one number.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      setErrorMessage('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;\':",./<>?).');
       setIsLoading(false);
       return;
     }
@@ -122,17 +159,21 @@ const ClientLogin = () => {
         const data = await response.json();
         
         if (data.success) {
-          // Directly switch to login view without any message
-          setIsLoginView(true);
-          // Clear signup form
-          setSignupData({
-            first_name: '',
-            last_name: '',
-            contact_number: '',
-            email: '',
-            password: '',
-            confirm_password: ''
-          });
+          // Show success message and switch to login view
+          setSuccessMessage('Registration successful! You can now login with your account.');
+          setTimeout(() => {
+            setIsLoginView(true);
+            setSuccessMessage('');
+            // Clear signup form
+            setSignupData({
+              first_name: '',
+              last_name: '',
+              contact_number: '',
+              email: '',
+              password: '',
+              confirm_password: ''
+            });
+          }, 2000);
         } else {
           setErrorMessage(data.message || 'Registration failed. Please try again.');
         }
@@ -149,17 +190,93 @@ const ClientLogin = () => {
     }
   };
 
-  // Rest of the component remains the same...
+  // Handle forgot password submission
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setIsResettingPassword(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    // Validate passwords match
+    if (forgotPasswordData.new_password !== forgotPasswordData.confirm_new_password) {
+      setErrorMessage('New passwords do not match.');
+      setIsResettingPassword(false);
+      return;
+    }
+
+    // Validate password requirements
+    const password = forgotPasswordData.new_password;
+    if (password.length < 8) {
+      setErrorMessage('Password must be at least 8 characters long.');
+      setIsResettingPassword(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setErrorMessage('Password must contain at least one uppercase letter.');
+      setIsResettingPassword(false);
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setErrorMessage('Password must contain at least one number.');
+      setIsResettingPassword(false);
+      return;
+    }
+
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      setErrorMessage('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;\':",./<>?).');
+      setIsResettingPassword(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://parishofdivinemercy.com/backend/client_forgot_password.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: forgotPasswordData.email,
+          new_password: forgotPasswordData.new_password
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccessMessage('Password has been successfully reset! You can now login with your new password.');
+        // Clear the form
+        setForgotPasswordData({
+          email: '',
+          new_password: '',
+          confirm_new_password: ''
+        });
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          setShowForgotPasswordModal(false);
+          setSuccessMessage('');
+        }, 2000);
+      } else {
+        setErrorMessage(data.message || 'Failed to reset password. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrorMessage('Network error. Please check your connection and try again.');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
   // Handle login input changes
   const handleLoginChange = (e) => {
     setLoginData({
       ...loginData,
       [e.target.name]: e.target.value
     });
-    // Clear error message when user starts typing
-    if (errorMessage) {
-      setErrorMessage('');
-    }
+    // Clear messages when user starts typing
+    if (errorMessage) setErrorMessage('');
+    if (successMessage) setSuccessMessage('');
   };
   
   // Handle signup input changes
@@ -168,10 +285,20 @@ const ClientLogin = () => {
       ...signupData,
       [e.target.name]: e.target.value
     });
-    // Clear error message when user starts typing
-    if (errorMessage) {
-      setErrorMessage('');
-    }
+    // Clear messages when user starts typing
+    if (errorMessage) setErrorMessage('');
+    if (successMessage) setSuccessMessage('');
+  };
+
+  // Handle forgot password input changes
+  const handleForgotPasswordChange = (e) => {
+    setForgotPasswordData({
+      ...forgotPasswordData,
+      [e.target.name]: e.target.value
+    });
+    // Clear messages when user starts typing
+    if (errorMessage) setErrorMessage('');
+    if (successMessage) setSuccessMessage('');
   };
 
   return (
@@ -189,10 +316,17 @@ const ClientLogin = () => {
           </div>
         </div>
         
-        {/* Error message display only */}
+        {/* Error message display */}
         {errorMessage && (
           <div className="error-message">
             {errorMessage}
+          </div>
+        )}
+
+        {/* Success message display */}
+        {successMessage && (
+          <div className="success-message">
+            {successMessage}
           </div>
         )}
         
@@ -242,6 +376,8 @@ const ClientLogin = () => {
               <a href="#" className="forgot-password" onClick={(e) => {
                 e.preventDefault();
                 setShowForgotPasswordModal(true);
+                setErrorMessage('');
+                setSuccessMessage('');
               }}>
                 Forgot Password?
               </a>
@@ -260,11 +396,12 @@ const ClientLogin = () => {
               <p>Don't have an account? <button type="button" onClick={() => {
                 setIsLoginView(false);
                 setErrorMessage('');
+                setSuccessMessage('');
               }}>Sign Up</button></p>
             </div>
           </form>
         ) : (
-          // Signup Form
+          // Signup Form (keeping the same structure as original)
           <form className="signup-form" onSubmit={handleSignupSubmit}>
             <div className="form-row">
               <div className="form-group">
@@ -354,6 +491,7 @@ const ClientLogin = () => {
                     onChange={handleSignupChange}
                     required
                     disabled={isLoading}
+                    minLength="8"
                   />
                   <FontAwesomeIcon
                     icon={showPassword ? faEyeSlash : faEye}
@@ -385,7 +523,15 @@ const ClientLogin = () => {
               </div>
               </div>
             </div>
-            
+            <div className="password-requirements">
+                  <small>Password must contain:</small>
+                  <ul>
+                    <li>At least 8 characters</li>
+                    <li>One uppercase letter</li>
+                    <li>One number</li>
+                    <li>One special character (!@#$%^&*...)</li>
+                  </ul>
+                </div>
             <div className="client-form-actions-button">
               <button 
                 type="submit" 
@@ -400,6 +546,7 @@ const ClientLogin = () => {
               <p>Already have an account? <button type="button" onClick={() => {
                 setIsLoginView(true);
                 setErrorMessage('');
+                setSuccessMessage('');
               }}>Login</button></p>
             </div>
           </form>
@@ -414,17 +561,36 @@ const ClientLogin = () => {
               <h2>Reset Password</h2>
               <button 
                 className="modal-close" 
-                onClick={() => setShowForgotPasswordModal(false)}
+                onClick={() => {
+                  setShowForgotPasswordModal(false);
+                  setForgotPasswordData({
+                    email: '',
+                    new_password: '',
+                    confirm_new_password: ''
+                  });
+                  setErrorMessage('');
+                  setSuccessMessage('');
+                }}
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
             
-            <form className="reset-password-form" onSubmit={(e) => {
-              e.preventDefault();
-              // Add forgot password logic here
-              setShowForgotPasswordModal(false);
-            }}>
+            {/* Error message display in modal */}
+            {errorMessage && (
+              <div className="error-message">
+                {errorMessage}
+              </div>
+            )}
+
+            {/* Success message display in modal */}
+            {successMessage && (
+              <div className="success-message">
+                {successMessage}
+              </div>
+            )}
+            
+            <form className="reset-password-form" onSubmit={handleForgotPasswordSubmit}>
               <div className="form-label">
                 <label htmlFor="reset-email">Email</label>
                 </div>
@@ -433,8 +599,12 @@ const ClientLogin = () => {
                   <input
                     type="email"
                     id="reset-email"
+                    name="email"
                     placeholder="Enter your registered email"
+                    value={forgotPasswordData.email}
+                    onChange={handleForgotPasswordChange}
                     required
+                    disabled={isResettingPassword}
                   />
                   <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
                 </div>
@@ -446,8 +616,13 @@ const ClientLogin = () => {
                   <input
                     type={showNewPassword ? "text" : "password"}
                     id="new-password"
-                    placeholder="Enter new password"
+                    name="new_password"
+                    placeholder="Enter new password (8+ chars, uppercase, number, special char)"
+                    value={forgotPasswordData.new_password}
+                    onChange={handleForgotPasswordChange}
                     required
+                    disabled={isResettingPassword}
+                    minLength="8"
                   />
                   <FontAwesomeIcon icon={faLock} className="input-icon" />
                   <FontAwesomeIcon
@@ -464,8 +639,13 @@ const ClientLogin = () => {
                   <input
                     type={showConfirmNewPassword ? "text" : "password"}
                     id="confirm-new-password"
+                    name="confirm_new_password"
                     placeholder="Confirm new password"
+                    value={forgotPasswordData.confirm_new_password}
+                    onChange={handleForgotPasswordChange}
                     required
+                    disabled={isResettingPassword}
+                    minLength="8"
                   />
                   <FontAwesomeIcon icon={faLock} className="input-icon" />
                   <FontAwesomeIcon
@@ -475,9 +655,23 @@ const ClientLogin = () => {
                   />
                 </div>
               </div>
-              
+               <div className="password-requirements">
+                  <small>Password must contain:</small>
+                  <ul>
+                    <li>At least 8 characters</li>
+                    <li>One uppercase letter</li>
+                    <li>One number</li>
+                    <li>One special character (!@#$%^&*...)</li>
+                  </ul>
+                </div>   
               <div className="form-actions-button">
-                <button type="submit" className="reset-password-btn">Save Changes</button>
+                <button 
+                  type="submit" 
+                  className="reset-password-btn"
+                  disabled={isResettingPassword}
+                >
+                  {isResettingPassword ? 'RESETTING PASSWORD...' : 'RESET PASSWORD'}
+                </button>
               </div>
             </form>
           </div>

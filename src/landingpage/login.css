@@ -8,7 +8,7 @@
     background: linear-gradient(135deg, #f2f1e4 0%, #d19a42 100%);
     padding: 20px;
     position: relative;
-  }
+}
   
   /* Theme variations */
   .login-page.secretary-theme {
@@ -54,8 +54,23 @@
     max-width: 700px;
     padding: 30px 50px 20px 50px;
     text-align: center;
-    height: 89vh auto;
+    height: 90vh;
+    overflow-y: auto;
   }
+  .login-container-client::-webkit-scrollbar {
+    width: 5px;
+    background-color: none;
+}
+
+.login-container-client::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+    height: 10px;
+    border-radius: 5px;
+}
+
+.login-container-client::-webkit-scrollbar-track {
+    background-color: none;
+}
   
   .login-container {
     background: white;
@@ -394,6 +409,50 @@
     align-items: center;
     justify-content: center;
   }
+  .password-requirements {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .password-requirements small {
+            display: block;
+            color: #6c757d;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .password-requirements ul {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .password-requirements li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 4px;
+            color: #495057;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .password-requirements li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .password-requirements li:last-child {
+            margin-bottom: 0;
+        }
+
   
   .modal-close:hover {
     color: #a56a00;
@@ -402,7 +461,10 @@
   /* Responsive styles */
   @media (max-width: 768px) {
     .login-container {
-      padding: 30px 20px;
+      padding: 30px 50px;
+    }
+    .login-container-client{
+      height: 90vh;
     }
     
     .form-row {
@@ -427,5 +489,13 @@
       width: 90%;
       margin: 0 20px;
       padding: 20px;
+    }
+  }
+  @media (max-width: 480px) {
+    .login-container {
+      padding: 30px 50px;
+    }
+    .login-container-client{
+      height: 80vh;
     }
   }

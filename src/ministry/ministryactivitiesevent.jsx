@@ -415,14 +415,132 @@ const MinistryActivitiesEvent = () => {
     }
   };
 
-  // Filter events based on status and search term
+  // Helper function to format date for searching
+  const formatDateForSearch = (dateString) => {
+    if (!dateString) return [];
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return [dateString.toLowerCase()];
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return [
+        dateString.toLowerCase(), // Original format
+        `${year}-${month}-${day}`, // YYYY-MM-DD
+        `${month}/${day}/${year}`, // MM/DD/YYYY
+        `${day}/${month}/${year}`, // DD/MM/YYYY
+        `${month}-${day}-${year}`, // MM-DD-YYYY
+        `${day}-${month}-${year}`, // DD-MM-YYYY
+        date.toLocaleDateString().toLowerCase(), // Locale format
+        date.toDateString().toLowerCase(), // Readable format
+        `${date.toLocaleDateString('en-US', { month: 'long' })} ${day}, ${year}`.toLowerCase(), // January 15, 2024
+        `${day} ${date.toLocaleDateString('en-US', { month: 'long' })} ${year}`.toLowerCase(), // 15 January 2024
+        date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toLowerCase(), // Jan 15, 2024
+      ];
+    } catch (error) {
+      return [dateString.toLowerCase()];
+    }
+  };
+
+  // Helper function to format time for searching
+  const formatTimeForSearch = (timeString) => {
+    if (!timeString) return [];
+    
+    try {
+      const formats = [timeString.toLowerCase()];
+      
+      // Handle 24-hour format (HH:MM)
+      const time24Match = timeString.match(/^(\d{1,2}):(\d{2})$/);
+      if (time24Match) {
+        const hours = parseInt(time24Match[1]);
+        const minutes = time24Match[2];
+        
+        // Convert to 12-hour format
+        if (hours === 0) {
+          formats.push(`12:${minutes} am`);
+          formats.push(`12:${minutes}am`);
+        } else if (hours < 12) {
+          formats.push(`${hours}:${minutes} am`);
+          formats.push(`${hours}:${minutes}am`);
+        } else if (hours === 12) {
+          formats.push(`12:${minutes} pm`);
+          formats.push(`12:${minutes}pm`);
+        } else {
+          formats.push(`${hours - 12}:${minutes} pm`);
+          formats.push(`${hours - 12}:${minutes}pm`);
+        }
+        
+        // Add padded hour formats
+        const paddedHour = String(hours).padStart(2, '0');
+        formats.push(`${paddedHour}:${minutes}`);
+      }
+      
+      // Handle 12-hour format input
+      const time12Match = timeString.toLowerCase().match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/);
+      if (time12Match) {
+        const hours = parseInt(time12Match[1]);
+        const minutes = time12Match[2];
+        const period = time12Match[3];
+        
+        // Convert to 24-hour format
+        let hours24;
+        if (period === 'am') {
+          hours24 = hours === 12 ? 0 : hours;
+        } else {
+          hours24 = hours === 12 ? 12 : hours + 12;
+        }
+        
+        formats.push(`${String(hours24).padStart(2, '0')}:${minutes}`);
+        formats.push(`${hours24}:${minutes}`);
+      }
+      
+      return formats;
+    } catch (error) {
+      return [timeString.toLowerCase()];
+    }
+  };
+
+  // Enhanced filter function to search across all event details
   const filteredEvents = events.filter(event => {
     const matchesStatus = statusFilter ? event.status === statusFilter : true;
-    const matchesSearch = searchTerm 
-      ? event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.category.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
+    
+    // If no search term, only filter by status
+    if (!searchTerm) {
+      return matchesStatus;
+    }
+    
+    // Convert search term to lowercase for case-insensitive search
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Get all possible date formats for searching
+    const dateFormats = formatDateForSearch(event.startDate);
+    const timeFormats = formatTimeForSearch(event.startTime);
+    
+    // Search across all event fields including formatted dates and times
+    const matchesSearch = 
+      (event.title && event.title.toLowerCase().includes(searchLower)) ||
+      (event.description && event.description.toLowerCase().includes(searchLower)) ||
+      (event.category && event.category.toLowerCase().includes(searchLower)) ||
+      (event.location && event.location.toLowerCase().includes(searchLower)) ||
+      (event.organizer && event.organizer.toLowerCase().includes(searchLower)) ||
+      (event.status && event.status.toLowerCase().includes(searchLower)) ||
+      // Search in all date formats
+      dateFormats.some(dateFormat => dateFormat.includes(searchLower)) ||
+      // Search in all time formats
+      timeFormats.some(timeFormat => timeFormat.includes(searchLower)) ||
+      // Search combined date and time
+      (event.startDate && event.startTime && 
+        `${event.startDate} ${event.startTime}`.toLowerCase().includes(searchLower)) ||
+      // Search formatted datetime combinations
+      dateFormats.some(dateFormat => 
+        timeFormats.some(timeFormat => 
+          `${dateFormat} ${timeFormat}`.includes(searchLower)
+        )
+      );
+    
     return matchesStatus && matchesSearch;
   });
 
@@ -440,26 +558,25 @@ const MinistryActivitiesEvent = () => {
         <div className="search-bar-cae">
           <input 
             type="text" 
-            placeholder="Search" 
+            placeholder="Search events by any detail (e.g., 'January 15, 2024', '2:30 PM', '2024-01-15 14:30')..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <FontAwesomeIcon icon={faSearch} className="search-icon-cae" />
         </div>
 
-        <div className="filter-actions-cae">
-          <div className="filter-container-cae">
-            <select 
-              className="filter-select-cae"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Filter Status</option>
-              <option value="Approved">Approved</option>
-              <option value="Pending">Pending</option>
-              <option value="Rejected">Rejected</option>
-            </select>
-          </div>
+        <div className="right-actions-cae">
+          <select 
+            className="filter-select-cae"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">Status</option>
+            <option value="Approved">Approved</option>
+            <option value="Pending">Pending</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          
           <button 
             className="add-event-btn-cae"
             onClick={() => setShowAddModal(true)}
@@ -468,11 +585,14 @@ const MinistryActivitiesEvent = () => {
           </button>
         </div>
       </div>
+      
       <div className="event-table-cae-container">
         {loading ? (
           <div className="loading-indicator">Loading events...</div>
         ) : filteredEvents.length === 0 ? (
-          <div className="no-events-message">No events found</div>
+          <div className="no-events-message">
+            {searchTerm || statusFilter ? "No events match your search criteria" : "No events found"}
+          </div>
         ) : (
           <table className="event-table-cae">
             <thead>

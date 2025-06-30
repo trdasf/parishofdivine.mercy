@@ -592,7 +592,7 @@ const ParishDashboard = () => {
 
   return (
     <div className="dashboard-container-parish">
-      <h1 className="title-parish">SECRETARY DASHBOARD</h1>
+      <h1 className="title-parish">PARISH DASHBOARD</h1>
       
       {/* Error message */}
       {error && (
@@ -812,7 +812,7 @@ const ParishDashboard = () => {
             <FontAwesomeIcon icon={faClipboardList} className="section-icon-parish" />
             Appointments for {formatMonthYear(currentDate)}
           </h2>
-          <div className="data-table-container">
+          <div className="data-table-container-parish">
             <table className="appointment-table-sa">
               <thead>
                 <tr>
@@ -868,7 +868,7 @@ const ParishDashboard = () => {
             <FontAwesomeIcon icon={faHandshake} className="section-icon-parish" />
             Community Events for {formatMonthYear(currentDate)}
           </h2>
-          <div className="data-table-container">
+          <div className="data-table-container-parish">
             <table className="event-table-sae">
               <thead>
                 <tr>

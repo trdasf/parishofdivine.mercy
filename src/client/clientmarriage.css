@@ -3,6 +3,7 @@
     padding-left: 50px;
     padding-right: 50px;
     padding-top: 20px;
+    padding-bottom: 50px;
     width: 100%;
     height: 100vh;
     overflow-y: auto;
@@ -451,7 +452,6 @@
     gap: 100px;
     justify-content: center;
     margin-top: 50px;
-    margin-bottom: 70px;
   }
   
   .client-marriage-submit-btn, 
@@ -848,6 +848,8 @@
   font-size: 12px;
   margin-top: 2px;
   margin-bottom: 5px;
+  padding: 5px 10px;
+  display: none
 }
 
 .document-error {
@@ -889,4 +891,695 @@
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
+
+/* Witness container styling */
+.client-marriage-witness-container {
+  margin-bottom: 30px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.client-marriage-witness-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.client-marriage-witness-box {
+  background-color: white;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #eee;
+}
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .client-marriage-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
   
+  .client-marriage-title {
+    font-size: 32px;
+  }
+  
+  .client-marriage-field-date select,
+  .client-marriage-field-time select {
+    width: 180px;
+  }
+  
+  .client-marriage-field-ga input,
+  .client-marriage-field-ga select {
+    width: 200px;
+  }
+  
+  .client-marriage-field-dob input {
+    width: 200px;
+  }
+  
+  .client-marriage-field-pob input {
+    width: 220px;
+  }
+  
+  .client-marriage-button-container {
+    gap: 80px;
+    margin-bottom: 120px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .client-marriage-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .client-marriage-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  .client-marriage-header {
+    margin-bottom: 20px;
+  }
+  
+  .client-marriage-back-button {
+    font-size: 16px;
+  }
+  
+  .client-marriage-back-icon {
+    font-size: 20px;
+  }
+  
+  /* Make date/time row responsive */
+  .client-marriage-row-date {
+    flex-direction: row;
+    gap: 30px;
+    align-items: stretch;
+  }
+  
+  .client-marriage-field-date,
+  .client-marriage-field-time {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .client-marriage-field-date label,
+  .client-marriage-field-time label {
+    min-width: auto;
+    white-space: nowrap;
+    margin-top: 0;
+    font-size: 13px;
+  }
+  
+  .client-marriage-field-date select,
+  .client-marriage-field-time select {
+    width: 140px;
+    font-size: 14px;
+  }
+  
+  .mini-title {
+    font-size: 13px;
+    margin-top: 18px;
+    margin-bottom: 15px;
+  }
+  
+  /* Make main form rows responsive */
+  .client-marriage-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .client-marriage-field-ga input,
+  .client-marriage-field-ga select {
+    width: 100%;
+  }
+  
+  .client-marriage-field-dob input {
+    width: 100%;
+  }
+  
+  .client-marriage-field-pob input {
+    width: 100%;
+  }
+  
+  /* Button container responsive */
+  .client-marriage-button-container {
+    gap: 50px;
+    margin-top: 40px;
+    margin-bottom: 120px;
+  }
+  
+  .client-marriage-submit-btn,
+  .client-marriage-cancel-btn {
+    width: 100px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal responsive */
+  .client-marriage-modal {
+    width: 90%;
+    max-width: 350px;
+    margin: 20px;
+  }
+  
+  .client-marriage-modal-buttons {
+    gap: 20px;
+  }
+  
+  .client-marriage-yes-btn,
+  .client-marriage-modal-no-btn {
+    width: 100px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section responsive */
+  .client-marriage-section-header {
+    margin-left: 10px;
+    font-size: 16px;
+  }
+  
+  .client-marriage-checkbox-list {
+    margin-left: 30px;
+  }
+  
+  .client-marriage-info-list {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  
+  /* Witness container responsive */
+  .client-marriage-witness-container {
+    padding: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .client-marriage-witness-title {
+    font-size: 16px;
+  }
+  
+  .client-marriage-witness-box {
+    padding: 12px;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .client-marriage-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .client-marriage-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+  
+  .client-marriage-row-date {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .client-marriage-field-date,
+  .client-marriage-field-time {
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .client-marriage-field-date label,
+  .client-marriage-field-time label {
+    font-size: 13px;
+    text-align: left;
+  }
+  
+  .client-marriage-field-date select,
+  .client-marriage-field-time select {
+    font-size: 12px;
+    width: 180px;
+  }
+  
+  .client-marriage-header {
+    margin-bottom: 15px;
+  }
+  
+  .client-marriage-back-button {
+    font-size: 14px;
+  }
+  
+  .client-marriage-back-icon {
+    font-size: 18px;
+  }
+  
+  .client-marriage-sub-title {
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  
+  .client-marriage-bypart {
+    margin-top: 30px;
+  }
+  
+  .mini-title {
+    font-size: 12px;
+    margin-top: 15px;
+    margin-bottom: 12px;
+  }
+  
+  /* Smaller form fields */
+  .client-marriage-field label {
+    font-size: 12px;
+  }
+  
+  .client-marriage-field input,
+  .client-marriage-field select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .client-marriage-field-ga label {
+    font-size: 12px;
+  }
+  
+  .client-marriage-field-ga input,
+  .client-marriage-field-ga select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .client-marriage-field-dob label,
+  .client-marriage-field-pob label {
+    font-size: 12px;
+  }
+  
+  .client-marriage-field-dob input,
+  .client-marriage-field-pob input {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Date inputs */
+  .date-input {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section */
+  .client-marriage-section-header {
+    font-size: 15px;
+    margin-left: 5px;
+  }
+  
+  .client-marriage-checkbox-list {
+    margin-left: 20px;
+  }
+  
+  .client-marriage-checkbox-list label {
+    font-size: 14px;
+  }
+  
+  .client-marriage-info-item p {
+    font-size: 0.9rem;
+  }
+  
+  /* Button adjustments */
+  .client-marriage-button-container {
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 120px;
+  }
+  
+  .client-marriage-submit-btn,
+  .client-marriage-cancel-btn {
+    width: 90px;
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+  
+  /* Modal adjustments */
+  .client-marriage-modal {
+    width: 95%;
+    max-width: 320px;
+    margin: 15px;
+  }
+  
+  .client-marriage-modal h2 {
+    font-size: 18px;
+  }
+  
+  .client-marriage-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .client-marriage-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .client-marriage-yes-btn,
+  .client-marriage-modal-no-btn {
+    width: 80px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown adjustments */
+  .location-dropdown {
+    max-height: 150px;
+  }
+  
+  .location-dropdown-item {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  /* Status dropdown */
+  .client-marriage-status-dropdown {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  /* Witness container adjustments */
+  .client-marriage-witness-container {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .client-marriage-witness-title {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .client-marriage-witness-box {
+    padding: 10px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .client-marriage-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .client-marriage-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    letter-spacing: 0.3px;
+  }
+  
+  .client-marriage-header {
+    margin-bottom: 12px;
+  }
+  
+  .client-marriage-back-button {
+    font-size: 13px;
+  }
+  
+  .client-marriage-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .client-marriage-sub-title {
+    font-size: 15px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+  }
+  
+  .client-marriage-bypart {
+    margin-top: 25px;
+  }
+  
+  .mini-title {
+    font-size: 11px;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  /* Even smaller form elements */
+  .client-marriage-field label,
+  .client-marriage-field-ga label,
+  .client-marriage-field-dob label,
+  .client-marriage-field-pob label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .client-marriage-field input,
+  .client-marriage-field select,
+  .client-marriage-field-ga input,
+  .client-marriage-field-ga select,
+  .client-marriage-field-dob input,
+  .client-marriage-field-pob input {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  .client-marriage-field-date label,
+  .client-marriage-field-time label {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .client-marriage-field-date select,
+  .client-marriage-field-time select {
+    width: 150px;
+    font-size: 12px;
+  }
+  
+  .date-input {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  /* Requirements section */
+  .client-marriage-section-header {
+    font-size: 14px;
+    margin-left: 0;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .client-marriage-checkbox-list {
+    margin-left: 15px;
+    gap: 6px;
+  }
+  
+  .client-marriage-checkbox-list label {
+    font-size: 13px;
+  }
+  
+  .client-marriage-info-list {
+    margin-left: 0.25rem;
+    padding-left: 0.25rem;
+  }
+  
+  .client-marriage-info-item {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .client-marriage-info-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Buttons */
+  .client-marriage-button-container {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 120px;
+  }
+  
+  .client-marriage-submit-btn,
+  .client-marriage-cancel-btn {
+    width: 120px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal for mobile */
+  .client-marriage-modal {
+    width: 95%;
+    max-width: 300px;
+    margin: 10px;
+  }
+  
+  .client-marriage-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .client-marriage-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .client-marriage-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .client-marriage-yes-btn,
+  .client-marriage-modal-no-btn {
+    width: 100px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown improvements for mobile */
+  .location-dropdown {
+    max-height: 120px;
+    font-size: 13px;
+  }
+  
+  .location-dropdown-item {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  /* Status dropdown */
+  .client-marriage-status-dropdown {
+    min-width: 90px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  /* Witness container adjustments */
+  .client-marriage-witness-container {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .client-marriage-witness-title {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .client-marriage-witness-box {
+    padding: 8px;
+  }
+  
+  /* Loading spinner adjustment */
+  .client-marriage-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+  
+  /* Error input adjustments */
+  .error-field input,
+  .error-field select {
+    border-width: 1px !important;
+  }
+  
+  .error-message {
+    font-size: 11px;
+    display: none;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .client-marriage-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .client-marriage-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .client-marriage-sub-title {
+    font-size: 14px;
+  }
+  
+  .mini-title {
+    font-size: 10px;
+  }
+  
+  .client-marriage-field label,
+  .client-marriage-field-ga label,
+  .client-marriage-field-dob label,
+  .client-marriage-field-pob label {
+    font-size: 10px;
+  }
+  
+  .client-marriage-field input,
+  .client-marriage-field select,
+  .client-marriage-field-ga input,
+  .client-marriage-field-ga select,
+  .client-marriage-field-dob input,
+  .client-marriage-field-pob input {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .client-marriage-section-header {
+    font-size: 13px;
+  }
+  
+  .client-marriage-checkbox-list label {
+    font-size: 12px;
+  }
+  
+  .client-marriage-info-item p {
+    font-size: 0.8rem;
+  }
+  
+  .client-marriage-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .client-marriage-modal h2 {
+    font-size: 15px;
+  }
+  
+  .client-marriage-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .location-dropdown-item {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .client-marriage-witness-container {
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .client-marriage-witness-title {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  .client-marriage-witness-box {
+    padding: 6px;
+  }
+}

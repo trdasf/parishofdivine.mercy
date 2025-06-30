@@ -393,7 +393,7 @@
     gap: 100px;
     justify-content: center;
     margin-top: 50px;
-    margin-bottom: 70px;
+    margin-bottom: 100px;
   }
   
   .client-funeral-submit-btn, 
@@ -593,4 +593,639 @@
     50% { opacity: 1; }
     100% { opacity: 0.6; }
   }
+
+  /* Location dropdown styling */
+  .location-dropdown-container {
+    position: relative;
+  }
   
+  .location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+  
+  .location-dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .location-dropdown-item:hover {
+    background-color: #f5f5f5;
+  }
+
+  /* Date input styling */
+  .date-input {
+    position: relative;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    color: #333;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+  
+  .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+  }
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .client-funeral-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .client-funeral-title {
+    font-size: 32px;
+  }
+  
+  .client-funeral-field-date input,
+  .client-funeral-field-time input,
+  .client-funeral-field-date select,
+  .client-funeral-field-time select {
+    width: 180px;
+  }
+  
+  .client-funeral-field-ga input,
+  .client-funeral-field-ga select {
+    width: 90px;
+  }
+  
+  .client-funeral-button-container {
+    gap: 80px;
+    margin-bottom: 200px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .client-funeral-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .client-funeral-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  .client-funeral-header {
+    margin-bottom: 20px;
+  }
+  
+  .client-funeral-back-button {
+    font-size: 16px;
+  }
+  
+  .client-funeral-back-icon {
+    font-size: 20px;
+  }
+  
+  /* Make date/time row responsive */
+  .client-funeral-row-date {
+    flex-direction: row;
+    gap: 30px;
+    align-items: stretch;
+  }
+  
+  .client-funeral-field-date,
+  .client-funeral-field-time {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .client-funeral-field-date label,
+  .client-funeral-field-time label {
+    min-width: auto;
+    white-space: nowrap;
+    margin-top: 0;
+    font-size: 13px;
+  }
+  
+  .client-funeral-field-date input,
+  .client-funeral-field-time input,
+  .client-funeral-field-date select,
+  .client-funeral-field-time select {
+    width: 140px;
+    font-size: 14px;
+  }
+  
+  /* Make main form rows responsive */
+  .client-funeral-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .client-funeral-field-ga input,
+  .client-funeral-field-ga select {
+    width: 100%;
+  }
+  
+  /* Address row responsive */
+  .client-funeral-address-row {
+    gap: 15px;
+  }
+  
+  /* Button container responsive */
+  .client-funeral-button-container {
+    gap: 50px;
+    margin-top: 40px;
+    margin-bottom: 200px;
+  }
+  
+  .client-funeral-submit-btn,
+  .client-funeral-cancel-btn {
+    width: 100px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal responsive */
+  .client-funeral-modal {
+    width: 90%;
+    max-width: 350px;
+    margin: 20px;
+  }
+  
+  .client-funeral-modal-buttons {
+    gap: 20px;
+  }
+  
+  .client-funeral-yes-btn,
+  .client-funeral-modal-no-btn {
+    width: 100px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section responsive */
+  .client-funeral-section-header {
+    margin-left: 10px;
+    font-size: 16px;
+  }
+  
+  .client-funeral-checkbox-list {
+    margin-left: 30px;
+  }
+  
+  .client-funeral-info-list {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .client-funeral-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .client-funeral-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+  
+  .client-funeral-row-date {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .client-funeral-field-date,
+  .client-funeral-field-time {
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .client-funeral-field-date label,
+  .client-funeral-field-time label {
+    font-size: 13px;
+    text-align: left;
+  }
+  
+  .client-funeral-field-date input,
+  .client-funeral-field-time input,
+  .client-funeral-field-date select,
+  .client-funeral-field-time select {
+    font-size: 12px;
+    width: 180px;
+  }
+  
+  .client-funeral-header {
+    margin-bottom: 15px;
+  }
+  
+  .client-funeral-back-button {
+    font-size: 14px;
+  }
+  
+  .client-funeral-back-icon {
+    font-size: 18px;
+  }
+  
+  .client-funeral-sub-title {
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  
+  .client-funeral-bypart {
+    margin-top: 30px;
+  }
+  
+  /* Smaller form fields */
+  .client-funeral-field label {
+    font-size: 12px;
+  }
+  
+  .client-funeral-field input,
+  .client-funeral-field select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .client-funeral-field-ga label {
+    font-size: 12px;
+  }
+  
+  .client-funeral-field-ga input,
+  .client-funeral-field-ga select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Date inputs */
+  .date-input {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section */
+  .client-funeral-section-header {
+    font-size: 15px;
+    margin-left: 5px;
+  }
+  
+  .client-funeral-checkbox-list {
+    margin-left: 20px;
+  }
+  
+  .client-funeral-checkbox-list label {
+    font-size: 14px;
+  }
+  
+  .client-funeral-info-item p {
+    font-size: 0.9rem;
+  }
+  
+  /* Button adjustments */
+  .client-funeral-button-container {
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 200px;
+  }
+  
+  .client-funeral-submit-btn,
+  .client-funeral-cancel-btn {
+    width: 90px;
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+  
+  /* Modal adjustments */
+  .client-funeral-modal {
+    width: 95%;
+    max-width: 320px;
+    margin: 15px;
+  }
+  
+  .client-funeral-modal h2 {
+    font-size: 18px;
+  }
+  
+  .client-funeral-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .client-funeral-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .client-funeral-yes-btn,
+  .client-funeral-modal-no-btn {
+    width: 80px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown adjustments */
+  .location-dropdown {
+    max-height: 150px;
+  }
+  
+  .location-dropdown-item {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  /* Status dropdown */
+  .client-funeral-status-dropdown {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .client-funeral-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .client-funeral-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    letter-spacing: 0.3px;
+  }
+  
+  .client-funeral-header {
+    margin-bottom: 12px;
+  }
+  
+  .client-funeral-back-button {
+    font-size: 13px;
+  }
+  
+  .client-funeral-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .client-funeral-sub-title {
+    font-size: 15px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+  }
+  
+  .client-funeral-bypart {
+    margin-top: 25px;
+  }
+  
+  /* Even smaller form elements */
+  .client-funeral-field label,
+  .client-funeral-field-ga label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .client-funeral-field input,
+  .client-funeral-field select,
+  .client-funeral-field-ga input,
+  .client-funeral-field-ga select {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  .client-funeral-field-date label,
+  .client-funeral-field-time label {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .client-funeral-field-date input,
+  .client-funeral-field-time input,
+  .client-funeral-field-date select,
+  .client-funeral-field-time select {
+    width: 150px;
+    font-size: 12px;
+  }
+  
+  .date-input {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  /* Requirements section */
+  .client-funeral-section-header {
+    font-size: 14px;
+    margin-left: 0;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .client-funeral-checkbox-list {
+    margin-left: 15px;
+    gap: 6px;
+  }
+  
+  .client-funeral-checkbox-list label {
+    font-size: 13px;
+  }
+  
+  .client-funeral-info-list {
+    margin-left: 0.25rem;
+    padding-left: 0.25rem;
+  }
+  
+  .client-funeral-info-item {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .client-funeral-info-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Buttons */
+  .client-funeral-button-container {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 200px;
+  }
+  
+  .client-funeral-submit-btn,
+  .client-funeral-cancel-btn {
+    width: 120px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal for mobile */
+  .client-funeral-modal {
+    width: 95%;
+    max-width: 300px;
+    margin: 10px;
+  }
+  
+  .client-funeral-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .client-funeral-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .client-funeral-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .client-funeral-yes-btn,
+  .client-funeral-modal-no-btn {
+    width: 100px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown improvements for mobile */
+  .location-dropdown {
+    max-height: 120px;
+    font-size: 13px;
+  }
+  
+  .location-dropdown-item {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  /* Status dropdown */
+  .client-funeral-status-dropdown {
+    min-width: 90px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  /* Loading spinner adjustment */
+  .client-funeral-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+  
+  /* Error input adjustments */
+  .error-field input,
+  .error-field select {
+    border-width: 1px !important;
+  }
+  
+  .error-message {
+    font-size: 11px;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .client-funeral-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .client-funeral-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .client-funeral-sub-title {
+    font-size: 14px;
+  }
+  
+  .client-funeral-field label,
+  .client-funeral-field-ga label {
+    font-size: 10px;
+  }
+  
+  .client-funeral-field input,
+  .client-funeral-field select,
+  .client-funeral-field-ga input,
+  .client-funeral-field-ga select {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .client-funeral-field-date label,
+  .client-funeral-field-time label {
+    font-size: 11px;
+  }
+
+  .client-funeral-field-date input,
+  .client-funeral-field-time input,
+  .client-funeral-field-date select,
+  .client-funeral-field-time select {
+    width: 130px;
+    font-size: 11px;
+  }
+  
+  .client-funeral-section-header {
+    font-size: 13px;
+  }
+  
+  .client-funeral-checkbox-list label {
+    font-size: 12px;
+  }
+  
+  .client-funeral-info-item p {
+    font-size: 0.8rem;
+  }
+  
+  .client-funeral-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .client-funeral-modal h2 {
+    font-size: 15px;
+  }
+  
+  .client-funeral-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .location-dropdown-item {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .client-funeral-button-container {
+    margin-bottom: 200px;
+  }
+  
+  .client-funeral-submit-btn,
+  .client-funeral-cancel-btn {
+    width: 100px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}

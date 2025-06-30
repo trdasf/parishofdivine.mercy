@@ -24,13 +24,15 @@ if ($conn->connect_error) {
 try {
     $conn->begin_transaction();
 
-    $clientID = $_POST['clientID'];
+    // Set clientID to null if not provided or empty
+    $clientID = isset($_POST['clientID']) && !empty($_POST['clientID']) ? $_POST['clientID'] : null;
     $applicationData = json_decode($_POST['applicationData'], true);
     $addressData = json_decode($_POST['addressData'], true);
     $fatherData = json_decode($_POST['fatherData'], true);
     $motherData = json_decode($_POST['motherData'], true);
     
     // Debug output of received data
+    error_log("ClientID: " . ($clientID ?? 'NULL'));
     error_log("Received application data: " . $_POST['applicationData']);
     
     // Check for JSON decode errors
@@ -172,3 +174,4 @@ try {
 }
 $conn->close();
 echo json_encode($response);
+?>

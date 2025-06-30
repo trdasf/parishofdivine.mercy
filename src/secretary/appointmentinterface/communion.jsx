@@ -10,38 +10,58 @@ const Communion = () => {
 
  
   // Form state
-  const [formData, setFormData] = useState({
-    date: "",
-    time: "",
-    first_name: "",
-    middle_name: "",
-    last_name: "",
-    gender: "",
-    age: "",
-    dateOfBirth: "",
-    dateOfBaptism: "",
-    churchOfBaptism: "",
-    placeOfBirth: "",
-    pob_region: "",
-    street: "",
-    barangay: "",
-    municipality: "",
-    province: "",
-    region: "",
-    father_first_name: "",
-    father_middle_name: "",
-    father_last_name: "",
-    father_dateOfBirth: "",
-    father_placeOfBirth: "",
-    father_region: "",
-    father_contact: "",
-    mother_first_name: "",
-    mother_middle_name: "",
-    mother_last_name: "",
-    mother_dateOfBirth: "",
-    mother_placeOfBirth: "",
-    mother_region: "",
-    mother_contact: "",
+ // REPLACE the formData state initialization:
+const [formData, setFormData] = useState({
+  date: "",
+  time: "",
+  first_name: "",
+  middle_name: "",
+  last_name: "",
+  gender: "",
+  age: "",
+  dateOfBirth: "",
+  dateOfBaptism: "",
+  churchOfBaptism: "",
+  placeOfBirth: "",
+  // REMOVE pob_region
+  street: "",
+  barangay: "",
+  municipality: "",
+  province: "",
+  region: "", // Keep only home address region
+  father_first_name: "",
+  father_middle_name: "",
+  father_last_name: "",
+  father_dateOfBirth: "",
+  father_placeOfBirth: "",
+  // REMOVE father_region
+  father_contact: "",
+  mother_first_name: "",
+  mother_middle_name: "",
+  mother_last_name: "",
+  mother_dateOfBirth: "",
+  mother_placeOfBirth: "",
+  // REMOVE mother_region
+  mother_contact: "",
+});
+
+  // Add state for separate birth location fields
+  const [birthFields, setBirthFields] = useState({
+    barangay: '',
+    municipality: '',
+    province: ''
+  });
+
+  const [fatherBirthFields, setFatherBirthFields] = useState({
+    barangay: '',
+    municipality: '',
+    province: ''
+  });
+
+  const [motherBirthFields, setMotherBirthFields] = useState({
+    barangay: '',
+    municipality: '',
+    province: ''
   });
 
   // Requirements
@@ -62,18 +82,23 @@ const Communion = () => {
   const [locationData, setLocationData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [focusedField, setFocusedField] = useState(null);
-  const [suggestions, setSuggestions] = useState({
-    barangay: [],
-    municipality: [],
-    province: [],
-    placeOfBirth: [],
-    pob_region: [],
-    region: [],
-    father_placeOfBirth: [],
-    father_region: [],
-    mother_placeOfBirth: [],
-    mother_region: []
-  });
+ // REPLACE the suggestions state:
+const [suggestions, setSuggestions] = useState({
+  barangay: [],
+  municipality: [],
+  province: [],
+  birthBarangay: [],
+  birthMunicipality: [],
+  birthProvince: [],
+  fatherBirthBarangay: [],
+  fatherBirthMunicipality: [],
+  fatherBirthProvince: [],
+  motherBirthBarangay: [],
+  motherBirthMunicipality: [],
+  motherBirthProvince: [],
+  region: [] // Keep only home address region
+  // REMOVE pob_region, father_region, mother_region
+});
 
   // States for dropdown data
   const [schedules, setSchedules] = useState([]);
@@ -222,88 +247,191 @@ const Communion = () => {
   }, [formData.date, formData.time, schedules]);
 
   // Enhanced filter functions to consider the other fields
-  const filterBarangays = (input = '', municipality = null, province = null) => {
-    const inputLower = input.toLowerCase();
-    let filtered = locationData;
-
-    // If municipality is provided, filter by municipality
-    if (municipality && municipality.trim() !== '') {
-      filtered = filtered.filter(location => location.municipality === municipality);
+ const filterBarangays = (input, municipality = null, province = null) => {
+  // If we have municipality and/or province context, show ALL related barangays
+  if (municipality && municipality.trim() !== '') {
+    const filtered = locationData.filter(location => location.municipality === municipality);
+    const allBarangays = [...new Set(filtered.map(loc => loc.barangay))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allBarangays.filter(barangay => barangay.toLowerCase().includes(inputLower));
     }
     
-    // If province is provided, filter by province
-    if (province && province.trim() !== '') {
-      filtered = filtered.filter(location => location.province === province);
-    }
-    
-    // Extract unique barangays and filter by input if provided
-    const uniqueBarangays = [...new Set(filtered.map(loc => loc.barangay))].sort();
-    
-    if (input) {
-      return uniqueBarangays.filter(barangay => barangay.toLowerCase().includes(inputLower));
-    }
-    
-    return uniqueBarangays;
-  };
-
-  const filterMunicipalities = (input = '', province = null) => {
-    const inputLower = input.toLowerCase();
-    let filtered = locationData;
-    
-    // If province is provided, filter by province
-    if (province && province.trim() !== '') {
-      filtered = filtered.filter(location => location.province === province);
-    }
-    
-    // Extract unique municipalities and filter by input if provided
-    const uniqueMunicipalities = [...new Set(filtered.map(loc => loc.municipality))].sort();
-    
-    if (input) {
-      return uniqueMunicipalities.filter(municipality => municipality.toLowerCase().includes(inputLower));
-    }
-    
-    return uniqueMunicipalities;
-  };
-
-  const filterProvinces = (input = '') => {
-    const inputLower = input.toLowerCase();
-    const uniqueProvinces = [...new Set(locationData.map(loc => loc.province))].sort();
-    
-    if (input) {
-      return uniqueProvinces.filter(province => province.toLowerCase().includes(inputLower));
-    }
-    
-    return uniqueProvinces;
-  };
+    // No input, return all barangays for this municipality
+    return allBarangays;
+  }
   
-  // Filter helpers for birth place
-  const filterBirthPlaces = (input = '') => {
-    const inputLower = input.toLowerCase();
+  if (province && province.trim() !== '') {
+    const filtered = locationData.filter(location => location.province === province);
+    const allBarangays = [...new Set(filtered.map(loc => loc.barangay))].sort();
     
-    // If there's input, filter based on search terms
-    if (input) {
-      const searchTerms = inputLower.split(/\s+/).filter(term => term.length > 0);
-      return locationData
-        .filter(location => {
-          const locationString = `${location.barangay} ${location.municipality} ${location.province}`.toLowerCase();
-          return searchTerms.every(term => locationString.includes(term));
-        })
-        .map(location => ({
-          barangay: location.barangay,
-          municipality: location.municipality,
-          province: location.province
-        }));
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allBarangays.filter(barangay => barangay.toLowerCase().includes(inputLower));
     }
     
-    // If no input, return a limited set of locations to avoid too many results
-    return locationData
-      .slice(0, 30) // Show first 30 locations
-      .map(location => ({
-        barangay: location.barangay,
-        municipality: location.municipality,
-        province: location.province
-      }));
-  };
+    // No input, return all barangays for this province
+    return allBarangays;
+  }
+  
+  // No context provided - show first 10 or filter by input
+  if (!input || !input.trim()) {
+    return [...new Set(locationData.map(loc => loc.barangay))].sort().slice(0, 10);
+  }
+  
+  const inputLower = input.toLowerCase();
+  return [...new Set(locationData.map(loc => loc.barangay))]
+    .filter(barangay => barangay.toLowerCase().includes(inputLower))
+    .sort()
+    .slice(0, 10);
+};
+
+const filterMunicipalities = (input, province = null, barangay = null) => {
+  // If we have barangay context, show ALL municipalities that have this barangay
+  if (barangay && barangay.trim() !== '') {
+    const filtered = locationData.filter(location => location.barangay === barangay);
+    const allMunicipalities = [...new Set(filtered.map(loc => loc.municipality))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allMunicipalities.filter(municipality => municipality.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all municipalities that have this barangay
+    return allMunicipalities;
+  }
+  
+  // If we have province context, show ALL municipalities in this province
+  if (province && province.trim() !== '') {
+    const filtered = locationData.filter(location => location.province === province);
+    const allMunicipalities = [...new Set(filtered.map(loc => loc.municipality))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allMunicipalities.filter(municipality => municipality.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all municipalities for this province
+    return allMunicipalities;
+  }
+  
+  // No context provided - show first 10 or filter by input
+  if (!input || !input.trim()) {
+    return [...new Set(locationData.map(loc => loc.municipality))].sort().slice(0, 10);
+  }
+  
+  const inputLower = input.toLowerCase();
+  return [...new Set(locationData.map(loc => loc.municipality))]
+    .filter(municipality => municipality.toLowerCase().includes(inputLower))
+    .sort()
+    .slice(0, 10);
+};
+
+const filterProvinces = (input, municipality = null, barangay = null) => {
+  // If we have municipality context, show ALL provinces that have this municipality
+  if (municipality && municipality.trim() !== '') {
+    const filtered = locationData.filter(location => location.municipality === municipality);
+    const allProvinces = [...new Set(filtered.map(loc => loc.province))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allProvinces.filter(province => province.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all provinces that have this municipality
+    return allProvinces;
+  }
+  
+  // If we have barangay context, show ALL provinces that have this barangay
+  if (barangay && barangay.trim() !== '') {
+    const filtered = locationData.filter(location => location.barangay === barangay);
+    const allProvinces = [...new Set(filtered.map(loc => loc.province))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allProvinces.filter(province => province.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all provinces that have this barangay
+    return allProvinces;
+  }
+  
+  // No context provided - show first 10 or filter by input
+  if (!input || !input.trim()) {
+    return [...new Set(locationData.map(loc => loc.province))].sort().slice(0, 10);
+  }
+  
+  const inputLower = input.toLowerCase();
+  return [...new Set(locationData.map(loc => loc.province))]
+    .filter(province => province.toLowerCase().includes(inputLower))
+    .sort()
+    .slice(0, 10);
+};
+
+// ADD this new auto-fill helper function:
+const autoFillLocationFields = (selectedValue, selectedType, fieldPrefix) => {
+  let updates = {};
+  
+  if (selectedType === 'barangay') {
+    // Find all locations with this barangay
+    const matchingLocations = locationData.filter(loc => loc.barangay === selectedValue);
+    
+    // Get unique municipalities and provinces
+    const uniqueMunicipalities = [...new Set(matchingLocations.map(loc => loc.municipality))];
+    const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+    
+    console.log(`Barangay "${selectedValue}" found in:`, {
+      municipalities: uniqueMunicipalities,
+      provinces: uniqueProvinces
+    });
+    
+    // Auto-fill if only one option exists
+    if (uniqueMunicipalities.length === 1) {
+      if (fieldPrefix === 'address') {
+        updates.municipality = uniqueMunicipalities[0];
+      } else {
+        updates[`${fieldPrefix}`].municipality = uniqueMunicipalities[0];
+      }
+      console.log(`Auto-filling municipality: ${uniqueMunicipalities[0]}`);
+    }
+    if (uniqueProvinces.length === 1) {
+      if (fieldPrefix === 'address') {
+        updates.province = uniqueProvinces[0];
+      } else {
+        updates[`${fieldPrefix}`].province = uniqueProvinces[0];
+      }
+      console.log(`Auto-filling province: ${uniqueProvinces[0]}`);
+    }
+  } 
+  else if (selectedType === 'municipality') {
+    // Find all locations with this municipality
+    const matchingLocations = locationData.filter(loc => loc.municipality === selectedValue);
+    
+    // Get unique provinces
+    const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+    
+    console.log(`Municipality "${selectedValue}" found in provinces:`, uniqueProvinces);
+    
+    // Auto-fill if only one option exists
+    if (uniqueProvinces.length === 1) {
+      if (fieldPrefix === 'address') {
+        updates.province = uniqueProvinces[0];
+      } else {
+        updates[`${fieldPrefix}`].province = uniqueProvinces[0];
+      }
+      console.log(`Auto-filling province: ${uniqueProvinces[0]}`);
+    }
+  }
+  
+  return updates;
+};
 
   // Add filterRegions function
   const filterRegions = (input = '') => {
@@ -329,11 +457,414 @@ const Communion = () => {
       'BARMM - Bangsamoro Autonomous Region in Muslim Mindanao'
     ];
     
-    if (input) {
-      return regions.filter(region => region.toLowerCase().includes(inputLower));
+    if (!input || !input.trim()) {
+      return regions.slice(0, 10);
     }
     
-    return regions;
+    return regions
+      .filter(region => region.toLowerCase().includes(inputLower))
+      .slice(0, 10);
+  };
+
+  // Functions to update combined place strings from separate fields
+  const updatePlaceOfBirth = (updatedFields) => {
+    const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : birthFields.barangay;
+    const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : birthFields.municipality;
+    const province = updatedFields.province !== undefined ? updatedFields.province : birthFields.province;
+    
+    let parts = [];
+    if (barangay) parts.push(barangay);
+    if (municipality) parts.push(municipality); 
+    if (province) parts.push(province);
+    
+    const formattedPlace = parts.join(', ');
+    
+    if (formattedPlace) {
+      setFormData(prevState => ({
+        ...prevState,
+        placeOfBirth: formattedPlace
+      }));
+    }
+  };
+
+  const updateFatherPlaceOfBirth = (updatedFields) => {
+    const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : fatherBirthFields.barangay;
+    const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : fatherBirthFields.municipality;
+    const province = updatedFields.province !== undefined ? updatedFields.province : fatherBirthFields.province;
+    
+    let parts = [];
+    if (barangay) parts.push(barangay);
+    if (municipality) parts.push(municipality); 
+    if (province) parts.push(province);
+    
+    const formattedPlace = parts.join(', ');
+    
+    if (formattedPlace) {
+      setFormData(prevState => ({
+        ...prevState,
+        father_placeOfBirth: formattedPlace
+      }));
+    }
+  };
+
+  const updateMotherPlaceOfBirth = (updatedFields) => {
+    const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : motherBirthFields.barangay;
+    const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : motherBirthFields.municipality;
+    const province = updatedFields.province !== undefined ? updatedFields.province : motherBirthFields.province;
+    
+    let parts = [];
+    if (barangay) parts.push(barangay);
+    if (municipality) parts.push(municipality); 
+    if (province) parts.push(province);
+    
+    const formattedPlace = parts.join(', ');
+    
+    if (formattedPlace) {
+      setFormData(prevState => ({
+        ...prevState,
+        mother_placeOfBirth: formattedPlace
+      }));
+    }
+  };
+
+  // Handlers for place of birth fields
+  const handleBirthBarangayChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...birthFields, barangay: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'birthBarangay') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthBarangay: filterBarangays(value, birthFields.municipality, birthFields.province) 
+      }));
+    }
+  };
+
+ const handleBirthMunicipalityChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...birthFields, municipality: value};
+  setBirthFields(updatedFields);
+  updatePlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'birthMunicipality') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      birthMunicipality: filterMunicipalities(value, birthFields.province, birthFields.barangay) 
+    }));
+  }
+  // NO AUTO-FILL while typing
+};
+  const handleBirthProvinceChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...birthFields, province: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'birthProvince') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthProvince: filterProvinces(value) 
+      }));
+    }
+  };
+
+  const handleSelectBirthBarangay = (barangay) => {
+    const newFields = {
+      ...birthFields,
+      barangay: barangay
+    };
+    
+    setBirthFields(newFields);
+    updatePlaceOfBirth(newFields);
+    setFocusedField(null);
+    
+    // Auto-fill municipality and province if available
+    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
+    if (matchedLocation) {
+      const finalFields = {...newFields};
+      let shouldUpdate = false;
+      
+      if (!newFields.municipality && matchedLocation.municipality) {
+        finalFields.municipality = matchedLocation.municipality;
+        shouldUpdate = true;
+      }
+      
+      if (!newFields.province && matchedLocation.province) {
+        finalFields.province = matchedLocation.province;
+        shouldUpdate = true;
+      }
+      
+      if (shouldUpdate) {
+        setBirthFields(finalFields);
+        updatePlaceOfBirth(finalFields);
+      }
+    }
+  };
+
+  
+const handleSelectBirthMunicipality = (municipality) => {
+  const newFields = {
+    ...birthFields,
+    municipality: municipality
+  };
+  
+  setBirthFields(newFields);
+  updatePlaceOfBirth(newFields);
+  setFocusedField(null);
+  
+  // Auto-fill province if available
+  const matchingLocations = locationData.filter(loc => loc.municipality === municipality);
+  const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+  
+  if (uniqueProvinces.length === 1 && !birthFields.province) {
+    const finalFields = {
+      ...newFields,
+      province: uniqueProvinces[0]
+    };
+    
+    setBirthFields(finalFields);
+    updatePlaceOfBirth(finalFields);
+  }
+};
+
+// Apply similar logic to other selection handlers...
+
+
+  const handleSelectBirthProvince = (province) => {
+    const newFields = {
+      ...birthFields,
+      province: province
+    };
+    
+    setBirthFields(newFields);
+    updatePlaceOfBirth(newFields);
+    setFocusedField(null);
+  };
+
+  // Handlers for father's place of birth fields
+  const handleFatherBirthBarangayChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...fatherBirthFields, barangay: value};
+    setFatherBirthFields(updatedFields);
+    updateFatherPlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'fatherBirthBarangay') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        fatherBirthBarangay: filterBarangays(value, fatherBirthFields.municipality, fatherBirthFields.province) 
+      }));
+    }
+  };
+
+ const handleFatherBirthMunicipalityChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...fatherBirthFields, municipality: value};
+  setFatherBirthFields(updatedFields);
+  updateFatherPlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'fatherBirthMunicipality') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      fatherBirthMunicipality: filterMunicipalities(value, fatherBirthFields.province, fatherBirthFields.barangay) 
+    }));
+  }
+  // NO AUTO-FILL while typing
+};
+
+  const handleFatherBirthProvinceChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...fatherBirthFields, province: value};
+    setFatherBirthFields(updatedFields);
+    updateFatherPlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'fatherBirthProvince') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        fatherBirthProvince: filterProvinces(value) 
+      }));
+    }
+  };
+
+  const handleSelectFatherBirthBarangay = (barangay) => {
+    const newFields = {
+      ...fatherBirthFields,
+      barangay: barangay
+    };
+    
+    setFatherBirthFields(newFields);
+    updateFatherPlaceOfBirth(newFields);
+    setFocusedField(null);
+    
+    // Auto-fill municipality and province if available
+    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
+    if (matchedLocation) {
+      const finalFields = {...newFields};
+      let shouldUpdate = false;
+      
+      if (!newFields.municipality && matchedLocation.municipality) {
+        finalFields.municipality = matchedLocation.municipality;
+        shouldUpdate = true;
+      }
+      
+      if (!newFields.province && matchedLocation.province) {
+        finalFields.province = matchedLocation.province;
+        shouldUpdate = true;
+      }
+      
+      if (shouldUpdate) {
+        setFatherBirthFields(finalFields);
+        updateFatherPlaceOfBirth(finalFields);
+      }
+    }
+  };
+
+  const handleSelectFatherBirthMunicipality = (municipality) => {
+    const newFields = {
+      ...fatherBirthFields,
+      municipality: municipality
+    };
+    
+    setFatherBirthFields(newFields);
+    updateFatherPlaceOfBirth(newFields);
+    
+    // Auto-fill province if available
+    const matchedLocation = locationData.find(loc => loc.municipality === municipality);
+    if (matchedLocation && !fatherBirthFields.province) {
+      const finalFields = {
+        ...newFields,
+        province: matchedLocation.province
+      };
+      
+      setFatherBirthFields(finalFields);
+      updateFatherPlaceOfBirth(finalFields);
+    }
+    
+    setFocusedField(null);
+  };
+
+  const handleSelectFatherBirthProvince = (province) => {
+    const newFields = {
+      ...fatherBirthFields,
+      province: province
+    };
+    
+    setFatherBirthFields(newFields);
+    updateFatherPlaceOfBirth(newFields);
+    setFocusedField(null);
+  };
+
+  // Handlers for mother's place of birth fields
+  const handleMotherBirthBarangayChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...motherBirthFields, barangay: value};
+    setMotherBirthFields(updatedFields);
+    updateMotherPlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'motherBirthBarangay') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        motherBirthBarangay: filterBarangays(value, motherBirthFields.municipality, motherBirthFields.province) 
+      }));
+    }
+  };
+
+ const handleMotherBirthMunicipalityChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...motherBirthFields, municipality: value};
+  setMotherBirthFields(updatedFields);
+  updateMotherPlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'motherBirthMunicipality') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      motherBirthMunicipality: filterMunicipalities(value, motherBirthFields.province, motherBirthFields.barangay) 
+    }));
+  }
+  // NO AUTO-FILL while typing
+};
+
+  const handleMotherBirthProvinceChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...motherBirthFields, province: value};
+    setMotherBirthFields(updatedFields);
+    updateMotherPlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'motherBirthProvince') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        motherBirthProvince: filterProvinces(value) 
+      }));
+    }
+  };
+
+  const handleSelectMotherBirthBarangay = (barangay) => {
+    const newFields = {
+      ...motherBirthFields,
+      barangay: barangay
+    };
+    
+    setMotherBirthFields(newFields);
+    updateMotherPlaceOfBirth(newFields);
+    setFocusedField(null);
+    
+    // Auto-fill municipality and province if available
+    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
+    if (matchedLocation) {
+      const finalFields = {...newFields};
+      let shouldUpdate = false;
+      
+      if (!newFields.municipality && matchedLocation.municipality) {
+        finalFields.municipality = matchedLocation.municipality;
+        shouldUpdate = true;
+      }
+      
+      if (!newFields.province && matchedLocation.province) {
+        finalFields.province = matchedLocation.province;
+        shouldUpdate = true;
+      }
+      
+      if (shouldUpdate) {
+        setMotherBirthFields(finalFields);
+        updateMotherPlaceOfBirth(finalFields);
+      }
+    }
+  };
+
+  const handleSelectMotherBirthMunicipality = (municipality) => {
+    const newFields = {
+      ...motherBirthFields,
+      municipality: municipality
+    };
+    
+    setMotherBirthFields(newFields);
+    updateMotherPlaceOfBirth(newFields);
+    
+    // Auto-fill province if available
+    const matchedLocation = locationData.find(loc => loc.municipality === municipality);
+    if (matchedLocation && !motherBirthFields.province) {
+      const finalFields = {
+        ...newFields,
+        province: matchedLocation.province
+      };
+      
+      setMotherBirthFields(finalFields);
+      updateMotherPlaceOfBirth(finalFields);
+    }
+    
+    setFocusedField(null);
+  };
+
+  const handleSelectMotherBirthProvince = (province) => {
+    const newFields = {
+      ...motherBirthFields,
+      province: province
+    };
+    
+    setMotherBirthFields(newFields);
+    updateMotherPlaceOfBirth(newFields);
+    setFocusedField(null);
   };
 
   // Add handlers for region fields
@@ -348,113 +879,118 @@ const Communion = () => {
     }
   };
 
-  const handlePOBRegionChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, pob_region: value }));
-    if (focusedField === 'pob_region') {
-      setSuggestions(prev => ({
-        ...prev,
-        pob_region: filterRegions(value)
-      }));
-    }
-  };
-
-  const handleFatherRegionChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, father_region: value }));
-    if (focusedField === 'father_region') {
-      setSuggestions(prev => ({
-        ...prev,
-        father_region: filterRegions(value)
-      }));
-    }
-  };
-
-  const handleMotherRegionChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, mother_region: value }));
-    if (focusedField === 'mother_region') {
-      setSuggestions(prev => ({
-        ...prev,
-        mother_region: filterRegions(value)
-      }));
-    }
-  };
+  
 
   const handleSelectRegion = (region) => {
     setFormData(prev => ({ ...prev, region: region }));
     setFocusedField(null);
   };
 
-  const handleSelectPOBRegion = (region) => {
-    setFormData(prev => ({ ...prev, pob_region: region }));
-    setFocusedField(null);
-  };
-
-  const handleSelectFatherRegion = (region) => {
-    setFormData(prev => ({ ...prev, father_region: region }));
-    setFocusedField(null);
-  };
-
-  const handleSelectMotherRegion = (region) => {
-    setFormData(prev => ({ ...prev, mother_region: region }));
-    setFocusedField(null);
-  };
+ 
   
-  // Updated focus handlers to show dropdown immediately without input
+  // Updated focus handlers to handle separate location fields
   const handleFocus = (field) => {
     setFocusedField(field);
     
-    if (field === 'barangay') {
-      setSuggestions(prev => ({
-        ...prev,
-        barangay: filterBarangays(formData.barangay || '', formData.municipality, formData.province)
-      }));
-    } else if (field === 'municipality') {
-      setSuggestions(prev => ({
-        ...prev,
-        municipality: filterMunicipalities(formData.municipality || '', formData.province)
-      }));
-    } else if (field === 'province') {
-      setSuggestions(prev => ({
-        ...prev,
-        province: filterProvinces(formData.province || '')
-      }));
-    } else if (field === 'placeOfBirth') {
-      setSuggestions(prev => ({
-        ...prev,
-        placeOfBirth: filterBirthPlaces(formData.placeOfBirth || '')
-      }));
-    } else if (field === 'father_placeOfBirth') {
-      setSuggestions(prev => ({
-        ...prev,
-        father_placeOfBirth: filterBirthPlaces(formData.father_placeOfBirth || '')
-      }));
-    } else if (field === 'mother_placeOfBirth') {
-      setSuggestions(prev => ({
-        ...prev,
-        mother_placeOfBirth: filterBirthPlaces(formData.mother_placeOfBirth || '')
-      }));
-    } else if (field === 'region') {
-      setSuggestions(prev => ({
-        ...prev,
-        region: filterRegions(formData.region || '')
-      }));
-    } else if (field === 'father_region') {
-      setSuggestions(prev => ({
-        ...prev,
-        father_region: filterRegions(formData.father_region || '')
-      }));
-    } else if (field === 'mother_region') {
-      setSuggestions(prev => ({
-        ...prev,
-        mother_region: filterRegions(formData.mother_region || '')
-      }));
-    } else if (field === 'pob_region') {
-      setSuggestions(prev => ({
-        ...prev,
-        pob_region: filterRegions(formData.pob_region || '')
-      }));
+    switch(field) {
+     case 'birthBarangay':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          birthBarangay: filterBarangays(birthFields.barangay, birthFields.municipality, birthFields.province) 
+        }));
+        break;
+      case 'birthMunicipality':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          birthMunicipality: filterMunicipalities(birthFields.municipality, birthFields.province) 
+        }));
+        break;
+      case 'birthProvince':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          birthProvince: filterProvinces(birthFields.province) 
+        }));
+        break;
+      case 'fatherBirthBarangay':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          fatherBirthBarangay: filterBarangays(fatherBirthFields.barangay, fatherBirthFields.municipality, fatherBirthFields.province) 
+        }));
+        break;
+      case 'fatherBirthMunicipality':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          fatherBirthMunicipality: filterMunicipalities(fatherBirthFields.municipality, fatherBirthFields.province) 
+        }));
+        break;
+      case 'fatherBirthProvince':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          fatherBirthProvince: filterProvinces(fatherBirthFields.province) 
+        }));
+        break;
+      case 'motherBirthBarangay':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          motherBirthBarangay: filterBarangays(motherBirthFields.barangay, motherBirthFields.municipality, motherBirthFields.province) 
+        }));
+        break;
+      case 'motherBirthMunicipality':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          motherBirthMunicipality: filterMunicipalities(motherBirthFields.municipality, motherBirthFields.province) 
+        }));
+        break;
+      case 'motherBirthProvince':
+        setSuggestions(prev => ({ 
+          ...prev, 
+          motherBirthProvince: filterProvinces(motherBirthFields.province) 
+        }));
+        break;
+      case 'barangay':
+        setSuggestions(prev => ({
+          ...prev,
+          barangay: filterBarangays(formData.barangay || '', formData.municipality, formData.province)
+        }));
+        break;
+      case 'municipality':
+        setSuggestions(prev => ({
+          ...prev,
+          municipality: filterMunicipalities(formData.municipality || '', formData.province)
+        }));
+        break;
+      case 'province':
+        setSuggestions(prev => ({
+          ...prev,
+          province: filterProvinces(formData.province || '')
+        }));
+        break;
+      case 'region':
+        setSuggestions(prev => ({
+          ...prev,
+          region: filterRegions(formData.region || '')
+        }));
+        break;
+      case 'father_region':
+        setSuggestions(prev => ({
+          ...prev,
+          father_region: filterRegions(formData.father_region || '')
+        }));
+        break;
+      case 'mother_region':
+        setSuggestions(prev => ({
+          ...prev,
+          mother_region: filterRegions(formData.mother_region || '')
+        }));
+        break;
+      case 'pob_region':
+        setSuggestions(prev => ({
+          ...prev,
+          pob_region: filterRegions(formData.pob_region || '')
+        }));
+        break;
+      default:
+        break;
     }
   };
 
@@ -481,40 +1017,6 @@ const Communion = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  // Father's Place of Birth handlers
-  const handleFatherPlaceOfBirthChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, father_placeOfBirth: value }));
-    if (focusedField === 'father_placeOfBirth') {
-      setSuggestions(s => ({
-        ...s,
-        father_placeOfBirth: filterBirthPlaces(value)
-      }));
-    }
-  };
-  const handleSelectFatherPlaceOfBirth = (location) => {
-    const formattedPlace = `${location.barangay}, ${location.municipality}, ${location.province}`;
-    setFormData(prev => ({ ...prev, father_placeOfBirth: formattedPlace }));
-    setFocusedField(null);
-  };
-
-  // Mother's Place of Birth handlers
-  const handleMotherPlaceOfBirthChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, mother_placeOfBirth: value }));
-    if (focusedField === 'mother_placeOfBirth') {
-      setSuggestions(s => ({
-        ...s,
-        mother_placeOfBirth: filterBirthPlaces(value)
-      }));
-    }
-  };
-  const handleSelectMotherPlaceOfBirth = (location) => {
-    const formattedPlace = `${location.barangay}, ${location.municipality}, ${location.province}`;
-    setFormData(prev => ({ ...prev, mother_placeOfBirth: formattedPlace }));
-    setFocusedField(null);
-  };
 
   // Update handleDateChange to calculate age
   const handleDateChange = (field, value) => {
@@ -543,6 +1045,78 @@ const Communion = () => {
     
     // No special handling needed for gender - use the value directly as selected from dropdown
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Updated handlers for address fields
+  const handleBarangayChange = (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, barangay: value }));
+    
+    if (focusedField === 'barangay') {
+      setSuggestions(prev => ({
+        ...prev,
+        barangay: filterBarangays(value, formData.municipality, formData.province)
+      }));
+    }
+  };
+
+  const handleMunicipalityChange = (e) => {
+  const value = e.target.value;
+  setFormData(prev => ({ ...prev, municipality: value }));
+  
+  if (focusedField === 'municipality') {
+    setSuggestions(prev => ({
+      ...prev,
+      municipality: filterMunicipalities(value, formData.province, formData.barangay)
+    }));
+  }
+  // NO AUTO-FILL while typing
+};
+
+  const handleProvinceChange = (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, province: value }));
+    
+    if (focusedField === 'province') {
+      setSuggestions(prev => ({
+        ...prev,
+        province: filterProvinces(value)
+      }));
+    }
+  };
+
+  // Updated selection handlers for address fields
+  const handleSelectBarangay = (barangay) => {
+    setFormData(prev => ({ ...prev, barangay: barangay }));
+    setFocusedField(null);
+    
+    // Check if this barangay has a specific municipality and province
+    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
+    if (matchedLocation) {
+      if (!formData.municipality) {
+        setFormData(prev => ({ ...prev, municipality: matchedLocation.municipality }));
+      }
+      if (!formData.province) {
+        setFormData(prev => ({ ...prev, province: matchedLocation.province }));
+      }
+    }
+  };
+
+  const handleSelectMunicipality = (municipality) => {
+  setFormData(prev => ({ ...prev, municipality: municipality }));
+  setFocusedField(null);
+  
+  // Auto-fill province if available
+  const matchingLocations = locationData.filter(loc => loc.municipality === municipality);
+  const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+  
+  if (uniqueProvinces.length === 1 && !formData.province) {
+    setFormData(prev => ({ ...prev, province: uniqueProvinces[0] }));
+  }
+};
+  const handleSelectProvince = (province) => {
+    setFormData(prev => ({ ...prev, province: province }));
+    setFocusedField(null);
   };
 
   // Update handleFileChange to handle uploading state
@@ -712,7 +1286,7 @@ const Communion = () => {
     
     try {
       const formDataToSend = new FormData();
-   
+      
       formDataToSend.append("applicationData", JSON.stringify(formData));
       formDataToSend.append(
         "addressData",
@@ -758,7 +1332,7 @@ const Communion = () => {
       console.log('Sending form data to backend...');
       // Send to backend
       const response = await fetch(
-        "http://parishofdivinemercy.com/backend/sec_communion_application.php",
+        "http://parishofdivinemercy.com/backend/communion_application.php",
         {
           method: "POST",
           body: formDataToSend,
@@ -780,8 +1354,8 @@ const Communion = () => {
 
       if (data.success) {
         console.log('Application submitted successfully, sending email...');
-        // Send confirmation email
        
+        
         setShowSuccessModal(true);
         setIsLoading(false);
         // Redirect after success
@@ -802,105 +1376,6 @@ const Communion = () => {
     }
   };
 
-  // Updated handlers to filter based on other fields
-  const handleBarangayChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, barangay: value }));
-    
-    if (focusedField === 'barangay') {
-      setSuggestions(prev => ({
-        ...prev,
-        barangay: filterBarangays(value, formData.municipality, formData.province)
-      }));
-    }
-  };
-
-  const handleMunicipalityChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, municipality: value }));
-    
-    if (focusedField === 'municipality') {
-      setSuggestions(prev => ({
-        ...prev,
-        municipality: filterMunicipalities(value, formData.province)
-      }));
-    }
-    
-    // If typing a municipality, check if it has a province
-    if (value) {
-      const matchedLocation = locationData.find(loc => 
-        loc.municipality.toLowerCase() === value.toLowerCase()
-      );
-      if (matchedLocation && !formData.province) {
-        setFormData(prev => ({ ...prev, province: matchedLocation.province }));
-      }
-    }
-  };
-
-  const handleProvinceChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, province: value }));
-    
-    if (focusedField === 'province') {
-      setSuggestions(prev => ({
-        ...prev,
-        province: filterProvinces(value)
-      }));
-    }
-  };
-
-  // Place of Birth handlers
-  const handlePlaceOfBirthChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, placeOfBirth: value }));
-    if (focusedField === 'placeOfBirth') {
-      setSuggestions(s => ({
-        ...s,
-        placeOfBirth: filterBirthPlaces(value)
-      }));
-    }
-  };
-
-  const handleSelectPlaceOfBirth = (location) => {
-    const formattedPlace = `${location.barangay}, ${location.municipality}, ${location.province}`;
-    setFormData(prev => ({ ...prev, placeOfBirth: formattedPlace }));
-    setFocusedField(null);
-  };
-
-  // Updated selection handlers
-  const handleSelectBarangay = (barangay) => {
-    setFormData(prev => ({ ...prev, barangay: barangay }));
-    setFocusedField(null);
-    
-    // Check if this barangay has a specific municipality and province
-    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
-    if (matchedLocation) {
-      if (!formData.municipality) {
-        setFormData(prev => ({ ...prev, municipality: matchedLocation.municipality }));
-      }
-      if (!formData.province) {
-        setFormData(prev => ({ ...prev, province: matchedLocation.province }));
-      }
-    }
-  };
-
-  const handleSelectMunicipality = (municipality) => {
-    setFormData(prev => ({ ...prev, municipality: municipality }));
-    
-    // Find the province for this municipality
-    const matchedLocation = locationData.find(loc => loc.municipality === municipality);
-    if (matchedLocation && !formData.province) {
-      setFormData(prev => ({ ...prev, province: matchedLocation.province }));
-    }
-    
-    setFocusedField(null);
-  };
-
-  const handleSelectProvince = (province) => {
-    setFormData(prev => ({ ...prev, province: province }));
-    setFocusedField(null);
-  };
-
   return (
     <div className="client-communion-container">
       {/* Header */}
@@ -911,7 +1386,7 @@ const Communion = () => {
           </button>
         </div>
       </div>
-      <h1 className="client-communion-title">Holy Communion Application Form</h1>
+      <h1 className="client-communion-title">Communion Application Form</h1>
       
       {/* Communion Data Section */}
       <div className="client-communion-data">
@@ -1026,29 +1501,79 @@ const Communion = () => {
               />
             </div>
           </div>
+          
+          {/* Place of Birth with separated fields */}
+          <label className="sub-cc">Place of Birth <span className="required-marker">*</span></label>
           <div className="client-communion-row">
             <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
-              <label>Place of Birth (Barangay, Municipality, Province) <span className="required-marker">*</span></label>
+              <label>Birth Barangay</label>
               <input
-                name="placeOfBirth"
-                value={formData.placeOfBirth || ""}
-                onChange={handlePlaceOfBirthChange}
-                onFocus={() => handleFocus('placeOfBirth')}
-                placeholder="Type to search (Barangay, Municipality, Province)"
-                autoComplete="off"
+                type="text"
+                placeholder="Type to search"
+                value={birthFields.barangay}
+                onChange={handleBirthBarangayChange}
+                onFocus={() => handleFocus('birthBarangay')}
                 className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
               />
-              {focusedField === 'placeOfBirth' && (
+              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
                 <div className="location-dropdown">
-                  {suggestions.placeOfBirth && suggestions.placeOfBirth.length > 0 ? (
-                    suggestions.placeOfBirth.map((location, idx) => (
-                      <div key={idx} onClick={() => handleSelectPlaceOfBirth(location)} className="location-dropdown-item">
-                        {`${location.barangay}, ${location.municipality}, ${location.province}`}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No locations found</div>
-                  )}
+                  {suggestions.birthBarangay.map((barangay, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthBarangay(barangay)}
+                      className="location-dropdown-item"
+                    >
+                      {barangay}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Municipality</label>
+              <input 
+                type="text"
+                placeholder="Type to search"
+                value={birthFields.municipality}
+                onChange={handleBirthMunicipalityChange}
+                onFocus={() => handleFocus('birthMunicipality')}
+                className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
+              />
+              {focusedField === 'birthMunicipality' && suggestions.birthMunicipality.length > 0 && (
+                <div className="location-dropdown">
+                  {suggestions.birthMunicipality.map((municipality, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthMunicipality(municipality)}
+                      className="location-dropdown-item"
+                    >
+                      {municipality}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Province</label>
+              <input 
+                type="text"
+                placeholder="Type to search"
+                value={birthFields.province}
+                onChange={handleBirthProvinceChange}
+                onFocus={() => handleFocus('birthProvince')}
+                className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
+              />
+              {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+                <div className="location-dropdown">
+                  {suggestions.birthProvince.map((province, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthProvince(province)}
+                      className="location-dropdown-item"
+                    >
+                      {province}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -1060,422 +1585,469 @@ const Communion = () => {
           <div className={`client-communion-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
               <label>Street <span className="required-marker">*</span></label>
               <input
-                name="street"
-                value={formData.street || ""}
-                onChange={e => setFormData(prev => ({ ...prev, street: e.target.value }))}
-                placeholder="Street"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
-              />
-            </div>
-            <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
-              <label>Barangay <span className="required-marker">*</span></label>
-              <input
-                name="barangay"
-                value={formData.barangay || ""}
-                onChange={handleBarangayChange}
-                onFocus={() => handleFocus('barangay')}
-                placeholder="Type to search"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
-              />
-              {focusedField === 'barangay' && (
-                <div className="location-dropdown">
-                  {suggestions.barangay && suggestions.barangay.length > 0 ? (
-                    suggestions.barangay.map((barangay, idx) => (
-                      <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
-                        {barangay}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No barangays found</div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.municipality ? 'field-error' : ''}`}>
-              <label>Municipality <span className="required-marker">*</span></label>
-              <input
-                name="municipality"
-                value={formData.municipality || ""}
-                onChange={handleMunicipalityChange}
-                onFocus={() => handleFocus('municipality')}
-                placeholder="Type to search"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.municipality ? 'input-error' : ''}
-              />
-              {focusedField === 'municipality' && (
-                <div className="location-dropdown">
-                  {suggestions.municipality && suggestions.municipality.length > 0 ? (
-                    suggestions.municipality.map((municipality, idx) => (
-                      <div key={idx} onClick={() => handleSelectMunicipality(municipality)} className="location-dropdown-item">
-                        {municipality}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No municipalities found</div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
-              <label>Province <span className="required-marker">*</span></label>
-              <input
-                name="province"
-                value={formData.province || ""}
-                onChange={handleProvinceChange}
-                onFocus={() => handleFocus('province')}
-                placeholder="Type to search"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
-              />
-              {focusedField === 'province' && (
-                <div className="location-dropdown">
-                  {suggestions.province && suggestions.province.length > 0 ? (
-                    suggestions.province.map((province, idx) => (
-                      <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
-                        {province}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No provinces found</div>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="client-communion-field location-dropdown-container">
-              <label>Region</label>
-              <input
-                name="region"
-                value={formData.region || ""}
-                onChange={handleRegionChange}
-                onFocus={() => handleFocus('region')}
-                placeholder="Type to search"
-                autoComplete="off"
-              />
-              {focusedField === 'region' && (
-                <div className="location-dropdown">
-                  {suggestions.region && suggestions.region.length > 0 ? (
-                    suggestions.region.map((region, idx) => (
-                      <div key={idx} onClick={() => handleSelectRegion(region)} className="location-dropdown-item">
-                        {region}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No regions found</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+               name="street"
+               value={formData.street || ""}
+               onChange={e => setFormData(prev => ({ ...prev, street: e.target.value }))}
+               placeholder="Street"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
+             />
+           </div>
+           <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
+             <label>Barangay <span className="required-marker">*</span></label>
+             <input
+               name="barangay"
+               value={formData.barangay || ""}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
+             />
+             {focusedField === 'barangay' && (
+               <div className="location-dropdown">
+                 {suggestions.barangay && suggestions.barangay.length > 0 ? (
+                   suggestions.barangay.map((barangay, idx) => (
+                     <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                       {barangay}
+                     </div>
+                   ))
+                 ) : (
+                   <div className="location-dropdown-item">No barangays found</div>
+                 )}
+               </div>
+             )}
+           </div>
+           <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.municipality ? 'field-error' : ''}`}>
+             <label>Municipality <span className="required-marker">*</span></label>
+             <input
+               name="municipality"
+               value={formData.municipality || ""}
+               onChange={handleMunicipalityChange}
+               onFocus={() => handleFocus('municipality')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.municipality ? 'input-error' : ''}
+             />
+             {focusedField === 'municipality' && (
+               <div className="location-dropdown">
+                 {suggestions.municipality && suggestions.municipality.length > 0 ? (
+                   suggestions.municipality.map((municipality, idx) => (
+                     <div key={idx} onClick={() => handleSelectMunicipality(municipality)} className="location-dropdown-item">
+                       {municipality}
+                     </div>
+                   ))
+                 ) : (
+                   <div className="location-dropdown-item">No municipalities found</div>
+                 )}
+               </div>
+             )}
+           </div>
+           <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
+             <label>Province <span className="required-marker">*</span></label>
+             <input
+               name="province"
+               value={formData.province || ""}
+               onChange={handleProvinceChange}
+               onFocus={() => handleFocus('province')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
+             />
+             {focusedField === 'province' && (
+               <div className="location-dropdown">
+                 {suggestions.province && suggestions.province.length > 0 ? (
+                   suggestions.province.map((province, idx) => (
+                     <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
+                       {province}
+                     </div>
+                   ))
+                 ) : (
+                   <div className="location-dropdown-item">No provinces found</div>
+                 )}
+               </div>
+             )}
+           </div>
+           <div className="client-communion-field location-dropdown-container">
+             <label>Region</label>
+             <input
+               name="region"
+               value={formData.region || ""}
+               onChange={handleRegionChange}
+               onFocus={() => handleFocus('region')}
+               placeholder="Type to search"
+               autoComplete="off"
+             />
+             {focusedField === 'region' && (
+               <div className="location-dropdown">
+                 {suggestions.region && suggestions.region.length > 0 ? (
+                   suggestions.region.map((region, idx) => (
+                     <div key={idx} onClick={() => handleSelectRegion(region)} className="location-dropdown-item">
+                       {region}
+                     </div>
+                   ))
+                 ) : (
+                   <div className="location-dropdown-item">No regions found</div>
+                 )}
+               </div>
+             )}
+           </div>
+         </div>
 
-          {/* Father's Information */}
-          <h3 className="client-communion-sub-title">Father's Information</h3>
-          <div className="client-communion-row">
-            <div className={`client-communion-field ${showValidationErrors && validationErrors.father_first_name ? 'field-error' : ''}`}>
-              <label>Father's First Name <span className="required-marker">*</span></label>
-              <input 
-                name="father_first_name" 
-                value={formData.father_first_name} 
-                onChange={handleInputChange}
-                className={showValidationErrors && validationErrors.father_first_name ? 'input-error' : ''} 
-              />
-            </div>
-            <div className="client-communion-field">
-              <label>Father's Middle Name</label>
-              <input name="father_middle_name" value={formData.father_middle_name} onChange={handleInputChange} />
-            </div>
-            <div className={`client-communion-field ${showValidationErrors && validationErrors.father_last_name ? 'field-error' : ''}`}>
-              <label>Father's Last Name <span className="required-marker">*</span></label>
-              <input 
-                name="father_last_name" 
-                value={formData.father_last_name} 
-                onChange={handleInputChange}
-                className={showValidationErrors && validationErrors.father_last_name ? 'input-error' : ''} 
-              />
-            </div>
-          </div>
-          <div className="client-communion-row">
-            <div className="client-communion-field">
-              <label>Father's Date of Birth</label>
-              <input name="father_dateOfBirth" type="date" value={formData.father_dateOfBirth} onChange={handleInputChange} className="date-input" />
-            </div>
-            <div className="client-communion-field">
-              <label>Father's Contact Number</label>
-              <input name="father_contact" value={formData.father_contact} onChange={handleInputChange} />
-            </div>
-            <div className="client-communion-field location-dropdown-container">
-              <label>Father's Region</label>
-              <input
-                name="father_region"
-                value={formData.father_region || ""}
-                onChange={handleFatherRegionChange}
-                onFocus={() => handleFocus('father_region')}
-                placeholder="Type to search"
-                autoComplete="off"
-              />
-              {focusedField === 'father_region' && (
-                <div className="location-dropdown">
-                  {suggestions.father_region && suggestions.father_region.length > 0 ? (
-                    suggestions.father_region.map((region, idx) => (
-                      <div key={idx} onClick={() => handleSelectFatherRegion(region)} className="location-dropdown-item">
-                        {region}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No regions found</div>
-                  )}
-                </div>
-              )}
-            </div>
-            </div>
-            <div className="client-communion-row">
-            <div className="client-communion-field location-dropdown-container">
-              <label>Father's Place of Birth (Barangay, Municipality, Province)</label>
-              <input
-                name="father_placeOfBirth"
-                value={formData.father_placeOfBirth || ""}
-                onChange={handleFatherPlaceOfBirthChange}
-                onFocus={() => handleFocus('father_placeOfBirth')}
-                placeholder="Type to search (Barangay, Municipality, Province)"
-                autoComplete="off"
-              />
-              {focusedField === 'father_placeOfBirth' && (
-                <div className="location-dropdown">
-                  {suggestions.father_placeOfBirth && suggestions.father_placeOfBirth.length > 0 ? (
-                    suggestions.father_placeOfBirth.map((location, idx) => (
-                      <div key={idx} onClick={() => handleSelectFatherPlaceOfBirth(location)} className="location-dropdown-item">
-                        {`${location.barangay}, ${location.municipality}, ${location.province}`}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No locations found</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          
-          {/* Mother's Information */}
-          <h3 className="client-communion-sub-title">Mother's Information</h3>
-          <div className="client-communion-row">
-            <div className={`client-communion-field ${showValidationErrors && validationErrors.mother_first_name ? 'field-error' : ''}`}>
-              <label>Mother's First Name <span className="required-marker">*</span></label>
-              <input 
-                name="mother_first_name" 
-                value={formData.mother_first_name} 
-                onChange={handleInputChange}
-                className={showValidationErrors && validationErrors.mother_first_name ? 'input-error' : ''} 
-              />
-            </div>
-            <div className="client-communion-field">
-              <label>Mother's Middle Name</label>
-              <input name="mother_middle_name" value={formData.mother_middle_name} onChange={handleInputChange} />
-            </div>
-            <div className={`client-communion-field ${showValidationErrors && validationErrors.mother_last_name ? 'field-error' : ''}`}>
-              <label>Mother's Last Name <span className="required-marker">*</span></label>
-              <input 
-                name="mother_last_name" 
-                value={formData.mother_last_name} 
-                onChange={handleInputChange}
-                className={showValidationErrors && validationErrors.mother_last_name ? 'input-error' : ''}
-              />
-            </div>
-          </div>
-          <div className="client-communion-row">
-            <div className="client-communion-field">
-              <label>Mother's Date of Birth</label>
-              <input name="mother_dateOfBirth" type="date" value={formData.mother_dateOfBirth} onChange={handleInputChange} className="date-input" />
-            </div>
-            <div className="client-communion-field">
-              <label>Mother's Contact Number</label>
-              <input name="mother_contact" value={formData.mother_contact} onChange={handleInputChange} />
-            </div>
-            <div className="client-communion-field location-dropdown-container">
-              <label>Mother's Region</label>
-              <input
-                name="mother_region"
-                value={formData.mother_region || ""}
-                onChange={handleMotherRegionChange}
-                onFocus={() => handleFocus('mother_region')}
-                placeholder="Type to search"
-                autoComplete="off"
-              />
-              {focusedField === 'mother_region' && (
-                <div className="location-dropdown">
-                  {suggestions.mother_region && suggestions.mother_region.length > 0 ? (
-                    suggestions.mother_region.map((region, idx) => (
-                      <div key={idx} onClick={() => handleSelectMotherRegion(region)} className="location-dropdown-item">
-                        {region}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No regions found</div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          </div>
-          <div className="client-communion-row">
-          <div className="client-communion-field location-dropdown-container">
-              <label>Mother's Place of Birth (Barangay, Municipality, Province)</label>
-              <input
-                name="mother_placeOfBirth"
-                value={formData.mother_placeOfBirth || ""}
-                onChange={handleMotherPlaceOfBirthChange}
-                onFocus={() => handleFocus('mother_placeOfBirth')}
-                placeholder="Type to search (Barangay, Municipality, Province)"
-                autoComplete="off"
-              />
-              {focusedField === 'mother_placeOfBirth' && (
-                <div className="location-dropdown">
-                  {suggestions.mother_placeOfBirth && suggestions.mother_placeOfBirth.length > 0 ? (
-                    suggestions.mother_placeOfBirth.map((location, idx) => (
-                      <div key={idx} onClick={() => handleSelectMotherPlaceOfBirth(location)} className="location-dropdown-item">
-                        {`${location.barangay}, ${location.municipality}, ${location.province}`}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="location-dropdown-item">No locations found</div>
-                  )}
-                </div>
-              )}
-            </div>
-        </div>
-        
-        {/* Requirements section */}
-        <div className="client-communion-requirements-container">
-          <h2 className="client-communion-requirements-title">Requirements</h2>
-          <div className="client-communion-requirements-box">
-            <h3 className="client-communion-section-header">Documents Needed</h3>
-            <div className="client-communion-info-list">
-              <div className="client-communion-info-item">
-                <p>Certificate of Baptism(Proof of Catholic Baptism)</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>First Communion Certificate(If Applicable, for record purposes)</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Birth Certificate(For verification purposes)</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Certificate of Permission(If outside the Parish)</p>
-              </div>
-            </div>
+         {/* Father's Information */}
+         <h3 className="client-communion-sub-title">Father's Information</h3>
+         <div className="client-communion-row">
+           <div className={`client-communion-field ${showValidationErrors && validationErrors.father_first_name ? 'field-error' : ''}`}>
+             <label>Father's First Name <span className="required-marker">*</span></label>
+             <input 
+               name="father_first_name" 
+               value={formData.father_first_name} 
+               onChange={handleInputChange}
+               className={showValidationErrors && validationErrors.father_first_name ? 'input-error' : ''} 
+             />
+           </div>
+           <div className="client-communion-field">
+             <label>Father's Middle Name</label>
+             <input name="father_middle_name" value={formData.father_middle_name} onChange={handleInputChange} />
+           </div>
+           <div className={`client-communion-field ${showValidationErrors && validationErrors.father_last_name ? 'field-error' : ''}`}>
+             <label>Father's Last Name <span className="required-marker">*</span></label>
+             <input 
+               name="father_last_name" 
+               value={formData.father_last_name} 
+               onChange={handleInputChange}
+               className={showValidationErrors && validationErrors.father_last_name ? 'input-error' : ''} 
+             />
+           </div>
+         </div>
+         <div className="client-communion-row">
+           <div className="client-communion-field">
+             <label>Father's Date of Birth</label>
+             <input name="father_dateOfBirth" type="date" value={formData.father_dateOfBirth} onChange={handleInputChange} className="date-input" />
+           </div>
+           <div className="client-communion-field">
+             <label>Father's Contact Number</label>
+             <input name="father_contact" value={formData.father_contact} onChange={handleInputChange} />
+           </div>
+         </div>
+         
+         {/* Father's Place of Birth with separated fields */}
+         <label className="sub-cc">Father's Place of Birth</label>
+         <div className="client-communion-row">
+           <div className="client-communion-field location-dropdown-container">
+             <label>Father's Birth Barangay</label>
+             <input
+               type="text"
+               placeholder="Type to search"
+               value={fatherBirthFields.barangay}
+               onChange={handleFatherBirthBarangayChange}
+               onFocus={() => handleFocus('fatherBirthBarangay')}
+             />
+             {focusedField === 'fatherBirthBarangay' && suggestions.fatherBirthBarangay.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.fatherBirthBarangay.map((barangay, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectFatherBirthBarangay(barangay)}
+                     className="location-dropdown-item"
+                   >
+                     {barangay}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+           <div className="client-communion-field location-dropdown-container">
+             <label>Father's Birth Municipality</label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={fatherBirthFields.municipality}
+               onChange={handleFatherBirthMunicipalityChange}
+               onFocus={() => handleFocus('fatherBirthMunicipality')}
+             />
+             {focusedField === 'fatherBirthMunicipality' && suggestions.fatherBirthMunicipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.fatherBirthMunicipality.map((municipality, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectFatherBirthMunicipality(municipality)}
+                     className="location-dropdown-item"
+                   >
+                     {municipality}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+           <div className="client-communion-field location-dropdown-container">
+             <label>Father's Birth Province</label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={fatherBirthFields.province}
+               onChange={handleFatherBirthProvinceChange}
+               onFocus={() => handleFocus('fatherBirthProvince')}
+             />
+             {focusedField === 'fatherBirthProvince' && suggestions.fatherBirthProvince.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.fatherBirthProvince.map((province, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectFatherBirthProvince(province)}
+                     className="location-dropdown-item"
+                   >
+                     {province}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         </div>
+         
+         {/* Mother's Information */}
+         <h3 className="client-communion-sub-title">Mother's Information</h3>
+         <div className="client-communion-row">
+           <div className={`client-communion-field ${showValidationErrors && validationErrors.mother_first_name ? 'field-error' : ''}`}>
+             <label>Mother's First Name <span className="required-marker">*</span></label>
+             <input 
+               name="mother_first_name" 
+               value={formData.mother_first_name} 
+               onChange={handleInputChange}
+               className={showValidationErrors && validationErrors.mother_first_name ? 'input-error' : ''} 
+             />
+           </div>
+           <div className="client-communion-field">
+             <label>Mother's Middle Name</label>
+             <input name="mother_middle_name" value={formData.mother_middle_name} onChange={handleInputChange} />
+           </div>
+           <div className={`client-communion-field ${showValidationErrors && validationErrors.mother_last_name ? 'field-error' : ''}`}>
+             <label>Mother's Last Name <span className="required-marker">*</span></label>
+             <input 
+               name="mother_last_name" 
+               value={formData.mother_last_name} 
+               onChange={handleInputChange}
+               className={showValidationErrors && validationErrors.mother_last_name ? 'input-error' : ''}
+             />
+           </div>
+         </div>
+         <div className="client-communion-row">
+           <div className="client-communion-field">
+             <label>Mother's Date of Birth</label>
+             <input name="mother_dateOfBirth" type="date" value={formData.mother_dateOfBirth} onChange={handleInputChange} className="date-input" />
+           </div>
+           <div className="client-communion-field">
+             <label>Mother's Contact Number</label>
+             <input name="mother_contact" value={formData.mother_contact} onChange={handleInputChange} />
+           </div>
+         </div>
+         
+         {/* Mother's Place of Birth with separated fields */}
+         <label className="sub-cc">Mother's Place of Birth</label>
+         <div className="client-communion-row">
+           <div className="client-communion-field location-dropdown-container">
+             <label>Mother's Birth Barangay</label>
+             <input
+               type="text"
+               placeholder="Type to search"
+               value={motherBirthFields.barangay}
+               onChange={handleMotherBirthBarangayChange}
+               onFocus={() => handleFocus('motherBirthBarangay')}
+             />
+             {focusedField === 'motherBirthBarangay' && suggestions.motherBirthBarangay.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.motherBirthBarangay.map((barangay, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectMotherBirthBarangay(barangay)}
+                     className="location-dropdown-item"
+                   >
+                     {barangay}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+           <div className="client-communion-field location-dropdown-container">
+             <label>Mother's Birth Municipality</label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={motherBirthFields.municipality}
+               onChange={handleMotherBirthMunicipalityChange}
+               onFocus={() => handleFocus('motherBirthMunicipality')}
+             />
+             {focusedField === 'motherBirthMunicipality' && suggestions.motherBirthMunicipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.motherBirthMunicipality.map((municipality, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectMotherBirthMunicipality(municipality)}
+                     className="location-dropdown-item"
+                   >
+                     {municipality}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+           <div className="client-communion-field location-dropdown-container">
+             <label>Mother's Birth Province</label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={motherBirthFields.province}
+               onChange={handleMotherBirthProvinceChange}
+               onFocus={() => handleFocus('motherBirthProvince')}
+             />
+             {focusedField === 'motherBirthProvince' && suggestions.motherBirthProvince.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.motherBirthProvince.map((province, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectMotherBirthProvince(province)}
+                     className="location-dropdown-item"
+                   >
+                     {province}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         </div>
+       </div>
+       
+       {/* Requirements section */}
+       <div className="client-communion-requirements-container">
+         <h2 className="client-communion-requirements-title">Requirements(Bring the following documents)</h2>
+         <div className="client-communion-requirements-box">
+           <h3 className="client-communion-section-header">Documents Needed</h3>
+           <div className="client-communion-info-list">
+             <div className="client-communion-info-item">
+               <p>Certificate of Baptism(Proof of Catholic Baptism)</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>First Communion Certificate(If Applicable, for record purposes)</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Birth Certificate(For verification purposes)</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Certificate of Permission(If outside the Parish)</p>
+             </div>
+           </div>
 
-            <h3 className="client-communion-section-header">Requirements for Candidate</h3>
-            <div className="client-communion-info-list">
-              <div className="client-communion-info-item">
-                <p>Must be a baptized Catholic</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must have reached the age of reason (usually around 7 years old)</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must have received the Sacrament of Reconciliation (Confession) before First Communion</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must attend a First Communion Catechesis or Religious Instruction Program</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must understand the significance of the Holy Eucharist and believe in the real presence of Christ in the sacrament</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must attend a First Communion Retreat (if required by the parish)</p>
-              </div>
-            </div>
+           <h3 className="client-communion-section-header">Requirements for Candidate</h3>
+           <div className="client-communion-info-list">
+             <div className="client-communion-info-item">
+               <p>Must be a baptized Catholic</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must have reached the age of reason (usually around 7 years old)</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must have received the Sacrament of Reconciliation (Confession) before First Communion</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must attend a First Communion Catechesis or Religious Instruction Program</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must understand the significance of the Holy Eucharist and believe in the real presence of Christ in the sacrament</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must attend a First Communion Retreat (if required by the parish)</p>
+             </div>
+           </div>
 
-            <h3 className="client-communion-section-header">Parish Requirements</h3>
-            <div className="client-communion-info-list">
-              <div className="client-communion-info-item">
-                <p>Must be registered in the parish where First Communion will be received</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must attend the required preparation classes and rehearsals</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Must participate in a First Communion Retreat (if required by the parish)</p>
-              </div>
-            </div>
+           <h3 className="client-communion-section-header">Parish Requirements</h3>
+           <div className="client-communion-info-list">
+             <div className="client-communion-info-item">
+               <p>Must be registered in the parish where First Communion will be received</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must attend the required preparation classes and rehearsals</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Must participate in a First Communion Retreat (if required by the parish)</p>
+             </div>
+           </div>
 
-            <h3 className="client-communion-section-header">Dress Code (If Specified by Parish)</h3>
-            <div className="client-communion-info-list">
-              <div className="client-communion-info-item">
-                <p>Boys: White polo or barong, black pants, and formal shoes</p>
-              </div>
-              <div className="client-communion-info-item">
-                <p>Girls: White dress with sleeves (modest), white veil (optional), and formal shoes</p>
-              </div>
-            </div>
-          </div>
-        </div>
+           <h3 className="client-communion-section-header">Dress Code (If Specified by Parish)</h3>
+           <div className="client-communion-info-list">
+             <div className="client-communion-info-item">
+               <p>Boys: White polo or barong, black pants, and formal shoes</p>
+             </div>
+             <div className="client-communion-info-item">
+               <p>Girls: White dress with sleeves (modest), white veil (optional), and formal shoes</p>
+             </div>
+           </div>
+         </div>
+       </div>
 
-        <div className="client-communion-button-container">
-          <button className="client-communion-submit-btn" onClick={handleSubmit}>Submit</button>
-          <button className="client-communion-cancel-btn">Cancel</button>
-        </div>
-      </div>
+       <div className="client-communion-button-container">
+         <button className="client-communion-submit-btn" onClick={handleSubmit}>Submit</button>
+         <button className="client-communion-cancel-btn">Cancel</button>
+       </div>
+     </div>
 
-      {/* Submit Confirmation Modal */}
-      {showModal && (
-        <div className="client-communion-modal-overlay">
-          <div className="client-communion-modal">
-            <h2>Submit Application</h2>
-            <hr className="client-communion-custom-hr"/>
-            <p>Are you sure you want to submit your Holy Communion application?</p>
-            <div className="client-communion-modal-buttons">
-              <button className="client-communion-yes-btn" onClick={handleYes}>Yes</button>
-              <button className="client-communion-modal-no-btn" onClick={() => setShowModal(false)}>No</button>
-            </div>
-          </div>
-        </div>
-      )}
+     {/* Submit Confirmation Modal */}
+     {showModal && (
+       <div className="client-communion-modal-overlay">
+         <div className="client-communion-modal">
+           <h2>Submit Application</h2>
+           <hr className="client-communion-custom-hr"/>
+           <p>Are you sure you want to submit your Holy Communion application?</p>
+           <div className="client-communion-modal-buttons">
+             <button className="client-communion-yes-btn" onClick={handleYes}>Yes</button>
+             <button className="client-communion-modal-no-btn" onClick={() => setShowModal(false)}>No</button>
+           </div>
+         </div>
+       </div>
+     )}
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="client-communion-modal-overlay">
-          <div className="client-communion-modal">
-            <h2>Success</h2>
-            <hr className="client-communion-custom-hr"/>
-            <p>Your Holy Communion application has been submitted successfully!</p>
-            <div className="client-communion-modal-buttons">
-              <button className="client-communion-yes-btn" onClick={() => setShowSuccessModal(false)}>OK</button>
-            </div>
-          </div>
-        </div>
-      )}
+     {/* Success Modal */}
+     {showSuccessModal && (
+       <div className="client-communion-modal-overlay">
+         <div className="client-communion-modal">
+           <h2>Success</h2>
+           <hr className="client-communion-custom-hr"/>
+           <p>Your Holy Communion application has been submitted successfully!</p>
+           <div className="client-communion-modal-buttons">
+             <button className="client-communion-yes-btn" onClick={() => setShowSuccessModal(false)}>OK</button>
+           </div>
+         </div>
+       </div>
+     )}
 
-      {/* Error Modal */}
-      {showErrorModal && (
-        <div className="client-communion-modal-overlay">
-          <div className="client-communion-modal">
-            <h2>Error</h2>
-            <hr className="client-communion-custom-hr"/>
-            <p>{errorMessage}</p>
-            <div className="client-communion-modal-buttons">
-              <button className="client-communion-modal-no-btn" onClick={() => setShowErrorModal(false)}>OK</button>
-            </div>
-          </div>
-        </div>
-      )}
+     {/* Error Modal */}
+     {showErrorModal && (
+       <div className="client-communion-modal-overlay">
+         <div className="client-communion-modal">
+           <h2>Error</h2>
+           <hr className="client-communion-custom-hr"/>
+           <p>{errorMessage}</p>
+           <div className="client-communion-modal-buttons">
+             <button className="client-communion-modal-no-btn" onClick={() => setShowErrorModal(false)}>OK</button>
+           </div>
+         </div>
+       </div>
+     )}
 
-      {/* Loading Modal */}
-      {isLoading && (
-        <div className="client-communion-modal-overlay">
-          <div className="client-communion-modal">
-            <h2>Processing Application</h2>
-            <hr className="client-communion-custom-hr"/>
-            <p>Please wait while we submit your Holy Communion application...</p>
-            <div className="client-communion-loading-spinner">
-              <div className="client-communion-spinner"></div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+     {/* Loading Modal */}
+     {isLoading && (
+       <div className="client-communion-modal-overlay">
+         <div className="client-communion-modal">
+           <h2>Processing Application</h2>
+           <hr className="client-communion-custom-hr"/>
+           <p>Please wait while we submit your Holy Communion application...</p>
+           <div className="client-communion-loading-spinner">
+             <div className="client-communion-spinner"></div>
+           </div>
+         </div>
+       </div>
+     )}
+   </div>
+ );
 };
 
 export default Communion;

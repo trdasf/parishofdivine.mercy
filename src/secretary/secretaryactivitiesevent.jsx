@@ -94,26 +94,84 @@ const SecretaryActivitiesEvent = () => {
     }
   };
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
   };
 
-  // Filter activities based on status and search term
+  // Format date to YYYY-MM-DD
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    try {
+      return new Date(dateString).toISOString().split('T')[0];
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
+  // Filter activities based on status and search term with flexible matching
   const filteredActivities = activities.filter(activity => {
     const matchesStatus = statusFilter ? activity.status === statusFilter : true;
-    const matchesSearch = searchTerm 
-      ? activity.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.proposedBy?.toLowerCase().includes(searchTerm.toLowerCase())
-      : true;
+    
+    if (!searchTerm.trim()) {
+      return matchesStatus;
+    }
+
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    
+    // Normalize both data and search by trimming and replacing multiple spaces
+    const title = activity.title?.toLowerCase().trim() || '';
+    const description = activity.description?.toLowerCase().trim() || '';
+    const category = activity.category?.toLowerCase().trim() || '';
+    const organizer = activity.organizer?.toLowerCase().trim() || '';
+    const proposedBy = activity.proposedBy?.toLowerCase().trim() || '';
+    const location = activity.location?.toLowerCase().trim() || '';
+    const status = activity.status?.toLowerCase().trim() || '';
+    const startTime = activity.startTime?.toLowerCase().trim() || '';
+    const formattedStartDate = formatDate(activity.startDate);
+    const formattedCreatedAt = activity.created_at ? formatDate(activity.created_at) : '';
+    const formattedUpdatedAt = activity.updated_at ? formatDate(activity.updated_at) : '';
+    
+    // Normalize search value by replacing multiple spaces with single space
+    const normalizedSearchValue = searchValue.replace(/\s+/g, ' ');
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    let matchesSearch;
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      matchesSearch = (
+        title.startsWith(normalizedSearchValue) ||
+        description.startsWith(normalizedSearchValue) ||
+        category.startsWith(normalizedSearchValue) ||
+        organizer.startsWith(normalizedSearchValue) ||
+        proposedBy.startsWith(normalizedSearchValue) ||
+        location.startsWith(normalizedSearchValue) ||
+        status.startsWith(normalizedSearchValue) ||
+        startTime.startsWith(normalizedSearchValue) ||
+        formattedStartDate.startsWith(normalizedSearchValue) ||
+        formattedCreatedAt.startsWith(normalizedSearchValue) ||
+        formattedUpdatedAt.startsWith(normalizedSearchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      matchesSearch = (
+        title.includes(normalizedSearchValue) ||
+        description.includes(normalizedSearchValue) ||
+        category.includes(normalizedSearchValue) ||
+        organizer.includes(normalizedSearchValue) ||
+        proposedBy.includes(normalizedSearchValue) ||
+        location.includes(normalizedSearchValue) ||
+        status.includes(normalizedSearchValue) ||
+        startTime.includes(normalizedSearchValue) ||
+        formattedStartDate.includes(normalizedSearchValue) ||
+        formattedCreatedAt.includes(normalizedSearchValue) ||
+        formattedUpdatedAt.includes(normalizedSearchValue)
+      );
+    }
+    
     return matchesStatus && matchesSearch;
   });
 
@@ -133,7 +191,7 @@ const SecretaryActivitiesEvent = () => {
             type="text" 
             placeholder="Search" 
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearch}
           />
           <FontAwesomeIcon icon={faSearch} className="search-icon-sae" />
         </div>
@@ -255,13 +313,13 @@ const SecretaryActivitiesEvent = () => {
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Created At:</div>
                 <div className="detail-value-sae">
-                  {viewEventData.created_at ? new Date(viewEventData.created_at).toLocaleString() : ""}
+                  {viewEventData.created_at ? formatDate(viewEventData.created_at) : ""}
                 </div>
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Updated At:</div>
                 <div className="detail-value-sae">
-                  {viewEventData.updated_at ? new Date(viewEventData.updated_at).toLocaleString() : ""}
+                  {viewEventData.updated_at ? formatDate(viewEventData.updated_at) : ""}
                 </div>
               </div>
             </div>

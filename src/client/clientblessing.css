@@ -166,6 +166,17 @@
     margin-bottom: 15px;
     margin-top: 40px;
   }
+
+  .sub-cc {
+    font-weight: 500;
+    font-size: 14px;
+    color: #000;
+    min-width: 150px;
+    text-align: left;
+    margin-top: 22px;
+    margin-bottom: 20px;
+    font-family: Roboto;
+  }
   
   /* Blessing row styling */
   .client-blessing-row {
@@ -412,7 +423,7 @@
     gap: 100px;
     justify-content: center;
     margin-top: 50px;
-    margin-bottom: 70px;
+    margin-bottom: 200px;
   }
   
   .client-blessing-submit-btn, 
@@ -611,4 +622,691 @@
   0% { opacity: 0.6; }
   50% { opacity: 1; }
   100% { opacity: 0.6; }
+}
+
+/* Location dropdown styling */
+.location-dropdown-container {
+  position: relative;
+}
+
+.location-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.location-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.location-dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+/* Date input styling */
+.date-input {
+  position: relative;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .client-blessing-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .client-blessing-title {
+    font-size: 32px;
+  }
+  
+  .client-blessing-field-date input,
+  .client-blessing-field-time input,
+  .client-blessing-field-date select,
+  .client-blessing-field-time select,
+  .client-blessing-field-name select {
+    width: 180px;
+  }
+  
+  .client-blessing-field-ga input,
+  .client-blessing-field-ga select {
+    width: 90px;
+  }
+  
+  .client-blessing-button-container {
+    gap: 80px;
+    margin-bottom: 200px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .client-blessing-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .client-blessing-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  .client-blessing-header {
+    margin-bottom: 20px;
+  }
+  
+  .client-blessing-back-button {
+    font-size: 16px;
+  }
+  
+  .client-blessing-back-icon {
+    font-size: 20px;
+  }
+  
+  .client-blessing-section-title {
+    font-size: 20px;
+  }
+  
+  .sub-cc {
+    font-size: 13px;
+    margin-top: 18px;
+    margin-bottom: 15px;
+  }
+  
+  /* Make date/time row responsive */
+  .client-blessing-row-date {
+    flex-direction: row;
+    gap: 30px;
+    align-items: stretch;
+  }
+  
+  .client-blessing-field-date,
+  .client-blessing-field-time,
+  .client-blessing-field-name {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .client-blessing-field-date label,
+  .client-blessing-field-time label,
+  .client-blessing-field-name label {
+    min-width: auto;
+    white-space: nowrap;
+    margin-top: 0;
+    font-size: 13px;
+  }
+  
+  .client-blessing-field-date input,
+  .client-blessing-field-time input,
+  .client-blessing-field-date select,
+  .client-blessing-field-time select,
+  .client-blessing-field-name select {
+    width: 140px;
+    font-size: 14px;
+  }
+  
+  /* Make main form rows responsive */
+  .client-blessing-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .client-blessing-field-ga input,
+  .client-blessing-field-ga select {
+    width: 100%;
+  }
+  
+  /* Button container responsive */
+  .client-blessing-button-container {
+    gap: 50px;
+    margin-top: 40px;
+    margin-bottom: 200px;
+  }
+  
+  .client-blessing-submit-btn,
+  .client-blessing-cancel-btn {
+    width: 100px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal responsive */
+  .client-blessing-modal {
+    width: 90%;
+    max-width: 350px;
+    margin: 20px;
+  }
+  
+  .client-blessing-modal-buttons {
+    gap: 20px;
+  }
+  
+  .client-blessing-yes-btn,
+  .client-blessing-modal-no-btn {
+    width: 100px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section responsive */
+  .client-blessing-section-header {
+    margin-left: 10px;
+    font-size: 16px;
+  }
+  
+  .client-blessing-checkbox-list {
+    margin-left: 30px;
+  }
+  
+  .client-blessing-info-list {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .client-blessing-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .client-blessing-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+  
+  .client-blessing-row-date {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .client-blessing-field-date,
+  .client-blessing-field-time,
+  .client-blessing-field-name {
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .client-blessing-field-date label,
+  .client-blessing-field-time label,
+  .client-blessing-field-name label {
+    font-size: 13px;
+    text-align: left;
+  }
+  
+  .client-blessing-field-date input,
+  .client-blessing-field-time input,
+  .client-blessing-field-date select,
+  .client-blessing-field-time select,
+  .client-blessing-field-name select {
+    font-size: 12px;
+    width: 180px;
+  }
+  
+  .client-blessing-header {
+    margin-bottom: 15px;
+  }
+  
+  .client-blessing-back-button {
+    font-size: 14px;
+  }
+  
+  .client-blessing-back-icon {
+    font-size: 18px;
+  }
+  
+  .client-blessing-section-title {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .client-blessing-sub-title {
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  
+  .client-blessing-bypart {
+    margin-top: 30px;
+  }
+  
+  .sub-cc {
+    font-size: 12px;
+    margin-top: 15px;
+    margin-bottom: 12px;
+  }
+  
+  /* Smaller form fields */
+  .client-blessing-field label {
+    font-size: 12px;
+  }
+  
+  .client-blessing-field input,
+  .client-blessing-field select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .client-blessing-field-ga label {
+    font-size: 12px;
+  }
+  
+  .client-blessing-field-ga input,
+  .client-blessing-field-ga select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .client-blessing-textarea {
+    height: 80px;
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section */
+  .client-blessing-section-header {
+    font-size: 15px;
+    margin-left: 5px;
+  }
+  
+  .client-blessing-checkbox-list {
+    margin-left: 20px;
+  }
+  
+  .client-blessing-checkbox-list label {
+    font-size: 14px;
+  }
+  
+  .client-blessing-info-item p {
+    font-size: 0.9rem;
+  }
+  
+  /* Button adjustments */
+  .client-blessing-button-container {
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 200px;
+  }
+  
+  .client-blessing-submit-btn,
+  .client-blessing-cancel-btn {
+    width: 90px;
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+  
+  /* Modal adjustments */
+  .client-blessing-modal {
+    width: 95%;
+    max-width: 320px;
+    margin: 15px;
+  }
+  
+  .client-blessing-modal h2 {
+    font-size: 18px;
+  }
+  
+  .client-blessing-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .client-blessing-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .client-blessing-yes-btn,
+  .client-blessing-modal-no-btn {
+    width: 80px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown adjustments */
+  .location-dropdown {
+    max-height: 150px;
+  }
+  
+  .location-dropdown-item {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  /* Status dropdown */
+  .client-blessing-status-dropdown {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .client-blessing-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .client-blessing-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    letter-spacing: 0.3px;
+  }
+  
+  .client-blessing-header {
+    margin-bottom: 12px;
+  }
+  
+  .client-blessing-back-button {
+    font-size: 13px;
+  }
+  
+  .client-blessing-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .client-blessing-section-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .client-blessing-sub-title {
+    font-size: 15px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+  }
+  
+  .client-blessing-bypart {
+    margin-top: 25px;
+  }
+  
+  .sub-cc {
+    font-size: 11px;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  /* Even smaller form elements */
+  .client-blessing-field label,
+  .client-blessing-field-ga label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .client-blessing-field input,
+  .client-blessing-field select,
+  .client-blessing-field-ga input,
+  .client-blessing-field-ga select {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  .client-blessing-field-date label,
+  .client-blessing-field-time label,
+  .client-blessing-field-name label {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .client-blessing-field-date input,
+  .client-blessing-field-time input,
+  .client-blessing-field-date select,
+  .client-blessing-field-time select,
+  .client-blessing-field-name select {
+    width: 150px;
+    font-size: 12px;
+  }
+  
+  .client-blessing-textarea {
+    height: 70px;
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  /* Requirements section */
+  .client-blessing-section-header {
+    font-size: 14px;
+    margin-left: 0;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .client-blessing-checkbox-list {
+    margin-left: 15px;
+    gap: 6px;
+  }
+  
+  .client-blessing-checkbox-list label {
+    font-size: 13px;
+  }
+  
+  .client-blessing-info-list {
+    margin-left: 0.25rem;
+    padding-left: 0.25rem;
+  }
+  
+  .client-blessing-info-item {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .client-blessing-info-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Buttons */
+  .client-blessing-button-container {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 200px;
+  }
+  
+  .client-blessing-submit-btn,
+  .client-blessing-cancel-btn {
+    width: 120px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal for mobile */
+  .client-blessing-modal {
+    width: 95%;
+    max-width: 300px;
+    margin: 10px;
+  }
+  
+  .client-blessing-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .client-blessing-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .client-blessing-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .client-blessing-yes-btn,
+  .client-blessing-modal-no-btn {
+    width: 100px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown improvements for mobile */
+  .location-dropdown {
+    max-height: 120px;
+    font-size: 13px;
+  }
+  
+  .location-dropdown-item {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  /* Status dropdown */
+  .client-blessing-status-dropdown {
+    min-width: 90px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  /* Loading spinner adjustment */
+  .client-blessing-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+  
+  /* Error input adjustments */
+  .input-error {
+    border-width: 1px !important;
+  }
+  
+  .error-message {
+    font-size: 11px;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .client-blessing-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .client-blessing-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .client-blessing-section-title {
+    font-size: 15px;
+  }
+  
+  .client-blessing-sub-title {
+    font-size: 14px;
+  }
+  
+  .sub-cc {
+    font-size: 10px;
+  }
+  
+  .client-blessing-field label,
+  .client-blessing-field-ga label {
+    font-size: 10px;
+  }
+  
+  .client-blessing-field input,
+  .client-blessing-field select,
+  .client-blessing-field-ga input,
+  .client-blessing-field-ga select {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .client-blessing-field-date label,
+  .client-blessing-field-time label,
+  .client-blessing-field-name label {
+    font-size: 11px;
+  }
+
+  .client-blessing-field-date input,
+  .client-blessing-field-time input,
+  .client-blessing-field-date select,
+  .client-blessing-field-time select,
+  .client-blessing-field-name select {
+    width: 130px;
+    font-size: 11px;
+  }
+  
+  .client-blessing-textarea {
+    height: 60px;
+    font-size: 12px;
+  }
+  
+  .client-blessing-section-header {
+    font-size: 13px;
+  }
+  
+  .client-blessing-checkbox-list label {
+    font-size: 12px;
+  }
+  
+  .client-blessing-info-item p {
+    font-size: 0.8rem;
+  }
+  
+  .client-blessing-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .client-blessing-modal h2 {
+    font-size: 15px;
+  }
+  
+  .client-blessing-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .location-dropdown-item {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .client-blessing-button-container {
+    margin-bottom: 200px;
+  }
+  
+  .client-blessing-submit-btn,
+  .client-blessing-cancel-btn {
+    width: 100px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
 }

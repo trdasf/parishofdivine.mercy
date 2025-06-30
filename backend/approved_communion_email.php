@@ -59,7 +59,7 @@ try {
     if (isset($data['communionID'])) {
         $communionID = $data['communionID'];
         
-        // Get communion application details
+        // Get communion application details and client info
         $stmt = $conn->prepare("
             SELECT c.*, cr.clientID, cr.first_name AS client_first_name, cr.last_name AS client_last_name, cr.email 
             FROM communion_application c
@@ -72,6 +72,26 @@ try {
         
         if ($result->num_rows > 0) {
             $communionData = $result->fetch_assoc();
+            
+            // Get the approved appointment details (this is the key fix!)
+            $stmt = $conn->prepare("
+                SELECT date, time, priest 
+                FROM approved_appointments 
+                WHERE sacramentID = ? AND sacrament_type = 'Communion'");
+            
+            if (!$stmt) {
+                throw new Exception("Prepare statement failed for appointment query: " . $conn->error);
+            }
+            
+            $stmt->bind_param("i", $communionID);
+            $stmt->execute();
+            $appointmentResult = $stmt->get_result();
+            
+            if ($appointmentResult->num_rows == 0) {
+                throw new Exception("Approved appointment details not found for communion ID: " . $communionID);
+            }
+            
+            $appointmentData = $appointmentResult->fetch_assoc();
             
             // Create new PHPMailer instance
             $mail = new PHPMailer(true);
@@ -92,9 +112,13 @@ try {
                 $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
                 $mail->addAddress($communionData['email'], $communionData['client_first_name'] . ' ' . $communionData['client_last_name']);
                 
-                // Format the date for display
-                $communionDate = new DateTime($communionData['date']);
+                // Format the date for display - USE APPOINTMENT DATA instead of communion data
+                $communionDate = new DateTime($appointmentData['date']); // Changed from $communionData['date']
                 $formattedDate = $communionDate->format('F j, Y');
+                
+                // Use appointment time and priest
+                $communionTime = $appointmentData['time']; // Changed from $communionData['time']
+                $priest = $appointmentData['priest']; // Changed from $communionData['priest']
                 
                 // Client name
                 $clientName = $communionData['client_first_name'] . ' ' . $communionData['client_last_name'];
@@ -133,11 +157,11 @@ try {
                                         </tr>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                            <td style='padding: 8px 0;'>{$communionData['time']}</td>
+                                            <td style='padding: 8px 0;'>{$communionTime}</td>
                                         </tr>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Celebrant:</td>
-                                            <td style='padding: 8px 0;'>{$communionData['priest']}</td>
+                                            <td style='padding: 8px 0;'>{$priest}</td>
                                         </tr>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Status:</td>
@@ -185,8 +209,8 @@ try {
                     "First Communion Details:\n" .
                     "Child's Name: {$childName}\n" .
                     "Date of Communion: {$formattedDate}\n" .
-                    "Time: {$communionData['time']}\n" .
-                    "Celebrant: {$communionData['priest']}\n" .
+                    "Time: {$communionTime}\n" .
+                    "Priest: {$priest}\n" .
                     "Status: APPROVED\n\n" .
                     "Please arrive at least 30 minutes before the scheduled time and ensure your child has completed all required preparation classes.\n\n" .
                     "With joy and blessings,\nParish of Divine Mercy";

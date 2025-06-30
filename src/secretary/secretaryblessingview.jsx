@@ -44,69 +44,78 @@ const SecretaryBlessingView = () => {
   }, [location]);
 
   // Function to fetch the blessing details
-  const fetchBlessingDetails = async (blessingID) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_blessing_details.php?blessingID=${blessingID}`);
-      const data = await response.json();
+ // Function to fetch the blessing details
+const fetchBlessingDetails = async (blessingID) => {
+  try {
+    setLoading(true);
+    const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_blessing_details.php?blessingID=${blessingID}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      // Transform the data into the expected format
+      const transformedData = transformBlessingData(data.data);
+      setBlessingData(transformedData);
       
-      if (data.success) {
-        // Transform the data into the expected format
-        const transformedData = transformBlessingData(data.data);
-        setBlessingData(transformedData);
-        
-        // Initialize the schedule fields with default empty values first
-        setAppointmentDate("");
-        setAppointmentTime("");
-        setSelectedPriest("");
-        
-        // If it's approved, fetch schedule details from approved_appointments table
-        if (transformedData.status === "Approved") {
-          fetchApprovedAppointmentDetails(blessingID);
-        } else {
-          // Only use these as initial values if not already approved
-          setAppointmentDate(transformedData.date || "");
+      // Clear previous state first
+      setAppointmentDate("");
+      setAppointmentTime("");
+      setSelectedPriest("");
+      
+      // If it's approved, fetch schedule details from approved_appointments table
+      if (transformedData.status === "Approved") {
+        await fetchApprovedAppointmentDetails(blessingID);
+      } else {
+        // For non-approved requests, set default values after a short delay
+        setTimeout(() => {
+          const defaultDate = transformedData.date ? formatDateForInput(transformedData.date) : "";
+          setAppointmentDate(defaultDate);
           setAppointmentTime(transformedData.time || "");
           setSelectedPriest(transformedData.priest || "");
-        }
-      } else {
-        setError(data.message || "Failed to fetch blessing details");
+        }, 100);
       }
-    } catch (error) {
-      console.error("Error fetching blessing details:", error);
-      setError("An error occurred while fetching the data");
-    } finally {
-      setLoading(false);
+    } else {
+      setError(data.message || "Failed to fetch blessing details");
     }
-  };
-  
+  } catch (error) {
+    console.error("Error fetching blessing details:", error);
+    setError("An error occurred while fetching the data");
+  } finally {
+    setLoading(false);
+  }
+};
   // Function to fetch schedule details from approved_appointments
-  const fetchApprovedAppointmentDetails = async (blessingID) => {
-    try {
-      console.log("Fetching appointment details for blessing ID:", blessingID);
-      const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_approved_appointment.php?sacramentID=${blessingID}&sacrament_type=blessing`);
-      const data = await response.json();
-      console.log("Appointment data response:", data);
+  // Function to fetch schedule details from approved_appointments
+const fetchApprovedAppointmentDetails = async (blessingID) => {
+  try {
+    console.log("Fetching appointment details for blessing ID:", blessingID);
+    const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_approved_appointment.php?sacramentID=${blessingID}&sacrament_type=blessing`);
+    const data = await response.json();
+    console.log("Appointment data response:", data);
+    
+    if (data.success && data.appointment) {
+      // Format the date properly for the date input
+      const formattedDate = data.appointment.date ? formatDateForInput(data.appointment.date) : "";
       
-      if (data.success && data.appointment) {
-        // Update ONLY the schedule fields with data from approved_appointments
-        console.log("Setting appointment values from DB:", {
-          date: data.appointment.date,
-          time: data.appointment.time,
-          priest: data.appointment.priest
-        });
-        
-        setAppointmentDate(data.appointment.date || "");
+      console.log("Setting appointment values from DB:", {
+        date: formattedDate,
+        time: data.appointment.time,
+        priest: data.appointment.priest
+      });
+      
+      // Use setTimeout to ensure state updates properly
+      setTimeout(() => {
+        setAppointmentDate(formattedDate);
         setAppointmentTime(data.appointment.time || "");
         setSelectedPriest(data.appointment.priest || "");
-      } else {
-        console.log("No approved appointment schedule found or there was an error");
-      }
-    } catch (error) {
-      console.error("Error fetching approved appointment schedule:", error);
+      }, 100);
+      
+    } else {
+      console.log("No approved appointment schedule found or there was an error");
     }
-  };
-
+  } catch (error) {
+    console.error("Error fetching approved appointment schedule:", error);
+  }
+};
   const transformBlessingData = (data) => {
     // Format the data from PHP API response to match the component's expected format
     const { blessing, address, type, requirements } = data;
@@ -161,126 +170,165 @@ const SecretaryBlessingView = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async () => {
-    if (!blessingData || !blessingData.blessingID) {
-      alert("No blessing data available to approve.");
-      return;
-    }
-    
-    // Validate required fields
-    if (!appointmentDate) {
-      alert("Please select a date for the appointment.");
-      return;
-    }
-    
-    if (!appointmentTime) {
-      alert("Please select a time for the appointment.");
-      return;
-    }
-    
-    if (!selectedPriest) {
-      alert("Please enter the name of the priest for the blessing.");
-      return;
-    }
-    
-    // Debug log
-    console.log("Submit values:", {
-      appointmentDate,
-      appointmentTime,
-      selectedPriest
-    });
+ // Handle form submission
+const handleSubmit = async () => {
+  if (!blessingData || !blessingData.blessingID) {
+    alert("No blessing data available to approve.");
+    return;
+  }
+  
+  // Debug logging - add these lines
+  console.log("=== DEBUG VALIDATION ===");
+  console.log("appointmentDate:", appointmentDate);
+  console.log("appointmentDate length:", appointmentDate ? appointmentDate.length : 0);
+  console.log("appointmentDate type:", typeof appointmentDate);
+  console.log("appointmentTime:", appointmentTime);
+  console.log("selectedPriest:", selectedPriest);
+  console.log("=== END DEBUG ===");
+  
+  // Validate required fields
+  if (!appointmentDate || appointmentDate.trim() === "") {
+    alert("Please select a date for the appointment.");
+    return;
+  }
+  
+  if (!appointmentTime || appointmentTime.trim() === "") {
+    alert("Please select a time for the appointment.");
+    return;
+  }
+  
+  if (!selectedPriest || selectedPriest.trim() === "") {
+    alert("Please enter the name of the priest for the blessing.");
+    return;
+  }
+  
+  // Debug log
+  console.log("Submit values:", {
+    appointmentDate,
+    appointmentTime,
+    selectedPriest
+  });
 
-    // Show confirmation modal instead of submitting immediately
-    setShowConfirmModal(true);
-  };
-
+  // Show confirmation modal instead of submitting immediately
+  setShowConfirmModal(true);
+};
   // Function to proceed with approval after confirmation
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+  // Function to proceed with approval after confirmation
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    // Log the values being sent to make sure they're what we expect
+    console.log("Sending appointment data:", {
+      sacramentID: blessingData.blessingID,
+      sacrament_type: "blessing",
+      date: appointmentDate,
+      time: appointmentTime, 
+      priest: selectedPriest
+    });
     
-    try {
-      // Log the values being sent to make sure they're what we expect
-      console.log("Sending appointment data:", {
+    // Insert into approved_appointments table
+    const appointmentResponse = await fetch("https://parishofdivinemercy.com/backend/save_approved_appointment.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         sacramentID: blessingData.blessingID,
         sacrament_type: "blessing",
         date: appointmentDate,
-        time: appointmentTime, 
+        time: appointmentTime,
+        priest: selectedPriest
+      }),
+    });
+    
+    const appointmentResult = await appointmentResponse.json();
+    console.log("Appointment save result:", appointmentResult);
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    // Then update the blessing status - ALSO sending date/time/priest values
+    const response = await fetch("https://parishofdivinemercy.com/backend/update_blessing_status.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        blessingID: blessingData.blessingID,
+        status: "Approved",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      }),
+    });
+
+    // First check if the response is valid JSON
+    let result;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      result = await response.json();
+    } else {
+      // If not JSON, get the text and show it as an error
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Invalid response from server. Please check server logs.");
+    }
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch("https://parishofdivinemercy.com/backend/approved_blessing_email.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            blessingID: blessingData.blessingID,
+            date: appointmentDate,
+            time: appointmentTime,
+            priest: selectedPriest
+          }),
+        });
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
+      }
+      // END EMAIL SENDING
+      
+      // Update local state to reflect changes
+      setBlessingData({
+        ...blessingData,
+        status: "Approved",
+        date: appointmentDate,
+        time: appointmentTime,
         priest: selectedPriest
       });
       
-      // Insert into approved_appointments table
-      const appointmentResponse = await fetch("https://parishofdivinemercy.com/backend/save_approved_appointment.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sacramentID: blessingData.blessingID,
-          sacrament_type: "blessing",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        }),
-      });
-      
-      const appointmentResult = await appointmentResponse.json();
-      console.log("Appointment save result:", appointmentResult);
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      // Then update the blessing status - ALSO sending date/time/priest values
-      const response = await fetch("https://parishofdivinemercy.com/backend/update_blessing_status.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          blessingID: blessingData.blessingID,
-          status: "Approved",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        }),
-      });
-
-      // First check if the response is valid JSON
-      let result;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        result = await response.json();
-      } else {
-        // If not JSON, get the text and show it as an error
-        const text = await response.text();
-        console.error("Non-JSON response:", text);
-        throw new Error("Invalid response from server. Please check server logs.");
-      }
-      
-      if (result.success) {
-        // Update local state to reflect changes
-        setBlessingData({
-          ...blessingData,
-          status: "Approved",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        });
-        
-        setSuccessMessage("Blessing application has been approved successfully! An email notification has been sent to the client.");
-        setShowSuccessModal(true);
-      } else {
-        // Show error message from server or a default one
-        const errorMessage = result.message || "Failed to approve blessing application";
-        setSuccessMessage(errorMessage);
-        setShowSuccessModal(true);
-      }
-    } catch (error) {
-      console.error("Error approving blessing application:", error);
-      setSuccessMessage("An error occurred while approving the blessing application: " + error.message);
+      setSuccessMessage("Blessing application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+    } else {
+      // Show error message from server or a default one
+      const errorMessage = result.message || "Failed to approve blessing application";
+      setSuccessMessage(errorMessage);
       setShowSuccessModal(true);
     }
-  };
+  } catch (error) {
+    console.error("Error approving blessing application:", error);
+    setSuccessMessage("An error occurred while approving the blessing application: " + error.message);
+    setShowSuccessModal(true);
+  }
+};
 
   // Function to handle download certificate
   const handleDownloadCertificate = () => {
@@ -303,7 +351,27 @@ const SecretaryBlessingView = () => {
       return dateString; // Return original string if formatting fails
     }
   };
-
+const formatDateForInput = (dateString) => {
+  if (!dateString) return "";
+  
+  try {
+    // If it's already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Otherwise, try to parse and format
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+    
+    return "";
+  } catch (error) {
+    console.error("Error formatting date for input:", error);
+    return "";
+  }
+};
   // Function to download the certificate as PDF
   const downloadCertificateAsPDF = async () => {
     if (!certificateRef.current) return;
@@ -935,19 +1003,20 @@ const SecretaryBlessingView = () => {
         <div className="secretary-blessing-view-info-card">
           <h2 className="secretary-blessing-view-sub-title">Schedule Selection</h2>
           <div className="secretary-blessing-view-row">
-            <div className="secretary-blessing-view-field">
-              <label>Date of Blessing:</label>
-              <input
-                type="date"
-                className="secretary-view-input"
-                value={appointmentDate}
-                onChange={(e) => {
-                  console.log("Date changed to:", e.target.value);
-                  setAppointmentDate(e.target.value);
-                }}
-                disabled={blessingData.status === "Approved"}
-              />
-            </div>
+           <div className="secretary-blessing-view-field">
+  <label>Date of Blessing:</label>
+  <input
+    type="date"
+    className="secretary-view-input"
+    value={formatDateForInput(appointmentDate)}
+    onChange={(e) => {
+      console.log("Date changed to:", e.target.value);
+      setAppointmentDate(e.target.value);
+    }}
+    disabled={blessingData.status === "Approved"}
+    min={new Date().toISOString().split('T')[0]} // Prevent selecting past dates
+  />
+</div>
             <div className="secretary-blessing-view-field">
               <label>Time of Blessing:</label>
               <input

@@ -79,15 +79,46 @@ const SecretaryAnointingOfTheSick = () => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter appointments based on search term
+  // Filter appointments based on search term with flexible matching
   const filteredAppointments = anointingAppointments.filter(appointment => {
-    const searchValue = searchTerm.toLowerCase();
-    return (
-      appointment.firstName?.toLowerCase().includes(searchValue) ||
-      appointment.lastName?.toLowerCase().includes(searchValue) ||
-      appointment.date?.toLowerCase().includes(searchValue) ||
-      appointment.status?.toLowerCase().includes(searchValue)
-    );
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    
+    // Normalize both data and search by trimming and replacing multiple spaces
+    const firstName = appointment.firstName?.toLowerCase().trim() || '';
+    const lastName = appointment.lastName?.toLowerCase().trim() || '';
+    const fullName = `${firstName} ${lastName}`.replace(/\s+/g, ' ');
+    const status = appointment.status?.toLowerCase().trim() || '';
+    const formattedDate = new Date(appointment.date).toISOString().split('T')[0];
+    const formattedCreatedAt = new Date(appointment.createdAt).toISOString().split('T')[0];
+    
+    // Normalize search value by replacing multiple spaces with single space
+    const normalizedSearchValue = searchValue.replace(/\s+/g, ' ');
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      return (
+        firstName.startsWith(normalizedSearchValue) ||
+        lastName.startsWith(normalizedSearchValue) ||
+        fullName.startsWith(normalizedSearchValue) ||
+        formattedDate.startsWith(normalizedSearchValue) ||
+        formattedCreatedAt.startsWith(normalizedSearchValue) ||
+        status.startsWith(normalizedSearchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      return (
+        firstName.includes(normalizedSearchValue) ||
+        lastName.includes(normalizedSearchValue) ||
+        fullName.includes(normalizedSearchValue) ||
+        formattedDate.includes(normalizedSearchValue) ||
+        formattedCreatedAt.includes(normalizedSearchValue) ||
+        status.includes(normalizedSearchValue)
+      );
+    }
   });
 
   // If we have no real data yet, use empty array
@@ -143,9 +174,9 @@ const SecretaryAnointingOfTheSick = () => {
                   <td>{appointment.id}</td>
                   <td>{appointment.firstName}</td>
                   <td>{appointment.lastName}</td>
-                  <td>{appointment.date}</td>
+                  <td>{new Date(appointment.date).toISOString().split('T')[0]}</td>
                   <td>{appointment.time}</td>
-                  <td>{appointment.createdAt}</td>
+                  <td>{new Date(appointment.createdAt).toISOString().split('T')[0]}</td>
                   <td>
                     <button
                       className="sa-details"

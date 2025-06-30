@@ -128,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <td style='padding: 8px 0;'>{$communionData['firstName']} {$communionData['middleName']} {$communionData['lastName']}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Communion Date:</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Date:</td>
                                             <td style='padding: 8px 0;'>{$formattedDate}</td>
                                         </tr>
                                         <tr>

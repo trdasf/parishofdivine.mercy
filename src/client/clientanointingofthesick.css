@@ -533,7 +533,7 @@
   gap: 100px;
   justify-content: center;
   margin-top: 50px;
-  margin-bottom: 70px;
+  margin-bottom: 200px;
 }
 
 .aos-submit-btn, .aos-cancel-btn {
@@ -704,4 +704,681 @@
   0% { opacity: 0.6; }
   50% { opacity: 1; }
   100% { opacity: 0.6; }
+}
+
+/* Validation styles */
+.aos-error-message {
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-family: Roboto;
+}
+
+.input-error {
+  border: 1px solid #f44336 !important;
+  background-color: #ffebee !important;
+}
+
+.required {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .aos-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .aos-title {
+    font-size: 32px;
+  }
+  
+  .aos-field-date input,
+  .aos-field-time input,
+  .aos-field-date select,
+  .aos-field-time select {
+    width: 180px;
+  }
+  
+  .aos-field-ga input,
+  .aos-field-ga select {
+    width: 90px;
+  }
+  
+  .aos-field-pob input {
+    width: 240px;
+  }
+  
+  .aos-button-container {
+    gap: 80px;
+    margin-bottom: 200px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .aos-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .aos-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+  
+  .aos-header {
+    margin-bottom: 20px;
+  }
+  
+  .aos-back-button {
+    font-size: 16px;
+  }
+  
+  .aos-back-icon {
+    font-size: 20px;
+  }
+  
+  /* Make date/time row responsive */
+  .aos-row-date {
+    flex-direction: row;
+    gap: 30px;
+    align-items: stretch;
+  }
+  
+  .aos-field-date,
+  .aos-field-time {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .aos-field-date label,
+  .aos-field-time label {
+    min-width: auto;
+    white-space: nowrap;
+    margin-top: 0;
+    font-size: 13px;
+  }
+  
+  .aos-field-date input,
+  .aos-field-time input,
+  .aos-field-date select,
+  .aos-field-time select {
+    width: 140px;
+    font-size: 14px;
+  }
+  
+  /* Make main form rows responsive */
+  .aos-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .aos-field-ga input,
+  .aos-field-ga select {
+    width: 100%;
+  }
+  
+  .aos-field-pob input {
+    width: 100%;
+  }
+  
+  /* Address row responsive */
+  .aos-address-row {
+    gap: 15px;
+  }
+  
+  /* Button container responsive */
+  .aos-button-container {
+    gap: 50px;
+    margin-top: 40px;
+  }
+  
+  .aos-submit-btn,
+  .aos-cancel-btn {
+    width: 100px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal responsive */
+  .aos-modal {
+    width: 90%;
+    max-width: 350px;
+    margin: 20px;
+  }
+  
+  .aos-modal-buttons {
+    gap: 20px;
+  }
+  
+  .aos-yes-btn,
+  .aos-modal-no-btn {
+    width: 100px;
+    font-size: 14px;
+  }
+  
+  /* Requirements section responsive */
+  .aos-section-header {
+    margin-left: 10px;
+    font-size: 16px;
+  }
+  
+  .aos-checkbox-list {
+    margin-left: 30px;
+  }
+  
+  .aos-info-list {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  
+  .aos-sub-title {
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  
+  .aos-section {
+    margin-top: 30px;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .aos-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .aos-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+  
+  .aos-row-date {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .aos-field-date,
+  .aos-field-time {
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .aos-field-date label,
+  .aos-field-time label {
+    font-size: 13px;
+    text-align: left;
+  }
+  
+  .aos-field-date input,
+  .aos-field-time input,
+  .aos-field-date select,
+  .aos-field-time select {
+    font-size: 12px;
+    width: 180px;
+  }
+  
+  .aos-header {
+    margin-bottom: 15px;
+  }
+  
+  .aos-back-button {
+    font-size: 14px;
+  }
+  
+  .aos-back-icon {
+    font-size: 18px;
+  }
+  
+  .aos-sub-title {
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+  }
+  
+  .aos-section {
+    margin-top: 30px;
+  }
+  
+  /* Smaller form fields */
+  .aos-field label {
+    font-size: 12px;
+  }
+  
+  .aos-field input,
+  .aos-field select,
+  .aos-field textarea {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .aos-field-wide label {
+    font-size: 12px;
+  }
+  
+  .aos-field-wide textarea {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .aos-field-ga label {
+    font-size: 12px;
+  }
+  
+  .aos-field-ga input,
+  .aos-field-ga select {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .aos-field-pob label {
+    font-size: 12px;
+  }
+  
+  .aos-field-pob input {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Date inputs */
+  .date-input {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  /* Checkbox containers */
+  .aos-checkbox-container {
+    margin: 8px 0;
+  }
+  
+  .aos-checkbox-container label {
+    font-size: 12px;
+  }
+  
+  /* Requirements section */
+  .aos-section-header {
+    font-size: 15px;
+    margin-left: 5px;
+  }
+  
+  .aos-checkbox-list {
+    margin-left: 20px;
+  }
+  
+  .aos-checkbox-list label {
+    font-size: 14px;
+  }
+  
+  .aos-info-item p {
+    font-size: 0.9rem;
+  }
+  
+  /* Button adjustments */
+  .aos-button-container {
+    gap: 30px;
+    margin-top: 30px;
+  }
+  
+  .aos-submit-btn,
+  .aos-cancel-btn {
+    width: 90px;
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+  
+  /* Modal adjustments */
+  .aos-modal {
+    width: 95%;
+    max-width: 320px;
+    margin: 15px;
+  }
+  
+  .aos-modal h2 {
+    font-size: 18px;
+  }
+  
+  .aos-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .aos-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .aos-yes-btn,
+  .aos-modal-no-btn {
+    width: 80px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown adjustments */
+  .aos-location-dropdown {
+    max-height: 150px;
+  }
+  
+  .aos-location-dropdown-item {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  /* Status dropdown */
+  .aos-status-dropdown {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .aos-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .aos-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    letter-spacing: 0.3px;
+  }
+  
+  .aos-header {
+    margin-bottom: 12px;
+  }
+  
+  .aos-back-button {
+    font-size: 13px;
+  }
+  
+  .aos-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .aos-sub-title {
+    font-size: 15px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+  }
+  
+  .aos-section {
+    margin-top: 25px;
+  }
+  
+  /* Even smaller form elements */
+  .aos-field label,
+  .aos-field-ga label,
+  .aos-field-wide label,
+  .aos-field-pob label {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .aos-field input,
+  .aos-field select,
+  .aos-field textarea,
+  .aos-field-ga input,
+  .aos-field-ga select,
+  .aos-field-wide textarea,
+  .aos-field-pob input {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  .aos-field-date label,
+  .aos-field-time label {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .aos-field-date input,
+  .aos-field-time input,
+  .aos-field-date select,
+  .aos-field-time select {
+    width: 150px;
+    font-size: 12px;
+  }
+  
+  .date-input {
+    padding: 5px;
+    font-size: 13px;
+  }
+  
+  /* Checkbox containers */
+  .aos-checkbox-container {
+    margin: 6px 0;
+  }
+  
+  .aos-checkbox-container label {
+    font-size: 11px;
+  }
+  
+  /* Requirements section */
+  .aos-section-header {
+    font-size: 14px;
+    margin-left: 0;
+    margin-top: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .aos-checkbox-list {
+    margin-left: 15px;
+    gap: 6px;
+  }
+  
+  .aos-checkbox-list label {
+    font-size: 13px;
+  }
+  
+  .aos-info-list {
+    margin-left: 0.25rem;
+    padding-left: 0.25rem;
+  }
+  
+  .aos-info-item {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .aos-info-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Buttons */
+  .aos-button-container {
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+  }
+  
+  .aos-submit-btn,
+  .aos-cancel-btn {
+    width: 120px;
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* Modal for mobile */
+  .aos-modal {
+    width: 95%;
+    max-width: 300px;
+    margin: 10px;
+  }
+  
+  .aos-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .aos-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .aos-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .aos-yes-btn,
+  .aos-modal-no-btn {
+    width: 100px;
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  /* Dropdown improvements for mobile */
+  .aos-location-dropdown {
+    max-height: 120px;
+    font-size: 13px;
+  }
+  
+  .aos-location-dropdown-item {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  /* Status dropdown */
+  .aos-status-dropdown {
+    min-width: 90px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  
+  /* Loading spinner adjustment */
+  .client-anointing-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+  
+  /* Error input adjustments */
+  .input-error {
+    border-width: 1px !important;
+  }
+  
+  .aos-error-message {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .aos-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .aos-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .aos-sub-title {
+    font-size: 14px;
+  }
+  
+  .aos-field label,
+  .aos-field-ga label,
+  .aos-field-wide label,
+  .aos-field-pob label {
+    font-size: 10px;
+  }
+  
+  .aos-field input,
+  .aos-field select,
+  .aos-field textarea,
+  .aos-field-ga input,
+  .aos-field-ga select,
+  .aos-field-wide textarea,
+  .aos-field-pob input {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .aos-field-date label,
+  .aos-field-time label {
+    font-size: 11px;
+  }
+
+  .aos-field-date input,
+  .aos-field-time input,
+  .aos-field-date select,
+  .aos-field-time select {
+    width: 130px;
+    font-size: 11px;
+  }
+  
+  .aos-checkbox-container label {
+    font-size: 10px;
+  }
+  
+  .aos-section-header {
+    font-size: 13px;
+  }
+  
+  .aos-checkbox-list label {
+    font-size: 12px;
+  }
+  
+  .aos-info-item p {
+    font-size: 0.8rem;
+  }
+  
+  .aos-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .aos-modal h2 {
+    font-size: 15px;
+  }
+  
+  .aos-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .aos-location-dropdown-item {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .aos-submit-btn,
+  .aos-cancel-btn {
+    width: 100px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+  .aos-error-message {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
 }

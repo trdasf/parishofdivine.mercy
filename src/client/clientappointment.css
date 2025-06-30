@@ -356,3 +356,413 @@
   color: #666;
   font-style: italic;
 }
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Small Laptop (1024px - 1279px) */
+@media screen and (max-width: 1280px) {
+  .appointment-container-ca {
+    padding: 15px 30px;
+  }
+  
+  .title-ca {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+  
+  .search-bar-ca {
+    width: 450px;
+  }
+  
+  .search-bar-ca input {
+    font-size: 16px;
+    padding: 8px 35px 8px 10px;
+  }
+  
+  .filter-select-ca {
+    font-size: 16px;
+    padding: 8px 12px;
+    width: 180px;
+  }
+  
+  .pdf-btn-ca {
+    padding: 8px 12px;
+    font-size: 14px;
+    width: 90px;
+  }
+  
+  .appointment-table-ca th {
+    font-size: 13px;
+    padding: 8px;
+  }
+  
+  .appointment-table-ca td {
+    font-size: 12px;
+    padding: 8px;
+  }
+  
+  .sacrament-modal-ca {
+    width: 500px;
+    padding: 20px;
+  }
+  
+  .sacrament-modal-header-ca h2 {
+    font-size: 20px;
+  }
+  
+  .sacrament-options-grid {
+    gap: 30px;
+    padding: 20px;
+  }
+  
+  .sacrament-option-btn-ca {
+    font-size: 14px;
+    padding: 12px 8px;
+  }
+}
+
+/* Tablet (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .appointment-container-ca {
+    padding: 10px 20px;
+  }
+  
+  .title-ca {
+    font-size: 25px;
+    margin-bottom: 20px;
+  }
+  
+  .appointment-actions-ca {
+    gap: 15px;
+    margin: 15px 0;
+  }
+  
+  .search-bar-ca {
+    width: 350px;
+  }
+  
+  .search-bar-ca input {
+    font-size: 14px;
+    padding: 8px 35px 8px 8px;
+  }
+  
+  .filter-pdf-container-ca {
+    gap: 8px;
+  }
+  
+  .filter-select-ca {
+    font-size: 14px;
+    padding: 8px 10px;
+    width: 160px;
+  }
+  
+  .pdf-btn-ca {
+    padding: 8px 10px;
+    font-size: 14px;
+    width: 80px;
+  }
+  
+  .appointment-table-ca th {
+    font-size: 12px;
+    padding: 6px;
+  }
+  
+  .appointment-table-ca td {
+    font-size: 11px;
+    padding: 6px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .ca-details {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  .sacrament-modal-ca {
+    width: 70%;
+    padding: 20px;
+  }
+  
+  .sacrament-modal-header-ca h2 {
+    font-size: 18px;
+  }
+  
+  .sacrament-options-grid {
+    gap: 20px;
+    padding: 15px;
+  }
+  
+  .sacrament-option-btn-ca {
+    font-size: 13px;
+    padding: 12px 6px;
+  }
+}
+
+/* Mobile Portrait (576px - 767px) */
+@media screen and (max-width: 767px) {
+  .appointment-container-ca {
+    padding: 8px 15px;
+  }
+  
+  .title-ca {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  
+  .search-bar-ca {
+    width: 100%;
+  }
+  
+  .search-bar-ca input {
+    font-size: 14px;
+    padding: 6px 35px 6px 8px;
+  }
+  
+  .filter-pdf-container-ca {
+    gap: 5px;
+  }
+  
+  .filter-select-ca {
+    font-size: 12px;
+    padding: 6px 8px;
+    width: 140px;
+  }
+  
+  .pdf-btn-ca {
+    padding: 6px 8px;
+    font-size: 12px;
+    width: 70px;
+  }
+  
+  .appointment-table-ca {
+    font-size: 10px;
+  }
+  
+  .appointment-table-ca th,
+  .appointment-table-ca td {
+    padding: 8px;
+    font-size: 10px;
+  }
+  
+  .appointment-table-ca td {
+    max-width: 80px;
+  }
+  
+  .ca-details {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  
+  .sacrament-modal-ca {
+    width: 85%;
+    padding: 15px;
+    margin: 10px;
+  }
+  
+  .sacrament-modal-header-ca h2 {
+    font-size: 16px;
+  }
+  
+  .sacrament-options-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .sacrament-option-btn-ca {
+    font-size: 12px;
+    padding: 12px 8px;
+  }
+  
+  .sacrament-options-grid button:last-child:nth-child(odd) {
+    grid-column: 1;
+    width: 100%;
+  }
+}
+
+/* Small Mobile (375px - 575px) */
+@media screen and (max-width: 575px) {
+  .appointment-container-ca {
+    padding: 5px 10px;
+  }
+  
+  .title-ca {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .search-bar-ca input {
+    font-size: 12px;
+    padding: 5px 30px 5px 6px;
+  }
+  
+  .search-icon-ca {
+    font-size: 12px;
+    right: 8px;
+  }
+  
+  .filter-pdf-container-ca {
+    gap: 3px;
+  }
+  
+  .filter-select-ca {
+    font-size: 10px;
+    padding: 5px 6px;
+    width: 120px;
+  }
+  
+  .pdf-btn-ca {
+    font-size: 10px;
+    padding: 5px 6px;
+    width: 60px;
+  }
+  
+  .appointment-table-ca {
+    font-size: 9px;
+  }
+  
+  .appointment-table-ca th,
+  .appointment-table-ca td {
+    padding: 8px;
+    font-size: 8px;
+    white-space: nowrap;
+  }
+  
+  .appointment-table-ca td {
+    max-width: 60px;
+  }
+  
+  .ca-details {
+    font-size: 8px;
+    padding: 1px 2px;
+  }
+  
+  .sacrament-modal-ca {
+    width: 90%;
+    padding: 12px;
+  }
+  
+  .sacrament-modal-header-ca h2 {
+    font-size: 14px;
+  }
+  
+  .sacrament-options-grid {
+    gap: 10px;
+    padding: 8px;
+  }
+  
+  .sacrament-option-btn-ca {
+    font-size: 11px;
+    padding: 10px 6px;
+  }
+}
+
+/* Very Small Mobile (320px - 374px) */
+@media screen and (max-width: 374px) {
+  .appointment-container-ca {
+    padding: 5px 8px;
+  }
+  
+  .title-ca {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .search-bar-ca input {
+    font-size: 11px;
+    padding: 4px 25px 4px 5px;
+  }
+  
+  .search-icon-ca {
+    font-size: 10px;
+    right: 6px;
+  }
+  
+  .filter-pdf-container-ca {
+    gap: 2px;
+  }
+  
+  .filter-select-ca {
+    font-size: 9px;
+    padding: 4px 5px;
+    width: 100px;
+  }
+  
+  .pdf-btn-ca {
+    font-size: 9px;
+    padding: 4px 5px;
+    width: 50px;
+  }
+  
+  .appointment-table-ca {
+    font-size: 8px;
+  }
+  
+  .appointment-table-ca th,
+  .appointment-table-ca td {
+    padding: 8px;
+    font-size: 7px;
+  }
+  
+  .appointment-table-ca td {
+    max-width: 50px;
+  }
+  
+  .ca-details {
+    font-size: 7px;
+    padding: 1px;
+  }
+  
+  .sacrament-modal-ca {
+    width: 95%;
+    padding: 10px;
+  }
+  
+  .sacrament-modal-header-ca h2 {
+    font-size: 12px;
+  }
+  
+  .close-modal-btn-ca {
+    font-size: 16px;
+  }
+  
+  .sacrament-options-grid {
+    gap: 8px;
+    padding: 5px;
+  }
+  
+  .sacrament-option-btn-ca {
+    font-size: 10px;
+    padding: 8px 4px;
+  }
+}
+
+/* Add overflow handling for mobile tables */
+@media screen and (max-width: 767px) {
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-container::-webkit-scrollbar {
+    height: 3px;
+  }
+  
+  .table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .table-container::-webkit-scrollbar-thumb {
+    background: #dbdbdb;
+    border-radius: 3px;
+  }
+  
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}

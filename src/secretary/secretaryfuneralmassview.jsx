@@ -250,96 +250,124 @@ const SecretaryFuneralMassView = () => {
     setShowConfirmModal(true);
   };
 
-  /**
-   * Handles the confirmation of the approval process
-   * Saves appointment details, updates status, and sends notification email
-   */
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+ /**
+ * Handles the confirmation of the approval process
+ * Saves appointment details, updates status, and sends notification email
+ */
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    // Step 1: First save the appointment data to approved_appointments table
+    // Using the selected date/time from the schedule selection section
+    const appointmentData = {
+      sacramentID: funeralData.funeralID,
+      sacrament_type: "Funeral",
+      date: selectedDate, // This is the date selected in the Schedule Selection section
+      time: selectedTime, // This is the time selected in the Schedule Selection section
+      priest: selectedPriest // This is the priest entered in the Schedule Selection section
+    };
     
-    try {
-      // Step 1: First save the appointment data to approved_appointments table
-      // Using the selected date/time from the schedule selection section
-      const appointmentData = {
-        sacramentID: funeralData.funeralID,
-        sacrament_type: "Funeral",
-        date: selectedDate, // This is the date selected in the Schedule Selection section
-        time: selectedTime, // This is the time selected in the Schedule Selection section
-        priest: selectedPriest // This is the priest entered in the Schedule Selection section
-      };
-      
-      console.log("Saving appointment data:", appointmentData);
-      
-      const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(appointmentData),
-      });
-      
-      if (!appointmentResponse.ok) {
-        throw new Error(`Server responded with status: ${appointmentResponse.status}`);
-      }
-      
-      const appointmentResult = await appointmentResponse.json();
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      console.log("Appointment saved successfully:", appointmentResult);
-      
-      // Step 2: Now update the funeral status
-      const response = await fetch(`${API_BASE_URL}/update_funeral_status.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          funeralID: funeralData.funeralID,
-          status: "Approved",
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest,
-          requesterEmail: funeralData.requester.email,
-          requesterName: `${funeralData.requester.firstName} ${funeralData.requester.lastName}`,
-          deceasedName: `${funeralData.deceased.firstName} ${funeralData.deceased.lastName}`,
-          relationship: funeralData.requester.relationship
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        setStatus("Approved");
-        
-        // Update approvedData state with the newly approved details
-        setApprovedData({
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest
-        });
-        
-        // Show success message for a short time
-        setSuccessMessage("Funeral mass application has been approved successfully!");
-        setShowSuccessModal(true);
-        
-        // After a short delay, navigate to the appointments page
-        setTimeout(() => {
-          setShowSuccessModal(false);
-          navigate("/secretary-appointment"); // Navigate to secretary-appointment page
-        }, 1500);  // 1.5 second delay to show the success message
-        
-      } else {
-        alert("Failed to approve funeral mass application: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error approving funeral mass application:", error);
-      alert("An error occurred while approving the funeral mass application: " + error.message);
+    console.log("Saving appointment data:", appointmentData);
+    
+    const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(appointmentData),
+    });
+    
+    if (!appointmentResponse.ok) {
+      throw new Error(`Server responded with status: ${appointmentResponse.status}`);
     }
-  };
+    
+    const appointmentResult = await appointmentResponse.json();
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    console.log("Appointment saved successfully:", appointmentResult);
+    
+    // Step 2: Now update the funeral status
+    const response = await fetch(`${API_BASE_URL}/update_funeral_status.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        funeralID: funeralData.funeralID,
+        status: "Approved",
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest,
+        requesterEmail: funeralData.requester.email,
+        requesterName: `${funeralData.requester.firstName} ${funeralData.requester.lastName}`,
+        deceasedName: `${funeralData.deceased.firstName} ${funeralData.deceased.lastName}`,
+        relationship: funeralData.requester.relationship
+      }),
+    });
 
+    const result = await response.json();
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_funeral_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            funeralID: funeralData.funeralID,
+            date: selectedDate,
+            time: selectedTime,
+            priest: selectedPriest
+          }),
+        });
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
+      }
+      // END EMAIL SENDING
+      
+      setStatus("Approved");
+      
+      // Update approvedData state with the newly approved details
+      setApprovedData({
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest
+      });
+      
+      // Show success message for a short time
+      setSuccessMessage("Funeral mass application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+      
+      // After a short delay, navigate to the appointments page
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate("/secretary-appointment"); // Navigate to secretary-appointment page
+      }, 1500);  // 1.5 second delay to show the success message
+      
+    } else {
+      alert("Failed to approve funeral mass application: " + result.message);
+    }
+  } catch (error) {
+    console.error("Error approving funeral mass application:", error);
+    alert("An error occurred while approving the funeral mass application: " + error.message);
+  }
+};
   // Handle cancel action
   const handleCancel = () => {
     // Reset the status to previous value or redirect

@@ -24,7 +24,8 @@ if ($conn->connect_error) {
 try {
     $conn->begin_transaction();
 
-    $clientID = $_POST['clientID'];
+    // Set clientID to null if not provided or empty
+    $clientID = isset($_POST['clientID']) && !empty($_POST['clientID']) ? $_POST['clientID'] : null;
     $applicationData = json_decode($_POST['applicationData'], true);
     $addressData = json_decode($_POST['addressData'], true);
     $fatherData = json_decode($_POST['fatherData'], true);
@@ -52,12 +53,10 @@ try {
     $gender = strval($applicationData['gender']);
     
     // Debug log
+    error_log("ClientID: " . ($clientID ?? 'NULL'));
     error_log("Date of Birth: " . $dateOfBirth);
     error_log("Date of Baptism: " . $dateOfBaptism);
     error_log("Gender value: " . $gender);
-    error_log("Gender type: " . gettype($gender));
-    error_log("Gender value from source: " . $applicationData['gender']);
-    error_log("Gender source type: " . gettype($applicationData['gender']));
 
     // Insert into communion_application
     $stmt = $conn->prepare("INSERT INTO communion_application (clientID, date, time, first_name, middle_name, last_name, gender, age, dateOfBirth, dateOfBaptism, churchOfBaptism, placeOfBirth, status) 
@@ -146,3 +145,4 @@ try {
 }
 $conn->close();
 echo json_encode($response);
+?>

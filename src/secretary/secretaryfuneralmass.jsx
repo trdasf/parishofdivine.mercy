@@ -98,15 +98,42 @@ const SecretaryFuneralMass = () => {
     document.body.removeChild(link);
   };
 
-  // Filter funeral mass data based on search term
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Filter funeral mass data based on search term with flexible matching
   const filteredFuneralMassData = funeralMassData.filter(funeral => {
-    const searchString = searchTerm.toLowerCase();
-    return (
-      funeral.firstName.toLowerCase().includes(searchString) ||
-      funeral.lastName.toLowerCase().includes(searchString) ||
-      funeral.date.toString().includes(searchString) ||
-      funeral.status.toLowerCase().includes(searchString)
-    );
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    const fullName = `${funeral.firstName} ${funeral.lastName}`.toLowerCase();
+    const formattedDate = new Date(funeral.date).toISOString().split('T')[0];
+    const formattedCreatedAt = new Date(funeral.createdAt).toISOString().split('T')[0];
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      return (
+        funeral.firstName?.toLowerCase().startsWith(searchValue) ||
+        funeral.lastName?.toLowerCase().startsWith(searchValue) ||
+        fullName.startsWith(searchValue) ||
+        formattedDate.startsWith(searchValue) ||
+        formattedCreatedAt.startsWith(searchValue) ||
+        funeral.status?.toLowerCase().startsWith(searchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      return (
+        funeral.firstName?.toLowerCase().includes(searchValue) ||
+        funeral.lastName?.toLowerCase().includes(searchValue) ||
+        fullName.includes(searchValue) ||
+        formattedDate.includes(searchValue) ||
+        formattedCreatedAt.includes(searchValue) ||
+        funeral.status?.toLowerCase().includes(searchValue)
+      );
+    }
   });
 
   if (loading) {
@@ -126,7 +153,7 @@ const SecretaryFuneralMass = () => {
             type="text" 
             placeholder="Search" 
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearch}
           />
           <FontAwesomeIcon icon={faSearch} className="search-icon-sfm" />
         </div>
@@ -164,9 +191,9 @@ const SecretaryFuneralMass = () => {
                   <tr key={funeral.id}>
                     <td>{funeral.id}</td>
                     <td>{`${funeral.firstName} ${funeral.lastName}`}</td>
-                    <td>{new Date(funeral.date).toLocaleDateString()}</td>
+                    <td>{new Date(funeral.date).toISOString().split('T')[0]}</td>
                     <td>{funeral.time}</td>
-                    <td>{new Date(funeral.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(funeral.createdAt).toISOString().split('T')[0]}</td>
                     <td>
                       <button
                         className="sfm-details"

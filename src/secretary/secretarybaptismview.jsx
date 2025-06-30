@@ -231,82 +231,109 @@ const SecretaryBaptismView = () => {
   };
 
   // Function to proceed with approval after confirmation
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+// Function to proceed with approval after confirmation
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    // Insert into approved_appointments table (removed clientID)
+    const appointmentResponse = await fetch("https://parishofdivinemercy.com/backend/save_approved_appointment.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sacramentID: baptismData.baptismID,
+        sacrament_type: "Baptism",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      }),
+    });
     
-    try {
-      // Insert into approved_appointments table (removed clientID)
-      const appointmentResponse = await fetch("https://parishofdivinemercy.com/backend/save_approved_appointment.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sacramentID: baptismData.baptismID,
-          sacrament_type: "Baptism",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        }),
-      });
-      
-      const appointmentResult = await appointmentResponse.json();
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      // Then update the baptism status
-      const response = await fetch("https://parishofdivinemercy.com/backend/update_baptism_status.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          baptismID: baptismData.baptismID,
-          status: "Approved",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        }),
-      });
+    const appointmentResult = await appointmentResponse.json();
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    // Then update the baptism status
+    const response = await fetch("https://parishofdivinemercy.com/backend/update_baptism_status.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        baptismID: baptismData.baptismID,
+        status: "Approved",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      }),
+    });
 
-      // First check if the response is valid JSON
-      let result;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        result = await response.json();
-      } else {
-        // If not JSON, get the text and show it as an error
-        const text = await response.text();
-        console.error("Non-JSON response:", text);
-        throw new Error("Invalid response from server. Please check server logs.");
-      }
-      
-      if (result.success) {
-        setStatus("Approved");
-        setSuccessMessage("Baptism application has been approved successfully! An email notification has been sent to the client.");
-        setShowSuccessModal(true);
-        
-        // Update the baptismData to reflect the changes
-        setBaptismData({
-          ...baptismData,
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
+    // First check if the response is valid JSON
+    let result;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      result = await response.json();
+    } else {
+      // If not JSON, get the text and show it as an error
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Invalid response from server. Please check server logs.");
+    }
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch("https://parishofdivinemercy.com/backend/approved_baptism_email.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            baptismID: baptismData.baptismID
+          }),
         });
-      } else {
-        // Show error message from server or a default one
-        const errorMessage = result.message || "Failed to approve baptism application";
-        setSuccessMessage(errorMessage);
-        setShowSuccessModal(true);
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
       }
-    } catch (error) {
-      console.error("Error approving baptism application:", error);
-      setSuccessMessage("An error occurred while approving the baptism application: " + error.message);
+      // END EMAIL SENDING
+      
+      setStatus("Approved");
+      setSuccessMessage("Baptism application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+      
+      // Update the baptismData to reflect the changes
+      setBaptismData({
+        ...baptismData,
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      });
+    } else {
+      // Show error message from server or a default one
+      const errorMessage = result.message || "Failed to approve baptism application";
+      setSuccessMessage(errorMessage);
       setShowSuccessModal(true);
     }
-  };
+  } catch (error) {
+    console.error("Error approving baptism application:", error);
+    setSuccessMessage("An error occurred while approving the baptism application: " + error.message);
+    setShowSuccessModal(true);
+  }
+};
 
   // Handle cancel action
   const handleCancel = () => {
@@ -651,13 +678,6 @@ const SecretaryBaptismView = () => {
               >
                 {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
               </button>
-              <button 
-                className="secretary-certificate-cancel-btn"
-                onClick={() => setShowCertificateModal(false)}
-                disabled={isDownloading}
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>
@@ -734,7 +754,7 @@ const SecretaryBaptismView = () => {
             <p>Date: {appointmentDate}</p>
             <p>Time: {appointmentTime}</p>
             <p>Priest: {selectedPriest}</p>
-            <p>An email notification will be sent to the client.</p>
+            
             <div className="secretary-confirm-buttons">
               <button 
                 className="secretary-confirm-yes-btn"
@@ -1129,7 +1149,7 @@ const SecretaryBaptismView = () => {
         <div className="secretary-action-buttons">
           {status !== "Approved" && (
             <button 
-              className="secretary-submit-button"
+              className="secretary-bap-submit-button"
               onClick={handleSubmit}
             >
               Approve

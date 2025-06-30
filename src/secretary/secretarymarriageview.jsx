@@ -318,104 +318,133 @@ const SecretaryMarriageView = () => {
     setShowConfirmModal(true);
   };
 
-  /**
-   * Handles the confirmation of the approval process
-   * Saves appointment details, updates status, and sends notification email
-   */
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+ /**
+ * Handles the confirmation of the approval process
+ * Saves appointment details, updates status, and sends notification email
+ */
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    // 1. Save to approved_appointments table
+    const appointmentData = {
+      sacramentID: marriageData.marriageID,
+      sacrament_type: "Marriage",
+      date: appointmentDate,
+      time: appointmentTime,
+      priest: selectedPriest,
+      clientID: marriageData.clientID // Include clientID if available
+    };
     
-    try {
-      // 1. Save to approved_appointments table
-      const appointmentData = {
-        sacramentID: marriageData.marriageID,
-        sacrament_type: "Marriage",
-        date: appointmentDate,
-        time: appointmentTime,
-        priest: selectedPriest,
-        clientID: marriageData.clientID // Include clientID if available
-      };
-      
-      console.log("Saving appointment data:", appointmentData);
-      
-      const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(appointmentData),
-      });
-      
-      if (!appointmentResponse.ok) {
-        throw new Error(`Server responded with status: ${appointmentResponse.status}`);
-      }
-      
-      const appointmentResult = await appointmentResponse.json();
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      console.log("Appointment saved successfully:", appointmentResult);
-      
-      // 2. Update the marriage application status
-      const updateData = {
-        marriageID: marriageData.marriageID,
-        status: "Approved",
-        date: appointmentDate,
-        time: appointmentTime,
-        priest: selectedPriest,
-        // Include email details for notification
-        groomEmail: marriageData.groom?.email,
-        brideEmail: marriageData.bride?.email,
-        groomName: `${marriageData.groom?.firstName} ${marriageData.groom?.lastName}`,
-        brideName: `${marriageData.bride?.firstName} ${marriageData.bride?.lastName}`,
-        clientID: marriageData.clientID
-      };
-      
-      console.log("Updating marriage status with data:", updateData);
-      
-      const response = await fetch(`${API_BASE_URL}/update_marriage_status.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
+    console.log("Saving appointment data:", appointmentData);
+    
+    const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(appointmentData),
+    });
+    
+    if (!appointmentResponse.ok) {
+      throw new Error(`Server responded with status: ${appointmentResponse.status}`);
+    }
+    
+    const appointmentResult = await appointmentResponse.json();
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    console.log("Appointment saved successfully:", appointmentResult);
+    
+    // 2. Update the marriage application status
+    const updateData = {
+      marriageID: marriageData.marriageID,
+      status: "Approved",
+      date: appointmentDate,
+      time: appointmentTime,
+      priest: selectedPriest,
+      // Include email details for notification
+      groomEmail: marriageData.groom?.email,
+      brideEmail: marriageData.bride?.email,
+      groomName: `${marriageData.groom?.firstName} ${marriageData.groom?.lastName}`,
+      brideName: `${marriageData.bride?.firstName} ${marriageData.bride?.lastName}`,
+      clientID: marriageData.clientID
+    };
+    
+    console.log("Updating marriage status with data:", updateData);
+    
+    const response = await fetch(`${API_BASE_URL}/update_marriage_status.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updateData),
+    });
 
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
 
-      const result = await response.json();
-      
-      console.log("Status update response:", result);
-      
-      if (result.success) {
-        // Update local state to reflect changes
-        setStatus("Approved");
-        setSuccessMessage(result.message || "Marriage application has been approved successfully! An email notification has been sent to the client.");
-        setShowSuccessModal(true);
-        
-        // Update the marriageData to reflect the changes
-        setMarriageData({
-          ...marriageData,
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest,
-          status: "Approved"
+    const result = await response.json();
+    
+    console.log("Status update response:", result);
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_marriage_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            marriageID: marriageData.marriageID,
+            date: appointmentDate,
+            time: appointmentTime,
+            priest: selectedPriest
+          }),
         });
-      } else {
-        const errorMessage = result.message || "Failed to approve marriage application";
-        setSuccessMessage(errorMessage);
-        setShowSuccessModal(true);
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
       }
-    } catch (error) {
-      console.error("Error approving marriage application:", error);
-      setSuccessMessage("An error occurred while approving the marriage application: " + error.message);
+      // END EMAIL SENDING
+      
+      // Update local state to reflect changes
+      setStatus("Approved");
+      setSuccessMessage(result.message || "Marriage application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+      
+      // Update the marriageData to reflect the changes
+      setMarriageData({
+        ...marriageData,
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest,
+        status: "Approved"
+      });
+    } else {
+      const errorMessage = result.message || "Failed to approve marriage application";
+      setSuccessMessage(errorMessage);
       setShowSuccessModal(true);
     }
-  };
+  } catch (error) {
+    console.error("Error approving marriage application:", error);
+    setSuccessMessage("An error occurred while approving the marriage application: " + error.message);
+    setShowSuccessModal(true);
+  }
+};
 
   // Handle date, time and priest changes
   const handleDateChange = (value) => {
@@ -702,7 +731,7 @@ const SecretaryMarriageView = () => {
             <p>Date: {appointmentDate}</p>
             <p>Time: {appointmentTime}</p>
             <p>Priest: {selectedPriest}</p>
-            <p>An email notification will be sent to the client.</p>
+           
             <div className="secretary-confirm-buttons">
               <button 
                 className="secretary-confirm-yes-btn"
@@ -1218,13 +1247,6 @@ const SecretaryMarriageView = () => {
                   >
                     {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
                   </button>
-                  <button 
-                    className="secretary-marriage-certificate-cancel-btn"
-                    onClick={() => setShowCertificateModal(false)}
-                    disabled={isDownloading}
-                  >
-                    Cancel
-                  </button>
                 </div>
               </div>
             </div>
@@ -1260,6 +1282,8 @@ const SecretaryMarriageView = () => {
       
       {/* Marriage Data Section */}
       <div className="secretary-marriage-view-data">
+        <div className="secretary-anointing-view-info-card">
+      <h3 className="secretary-funeral-view-sub-title">Appointment Request Details</h3>
         <div className="secretary-marriage-view-row-date">
           <div className="secretary-marriage-view-field-date">
             <label>Date of Appointment:</label>
@@ -1270,6 +1294,7 @@ const SecretaryMarriageView = () => {
             <label>Time of Appointment:</label>
             {renderReadOnlyField(marriageData.time)}
           </div>
+        </div>
         </div>
         
         <div className="secretary-marriage-view-bypart">
@@ -1332,8 +1357,6 @@ const SecretaryMarriageView = () => {
                 <label>Municipality:</label>
                 {renderReadOnlyField(marriageData.groom.address.municipality)}
               </div>
-            </div>
-            <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
               <div className="secretary-marriage-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(marriageData.groom.address.province)}
@@ -1399,8 +1422,6 @@ const SecretaryMarriageView = () => {
                 <label>Municipality:</label>
                 {renderReadOnlyField(marriageData.bride.address.municipality)}
               </div>
-            </div>
-            <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
               <div className="secretary-marriage-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(marriageData.bride.address.province)}

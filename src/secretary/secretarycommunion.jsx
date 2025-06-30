@@ -8,7 +8,6 @@ import axios from "axios";
 const SecretaryCommunion = () => {
   const navigate = useNavigate();
   const [communionData, setCommunionData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,7 +41,6 @@ const SecretaryCommunion = () => {
         
         console.log("Formatted data:", formattedData);
         setCommunionData(formattedData);
-        setFilteredData(formattedData);
       } else {
         console.error("API returned error:", response.data.message);
         setError(response.data.message || "Failed to fetch communion data");
@@ -77,37 +75,62 @@ const SecretaryCommunion = () => {
     });
   };
 
-  // Handle search input change
   const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    
-    if (term.trim() === "") {
-      setFilteredData(communionData);
-    } else {
-      const filtered = communionData.filter(item => {
-        return (
-          item.firstName?.toLowerCase().includes(term) ||
-          item.lastName?.toLowerCase().includes(term) ||
-          `${item.firstName} ${item.lastName}`.toLowerCase().includes(term)
-        );
-      });
-      setFilteredData(filtered);
-    }
+    setSearchTerm(e.target.value);
   };
 
-  // Function to format date
+  // Filter communion data based on search term with flexible matching
+  const filteredData = communionData.filter(item => {
+    if (searchTerm.trim() === "") {
+      return true;
+    }
+
+    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
+    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
+    
+    // Normalize both data and search by trimming and replacing multiple spaces
+    const firstName = item.firstName?.toLowerCase().trim() || '';
+    const lastName = item.lastName?.toLowerCase().trim() || '';
+    const fullName = `${firstName} ${lastName}`.replace(/\s+/g, ' ');
+    const status = item.status?.toLowerCase().trim() || '';
+    const formattedDate = new Date(item.date).toISOString().split('T')[0];
+    const formattedCreatedAt = new Date(item.created_at).toISOString().split('T')[0];
+    
+    // Normalize search value by replacing multiple spaces with single space
+    const normalizedSearchValue = searchValue.replace(/\s+/g, ' ');
+    
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      return (
+        firstName.startsWith(normalizedSearchValue) ||
+        lastName.startsWith(normalizedSearchValue) ||
+        fullName.startsWith(normalizedSearchValue) ||
+        formattedDate.startsWith(normalizedSearchValue) ||
+        formattedCreatedAt.startsWith(normalizedSearchValue) ||
+        status.startsWith(normalizedSearchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term
+      return (
+        firstName.includes(normalizedSearchValue) ||
+        lastName.includes(normalizedSearchValue) ||
+        fullName.includes(normalizedSearchValue) ||
+        formattedDate.includes(normalizedSearchValue) ||
+        formattedCreatedAt.includes(normalizedSearchValue) ||
+        status.includes(normalizedSearchValue)
+      );
+    }
+  });
+
+  // Function to format date to YYYY-MM-DD
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     
-    const options = { 
-      year: 'numeric', 
-      month: 'numeric', 
-      day: 'numeric' 
-    };
-    
     try {
-      return new Date(dateString).toLocaleDateString(undefined, options);
+      return new Date(dateString).toISOString().split('T')[0];
     } catch (error) {
       console.error("Error formatting date:", error);
       return dateString;
@@ -184,13 +207,14 @@ const SecretaryCommunion = () => {
               <th>Last Name</th>
               <th>Date</th>
               <th>Time</th>
+              <th>Created At</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan="9" className="no-data-sb">
+                <td colSpan="7" className="no-data-sb">
                   No approved communion applications found. {searchTerm && "Try a different search term."}
                 </td>
               </tr>
@@ -202,12 +226,12 @@ const SecretaryCommunion = () => {
                   <td>{item.lastName}</td>
                   <td>{formatDate(item.date)}</td>
                   <td>{item.time}</td>
+                  <td>{formatDate(item.created_at)}</td>
                   <td>
                     <button
                       className="sc-details"
                       onClick={() => viewCommunionDetails(item.communionID, item.status)}
                     >
-                      <FontAwesomeIcon icon={faEye} style={{ marginRight: "5px" }} />
                       View
                     </button>
                   </td>

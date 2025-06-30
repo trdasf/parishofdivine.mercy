@@ -34,10 +34,11 @@ try {
         throw new Exception("Method not allowed. Expected GET, got " . $_SERVER['REQUEST_METHOD']);
     }
 
-    // Fetch only pending confirmation applications
-    $sql = "SELECT confirmationID, date, time, priest, IFNULL(status, 'pending') as status
+    // Fetch all confirmation applications except cancelled and completed
+    // This matches the funeral mass logic exactly
+    $sql = "SELECT confirmationID, date, time, priest, status 
             FROM confirmation_application 
-            WHERE IFNULL(status, 'pending') = 'pending'";
+            WHERE status != 'cancelled' AND status != 'completed'";
     
     $result = $conn->query($sql);
     
@@ -65,4 +66,4 @@ try {
         "message" => $e->getMessage()
     ]);
 }
-?> 
+?>

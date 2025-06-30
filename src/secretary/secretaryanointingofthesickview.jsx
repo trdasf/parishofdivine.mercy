@@ -244,87 +244,115 @@ const SecretaryAnointingOfTheSickView = () => {
 
   // Function to proceed with approval after confirmation
   const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+  setShowConfirmModal(false);
+  
+  try {
+    console.log(`Approving anointing application with ID: ${anointingData.anointingID}`);
     
-    try {
-      console.log(`Approving anointing application with ID: ${anointingData.anointingID}`);
-      
-      // Step 1: First save the appointment data to approved_appointments table
-      const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sacramentID: anointingData.anointingID,
-          sacrament_type: "Anointing",
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest
-        }),
-      });
-      
-      const appointmentResult = await appointmentResponse.json();
-      console.log("Appointment save result:", appointmentResult);
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      // Step 2: Now update the anointing status
-      const response = await fetch(`${API_BASE_URL}/update_anointing_status.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          anointingID: anointingData.anointingID,
-          status: "Approved",
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest
-        }),
-      });
+    // Step 1: First save the appointment data to approved_appointments table
+    const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sacramentID: anointingData.anointingID,
+        sacrament_type: "Anointing",
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest
+      }),
+    });
+    
+    const appointmentResult = await appointmentResponse.json();
+    console.log("Appointment save result:", appointmentResult);
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    // Step 2: Now update the anointing status
+    const response = await fetch(`${API_BASE_URL}/update_anointing_status.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        anointingID: anointingData.anointingID,
+        status: "Approved",
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest
+      }),
+    });
 
-      // First check if the response is valid JSON
-      let result;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        result = await response.json();
-      } else {
-        // If not JSON, get the text and show it as an error
-        const text = await response.text();
-        console.error("Non-JSON response:", text);
-        throw new Error("Invalid response from server. Please check server logs.");
-      }
-      
-      if (result.success) {
-        setStatus("Approved");
-        
-        // Update local state with the selected values
-        setAnointingData({
-          ...anointingData,
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest,
-          status: "Approved"
+    // First check if the response is valid JSON
+    let result;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      result = await response.json();
+    } else {
+      // If not JSON, get the text and show it as an error
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Invalid response from server. Please check server logs.");
+    }
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_anointing_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            anointingID: anointingData.anointingID,
+            date: selectedDate,
+            time: selectedTime,
+            priest: selectedPriest
+          }),
         });
+
+        const emailResult = await emailResponse.json();
         
-        setSuccessMessage("Anointing application has been approved successfully! An email notification has been sent to the client.");
-        setShowSuccessModal(true);
-      } else {
-        // Show error message from server or a default one
-        const errorMessage = result.message || "Failed to approve anointing application";
-        setSuccessMessage(errorMessage);
-        setShowSuccessModal(true);
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
       }
-    } catch (error) {
-      console.error("Error approving anointing application:", error);
-      setSuccessMessage("An error occurred while approving the anointing application: " + error.message);
+      // END EMAIL SENDING
+      
+      setStatus("Approved");
+      
+      // Update local state with the selected values
+      setAnointingData({
+        ...anointingData,
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest,
+        status: "Approved"
+      });
+      
+      setSuccessMessage("Anointing application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+    } else {
+      // Show error message from server or a default one
+      const errorMessage = result.message || "Failed to approve anointing application";
+      setSuccessMessage(errorMessage);
       setShowSuccessModal(true);
     }
-  };
-
+  } catch (error) {
+    console.error("Error approving anointing application:", error);
+    setSuccessMessage("An error occurred while approving the anointing application: " + error.message);
+    setShowSuccessModal(true);
+  }
+};
   // Handle cancel action
   const handleCancel = () => {
     // Reset the status to previous value or redirect
@@ -601,7 +629,8 @@ const SecretaryAnointingOfTheSickView = () => {
       
       {/* Anointing Data Section */}
       <div className="secretary-anointing-view-data">
-        {/* Date and Time Selection Container */}
+          <div className="secretary-anointing-view-info-card">
+      <h3 className="secretary-funeral-view-sub-title">Appointment Request Details</h3>
         <div className="secretary-anointing-view-row-date">
           <div className="secretary-anointing-view-field-date">
             <label>Date of Appointment:</label>
@@ -612,6 +641,7 @@ const SecretaryAnointingOfTheSickView = () => {
             <label>Time of Appointment:</label>
             {renderReadOnlyField(anointingData.time)}
           </div>
+        </div>
         </div>
 
         {/* Sick Person Information */}
@@ -638,12 +668,12 @@ const SecretaryAnointingOfTheSickView = () => {
                 {renderReadOnlyField(formatDate(anointingData.dateOfBirth))}
               </div>
               <div className="secretary-anointing-view-field">
-                <label>Sex:</label>
-                {renderReadOnlyField(anointingData.sex)}
-              </div>
-              <div className="secretary-anointing-view-field">
                 <label>Age:</label>
                 {renderReadOnlyField(anointingData.age)}
+              </div>
+              <div className="secretary-anointing-view-field">
+                <label>Sex:</label>
+                {renderReadOnlyField(anointingData.sex)}
               </div>
             </div>
             <div className="secretary-anointing-view-row">
@@ -873,10 +903,10 @@ const SecretaryAnointingOfTheSickView = () => {
         </div>
 
         {/* Action Buttons Section */}
-        <div className="secretary-anointing-action-buttons">
+        <div className="secretary-action-buttons">
           {status !== "Approved" && (
             <button 
-              className="secretary-marriage-submit-button"
+              className="secretary-ano-submit-button"
               onClick={handleSubmit}
             >
               Approve

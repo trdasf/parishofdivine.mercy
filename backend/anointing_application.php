@@ -32,7 +32,7 @@ try {
     $conn->begin_transaction();
 
     // Extract data from POST request
-    $clientID = $_POST['clientID'];
+   $clientID = isset($_POST['clientID']) && !empty($_POST['clientID']) ? $_POST['clientID'] : null;
     
     // Get the JSON data from the anointingData field
     $anointingData = json_decode($_POST['anointingData'], true);

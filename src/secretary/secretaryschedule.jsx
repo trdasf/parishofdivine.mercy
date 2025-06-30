@@ -183,8 +183,7 @@ const SecretarySchedule = () => {
     }, 4000);
   };
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
+  const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
@@ -193,15 +192,87 @@ const SecretarySchedule = () => {
     setSacramentTypeFilter(e.target.value);
   };
 
-  // Filter schedules based on search term and filters
+  // Function to format time for searching (handle different time formats)
+  const formatTimeForSearch = (timeString) => {
+    try {
+      if (!timeString) return '';
+      
+      let hours, minutes;
+      
+      if (timeString.includes(':')) {
+        [hours, minutes] = timeString.split(':');
+      } else if (timeString.includes('T')) {
+        const timePart = timeString.split('T')[1];
+        [hours, minutes] = timePart.split(':');
+      } else {
+        return timeString.toLowerCase();
+      }
+      
+      const time = new Date();
+      time.setHours(parseInt(hours));
+      time.setMinutes(parseInt(minutes));
+      
+      const formatted12Hour = time.toLocaleString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }).toLowerCase();
+      
+      const formatted24Hour = `${String(parseInt(hours)).padStart(2, '0')}:${String(parseInt(minutes)).padStart(2, '0')}`;
+      
+      return `${formatted12Hour} ${formatted24Hour}`;
+    } catch (e) {
+      return timeString.toLowerCase();
+    }
+  };
+
+  // Filter schedules based on search term and filters with flexible matching - REAL-TIME
   const filteredSchedules = schedules.filter(schedule => {
-    const sacramentTypeMatch = schedule.sacramentType?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
-    const scheduleCodeMatch = schedule.scheduleCode?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
-    
-    const matchesSearch = searchTerm === "" || sacramentTypeMatch || scheduleCodeMatch;
+    // First apply sacrament type filter
     const matchesSacramentType = sacramentTypeFilter === "" || schedule.sacramentType === sacramentTypeFilter;
     
-    return matchesSearch && matchesSacramentType;
+    // If no search term, show all results that match sacrament filter
+    if (!searchTerm.trim()) {
+      return matchesSacramentType;
+    }
+
+    const searchValue = searchTerm.toLowerCase().trim();
+    const originalSearchValue = searchTerm.toLowerCase();
+    
+    // Normalize both data and search by trimming and replacing multiple spaces
+    const sacramentType = schedule.sacramentType?.toLowerCase().trim() || '';
+    
+    // Format date to YYYY-MM-DD for searching
+    const formattedDate = schedule.date ? new Date(schedule.date).toISOString().split('T')[0] : '';
+    
+    // Format time for searching (both 12-hour and 24-hour formats)
+    const searchableTime = formatTimeForSearch(schedule.time);
+    
+    // Normalize search value by replacing multiple spaces with single space
+    const normalizedSearchValue = searchValue.replace(/\s+/g, ' ');
+    
+    // REAL-TIME SEARCH: Check if search term matches any field immediately
+    // If search ends with space, only match if the trimmed search is a prefix
+    const endsWithSpace = originalSearchValue !== searchValue;
+    
+    let matchesSearch;
+    if (endsWithSpace && searchValue) {
+      // For searches ending with space, check if any field starts with the search term
+      matchesSearch = (
+        sacramentType.startsWith(normalizedSearchValue) ||
+        formattedDate.startsWith(normalizedSearchValue) ||
+        searchableTime.startsWith(normalizedSearchValue)
+      );
+    } else {
+      // Regular search - check if any field contains the search term (REAL-TIME)
+      matchesSearch = (
+        sacramentType.includes(normalizedSearchValue) ||
+        formattedDate.includes(normalizedSearchValue) ||
+        searchableTime.includes(normalizedSearchValue)
+      );
+    }
+    
+    return matchesSacramentType && matchesSearch;
   });
 
   const handleSubmit = async (e) => {
@@ -293,12 +364,11 @@ const SecretarySchedule = () => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
-    });
+    try {
+      return new Date(dateString).toISOString().split('T')[0]; // Return YYYY-MM-DD format
+    } catch (error) {
+      return dateString;
+    }
   };
 
   const formatTime = (timeString) => {
@@ -354,6 +424,14 @@ const SecretarySchedule = () => {
     return true;
   };
 
+  // Dynamic placeholder text based on sacrament filter
+  const getPlaceholderText = () => {
+    if (sacramentTypeFilter) {
+      return `Search date or time of ${sacramentTypeFilter}`;
+    }
+    return "Search by sacrament type, date, or time";
+  };
+
   return (
     <div className="schedule-container-ssc">
       <div className="title-container-ssc">
@@ -361,12 +439,12 @@ const SecretarySchedule = () => {
       </div>
       
       <div className="schedule-actions-ssc">
-        <div className="search-bar-ssc">
+        <div className="search-bar-ssc-ssc">
           <input 
             type="text" 
-            placeholder="Search by sacrament type or schedule code" 
+            placeholder={getPlaceholderText()} 
             value={searchTerm} 
-            onChange={handleSearchChange}
+            onChange={handleSearch}
           />
           <FontAwesomeIcon icon={faSearch} className="search-icon-ssc" />
         </div>
@@ -432,9 +510,6 @@ const SecretarySchedule = () => {
           <div className="schedule-modal-ssc">
             <div className="schedule-modal-header-ssc">
               <h2>{isEditing ? 'Edit Schedule' : 'Add New Schedule'}</h2>
-              <button className="close-modal-btn-ssc" onClick={() => toggleModal()}>
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
             </div>
             <div>
               <hr className="custom-hr-ssc"/>
@@ -478,9 +553,6 @@ const SecretarySchedule = () => {
                     defaultValue={currentSchedule?.date ? currentSchedule.date.split('T')[0] : ''}
                   />
                 </div>
-              </div>
-
-              <div className="form-row-ssc">
                 <div className="form-group-ssc">
                   <label>Time</label>
                   <input 

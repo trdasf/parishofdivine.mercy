@@ -33,6 +33,13 @@ const Blessing = () => {
     purpose: "",
     notes: "",
   });
+  
+  // Add state for birth location components
+  const [birthFields, setBirthFields] = useState({
+    barangay: '',
+    municipality: '',
+    province: ''
+  });
 
   // State to track modals and loading
   const [showModal, setShowModal] = useState(false);
@@ -54,7 +61,9 @@ const Blessing = () => {
     barangay: [],
     municipality: [],
     province: [],
-    placeOfBirth: []
+    birthBarangay: [],
+    birthMunicipality: [],
+    birthProvince: []
   });
 
   // Add states for schedules
@@ -166,60 +175,289 @@ const Blessing = () => {
   }, [formData.preferredDate, schedules]);
 
   // Enhanced filter functions to consider the other fields
-  const filterBarangays = (input, municipality = null, province = null) => {
-    const inputLower = input.toLowerCase();
-    let filtered = locationData;
-
-    if (municipality && municipality.trim() !== '') {
-      filtered = filtered.filter(location => location.municipality === municipality);
+ const filterBarangays = (input, municipality = null, province = null) => {
+  // If we have municipality and/or province context, show ALL related barangays
+  if (municipality && municipality.trim() !== '') {
+    const filtered = locationData.filter(location => location.municipality === municipality);
+    const allBarangays = [...new Set(filtered.map(loc => loc.barangay))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allBarangays.filter(barangay => barangay.toLowerCase().includes(inputLower));
     }
     
-    if (province && province.trim() !== '') {
-      filtered = filtered.filter(location => location.province === province);
+    // No input, return all barangays for this municipality
+    return allBarangays;
+  }
+  
+  if (province && province.trim() !== '') {
+    const filtered = locationData.filter(location => location.province === province);
+    const allBarangays = [...new Set(filtered.map(loc => loc.barangay))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allBarangays.filter(barangay => barangay.toLowerCase().includes(inputLower));
     }
     
-    return [...new Set(filtered.map(loc => loc.barangay))]
-      .filter(barangay => barangay.toLowerCase().includes(inputLower))
-      .sort();
-  };
+    // No input, return all barangays for this province
+    return allBarangays;
+  }
+  
+  // No context provided - show first 10 or filter by input
+  if (!input || !input.trim()) {
+    return [...new Set(locationData.map(loc => loc.barangay))].sort().slice(0, 10);
+  }
+  
+  const inputLower = input.toLowerCase();
+  return [...new Set(locationData.map(loc => loc.barangay))]
+    .filter(barangay => barangay.toLowerCase().includes(inputLower))
+    .sort()
+    .slice(0, 10);
+};
 
-  const filterMunicipalities = (input, province = null) => {
-    const inputLower = input.toLowerCase();
-    let filtered = locationData;
+const filterMunicipalities = (input, province = null, barangay = null) => {
+  // If we have barangay context, show ALL municipalities that have this barangay
+  if (barangay && barangay.trim() !== '') {
+    const filtered = locationData.filter(location => location.barangay === barangay);
+    const allMunicipalities = [...new Set(filtered.map(loc => loc.municipality))].sort();
     
-    if (province && province.trim() !== '') {
-      filtered = filtered.filter(location => location.province === province);
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allMunicipalities.filter(municipality => municipality.toLowerCase().includes(inputLower));
     }
     
-    return [...new Set(filtered.map(loc => loc.municipality))]
-      .filter(municipality => municipality.toLowerCase().includes(inputLower))
-      .sort();
-  };
+    // No input, return all municipalities that have this barangay
+    return allMunicipalities;
+  }
+  
+  // If we have province context, show ALL municipalities in this province
+  if (province && province.trim() !== '') {
+    const filtered = locationData.filter(location => location.province === province);
+    const allMunicipalities = [...new Set(filtered.map(loc => loc.municipality))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allMunicipalities.filter(municipality => municipality.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all municipalities for this province
+    return allMunicipalities;
+  }
+  
+  // No context provided - show first 10 or filter by input
+  if (!input || !input.trim()) {
+    return [...new Set(locationData.map(loc => loc.municipality))].sort().slice(0, 10);
+  }
+  
+  const inputLower = input.toLowerCase();
+  return [...new Set(locationData.map(loc => loc.municipality))]
+    .filter(municipality => municipality.toLowerCase().includes(inputLower))
+    .sort()
+    .slice(0, 10);
+};
 
-  const filterProvinces = (input) => {
-    const inputLower = input.toLowerCase();
-    return [...new Set(locationData.map(loc => loc.province))]
-      .filter(province => province.toLowerCase().includes(inputLower))
-      .sort();
-  };
+const filterProvinces = (input, municipality = null, barangay = null) => {
+  // If we have municipality context, show ALL provinces that have this municipality
+  if (municipality && municipality.trim() !== '') {
+    const filtered = locationData.filter(location => location.municipality === municipality);
+    const allProvinces = [...new Set(filtered.map(loc => loc.province))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allProvinces.filter(province => province.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all provinces that have this municipality
+    return allProvinces;
+  }
+  
+  // If we have barangay context, show ALL provinces that have this barangay
+  if (barangay && barangay.trim() !== '') {
+    const filtered = locationData.filter(location => location.barangay === barangay);
+    const allProvinces = [...new Set(filtered.map(loc => loc.province))].sort();
+    
+    // If there's input, filter by input
+    if (input && input.trim()) {
+      const inputLower = input.toLowerCase();
+      return allProvinces.filter(province => province.toLowerCase().includes(inputLower));
+    }
+    
+    // No input, return all provinces that have this barangay
+    return allProvinces;
+  }
+  
+  // No context provided - show first 10 or filter by input
+  if (!input || !input.trim()) {
+    return [...new Set(locationData.map(loc => loc.province))].sort().slice(0, 10);
+  }
+  
+  const inputLower = input.toLowerCase();
+  return [...new Set(locationData.map(loc => loc.province))]
+    .filter(province => province.toLowerCase().includes(inputLower))
+    .sort()
+    .slice(0, 10);
+};
 
-  // Filter helpers for birth place
-  const filterBirthPlaces = (input) => {
-    const inputLower = input.toLowerCase();
-    const searchTerms = inputLower.split(/\s+/).filter(term => term.length > 0);
-    return locationData
-      .filter(location => {
-        const locationString = `${location.barangay} ${location.municipality} ${location.province}`.toLowerCase();
-        return searchTerms.every(term => locationString.includes(term));
-      })
-      .map(location => ({
-        barangay: location.barangay,
-        municipality: location.municipality,
-        province: location.province
+  // Updated handlers for birth location fields
+  const handleBirthBarangayChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...birthFields, barangay: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'birthBarangay') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthBarangay: filterBarangays(value, birthFields.municipality, birthFields.province) 
       }));
+    }
   };
 
-  // Updated handlers to filter based on other fields
+ const handleBirthMunicipalityChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...birthFields, municipality: value};
+  setBirthFields(updatedFields);
+  updatePlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'birthMunicipality') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      birthMunicipality: filterMunicipalities(value, birthFields.province, birthFields.barangay) 
+    }));
+  }
+  // NO AUTO-FILL while typing
+};
+
+  const handleBirthProvinceChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...birthFields, province: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'birthProvince') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthProvince: filterProvinces(value) 
+      }));
+    }
+  };
+
+  // Function to update place of birth from separate fields
+  const updatePlaceOfBirth = (updatedFields) => {
+    // Get the current values, prioritizing the updated fields
+    const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : birthFields.barangay;
+    const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : birthFields.municipality;
+    const province = updatedFields.province !== undefined ? updatedFields.province : birthFields.province;
+    
+    // Build formatted place string with all three components when available
+    let parts = [];
+    if (barangay) parts.push(barangay);
+    if (municipality) parts.push(municipality); 
+    if (province) parts.push(province);
+    
+    const formattedPlace = parts.join(', ');
+    
+    // Only update if we have at least one component
+    if (formattedPlace) {
+      // Direct state update to ensure it happens immediately
+      setFormData(prevState => ({
+        ...prevState,
+        placeOfBirth: formattedPlace
+      }));
+    }
+  };
+
+  // Add handlers for birth place selection
+  const handleSelectBirthBarangay = (barangay) => {
+    // Create a copy with the updated barangay
+    const newFields = {
+      ...birthFields,
+      barangay: barangay
+    };
+    
+    // Update birth fields state
+    setBirthFields(newFields);
+    
+    // Update place of birth with all fields
+    updatePlaceOfBirth(newFields);
+    
+    setFocusedField(null);
+    
+    // Check if this barangay has a specific municipality and province
+    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
+    if (matchedLocation) {
+      const finalFields = {
+        ...newFields
+      };
+      
+      let shouldUpdate = false;
+      
+      if (!newFields.municipality && matchedLocation.municipality) {
+        finalFields.municipality = matchedLocation.municipality;
+        shouldUpdate = true;
+      }
+      
+      if (!newFields.province && matchedLocation.province) {
+        finalFields.province = matchedLocation.province;
+        shouldUpdate = true;
+      }
+      
+      if (shouldUpdate) {
+        // Update the state with the additional fields
+        setBirthFields(finalFields);
+        // Update place of birth with complete information
+        updatePlaceOfBirth(finalFields);
+      }
+    }
+  };
+
+ const handleSelectBirthMunicipality = (municipality) => {
+  const newFields = {
+    ...birthFields,
+    municipality: municipality
+  };
+  
+  setBirthFields(newFields);
+  updatePlaceOfBirth(newFields);
+  setFocusedField(null);
+  
+  // Auto-fill province if available
+  const matchingLocations = locationData.filter(loc => loc.municipality === municipality);
+  const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+  
+  if (uniqueProvinces.length === 1 && !birthFields.province) {
+    const finalFields = {
+      ...newFields,
+      province: uniqueProvinces[0]
+    };
+    
+    setBirthFields(finalFields);
+    updatePlaceOfBirth(finalFields);
+  }
+};
+
+  const handleSelectBirthProvince = (province) => {
+    // Create a copy with the updated province
+    const newFields = {
+      ...birthFields,
+      province: province
+    };
+    
+    // Update birth fields state
+    setBirthFields(newFields);
+    
+    // Update place of birth with all fields
+    updatePlaceOfBirth(newFields);
+    
+    setFocusedField(null);
+  };
+
+  // Updated handlers for address fields
   const handleBarangayChange = (e) => {
     const value = e.target.value;
     setFormData(prev => ({ ...prev, barangay: value }));
@@ -232,26 +470,19 @@ const Blessing = () => {
     }
   };
 
-  const handleMunicipalityChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, municipality: value }));
-    
-    if (focusedField === 'municipality') {
-      setSuggestions(prev => ({
-        ...prev,
-        municipality: filterMunicipalities(value, formData.province)
-      }));
-    }
-    
-    if (value) {
-      const matchedLocation = locationData.find(loc => 
-        loc.municipality.toLowerCase() === value.toLowerCase()
-      );
-      if (matchedLocation && !formData.province) {
-        setFormData(prev => ({ ...prev, province: matchedLocation.province }));
-      }
-    }
-  };
+ const handleMunicipalityChange = (e) => {
+  const value = e.target.value;
+  setFormData(prev => ({ ...prev, municipality: value }));
+  
+  if (focusedField === 'municipality') {
+    setSuggestions(prev => ({
+      ...prev,
+      municipality: filterMunicipalities(value, formData.province, formData.barangay)
+    }));
+  }
+  // NO AUTO-FILL while typing
+};
+
 
   const handleProvinceChange = (e) => {
     const value = e.target.value;
@@ -263,24 +494,6 @@ const Blessing = () => {
         province: filterProvinces(value)
       }));
     }
-  };
-
-  // Place of Birth handlers
-  const handlePlaceOfBirthChange = (e) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, placeOfBirth: value }));
-    if (focusedField === 'placeOfBirth') {
-      setSuggestions(s => ({
-        ...s,
-        placeOfBirth: filterBirthPlaces(value)
-      }));
-    }
-  };
-
-  const handleSelectPlaceOfBirth = (location) => {
-    const formattedPlace = `${location.barangay}, ${location.municipality}, ${location.province}`;
-    setFormData(prev => ({ ...prev, placeOfBirth: formattedPlace }));
-    setFocusedField(null);
   };
 
   // Updated selection handlers
@@ -300,47 +513,67 @@ const Blessing = () => {
   };
 
   const handleSelectMunicipality = (municipality) => {
-    setFormData(prev => ({ ...prev, municipality: municipality }));
-    
-    const matchedLocation = locationData.find(loc => loc.municipality === municipality);
-    if (matchedLocation && !formData.province) {
-      setFormData(prev => ({ ...prev, province: matchedLocation.province }));
-    }
-    
-    setFocusedField(null);
-  };
-
+  setFormData(prev => ({ ...prev, municipality: municipality }));
+  setFocusedField(null);
+  
+  // Auto-fill province if available
+  const matchingLocations = locationData.filter(loc => loc.municipality === municipality);
+  const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+  
+  if (uniqueProvinces.length === 1 && !formData.province) {
+    setFormData(prev => ({ ...prev, province: uniqueProvinces[0] }));
+  }
+};
   const handleSelectProvince = (province) => {
     setFormData(prev => ({ ...prev, province: province }));
     setFocusedField(null);
   };
 
   // Updated focus handlers
-  const handleFocus = (field) => {
-    setFocusedField(field);
-    
-    if (field === 'barangay') {
+ const handleFocus = (field) => {
+  setFocusedField(field);
+  
+  switch(field) {
+    case 'birthBarangay':
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthBarangay: filterBarangays(birthFields.barangay, birthFields.municipality, birthFields.province) 
+      }));
+      break;
+    case 'birthMunicipality':
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthMunicipality: filterMunicipalities(birthFields.municipality, birthFields.province, birthFields.barangay) 
+      }));
+      break;
+    case 'birthProvince':
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthProvince: filterProvinces(birthFields.province, birthFields.municipality, birthFields.barangay) 
+      }));
+      break;
+    case 'barangay':
       setSuggestions(prev => ({
         ...prev,
         barangay: filterBarangays(formData.barangay || '', formData.municipality, formData.province)
       }));
-    } else if (field === 'municipality') {
+      break;
+    case 'municipality':
       setSuggestions(prev => ({
         ...prev,
-        municipality: filterMunicipalities(formData.municipality || '', formData.province)
+        municipality: filterMunicipalities(formData.municipality || '', formData.province, formData.barangay)
       }));
-    } else if (field === 'province') {
+      break;
+    case 'province':
       setSuggestions(prev => ({
         ...prev,
-        province: filterProvinces(formData.province || '')
+        province: filterProvinces(formData.province || '', formData.municipality, formData.barangay)
       }));
-    } else if (field === 'placeOfBirth') {
-      setSuggestions(prev => ({
-        ...prev,
-        placeOfBirth: filterBirthPlaces(formData.placeOfBirth || '')
-      }));
-    }
-  };
+      break;
+    default:
+      break;
+  }
+};
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -452,7 +685,7 @@ const Blessing = () => {
       const formDataToSend = new FormData();
       
       // Add all form fields
-   
+
       formDataToSend.append('blessingData', JSON.stringify({
         ...formData,
         placeOfBirth: formData.placeOfBirth
@@ -461,7 +694,7 @@ const Blessing = () => {
       formDataToSend.append('blessingTypeData', JSON.stringify(blessingTypeData));
 
       // Submit the form
-      const response = await fetch('http://parishofdivinemercy.com/backend/sec_blessing_application.php', {
+      const response = await fetch('http://parishofdivinemercy.com/backend/blessing_application.php', {
         method: 'POST',
         body: formDataToSend
       });
@@ -469,8 +702,7 @@ const Blessing = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Send confirmation email
-      
+
         setShowSuccessModal(true);
         setIsLoading(false);
         setTimeout(() => {
@@ -493,11 +725,11 @@ const Blessing = () => {
   return (
     <div className="client-blessing-container">
       <div className="client-blessing-header">
-        <div className="client-blessing-back-button" onClick={() => navigate('/secretary-appointment')}>
+        <div className="client-blessing-back-button" onClick={() => navigate('/client-appointment')}>
           <AiOutlineArrowLeft /> Back
         </div>
       </div>
-      <h1 className="client-blessing-title">Blessing Registration Form</h1>
+      <h1 className="client-blessing-title">Blessing Application Form</h1>
       <div className="client-blessing-data">
         <div className="client-blessing-row-date">
           <div className="client-blessing-field-date">
@@ -577,7 +809,7 @@ const Blessing = () => {
           </div>
           
           <div className="client-blessing-row">
-          <div className={`client-blessing-field ${showValidationErrors && validationErrors.emailAddress ? 'field-error' : ''}`}>
+            <div className={`client-blessing-field ${showValidationErrors && validationErrors.emailAddress ? 'field-error' : ''}`}>
               <label>Email Address <span className="required-marker">*</span></label>
               <input 
                 type="email" 
@@ -587,217 +819,273 @@ const Blessing = () => {
                 className={showValidationErrors && validationErrors.emailAddress ? 'input-error' : ''}
               />
             </div>
+          </div>
+          
+          {/* Place of Birth with separated fields */}
+          <label className="sub-cc">Place of Birth <span className="required-marker">*</span></label>
+          <div className="client-blessing-row">
             <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
-              <label>Place of Birth (Barangay, Municipality, Province) <span className="required-marker">*</span></label>
+              <label>Birth Barangay</label>
               <input
-                name="placeOfBirth"
-                value={formData.placeOfBirth || ""}
-                onChange={handlePlaceOfBirthChange}
-                onFocus={() => handleFocus('placeOfBirth')}
-                placeholder="Type to search (Barangay, Municipality, Province)"
-                autoComplete="off"
+                type="text"
+                placeholder="Type to search"
+                value={birthFields.barangay}
+                onChange={handleBirthBarangayChange}
+                onFocus={() => handleFocus('birthBarangay')}
                 className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
               />
-              {focusedField === 'placeOfBirth' && suggestions.placeOfBirth.length > 0 && (
+              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
                 <div className="location-dropdown">
-                  {suggestions.placeOfBirth.map((location, idx) => (
-                    <div key={idx} onClick={() => handleSelectPlaceOfBirth(location)} className="location-dropdown-item">
-                      {`${location.barangay}, ${location.municipality}, ${location.province}`}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <label className="sub-cc">Location <span className="required-marker">*</span></label>
-          <div className="client-blessing-row">
-          <div className={`client-blessing-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
-              <label>Street <span className="required-marker">*</span></label>
-              <input
-                name="street"
-                value={formData.street || ""}
-                onChange={handleInputChange}
-                placeholder="Street"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
-              />
-            </div>
-            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
-              <label>Barangay <span className="required-marker">*</span></label>
-              <input
-                name="barangay"
-                value={formData.barangay || ""}
-                onChange={handleBarangayChange}
-                onFocus={() => handleFocus('barangay')}
-                placeholder="Type to search"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
-              />
-              {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
-                <div className="location-dropdown">
-                  {suggestions.barangay.map((barangay, idx) => (
-                    <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                  {suggestions.birthBarangay.map((barangay, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthBarangay(barangay)}
+                      className="location-dropdown-item"
+                    >
                       {barangay}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.municipality ? 'field-error' : ''}`}>
-              <label>Municipality <span className="required-marker">*</span></label>
-              <input
-                name="municipality"
-                value={formData.municipality || ""}
-                onChange={handleMunicipalityChange}
-                onFocus={() => handleFocus('municipality')}
+            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Municipality</label>
+              <input 
+                type="text"
                 placeholder="Type to search"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.municipality ? 'input-error' : ''}
+                value={birthFields.municipality}
+                onChange={handleBirthMunicipalityChange}
+                onFocus={() => handleFocus('birthMunicipality')}
+                className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
               />
-              {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
+              {focusedField === 'birthMunicipality' && suggestions.birthMunicipality.length > 0 && (
                 <div className="location-dropdown">
-                  {suggestions.municipality.map((municipality, idx) => (
-                    <div key={idx} onClick={() => handleSelectMunicipality(municipality)} className="location-dropdown-item">
+                  {suggestions.birthMunicipality.map((municipality, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthMunicipality(municipality)}
+                      className="location-dropdown-item"
+                    >
                       {municipality}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
-              <label>Province <span className="required-marker">*</span></label>
-              <input
-                name="province"
-                value={formData.province || ""}
-                onChange={handleProvinceChange}
-                onFocus={() => handleFocus('province')}
-                placeholder="Type to search"
-                autoComplete="off"
-                className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
-              />
-              {focusedField === 'province' && suggestions.province.length > 0 && (
-                <div className="location-dropdown">
-                  {suggestions.province.map((province, idx) => (
-                    <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
-                      {province}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="client-blessing-row">
-             <div className="client-blessing-field">
-              <label>Blessing Type <span className="required-marker">*</span></label>
-              <select 
-                name="blessingType"
-                value={formData.blessingType}
-                onChange={handleInputChange}
-              >
-                <option value="house">House Blessing</option>
-                <option value="business">Business Blessing</option>
-                <option value="car">Car Blessing</option>
-              </select>
-            </div>
-            <div className={`client-blessing-field ${showValidationErrors && validationErrors.purpose ? 'field-error' : ''}`}>
-              <label>Purpose <span className="required-marker">*</span></label>
+            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Province</label>
               <input 
-                type="text" 
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleInputChange}
-                placeholder="Brief description of the purpose for the blessing"
-                className={showValidationErrors && validationErrors.purpose ? 'input-error' : ''}
-              />
-            </div>
-          </div>
+                type="text"
+                placeholder="Type to search"
+              value={birthFields.province}
+               onChange={handleBirthProvinceChange}
+               onFocus={() => handleFocus('birthProvince')}
+               className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
+             />
+             {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.birthProvince.map((province, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBirthProvince(province)}
+                     className="location-dropdown-item"
+                   >
+                     {province}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         </div>
 
-          <div className="client-blessing-row">
+         <label className="sub-cc">Current Address <span className="required-marker">*</span></label>
+         <div className="client-blessing-row">
+           <div className={`client-blessing-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
+             <label>Street <span className="required-marker">*</span></label>
+             <input
+               name="street"
+               value={formData.street || ""}
+               onChange={handleInputChange}
+               placeholder="Street"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
+             />
+           </div>
+           <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
+             <label>Barangay <span className="required-marker">*</span></label>
+             <input
+               name="barangay"
+               value={formData.barangay || ""}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
+             />
+             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.barangay.map((barangay, idx) => (
+                   <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                     {barangay}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+           <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.municipality ? 'field-error' : ''}`}>
+             <label>Municipality <span className="required-marker">*</span></label>
+             <input
+               name="municipality"
+               value={formData.municipality || ""}
+               onChange={handleMunicipalityChange}
+               onFocus={() => handleFocus('municipality')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.municipality ? 'input-error' : ''}
+             />
+             {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.municipality.map((municipality, idx) => (
+                   <div key={idx} onClick={() => handleSelectMunicipality(municipality)} className="location-dropdown-item">
+                     {municipality}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+           <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
+             <label>Province <span className="required-marker">*</span></label>
+             <input
+               name="province"
+               value={formData.province || ""}
+               onChange={handleProvinceChange}
+               onFocus={() => handleFocus('province')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
+             />
+             {focusedField === 'province' && suggestions.province.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.province.map((province, idx) => (
+                   <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
+                     {province}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         </div>
+
+         <div className="client-blessing-row">
             <div className="client-blessing-field">
-              <label>Notes</label>
-              <textarea 
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                placeholder="Additional information or special requests"
-                className="client-blessing-textarea"
-              ></textarea>
-            </div>
-          </div>
-        </div>
+             <label>Blessing Type <span className="required-marker">*</span></label>
+             <select 
+               name="blessingType"
+               value={formData.blessingType}
+               onChange={handleInputChange}
+             >
+               <option value="house">House Blessing</option>
+               <option value="business">Business Blessing</option>
+               <option value="car">Car Blessing</option>
+             </select>
+           </div>
+           <div className={`client-blessing-field ${showValidationErrors && validationErrors.purpose ? 'field-error' : ''}`}>
+             <label>Purpose <span className="required-marker">*</span></label>
+             <input 
+               type="text" 
+               name="purpose"
+               value={formData.purpose}
+               onChange={handleInputChange}
+               placeholder="Brief description of the purpose for the blessing"
+               className={showValidationErrors && validationErrors.purpose ? 'input-error' : ''}
+             />
+           </div>
+         </div>
 
-        <div className="client-blessing-button-container">
-          <button className="client-blessing-submit-btn" onClick={handleSubmit}>Submit</button>
-          <button className="client-blessing-cancel-btn" onClick={() => navigate('/secretary-appointment')}>Cancel</button>
-        </div>
-      </div>
+         <div className="client-blessing-row">
+           <div className="client-blessing-field">
+             <label>Notes</label>
+             <textarea 
+               name="notes"
+               value={formData.notes}
+               onChange={handleInputChange}
+               placeholder="Additional information or special requests"
+               className="client-blessing-textarea"
+             ></textarea>
+           </div>
+         </div>
+       </div>
 
-      {/* Confirmation Modal */}
-      {showModal && (
-        <div className="client-blessing-modal-overlay">
-          <div className="client-blessing-modal">
-            <h2>Submit Application</h2>
-            <hr className="client-blessing-custom-hr" />
-            <p>Are you sure you want to submit your {formData.blessingType.charAt(0).toUpperCase() + formData.blessingType.slice(1)} Blessing application?</p>
-            <div className="client-blessing-modal-buttons">
-              <button className="client-blessing-yes-btn" onClick={handleYes}>Yes</button>
-              <button className="client-blessing-modal-no-btn" onClick={() => setShowModal(false)}>No</button>
-            </div>
-          </div>
-        </div>
-      )}
+       <div className="client-blessing-button-container">
+         <button className="client-blessing-submit-btn" onClick={handleSubmit}>Submit</button>
+         <button className="client-blessing-cancel-btn" onClick={() => navigate('/client-appointment')}>Cancel</button>
+       </div>
+     </div>
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="client-blessing-modal-overlay">
-          <div className="client-blessing-modal">
-            <h2>Success</h2>
-            <hr className="client-blessing-custom-hr" />
-            <p>Your blessing application has been submitted successfully!</p>
-            <div className="client-blessing-modal-buttons">
-              <button className="client-blessing-yes-btn" onClick={() => {
-                setShowSuccessModal(false);
-                navigate('/secretary-appointment');
-              }}>OK</button>
-            </div>
-          </div>
-        </div>
-      )}
+     {/* Confirmation Modal */}
+     {showModal && (
+       <div className="client-blessing-modal-overlay">
+         <div className="client-blessing-modal">
+           <h2>Submit Application</h2>
+           <hr className="client-blessing-custom-hr" />
+           <p>Are you sure you want to submit your {formData.blessingType.charAt(0).toUpperCase() + formData.blessingType.slice(1)} Blessing application?</p>
+           <div className="client-blessing-modal-buttons">
+             <button className="client-blessing-yes-btn" onClick={handleYes}>Yes</button>
+             <button className="client-blessing-modal-no-btn" onClick={() => setShowModal(false)}>No</button>
+           </div>
+         </div>
+       </div>
+     )}
 
-      {/* Error Modal */}
-      {showErrorModal && (
-        <div className="client-blessing-modal-overlay">
-          <div className="client-blessing-modal">
-            <h2>Error</h2>
-            <hr className="client-blessing-custom-hr" />
-            <p>{errorMessage}</p>
-            <div className="client-blessing-modal-buttons">
-              <button className="client-blessing-modal-no-btn" onClick={() => {
-                setShowErrorModal(false);
-                setErrorMessage("");
-              }}>OK</button>
-            </div>
-          </div>
-        </div>
-      )}
+     {/* Success Modal */}
+     {showSuccessModal && (
+       <div className="client-blessing-modal-overlay">
+         <div className="client-blessing-modal">
+           <h2>Success</h2>
+           <hr className="client-blessing-custom-hr" />
+           <p>Your blessing application has been submitted successfully!</p>
+           <div className="client-blessing-modal-buttons">
+             <button className="client-blessing-yes-btn" onClick={() => {
+               setShowSuccessModal(false);
+               navigate('/client-appointment');
+             }}>OK</button>
+           </div>
+         </div>
+       </div>
+     )}
 
-      {/* Loading Modal */}
-      {isLoading && (
-        <div className="client-blessing-modal-overlay">
-          <div className="client-blessing-modal">
-            <h2>Processing Application</h2>
-            <hr className="client-blessing-custom-hr" />
-            <p>Please wait while we submit your blessing application...</p>
-            <div className="client-blessing-loading-spinner">
-              <div className="client-blessing-spinner"></div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+     {/* Error Modal */}
+     {showErrorModal && (
+       <div className="client-blessing-modal-overlay">
+         <div className="client-blessing-modal">
+           <h2>Error</h2>
+           <hr className="client-blessing-custom-hr" />
+           <p>{errorMessage}</p>
+           <div className="client-blessing-modal-buttons">
+             <button className="client-blessing-modal-no-btn" onClick={() => {
+               setShowErrorModal(false);
+               setErrorMessage("");
+             }}>OK</button>
+           </div>
+         </div>
+       </div>
+     )}
+
+     {/* Loading Modal */}
+     {isLoading && (
+       <div className="client-blessing-modal-overlay">
+         <div className="client-blessing-modal">
+           <h2>Processing Application</h2>
+           <hr className="client-blessing-custom-hr" />
+           <p>Please wait while we submit your blessing application...</p>
+           <div className="client-blessing-loading-spinner">
+             <div className="client-blessing-spinner"></div>
+           </div>
+         </div>
+       </div>
+     )}
+   </div>
+ );
 };
 
 export default Blessing;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { AiOutlineArrowLeft, AiOutlineCheck, AiOutlineUpload, AiOutlineClose } from "react-icons/ai";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./ClientAnointingOfTheSick.css";
@@ -108,6 +108,97 @@ const ClientAnointingOfTheSick = () => {
     province: ''
   });
 
+  // Create memoized location indexes for faster filtering
+  const locationIndexes = useMemo(() => {
+    if (!locationData.length) return {};
+    
+    // Create indexes for each type of location data
+    const barangays = {};
+    const municipalities = {};
+    const provinces = {};
+    const barangaysByMunicipality = {};
+    const barangaysByProvince = {};
+    const municipalitiesByProvince = {};
+
+    locationData.forEach(loc => {
+      // Add to barangays index
+      if (!barangays[loc.barangay.toLowerCase()]) {
+        barangays[loc.barangay.toLowerCase()] = [];
+      }
+      barangays[loc.barangay.toLowerCase()].push(loc);
+
+      // Add to municipalities index
+      if (!municipalities[loc.municipality.toLowerCase()]) {
+        municipalities[loc.municipality.toLowerCase()] = [];
+      }
+      municipalities[loc.municipality.toLowerCase()].push(loc);
+
+      // Add to provinces index
+      if (!provinces[loc.province.toLowerCase()]) {
+        provinces[loc.province.toLowerCase()] = [];
+      }
+      provinces[loc.province.toLowerCase()].push(loc);
+
+      // Add to barangaysByMunicipality index
+      const munKey = loc.municipality.toLowerCase();
+      if (!barangaysByMunicipality[munKey]) {
+        barangaysByMunicipality[munKey] = new Set();
+      }
+      barangaysByMunicipality[munKey].add(loc.barangay);
+
+      // Add to barangaysByProvince index
+      const provKey = loc.province.toLowerCase();
+      if (!barangaysByProvince[provKey]) {
+        barangaysByProvince[provKey] = new Set();
+      }
+      barangaysByProvince[provKey].add(loc.barangay);
+
+      // Add to municipalitiesByProvince index
+      if (!municipalitiesByProvince[provKey]) {
+        municipalitiesByProvince[provKey] = new Set();
+      }
+      municipalitiesByProvince[provKey].add(loc.municipality);
+    });
+
+    // Convert Sets to arrays
+    Object.keys(barangaysByMunicipality).forEach(key => {
+      barangaysByMunicipality[key] = Array.from(barangaysByMunicipality[key]);
+    });
+
+    Object.keys(barangaysByProvince).forEach(key => {
+      barangaysByProvince[key] = Array.from(barangaysByProvince[key]);
+    });
+
+    Object.keys(municipalitiesByProvince).forEach(key => {
+      municipalitiesByProvince[key] = Array.from(municipalitiesByProvince[key]);
+    });
+
+    return {
+      barangays,
+      municipalities,
+      provinces,
+      barangaysByMunicipality,
+      barangaysByProvince,
+      municipalitiesByProvince
+    };
+  }, [locationData]);
+
+  // Memoize unique provinces and municipalities
+  const uniqueProvinces = useMemo(() => {
+    if (!locationData.length) return [];
+    return [...new Set(locationData.map(loc => loc.province))].sort();
+  }, [locationData]);
+
+  const uniqueMunicipalities = useMemo(() => {
+    if (!locationData.length) return [];
+    return [...new Set(locationData.map(loc => loc.municipality))].sort();
+  }, [locationData]);
+
+  const uniqueBarangays = useMemo(() => {
+    if (!locationData.length) return [];
+    return [...new Set(locationData.map(loc => loc.barangay))].sort();
+  }, [locationData]);
+
   // Fetch all necessary data on component mount
   useEffect(() => {
     fetchAnointingSchedules();
@@ -142,57 +233,59 @@ const ClientAnointingOfTheSick = () => {
     }
   };
 
-  // Fetch anointing schedules and process unique dates
-  const fetchAnointingSchedules = async () => {
-    try {
-      const [schedulesResponse, anointingsResponse] = await Promise.all([
-        fetch('http://parishofdivinemercy.com/backend/schedule.php'),
-        fetch('http://parishofdivinemercy.com/backend/get_anointing_applications.php')
-      ]);
+ // Fetch anointing schedules and filter out already booked dates/times
+const fetchAnointingSchedules = async () => {
+  try {
+    const [schedulesResponse, anointingsResponse] = await Promise.all([
+      fetch('http://parishofdivinemercy.com/backend/schedule.php'),
+      fetch('http://parishofdivinemercy.com/backend/get_anointing_applications.php')
+    ]);
+    
+    const scheduleData = await schedulesResponse.json();
+    const anointingData = await anointingsResponse.json();
+    
+    if (scheduleData.success) {
+      // Filter only anointing schedules
+      const anointingSchedules = scheduleData.schedules.filter(
+        schedule => schedule.sacramentType.toLowerCase() === 'anointing of the sick and viaticum'
+      );
       
-      const scheduleData = await schedulesResponse.json();
-      const anointingData = await anointingsResponse.json();
-      
-      if (scheduleData.success) {
-        // Filter only anointing schedules
-        const anointingSchedules = scheduleData.schedules.filter(
-          schedule => schedule.sacramentType.toLowerCase() === 'anointing of the sick and viaticum'
-        );
-        
-        // Get existing anointing applications
-        const existingAnointingSet = new Set();
-        if (anointingData.success) {
-          anointingData.applications.forEach(app => {
-            existingAnointingSet.add(`${app.dateOfAnointing}-${app.timeOfAnointing}-${app.priestName}`);
-          });
-        }
-
-        // Filter out already booked schedules
-        const availableSchedules = anointingSchedules.filter(schedule => {
-          const key = `${schedule.date}-${schedule.time}-${schedule.parishName}`;
-          return !existingAnointingSet.has(key);
+      // Create a set of booked date-time combinations
+      const existingAnointingSet = new Set();
+      if (anointingData.success) {
+        anointingData.applications.forEach(app => {
+          existingAnointingSet.add(`${app.dateOfAnointing}-${app.timeOfAnointing}`);
         });
-
-        setSchedules(availableSchedules);
-        
-        // Extract unique dates
-        const uniqueDatesSet = new Set();
-        const uniqueDatesArray = [];
-        
-        availableSchedules.forEach(schedule => {
-          if (!uniqueDatesSet.has(schedule.date)) {
-            uniqueDatesSet.add(schedule.date);
-            uniqueDatesArray.push(schedule.date);
-          }
-        });
-        
-        setUniqueDates(uniqueDatesArray);
       }
-    } catch (error) {
-      console.error('Error fetching schedules:', error);
-    }
-  };
 
+      // Filter out already booked schedules
+      const availableSchedules = anointingSchedules.filter(schedule => {
+        const key = `${schedule.date}-${schedule.time}`;
+        return !existingAnointingSet.has(key);
+      });
+
+      setSchedules(availableSchedules);
+      
+      // Extract unique dates from available schedules
+      const uniqueDatesSet = new Set();
+      const uniqueDatesArray = [];
+      
+      availableSchedules.forEach(schedule => {
+        if (!uniqueDatesSet.has(schedule.date)) {
+          uniqueDatesSet.add(schedule.date);
+          uniqueDatesArray.push(schedule.date);
+        }
+      });
+      
+      // Sort dates chronologically
+      uniqueDatesArray.sort((a, b) => new Date(a) - new Date(b));
+      
+      setUniqueDates(uniqueDatesArray);
+    }
+  } catch (error) {
+    console.error('Error fetching schedules:', error);
+  }
+};
   // Fetch priests from parish.php
   const fetchPriests = async () => {
     try {
@@ -259,53 +352,110 @@ const ClientAnointingOfTheSick = () => {
     }
   }, [formData.dateOfAnointing, formData.timeOfAnointing, schedules]);
 
-  // Enhanced filter functions to consider the other fields
+  // Optimized filter functions
   const filterBarangays = (input, municipality = null, province = null) => {
+    if (!input.trim() || !locationIndexes.barangays) {
+      // Return an empty array or the first few items if input is empty
+      if (municipality && locationIndexes.barangaysByMunicipality) {
+        const municipalityKey = municipality.toLowerCase();
+        if (locationIndexes.barangaysByMunicipality[municipalityKey]) {
+          return locationIndexes.barangaysByMunicipality[municipalityKey].slice(0, 10);
+        }
+      } else if (province && locationIndexes.barangaysByProvince) {
+        const provinceKey = province.toLowerCase();
+        if (locationIndexes.barangaysByProvince[provinceKey]) {
+          return locationIndexes.barangaysByProvince[provinceKey].slice(0, 10);
+        }
+      }
+      return uniqueBarangays.slice(0, 10);
+    }
+    
     const inputLower = input.toLowerCase();
-    let filtered = locationData;
-
-    // If municipality is provided, filter by municipality
-    if (municipality && municipality.trim() !== '') {
-      filtered = filtered.filter(location => location.municipality === municipality);
+    
+    // Use the appropriate index based on filters
+    let filteredResults = [];
+    if (municipality && province) {
+      // Both municipality and province provided
+      const municipalityKey = municipality.toLowerCase();
+      if (locationIndexes.barangaysByMunicipality[municipalityKey]) {
+        filteredResults = locationIndexes.barangaysByMunicipality[municipalityKey].filter(
+          barangay => barangay.toLowerCase().includes(inputLower)
+        );
+      }
+    } else if (municipality) {
+      // Only municipality provided
+      const municipalityKey = municipality.toLowerCase();
+      if (locationIndexes.barangaysByMunicipality[municipalityKey]) {
+        filteredResults = locationIndexes.barangaysByMunicipality[municipalityKey].filter(
+          barangay => barangay.toLowerCase().includes(inputLower)
+        );
+      }
+    } else if (province) {
+      // Only province provided
+      const provinceKey = province.toLowerCase();
+      if (locationIndexes.barangaysByProvince[provinceKey]) {
+        filteredResults = locationIndexes.barangaysByProvince[provinceKey].filter(
+          barangay => barangay.toLowerCase().includes(inputLower)
+        );
+      }
+    } else {
+      // No filters, search all barangays
+      filteredResults = uniqueBarangays.filter(
+        barangay => barangay.toLowerCase().includes(inputLower)
+      );
     }
     
-    // If province is provided, filter by province
-    if (province && province.trim() !== '') {
-      filtered = filtered.filter(location => location.province === province);
-    }
-    
-    // Extract unique barangays and filter by input
-    return [...new Set(filtered.map(loc => loc.barangay))]
-      .filter(barangay => barangay.toLowerCase().includes(inputLower))
-      .sort();
+    return filteredResults.slice(0, 10); // Limit to 10 results for better performance
   };
 
   const filterMunicipalities = (input, province = null) => {
-    const inputLower = input.toLowerCase();
-    let filtered = locationData;
-    
-    // If province is provided, filter by province
-    if (province && province.trim() !== '') {
-      filtered = filtered.filter(location => location.province === province);
+    if (!input.trim() || !locationIndexes.municipalities) {
+      // Return an empty array or the first few items if input is empty
+      if (province && locationIndexes.municipalitiesByProvince) {
+        const provinceKey = province.toLowerCase();
+        if (locationIndexes.municipalitiesByProvince[provinceKey]) {
+          return locationIndexes.municipalitiesByProvince[provinceKey].slice(0, 10);
+        }
+      }
+      return uniqueMunicipalities.slice(0, 10);
     }
     
-    // Extract unique municipalities and filter by input
-    return [...new Set(filtered.map(loc => loc.municipality))]
-      .filter(municipality => municipality.toLowerCase().includes(inputLower))
-      .sort();
+    const inputLower = input.toLowerCase();
+    
+    let filteredResults = [];
+    if (province) {
+      // Province provided, filter municipalities by province
+      const provinceKey = province.toLowerCase();
+      if (locationIndexes.municipalitiesByProvince[provinceKey]) {
+        filteredResults = locationIndexes.municipalitiesByProvince[provinceKey].filter(
+          municipality => municipality.toLowerCase().includes(inputLower)
+        );
+      }
+    } else {
+      // No province filter, search all municipalities
+      filteredResults = uniqueMunicipalities.filter(
+        municipality => municipality.toLowerCase().includes(inputLower)
+      );
+    }
+    
+    return filteredResults.slice(0, 10); // Limit to 10 results
   };
 
   const filterProvinces = (input) => {
+    if (!input.trim() || !uniqueProvinces) {
+      return uniqueProvinces.slice(0, 10);
+    }
+    
     const inputLower = input.toLowerCase();
-    return [...new Set(locationData.map(loc => loc.province))]
-      .filter(province => province.toLowerCase().includes(inputLower))
-      .sort();
+    const filteredResults = uniqueProvinces.filter(
+      province => province.toLowerCase().includes(inputLower)
+    );
+    
+    return filteredResults.slice(0, 10); // Limit to 10 results
   };
 
   // New filter function for regions
   const filterRegions = (input) => {
-    const inputLower = input.toLowerCase();
-    // Assuming we have regions in the location data. If not, use a static list
     const regions = [
       'NCR - National Capital Region',
       'CAR - Cordillera Administrative Region',
@@ -326,24 +476,54 @@ const ClientAnointingOfTheSick = () => {
       'BARMM - Bangsamoro Autonomous Region in Muslim Mindanao'
     ];
     
-    return regions.filter(region => region.toLowerCase().includes(inputLower));
+    if (!input.trim()) {
+      return regions.slice(0, 10);
+    }
+    
+    const inputLower = input.toLowerCase();
+    return regions
+      .filter(region => region.toLowerCase().includes(inputLower))
+      .slice(0, 10);
   };
 
   // Add a filter method for birth places
   const filterBirthPlaces = (input) => {
+    if (!input.trim() || !locationData.length) {
+      return [];
+    }
+    
     const inputLower = input.toLowerCase();
     const searchTerms = inputLower.split(/\s+/).filter(term => term.length > 0);
     
-    return locationData
-      .filter(location => {
-        const locationString = `${location.barangay} ${location.municipality} ${location.province}`.toLowerCase();
-        return searchTerms.every(term => locationString.includes(term));
-      })
-      .map(location => ({
-        barangay: location.barangay,
-        municipality: location.municipality,
-        province: location.province
-      }));
+    if (searchTerms.length === 0) {
+      return [];
+    }
+    
+    // Optimize by creating a temporary index for this search
+    const possibleLocations = [];
+    
+    // Only process the first 500 locations for performance
+    const maxLocationsToCheck = Math.min(locationData.length, 500);
+    
+    for (let i = 0; i < maxLocationsToCheck; i++) {
+      const loc = locationData[i];
+      const locationString = `${loc.barangay} ${loc.municipality} ${loc.province}`.toLowerCase();
+      
+      if (searchTerms.every(term => locationString.includes(term))) {
+        possibleLocations.push({
+          barangay: loc.barangay,
+          municipality: loc.municipality,
+          province: loc.province
+        });
+        
+        // Limit to 10 results for better performance
+        if (possibleLocations.length >= 10) {
+          break;
+        }
+      }
+    }
+    
+    return possibleLocations;
   };
 
   // Handle input changes
@@ -388,17 +568,18 @@ const ClientAnointingOfTheSick = () => {
     }));
   };
 
-  // Updated handlers to filter based on other fields
+  // Updated handlers with throttling
   const handleBarangayChange = (e) => {
     const value = e.target.value;
     handleInputChange('barangay', value);
     
+    // Only update suggestions if field is focused
     if (focusedField === 'barangay') {
-      // Filter barangays based on municipality and province if they exist
-      setSuggestions({
-        ...suggestions,
-        barangay: filterBarangays(value, formData.municipality, formData.province)
-      });
+      const suggestions = filterBarangays(value, formData.municipality, formData.province);
+      setSuggestions(prev => ({
+        ...prev,
+        barangay: suggestions
+      }));
     }
   };
 
@@ -407,20 +588,20 @@ const ClientAnointingOfTheSick = () => {
     handleInputChange('municipality', value);
     
     if (focusedField === 'municipality') {
-      // Filter municipalities based on province if it exists
-      setSuggestions({
-        ...suggestions,
-        municipality: filterMunicipalities(value, formData.province)
-      });
+      const suggestions = filterMunicipalities(value, formData.province);
+      setSuggestions(prev => ({
+        ...prev,
+        municipality: suggestions
+      }));
     }
     
     // If typing a municipality, check if it has a province
-    if (value) {
-      const matchedLocation = locationData.find(loc => 
-        loc.municipality.toLowerCase() === value.toLowerCase()
-      );
-      if (matchedLocation && !formData.province) {
-        handleInputChange('province', matchedLocation.province);
+    if (value && locationIndexes.municipalities) {
+      const municipalityKey = value.toLowerCase();
+      const matchedLocations = locationIndexes.municipalities[municipalityKey];
+      
+      if (matchedLocations && matchedLocations.length > 0 && !formData.province) {
+        handleInputChange('province', matchedLocations[0].province);
       }
     }
   };
@@ -430,10 +611,11 @@ const ClientAnointingOfTheSick = () => {
     handleInputChange('province', value);
     
     if (focusedField === 'province') {
-      setSuggestions({
-        ...suggestions,
-        province: filterProvinces(value)
-      });
+      const suggestions = filterProvinces(value);
+      setSuggestions(prev => ({
+        ...prev,
+        province: suggestions
+      }));
     }
   };
 
@@ -443,10 +625,11 @@ const ClientAnointingOfTheSick = () => {
     handleInputChange('regionOfBirth', value);
     
     if (focusedField === 'regionOfBirth') {
-      setSuggestions({
-        ...suggestions,
-        regionOfBirth: filterRegions(value)
-      });
+      const suggestions = filterRegions(value);
+      setSuggestions(prev => ({
+        ...prev,
+        regionOfBirth: suggestions
+      }));
     }
   };
 
@@ -455,10 +638,11 @@ const ClientAnointingOfTheSick = () => {
     handleInputChange('locationRegion', value);
     
     if (focusedField === 'locationRegion') {
-      setSuggestions({
-        ...suggestions,
-        region: filterRegions(value)
-      });
+      const suggestions = filterRegions(value);
+      setSuggestions(prev => ({
+        ...prev,
+        region: suggestions
+      }));
     }
   };
 
@@ -468,13 +652,17 @@ const ClientAnointingOfTheSick = () => {
     setFocusedField(null);
     
     // Check if this barangay has a specific municipality and province
-    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
-    if (matchedLocation) {
-      if (!formData.municipality) {
-        handleInputChange('municipality', matchedLocation.municipality);
-      }
-      if (!formData.province) {
-        handleInputChange('province', matchedLocation.province);
+    if (locationIndexes.barangays) {
+      const barangayKey = barangay.toLowerCase();
+      const matchedLocations = locationIndexes.barangays[barangayKey];
+      
+      if (matchedLocations && matchedLocations.length > 0) {
+        if (!formData.municipality) {
+          handleInputChange('municipality', matchedLocations[0].municipality);
+        }
+        if (!formData.province) {
+          handleInputChange('province', matchedLocations[0].province);
+        }
       }
     }
   };
@@ -483,9 +671,13 @@ const ClientAnointingOfTheSick = () => {
     handleInputChange('municipality', municipality);
     
     // Find the province for this municipality
-    const matchedLocation = locationData.find(loc => loc.municipality === municipality);
-    if (matchedLocation && !formData.province) {
-      handleInputChange('province', matchedLocation.province);
+    if (locationIndexes.municipalities) {
+      const municipalityKey = municipality.toLowerCase();
+      const matchedLocations = locationIndexes.municipalities[municipalityKey];
+      
+      if (matchedLocations && matchedLocations.length > 0 && !formData.province) {
+        handleInputChange('province', matchedLocations[0].province);
+      }
     }
     
     setFocusedField(null);
@@ -507,10 +699,196 @@ const ClientAnointingOfTheSick = () => {
     setFocusedField(null);
   };
 
-  // Updated focus handlers
+  // Add handlers for birth place fields
+  const handleBirthBarangayChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...birthFields, barangay: value};
+  setBirthFields(updatedFields);
+  updatePlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'birthBarangay') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      birthBarangay: filterBarangays(value, birthFields.municipality, birthFields.province) 
+    }));
+  }
+};
+
+const handleBirthMunicipalityChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...birthFields, municipality: value};
+  setBirthFields(updatedFields);
+  updatePlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'birthMunicipality') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      birthMunicipality: filterMunicipalities(value, birthFields.province) 
+    }));
+  }
+  
+  // If typing a municipality, check if it has a province
+  if (value && locationIndexes.municipalities) {
+    const municipalityKey = value.toLowerCase();
+    const matchedLocations = locationIndexes.municipalities[municipalityKey];
+    
+    if (matchedLocations && matchedLocations.length > 0 && !birthFields.province) {
+      const newFields = {...updatedFields, province: matchedLocations[0].province};
+      setBirthFields(newFields);
+      updatePlaceOfBirth(newFields);
+    }
+  }
+};
+
+const handleBirthProvinceChange = (e) => {
+  const value = e.target.value;
+  const updatedFields = {...birthFields, province: value};
+  setBirthFields(updatedFields);
+  updatePlaceOfBirth(updatedFields);
+  
+  if (focusedField === 'birthProvince') {
+    setSuggestions(prev => ({ 
+      ...prev, 
+      birthProvince: filterProvinces(value) 
+    }));
+  }
+};
+  // Add select handlers for place of birth dropdowns
+  const handleSelectBirthBarangay = (barangay) => {
+  // Create a copy with the updated barangay
+  const newFields = {
+    ...birthFields,
+    barangay: barangay
+  };
+  
+  // Update birth fields state
+  setBirthFields(newFields);
+  
+  // Update place of birth with all fields
+  updatePlaceOfBirth(newFields);
+  
+  setFocusedField(null);
+  
+  // Check if this barangay has a specific municipality and province
+  if (locationIndexes.barangays) {
+    const barangayKey = barangay.toLowerCase();
+    const matchedLocations = locationIndexes.barangays[barangayKey];
+    
+    if (matchedLocations && matchedLocations.length > 0) {
+      const foundMunicipality = matchedLocations[0].municipality;
+      const foundProvince = matchedLocations[0].province;
+      
+      // Only update municipality and province if they're not already set
+      const finalFields = {
+        ...newFields
+      };
+      
+      let shouldUpdate = false;
+      
+      if (!newFields.municipality && foundMunicipality) {
+        finalFields.municipality = foundMunicipality;
+        shouldUpdate = true;
+      }
+      
+      if (!newFields.province && foundProvince) {
+        finalFields.province = foundProvince;
+        shouldUpdate = true;
+      }
+      
+      if (shouldUpdate) {
+        // Update the state with the additional fields
+        setBirthFields(finalFields);
+        // Update place of birth with complete information
+        updatePlaceOfBirth(finalFields);
+      }
+    }
+  }
+};
+  const handleSelectBirthMunicipality = (municipality) => {
+  // Create a copy with the updated municipality
+  const newFields = {
+    ...birthFields,
+    municipality: municipality
+  };
+  
+  // Update birth fields state
+  setBirthFields(newFields);
+  
+  // Update place of birth with all fields
+  updatePlaceOfBirth(newFields);
+  
+  // Find the province for this municipality
+  if (locationIndexes.municipalities) {
+    const municipalityKey = municipality.toLowerCase();
+    const matchedLocations = locationIndexes.municipalities[municipalityKey];
+    
+    if (matchedLocations && matchedLocations.length > 0 && !birthFields.province) {
+      const foundProvince = matchedLocations[0].province;
+      
+      // Update with the province
+      const finalFields = {
+        ...newFields,
+        province: foundProvince
+      };
+      
+      // Update the state
+      setBirthFields(finalFields);
+      // Update place of birth with complete information
+      updatePlaceOfBirth(finalFields);
+    }
+  }
+  
+  setFocusedField(null);
+};
+
+ const handleSelectBirthProvince = (province) => {
+  // Create a copy with the updated province
+  const newFields = {
+    ...birthFields,
+    province: province
+  };
+  
+  // Update birth fields state
+  setBirthFields(newFields);
+  
+  // Update place of birth with all fields
+  updatePlaceOfBirth(newFields);
+  
+  setFocusedField(null);
+};
+
+const updatePlaceOfBirth = (updatedFields) => {
+  // Get the current values, prioritizing the updated fields
+  const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : birthFields.barangay;
+  const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : birthFields.municipality;
+  const province = updatedFields.province !== undefined ? updatedFields.province : birthFields.province;
+  
+  // Build formatted place string with all three components when available
+  let parts = [];
+  if (barangay) parts.push(barangay);
+  if (municipality) parts.push(municipality); 
+  if (province) parts.push(province);
+  
+  const formattedPlace = parts.join(', ');
+  
+  // Only update if we have at least one component
+  if (formattedPlace) {
+    console.log('Updating placeOfBirth to:', formattedPlace); // Debug log
+    
+    // Direct state update to ensure it happens immediately
+    setFormData(prevState => ({
+      ...prevState,
+      placeOfBirth: formattedPlace
+    }));
+  }
+};
+
+  // Updated focus handlers with optimized performance
+ // Updated focus handlers with optimized performance
   const handleFocus = (field) => {
     setFocusedField(field);
     
+    // Immediate feedback by showing suggestions based on current input
     switch(field) {
       case 'birthBarangay':
         setSuggestions(prev => ({ 
@@ -530,41 +908,35 @@ const ClientAnointingOfTheSick = () => {
           birthProvince: filterProvinces(birthFields.province) 
         }));
         break;
-      case 'placeOfBirth':
-        setSuggestions(prev => ({ 
-          ...prev, 
-          placeOfBirth: filterBirthPlaces(formData.placeOfBirth) 
+      case 'barangay':
+        setSuggestions(prev => ({
+          ...prev,
+          barangay: filterBarangays(formData.barangay, formData.municipality, formData.province)
         }));
         break;
-      case 'barangay':
-        setSuggestions({
-          ...suggestions,
-          barangay: filterBarangays(formData.barangay, formData.municipality, formData.province)
-        });
-        break;
       case 'municipality':
-        setSuggestions({
-          ...suggestions,
+        setSuggestions(prev => ({
+          ...prev,
           municipality: filterMunicipalities(formData.municipality, formData.province)
-        });
+        }));
         break;
       case 'province':
-        setSuggestions({
-          ...suggestions,
+        setSuggestions(prev => ({
+          ...prev,
           province: filterProvinces(formData.province)
-        });
+        }));
         break;
       case 'regionOfBirth':
-        setSuggestions({
-          ...suggestions,
+        setSuggestions(prev => ({
+          ...prev,
           regionOfBirth: filterRegions(formData.regionOfBirth)
-        });
+        }));
         break;
       case 'locationRegion':
-        setSuggestions({
-          ...suggestions,
+        setSuggestions(prev => ({
+          ...prev,
           region: filterRegions(formData.locationRegion)
-        });
+        }));
         break;
       default:
         break;
@@ -816,129 +1188,6 @@ const ClientAnointingOfTheSick = () => {
     }
   };
 
-  // Add handlers for birth place fields
-  const handleBirthBarangayChange = (e) => {
-    const value = e.target.value;
-    setBirthFields(prev => ({...prev, barangay: value}));
-    updatePlaceOfBirth({...birthFields, barangay: value});
-    
-    if (focusedField === 'birthBarangay') {
-      setSuggestions(prev => ({ 
-        ...prev, 
-        birthBarangay: filterBarangays(value, birthFields.municipality, birthFields.province) 
-      }));
-    }
-  };
-
-  const handleBirthMunicipalityChange = (e) => {
-    const value = e.target.value;
-    setBirthFields(prev => ({...prev, municipality: value}));
-    updatePlaceOfBirth({...birthFields, municipality: value});
-    
-    if (focusedField === 'birthMunicipality') {
-      setSuggestions(prev => ({ 
-        ...prev, 
-        birthMunicipality: filterMunicipalities(value, birthFields.province) 
-      }));
-    }
-    
-    // If typing a municipality, check if it has a province
-    if (value) {
-      const matchedLocation = locationData.find(loc => 
-        loc.municipality.toLowerCase() === value.toLowerCase()
-      );
-      if (matchedLocation && !birthFields.province) {
-        setBirthFields(prev => ({...prev, province: matchedLocation.province}));
-        updatePlaceOfBirth({...birthFields, municipality: value, province: matchedLocation.province});
-      }
-    }
-  };
-
-  const handleBirthProvinceChange = (e) => {
-    const value = e.target.value;
-    setBirthFields(prev => ({...prev, province: value}));
-    updatePlaceOfBirth({...birthFields, province: value});
-    
-    if (focusedField === 'birthProvince') {
-      setSuggestions(prev => ({ 
-        ...prev, 
-        birthProvince: filterProvinces(value) 
-      }));
-    }
-  };
-
-  // Add select handlers for place of birth dropdowns
-  const handleSelectBirthBarangay = (barangay) => {
-    setBirthFields(prev => ({...prev, barangay}));
-    updatePlaceOfBirth({...birthFields, barangay});
-    setFocusedField(null);
-    
-    // Check if this barangay has a specific municipality and province
-    const matchedLocation = locationData.find(loc => loc.barangay === barangay);
-    if (matchedLocation) {
-      if (!birthFields.municipality) {
-        setBirthFields(prev => ({...prev, municipality: matchedLocation.municipality}));
-        updatePlaceOfBirth({...birthFields, barangay, municipality: matchedLocation.municipality});
-      }
-      if (!birthFields.province) {
-        setBirthFields(prev => ({...prev, province: matchedLocation.province}));
-        updatePlaceOfBirth({...birthFields, barangay, province: matchedLocation.province});
-      }
-    }
-  };
-
-  const handleSelectBirthMunicipality = (municipality) => {
-    setBirthFields(prev => ({...prev, municipality}));
-    updatePlaceOfBirth({...birthFields, municipality});
-    
-    // Find the province for this municipality
-    const matchedLocation = locationData.find(loc => loc.municipality === municipality);
-    if (matchedLocation && !birthFields.province) {
-      setBirthFields(prev => ({...prev, province: matchedLocation.province}));
-      updatePlaceOfBirth({...birthFields, municipality, province: matchedLocation.province});
-    }
-    
-    setFocusedField(null);
-  };
-
-  const handleSelectBirthProvince = (province) => {
-    setBirthFields(prev => ({...prev, province}));
-    updatePlaceOfBirth({...birthFields, province});
-    setFocusedField(null);
-  };
-
-  // Helper to update the placeOfBirth field with formatted address
-  const updatePlaceOfBirth = (fields) => {
-    const { barangay, municipality, province } = fields;
-    const parts = [];
-    
-    if (barangay) parts.push(barangay);
-    if (municipality) parts.push(municipality);
-    if (province) parts.push(province);
-    
-    const formattedPlace = parts.join(', ');
-    handleInputChange('placeOfBirth', formattedPlace);
-  };
-
-  // Add handlers for place of birth combined field
-  const handlePlaceOfBirthChange = (e) => {
-    const value = e.target.value;
-    handleInputChange('placeOfBirth', value);
-    
-    if (focusedField === 'placeOfBirth') {
-      setSuggestions(prev => ({ 
-        ...prev, 
-        placeOfBirth: filterBirthPlaces(value) 
-      }));
-    }
-  };
-
-  const handleSelectPlaceOfBirth = (location) => {
-    const formattedPlace = `${location.barangay}, ${location.municipality}, ${location.province}`;
-    handleInputChange('placeOfBirth', formattedPlace);
-    setFocusedField(null);
-  };
-
   return (
     <div className="aos-container">
       {/* Header */}
@@ -1036,7 +1285,7 @@ const ClientAnointingOfTheSick = () => {
             </div>
           </div>
           <div className="aos-row">
-          <div className="aos-field-ga">
+            <div className="aos-field-ga">
               <label>Age</label>
               <input 
                 type="text"
@@ -1057,24 +1306,74 @@ const ClientAnointingOfTheSick = () => {
                 <option value="Female">Female</option>
               </select>
             </div>
+          </div>
+
+          {/* Place of Birth with separated fields */}
+          <div className="aos-row">
             <div className="aos-field aos-location-dropdown-container">
-              <label>Place of Birth</label>
+              <label>Birth Barangay</label>
               <input 
                 type="text"
-                placeholder="Type to search (Barangay, Municipality, Province)"
-                value={formData.placeOfBirth}
-                onChange={handlePlaceOfBirthChange}
-                onFocus={() => handleFocus('placeOfBirth')}
+                placeholder="Type to search"
+                value={birthFields.barangay}
+                onChange={handleBirthBarangayChange}
+                onFocus={() => handleFocus('birthBarangay')}
               />
-              {focusedField === 'placeOfBirth' && suggestions.placeOfBirth && suggestions.placeOfBirth.length > 0 && (
+              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
                 <div className="aos-location-dropdown">
-                  {suggestions.placeOfBirth.map((location, index) => (
+                  {suggestions.birthBarangay.map((barangay, index) => (
                     <div 
                       key={index}
-                      onClick={() => handleSelectPlaceOfBirth(location)}
+                      onClick={() => handleSelectBirthBarangay(barangay)}
                       className="aos-location-dropdown-item"
                     >
-                      {`${location.barangay}, ${location.municipality}, ${location.province}`}
+                      {barangay}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="aos-field aos-location-dropdown-container">
+              <label>Birth Municipality</label>
+              <input 
+                type="text"
+                placeholder="Type to search"
+                value={birthFields.municipality}
+                onChange={handleBirthMunicipalityChange}
+                onFocus={() => handleFocus('birthMunicipality')}
+              />
+              {focusedField === 'birthMunicipality' && suggestions.birthMunicipality.length > 0 && (
+                <div className="aos-location-dropdown">
+                  {suggestions.birthMunicipality.map((municipality, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthMunicipality(municipality)}
+                      className="aos-location-dropdown-item"
+                    >
+                      {municipality}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="aos-field aos-location-dropdown-container">
+              <label>Birth Province</label>
+              <input 
+                type="text"
+                placeholder="Type to search"
+                value={birthFields.province}
+                onChange={handleBirthProvinceChange}
+                onFocus={() => handleFocus('birthProvince')}
+              />
+              {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+                <div className="aos-location-dropdown">
+                  {suggestions.birthProvince.map((province, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthProvince(province)}
+                      className="aos-location-dropdown-item"
+                    >
+                      {province}
                     </div>
                   ))}
                 </div>

@@ -31,6 +31,13 @@ const MinistryProfile = () => {
     joinedDate: ""
   });
 
+  // Password change states
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [passwordError, setPasswordError] = useState("");
+
   // Location dropdown states
   const [locationData, setLocationData] = useState([]);
   const [focusedField, setFocusedField] = useState(null);
@@ -327,6 +334,47 @@ const MinistryProfile = () => {
     });
   };
 
+  // Password change handlers
+  const handlePasswordChange = (name, value) => {
+    setPasswordData({
+      ...passwordData,
+      [name]: value
+    });
+    
+    // Clear password error when user starts typing
+    if (passwordError) {
+      setPasswordError("");
+    }
+  };
+
+  // Validate password fields
+  const validatePassword = () => {
+    // If both fields are empty, it's valid (no password change)
+    if (!passwordData.newPassword && !passwordData.confirmPassword) {
+      return true;
+    }
+    
+    // If only one field is filled, it's invalid
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordError("Both password fields must be filled if you want to change your password");
+      return false;
+    }
+    
+    // Check password length
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError("Password must be at least 6 characters long");
+      return false;
+    }
+    
+    // Check if passwords match
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleClear = () => {
     // Only clear editable fields
     setProfile({
@@ -346,11 +394,22 @@ const MinistryProfile = () => {
       province: "",
     });
     setImage(null);
+    // Clear password fields
+    setPasswordData({
+      newPassword: "",
+      confirmPassword: ""
+    });
+    setPasswordError("");
   };
 
   const handleUpdate = async () => {
     if (!userID) {
       setMessage({ text: "User ID is missing, please login again", type: "error" });
+      return;
+    }
+
+    // Validate password if provided
+    if (!validatePassword()) {
       return;
     }
 
@@ -365,6 +424,11 @@ const MinistryProfile = () => {
         profile: image
       };
 
+      // Add password if provided
+      if (passwordData.newPassword && passwordData.confirmPassword) {
+        updateData.password = passwordData.newPassword;
+      }
+
       const response = await fetch("https://parishofdivinemercy.com/backend/user_management.php", {
         method: "PUT",
         headers: {
@@ -377,6 +441,13 @@ const MinistryProfile = () => {
       
       if (data.success) {
         setMessage({ text: "Profile updated successfully", type: "success" });
+        
+        // Clear password fields after successful update
+        setPasswordData({
+          newPassword: "",
+          confirmPassword: ""
+        });
+        setPasswordError("");
         
         // Update local storage data
         const storedUser = JSON.parse(localStorage.getItem("ministry_user"));
@@ -407,7 +478,7 @@ const MinistryProfile = () => {
   return (
     <div className="community-profile-container">
       <div className="community-profile-header">
-        <h1 className="title-cp">MINISTRY PROFILE</h1>
+        <h1 className="title-mp">MINISTRY PROFILE</h1>
       </div>
 
       {message.text && (
@@ -440,7 +511,7 @@ const MinistryProfile = () => {
         {/* Form Fields */}
         <div className="community-profile-fields-cp">
           <div className="community-profile-row-cp">
-            <div className="cp-fields">
+            <div>
               <label>First Name</label>
               <input 
                 type="text" 
@@ -449,7 +520,7 @@ const MinistryProfile = () => {
                 onChange={(e) => handleInputChange('firstName', e.target.value)} 
               />
             </div>
-            <div className="cp-fields">
+            <div>
               <label>Middle Name</label>
               <input 
                 type="text" 
@@ -458,7 +529,7 @@ const MinistryProfile = () => {
                 onChange={(e) => handleInputChange('middleName', e.target.value)} 
               />
             </div>
-            <div className="cp-fields">
+            <div>
               <label>Last Name</label>
               <input 
                 type="text" 
@@ -467,7 +538,10 @@ const MinistryProfile = () => {
                 onChange={(e) => handleInputChange('lastName', e.target.value)} 
               />
             </div>
-            <div className="cp-fields">
+          </div>
+          
+          <div className="community-profile-row-cp">
+            <div>
               <label>Gender</label>
               <select 
                 name="gender" 
@@ -480,10 +554,7 @@ const MinistryProfile = () => {
                 <option value="Other">Other</option>
               </select>
             </div>
-          </div>
-
-          <div className="community-profile-row-cp">
-            <div className="cp-fields"> 
+            <div> 
               <label>Date of Birth</label>
               <input 
                 type="date" 
@@ -492,7 +563,7 @@ const MinistryProfile = () => {
                 onChange={(e) => handleInputChange('dateOfBirth', e.target.value)} 
               />
             </div>
-            <div className="cp-fields">
+            <div>
               <label>Contact Number</label>
               <input 
                 type="text" 
@@ -501,7 +572,19 @@ const MinistryProfile = () => {
                 onChange={(e) => handleInputChange('contactNumber', e.target.value)} 
               />
             </div>
-            <div className="cp-fields">
+          </div>
+
+          <div className="community-profile-row-cp">
+            <div>
+              <label>Email Address</label>
+              <input 
+                type="email" 
+                name="email" 
+                value={profile.email} 
+                onChange={(e) => handleInputChange('email', e.target.value)} 
+              />
+            </div>
+            <div>
               <label>Nationality</label>
               <input 
                 type="text" 
@@ -510,29 +593,11 @@ const MinistryProfile = () => {
                 onChange={(e) => handleInputChange('nationality', e.target.value)} 
               />
             </div>
-            <div className="cp-fields">
-              <label>Religion</label>
-              <input 
-                type="text" 
-                name="religion" 
-                value={profile.religion} 
-                onChange={(e) => handleInputChange('religion', e.target.value)} 
-              />
-            </div>
           </div>
         </div>
       </div>
 
       <div className="community-profile-row-cp">
-        <div>
-          <label>Email Address</label>
-          <input 
-            type="email" 
-            name="email" 
-            value={profile.email} 
-            onChange={(e) => handleInputChange('email', e.target.value)} 
-          />
-        </div>
         <div>
           <label>Street</label>
           <input 
@@ -566,9 +631,6 @@ const MinistryProfile = () => {
             </div>
           )}
         </div>
-      </div>
-
-      <div className="community-profile-row-cp">
         <div className="location-dropdown-container">
           <label>Municipality</label>
           <input 
@@ -617,11 +679,50 @@ const MinistryProfile = () => {
             </div>
           )}
         </div>
-        <div style={{ visibility: "hidden" }}></div>
       </div>
+
+      {/* Password Change Section */}
+      <div className="community-profile-row-cp">
+        <div>
+          <label>New Password</label>
+          <input 
+            type="password" 
+            name="newPassword" 
+            value={passwordData.newPassword} 
+            onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+            placeholder="Leave blank to keep current password"
+          />
+        </div>
+        <div>
+          <label>Confirm New Password</label>
+          <input 
+            type="password" 
+            name="confirmPassword" 
+            value={passwordData.confirmPassword} 
+            onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+            placeholder="Confirm your new password"
+          />
+        </div>
+      </div>
+
+      {/* Password Error Message */}
+      {passwordError && (
+        <div className="password-error-message">
+          {passwordError}
+        </div>
+      )}
 
       {/* Non-editable fields */}
       <div className="community-profile-row-cp">
+        <div>
+          <label>Religion</label>
+          <input 
+            type="text" 
+            name="religion" 
+            value={profile.religion} 
+            onChange={(e) => handleInputChange('religion', e.target.value)} 
+          />
+        </div>
         <div>
           <label>Position</label>
           <input 
