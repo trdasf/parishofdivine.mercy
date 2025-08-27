@@ -100,8 +100,7 @@ const ClientLogin = () => {
     }
   };
 
-  // Handle signup submission
- // Handle signup submission - FIXED VERSION
+// Handle signup submission - PROPER DUPLICATE EMAIL HANDLING
 const handleSignupSubmit = async (e) => {
   e.preventDefault();
   setIsLoading(true);
@@ -155,48 +154,33 @@ const handleSignupSubmit = async (e) => {
       })
     });
     
-    const contentType = response.headers.get("content-type");
+    const data = await response.json();
     
-    // Always try to parse JSON response first
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-      const data = await response.json();
-      
-      // Check if the request was successful (status 200-299)
-      if (response.ok && data.success) {
-        // Show success message and switch to login view
-        setSuccessMessage('Registration successful! You can now login with your account.');
-        setTimeout(() => {
-          setIsLoginView(true);
-          setSuccessMessage('');
-          // Clear signup form
-          setSignupData({
-            first_name: '',
-            last_name: '',
-            contact_number: '',
-            email: '',
-            password: '',
-            confirm_password: ''
-          });
-        }, 2000);
-      } else {
-        // Handle specific error cases
-        if (response.status === 409) {
-          // Email already exists
-          setErrorMessage(data.message || 'An account with this email already exists.');
-        } else if (response.status === 400) {
-          // Bad request (validation errors)
-          setErrorMessage(data.message || 'Please check your input and try again.');
-        } else {
-          // Other errors
-          setErrorMessage(data.message || 'Registration failed. Please try again.');
-        }
-      }
-    } else {
-      // Non-JSON response - server error
-      const text = await response.text();
-      console.error('Non-JSON response:', text);
-      setErrorMessage('Server error. Please try again later.');
+    // Check for success first
+    if (response.ok && data.success) {
+      setSuccessMessage('Registration successful! You can now login with your account.');
+      setTimeout(() => {
+        setIsLoginView(true);
+        setSuccessMessage('');
+        setSignupData({
+          first_name: '',
+          last_name: '',
+          contact_number: '',
+          email: '',
+          password: '',
+          confirm_password: ''
+        });
+      }, 2000);
+    } 
+    // Handle 409 Conflict (duplicate email) specifically
+    else if (response.status === 409) {
+      setErrorMessage('The email is already existing');
     }
+    // Handle other errors
+    else {
+      setErrorMessage(data.message || 'Registration failed. Please try again.');
+    }
+    
   } catch (error) {
     console.error('Network Error:', error);
     setErrorMessage('Network error. Please check your connection and try again.');
