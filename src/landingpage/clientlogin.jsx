@@ -101,95 +101,109 @@ const ClientLogin = () => {
   };
 
   // Handle signup submission
-  const handleSignupSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
+ // Handle signup submission - FIXED VERSION
+const handleSignupSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setErrorMessage('');
+  setSuccessMessage('');
+  
+  if (signupData.password !== signupData.confirm_password) {
+    setErrorMessage('Passwords do not match.');
+    setIsLoading(false);
+    return;
+  }
+
+  // Validate password requirements
+  const password = signupData.password;
+  if (password.length < 8) {
+    setErrorMessage('Password must be at least 8 characters long.');
+    setIsLoading(false);
+    return;
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    setErrorMessage('Password must contain at least one uppercase letter.');
+    setIsLoading(false);
+    return;
+  }
+
+  if (!/[0-9]/.test(password)) {
+    setErrorMessage('Password must contain at least one number.');
+    setIsLoading(false);
+    return;
+  }
+
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    setErrorMessage('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;\':",./<>?).');
+    setIsLoading(false);
+    return;
+  }
+  
+  try {
+    const response = await fetch('http://parishofdivinemercy.com/backend/client_registration.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        first_name: signupData.first_name,
+        last_name: signupData.last_name,
+        contact_number: signupData.contact_number,
+        email: signupData.email,
+        password: signupData.password
+      })
+    });
     
-    if (signupData.password !== signupData.confirm_password) {
-      setErrorMessage('Passwords do not match.');
-      setIsLoading(false);
-      return;
-    }
-
-    // Validate password requirements
-    const password = signupData.password;
-    if (password.length < 8) {
-      setErrorMessage('Password must be at least 8 characters long.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setErrorMessage('Password must contain at least one uppercase letter.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[0-9]/.test(password)) {
-      setErrorMessage('Password must contain at least one number.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      setErrorMessage('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;\':",./<>?).');
-      setIsLoading(false);
-      return;
-    }
+    const contentType = response.headers.get("content-type");
     
-    try {
-      const response = await fetch('http://parishofdivinemercy.com/backend/client_registration.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          first_name: signupData.first_name,
-          last_name: signupData.last_name,
-          contact_number: signupData.contact_number,
-          email: signupData.email,
-          password: signupData.password
-        })
-      });
+    // Always try to parse JSON response first
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      const data = await response.json();
       
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        const data = await response.json();
-        
-        if (data.success) {
-          // Show success message and switch to login view
-          setSuccessMessage('Registration successful! You can now login with your account.');
-          setTimeout(() => {
-            setIsLoginView(true);
-            setSuccessMessage('');
-            // Clear signup form
-            setSignupData({
-              first_name: '',
-              last_name: '',
-              contact_number: '',
-              email: '',
-              password: '',
-              confirm_password: ''
-            });
-          }, 2000);
+      // Check if the request was successful (status 200-299)
+      if (response.ok && data.success) {
+        // Show success message and switch to login view
+        setSuccessMessage('Registration successful! You can now login with your account.');
+        setTimeout(() => {
+          setIsLoginView(true);
+          setSuccessMessage('');
+          // Clear signup form
+          setSignupData({
+            first_name: '',
+            last_name: '',
+            contact_number: '',
+            email: '',
+            password: '',
+            confirm_password: ''
+          });
+        }, 2000);
+      } else {
+        // Handle specific error cases
+        if (response.status === 409) {
+          // Email already exists
+          setErrorMessage(data.message || 'An account with this email already exists.');
+        } else if (response.status === 400) {
+          // Bad request (validation errors)
+          setErrorMessage(data.message || 'Please check your input and try again.');
         } else {
+          // Other errors
           setErrorMessage(data.message || 'Registration failed. Please try again.');
         }
-      } else {
-        const text = await response.text();
-        console.error('Non-JSON response:', text);
-        setErrorMessage('Server error. Please try again later.');
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setErrorMessage('Network error. Please check your connection and try again.');
-    } finally {
-      setIsLoading(false);
+    } else {
+      // Non-JSON response - server error
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
+      setErrorMessage('Server error. Please try again later.');
     }
-  };
-
+  } catch (error) {
+    console.error('Network Error:', error);
+    setErrorMessage('Network error. Please check your connection and try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
   // Handle forgot password submission
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
