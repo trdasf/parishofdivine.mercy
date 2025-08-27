@@ -10,7 +10,9 @@ import {
   faPhone, 
   faEnvelope, 
   faLock,
-  faTimes
+  faTimes,
+  faCheckCircle,
+  faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
 import pdmLogo from "../assets/pdmlogo.png";
 import "./login.css";
@@ -28,6 +30,10 @@ const ClientLogin = () => {
   // Error and success messages
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Modal states for success and error
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   
   // Forgot password modal state
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
@@ -91,103 +97,111 @@ const ClientLogin = () => {
         });
       } else {
         setErrorMessage(data.message || 'Invalid email or password.');
+        setShowErrorModal(true);
       }
     } catch (error) {
       console.error('Error:', error);
       setErrorMessage('Network error. Please check your connection and try again.');
+      setShowErrorModal(true);
     } finally {
       setIsLoading(false);
     }
   };
 
-// Handle signup submission - PROPER DUPLICATE EMAIL HANDLING
-const handleSignupSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setErrorMessage('');
-  setSuccessMessage('');
-  
-  if (signupData.password !== signupData.confirm_password) {
-    setErrorMessage('Passwords do not match.');
-    setIsLoading(false);
-    return;
-  }
-
-  // Validate password requirements
-  const password = signupData.password;
-  if (password.length < 8) {
-    setErrorMessage('Password must be at least 8 characters long.');
-    setIsLoading(false);
-    return;
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    setErrorMessage('Password must contain at least one uppercase letter.');
-    setIsLoading(false);
-    return;
-  }
-
-  if (!/[0-9]/.test(password)) {
-    setErrorMessage('Password must contain at least one number.');
-    setIsLoading(false);
-    return;
-  }
-
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    setErrorMessage('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;\':",./<>?).');
-    setIsLoading(false);
-    return;
-  }
-  
-  try {
-    const response = await fetch('http://parishofdivinemercy.com/backend/client_registration.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        first_name: signupData.first_name,
-        last_name: signupData.last_name,
-        contact_number: signupData.contact_number,
-        email: signupData.email,
-        password: signupData.password
-      })
-    });
+  // Handle signup submission
+  const handleSignupSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage('');
+    setSuccessMessage('');
     
-    const data = await response.json();
-    
-    // Check for success first
-    if (response.ok && data.success) {
-      setSuccessMessage('Registration successful! You can now login with your account.');
-      setTimeout(() => {
-        setIsLoginView(true);
-        setSuccessMessage('');
-        setSignupData({
-          first_name: '',
-          last_name: '',
-          contact_number: '',
-          email: '',
-          password: '',
-          confirm_password: ''
-        });
-      }, 2000);
-    } 
-    // Handle 409 Conflict (duplicate email) specifically
-    else if (response.status === 409) {
-      setErrorMessage('The email is already existing');
+    if (signupData.password !== signupData.confirm_password) {
+      setErrorMessage('Passwords do not match.');
+      setShowErrorModal(true);
+      setIsLoading(false);
+      return;
     }
-    // Handle other errors
-    else {
-      setErrorMessage(data.message || 'Registration failed. Please try again.');
+
+    // Validate password requirements
+    const password = signupData.password;
+    if (password.length < 8) {
+      setErrorMessage('Password must be at least 8 characters long.');
+      setShowErrorModal(true);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setErrorMessage('Password must contain at least one uppercase letter.');
+      setShowErrorModal(true);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setErrorMessage('Password must contain at least one number.');
+      setShowErrorModal(true);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      setErrorMessage('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;\':",./<>?).');
+      setShowErrorModal(true);
+      setIsLoading(false);
+      return;
     }
     
-  } catch (error) {
-    console.error('Network Error:', error);
-    setErrorMessage('Network error. Please check your connection and try again.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      const response = await fetch('http://parishofdivinemercy.com/backend/client_registration.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: signupData.first_name,
+          last_name: signupData.last_name,
+          contact_number: signupData.contact_number,
+          email: signupData.email,
+          password: signupData.password
+        })
+      });
+      
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await response.json();
+        
+        if (data.success) {
+          // Show success modal and clear signup form
+          setSuccessMessage('Registration successful! You can now login with your account.');
+          setShowSuccessModal(true);
+          setSignupData({
+            first_name: '',
+            last_name: '',
+            contact_number: '',
+            email: '',
+            password: '',
+            confirm_password: ''
+          });
+        } else {
+          setErrorMessage(data.message || 'Registration failed. Please try again.');
+          setShowErrorModal(true);
+        }
+      } else {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        setErrorMessage('Server error. Please try again later.');
+        setShowErrorModal(true);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErrorMessage('Network error. Please check your connection and try again.');
+      setShowErrorModal(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Handle forgot password submission
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
@@ -266,15 +280,25 @@ const handleSignupSubmit = async (e) => {
     }
   };
 
+  // Handle closing success modal
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setSuccessMessage('');
+    setIsLoginView(true); // Switch to login view after successful registration
+  };
+
+  // Handle closing error modal
+  const handleErrorModalClose = () => {
+    setShowErrorModal(false);
+    setErrorMessage('');
+  };
+
   // Handle login input changes
   const handleLoginChange = (e) => {
     setLoginData({
       ...loginData,
       [e.target.name]: e.target.value
     });
-    // Clear messages when user starts typing
-    if (errorMessage) setErrorMessage('');
-    if (successMessage) setSuccessMessage('');
   };
   
   // Handle signup input changes
@@ -283,9 +307,6 @@ const handleSignupSubmit = async (e) => {
       ...signupData,
       [e.target.name]: e.target.value
     });
-    // Clear messages when user starts typing
-    if (errorMessage) setErrorMessage('');
-    if (successMessage) setSuccessMessage('');
   };
 
   // Handle forgot password input changes
@@ -313,20 +334,6 @@ const handleSignupSubmit = async (e) => {
             <FontAwesomeIcon icon={faUser} className="role-page-icon" />
           </div>
         </div>
-        
-        {/* Error message display */}
-        {errorMessage && (
-          <div className="error-message">
-            {errorMessage}
-          </div>
-        )}
-
-        {/* Success message display */}
-        {successMessage && (
-          <div className="success-message">
-            {successMessage}
-          </div>
-        )}
         
         {isLoginView ? (
           <form className="login-form" onSubmit={handleLoginSubmit}>
@@ -550,6 +557,56 @@ const handleSignupSubmit = async (e) => {
           </form>
         )}
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="modal-container success-modal">
+            <div className="modal-header">
+              <div className="success-icon">
+                <FontAwesomeIcon icon={faCheckCircle} />
+              </div>
+              <h2>Success!</h2>
+            </div>
+            <div className="modal-content">
+              <p>{successMessage}</p>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="modal-ok-button"
+                onClick={handleSuccessModalClose}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="modal-overlay">
+          <div className="modal-container error-modal">
+            <div className="modal-header">
+              <div className="error-icon">
+                <FontAwesomeIcon icon={faExclamationTriangle} />
+              </div>
+              <h2>Error</h2>
+            </div>
+            <div className="modal-content-error">
+              <p>{errorMessage}</p>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="modal-ok-button"
+                onClick={handleErrorModalClose}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Forgot Password Modal */}
       {showForgotPasswordModal && (

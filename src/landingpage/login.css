@@ -379,6 +379,7 @@
     max-width: 500px;
     padding: 30px;
     position: relative;
+    text-align: center;
   }
   
   .modal-header {
@@ -409,51 +410,132 @@
     align-items: center;
     justify-content: center;
   }
+
+  /* Success and Error Modal Specific Styles */
+  .success-modal .modal-header,
+  .error-modal .modal-header {
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    border-bottom: none;
+    padding-bottom: 10px;
+  }
+
+  .success-icon,
+  .error-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto;
+  }
+
+  .success-icon {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .error-icon {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .success-modal .modal-header h2 {
+    color: #155724;
+    margin: 0;
+  }
+
+  .error-modal .modal-header h2 {
+    color: #721c24;
+    margin: 0;
+  }
+
+  .modal-content-error {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .modal-content-error p {
+    color: #333;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0;
+    font-family: Roboto, sans-serif;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .modal-ok-button {
+    background: #a56a00;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-family: Montserrat, sans-serif;
+    min-width: 80px;
+  }
+
+  .modal-ok-button:hover {
+    background: #804a00;
+  }
+
   .password-requirements {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 8px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
 
-        .password-requirements small {
-            display: block;
-            color: #6c757d;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
+  .password-requirements small {
+    display: block;
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
 
-        .password-requirements ul {
-            margin: 0;
-            padding-left: 0;
-            list-style: none;
-        }
+  .password-requirements ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
 
-        .password-requirements li {
-            position: relative;
-            padding-left: 24px;
-            margin-bottom: 4px;
-            color: #495057;
-            font-size: 0.875rem;
-            line-height: 1.4;
-        }
+  .password-requirements li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 4px;
+    color: #495057;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
 
-        .password-requirements li:before {
-            content: "•";
-            position: absolute;
-            left: 8px;
-            color: #6c757d;
-            font-weight: bold;
-        }
+  .password-requirements li:before {
+    content: "•";
+    position: absolute;
+    left: 8px;
+    color: #6c757d;
+    font-weight: bold;
+  }
 
-        .password-requirements li:last-child {
-            margin-bottom: 0;
-        }
+  .password-requirements li:last-child {
+    margin-bottom: 0;
+  }
 
-  
   .modal-close:hover {
     color: #a56a00;
   }
@@ -489,6 +571,21 @@
       width: 90%;
       margin: 0 20px;
       padding: 20px;
+    }
+
+    .success-icon,
+    .error-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+    }
+
+    .modal-content p {
+      font-size: 14px;
     }
   }
   @media (max-width: 480px) {
