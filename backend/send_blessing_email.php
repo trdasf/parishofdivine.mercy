@@ -77,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'parishofdivinemercy@gmail.com';
-                $mail->Password   = 'scdq scnf milp uson';
+                $mail->Password   = 'obyk hxts jdsv lofs';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
@@ -89,12 +89,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $blessingDate = new DateTime($blessingData['preferredDate']);
                 $formattedDate = $blessingDate->format('F j, Y');
                 
+                // Format time to 12-hour format with AM/PM
+                $blessingTime = '';
+                if (isset($blessingData['preferredTime']) && !empty($blessingData['preferredTime'])) {
+                    // Convert 24-hour format to 12-hour format with AM/PM
+                    $timeObj = DateTime::createFromFormat('H:i:s', $blessingData['preferredTime']);
+                    if ($timeObj) {
+                        $blessingTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                    } else {
+                        // Fallback: try without seconds
+                        $timeObj = DateTime::createFromFormat('H:i', $blessingData['preferredTime']);
+                        if ($timeObj) {
+                            $blessingTime = $timeObj->format('g:i A');
+                        } else {
+                            $blessingTime = $blessingData['preferredTime']; // Use original if conversion fails
+                        }
+                    }
+                }
+                
                 // Extract blessing type if available
                 $blessingType = isset($blessingData['blessingType']) ? $blessingData['blessingType'] : 'General Blessing';
                 
                 // Email content
                 $mail->isHTML(true);
-                $mail->Subject = 'Blessing Ceremony Appointment Request - Parish of Divine Mercy';
+                $mail->Subject = 'Blessing Ceremony Appointment Request Pending - Parish of Divine Mercy';
                 $mail->Body = "
                     <html>
                     <body style='font-family: Roboto, Arial, sans-serif; line-height: 1.6; color: #000; margin: 0; padding: 0;'>
@@ -108,24 +126,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div style='padding: 30px 20px; background-color: #fff;'>
                                 <h2 style='color: #573901; font-family: Montserrat, sans-serif; margin-bottom: 20px;'>Dear {$fullName},</h2>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Thank you for scheduling a blessing ceremony appointment at the Parish of Divine Mercy.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Thank you for submitting your <b>Blessing Ceremony Appointment Request</b> to the Parish of Divine Mercy.</p>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your appointment request is currently <strong style='color: #b3701f;'>PENDING</strong> for confirmation by our parish office.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your appointment request is currently <strong style='color: #b3701f;'>PENDING</strong> for review and confirmation by our parish office.</p>
                                 
                                 <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #710808;'>
-                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Appointment Details:</h3>
+                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Appointment Request Details:</h3>
                                     <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Blessing Type:</td>
                                             <td style='padding: 8px 0;'>{$blessingType}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Preferred Date:</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Date:</td>
                                             <td style='padding: 8px 0;'>{$formattedDate}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Preferred Time:</td>
-                                            <td style='padding: 8px 0;'>{$blessingData['preferredTime']}</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Time:</td>
+                                            <td style='padding: 8px 0;'>{$blessingTime}</td>
                                         </tr>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Status:</td>
@@ -136,24 +154,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 
                                 <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Our parish staff will review your appointment request. You will receive another email once your appointment has been confirmed or if any changes are needed.</p>
                                 
+                                <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                    <p style='color: #856404; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                        <strong>Please Note:</strong> This is for an appointment scheduling only. The actual blessing ceremony will be conducted during your scheduled appointment after it is confirmed.
+                                    </p>
+                                </div>
+                                
                                 <div style='margin-top: 30px;'>
                                     <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Reminders:</h3>
                                     <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
-                                        <li style='margin-bottom: 10px;'>Please arrive at least 15 minutes before your scheduled time</li>
+                                        <li style='margin-bottom: 10px;'>Please arrive at least 15 minutes before your scheduled appointment time</li>
                                         <li style='margin-bottom: 10px;'>Bring any items that need to be blessed if applicable</li>
                                         <li style='margin-bottom: 10px;'>Observe proper church attire and decorum</li>
                                         <li style='margin-bottom: 10px;'>If you need to reschedule, please contact the parish office at least 24 hours before</li>
+                                        <li style='margin-bottom: 10px;'>The blessing ceremony will take place during your confirmed appointment time</li>
                                     </ul>
                                 </div>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>God bless,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong></p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions, please contact our parish office.</p>
+                                
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>God bless,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Blessing Ministry</p>
                             </div>
                             
                             <div style='background: linear-gradient(to right, #710808, #ffcccc); height: 2px; width: 100%;'></div>
                             
                             <div style='background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;'>
                                 <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>This is an automated message. Please do not reply to this email.</p>
-                                <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>Parish of Divine Mercy | Contact: (your parish contact info)</p>
+                                <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>Parish of Divine Mercy | Contact: parishofdivinemercy@gmail.com</p>
                             </div>
                         </div>
                     </body>
@@ -162,19 +189,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Plain text version
                 $mail->AltBody = "Dear {$fullName},\n\n" .
-                    "Thank you for scheduling a blessing ceremony appointment at the Parish of Divine Mercy.\n" .
-                    "Your appointment request is currently PENDING for confirmation by our parish office.\n\n" .
-                    "Appointment Details:\n" .
+                    "Thank you for submitting your Blessing Ceremony Appointment Request to the Parish of Divine Mercy.\n" .
+                    "Your appointment request is currently PENDING for review and confirmation by our parish office.\n\n" .
+                    "Appointment Request Details:\n" .
                     "Blessing Type: {$blessingType}\n" .
-                    "Date: {$formattedDate}\n" .
-                    "Time: {$blessingData['preferredTime']}\n" .
+                    "Requested Date: {$formattedDate}\n" .
+                    "Requested Time: {$blessingTime}\n" .
                     "Status: PENDING\n\n" .
+                    "Please Note: This is for an appointment scheduling only. The actual blessing ceremony will be conducted during your scheduled appointment after it is confirmed.\n\n" .
                     "Our parish staff will review your appointment request. You will receive another email once confirmed.\n\n" .
                     "Important Reminders:\n" .
-                    "- Please arrive at least 15 minutes before your scheduled time\n" .
+                    "- Please arrive at least 15 minutes before your scheduled appointment time\n" .
                     "- Bring any items that need to be blessed if applicable\n" .
                     "- Observe proper church attire and decorum\n" .
-                    "- If you need to reschedule, please contact the parish office at least 24 hours before\n\n" .
+                    "- If you need to reschedule, please contact the parish office at least 24 hours before\n" .
+                    "- The blessing ceremony will take place during your confirmed appointment time\n\n" .
                     "God bless,\nParish of Divine Mercy";
 
                 if ($mail->send()) {

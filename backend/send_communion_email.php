@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'parishofdivinemercy@gmail.com';
-                $mail->Password   = 'scdq scnf milp uson';
+                $mail->Password   = 'obyk hxts jdsv lofs';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
@@ -99,10 +99,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $communionDate = new DateTime($communionData['date']);
                 $formattedDate = $communionDate->format('F j, Y');
                 
+                // Format time to 12-hour format with AM/PM
+                $communionTime = '';
+                if (isset($communionData['time']) && !empty($communionData['time'])) {
+                    // Convert 24-hour format to 12-hour format with AM/PM
+                    $timeObj = DateTime::createFromFormat('H:i:s', $communionData['time']);
+                    if ($timeObj) {
+                        $communionTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                    } else {
+                        // Fallback: try without seconds
+                        $timeObj = DateTime::createFromFormat('H:i', $communionData['time']);
+                        if ($timeObj) {
+                            $communionTime = $timeObj->format('g:i A');
+                        } else {
+                            $communionTime = $communionData['time']; // Use original if conversion fails
+                        }
+                    }
+                }
+                
                 error_log("Preparing email content...");
                 // Email content with matching color scheme
                 $mail->isHTML(true);
-                $mail->Subject = 'Holy Communion Appointment Pending - Parish of Divine Mercy';
+                $mail->Subject = 'Holy Communion Appointment Request Pending - Parish of Divine Mercy';
                 $mail->Body = "
                     <html>
                     <body style='font-family: Roboto, Arial, sans-serif; line-height: 1.6; color: #000; margin: 0; padding: 0;'>
@@ -116,27 +134,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div style='padding: 30px 20px; background-color: #fff;'>
                                 <h2 style='color: #573901; font-family: Montserrat, sans-serif; margin-bottom: 20px;'>Dear {$fullName},</h2>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Thank you for submitting your <b>Holy Communion application</b> to the Parish of Divine Mercy.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Thank you for submitting your <b>Holy Communion Appointment Request</b> to the Parish of Divine Mercy.</p>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your appointment is currently <strong style='color: #b3701f;'>PENDING</strong> for review by our parish office.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your appointment request is currently <strong style='color: #b3701f;'>PENDING</strong> for review by our parish office.</p>
                                 
                                 <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #710808;'>
-                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Appointment Details:</h3>
+                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Appointment Request Details:</h3>
                                     <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Candidate's Name:</td>
                                             <td style='padding: 8px 0;'>{$communionData['firstName']} {$communionData['middleName']} {$communionData['lastName']}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Date:</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Date:</td>
                                             <td style='padding: 8px 0;'>{$formattedDate}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                            <td style='padding: 8px 0;'>{$communionData['time']}</td>
-                                        </tr>
-                                        <tr>
-                                           
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Time:</td>
+                                            <td style='padding: 8px 0;'>{$communionTime}</td>
                                         </tr>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Status:</td>
@@ -145,14 +160,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </table>
                                 </div>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Our parish staff will review your application and documents. You will receive another email once your appointment has been approved or if additional information is needed.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Our parish staff will review your appointment request and documents. You will receive another email once your appointment has been approved or if additional information is needed.</p>
+                                
+                                <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                    <p style='color: #856404; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                        <strong>Please Note:</strong> This is for an appointment scheduling only. The actual First Holy Communion ceremony will be scheduled after your appointment is approved and all preparation requirements are completed.
+                                    </p>
+                                </div>
                                 
                                 <div style='margin-top: 30px;'>
-                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Next Steps:</h3>
+                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Next Steps for Your Appointment:</h3>
                                     <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
                                         <li style='margin-bottom: 10px;'>Wait for the approval email from our parish office</li>
-                                        <li style='margin-bottom: 10px;'>Prepare all original documents for verification</li>
+                                        <li style='margin-bottom: 10px;'>Prepare all original documents for verification during your appointment</li>
                                         <li style='margin-bottom: 10px;'>Attend the First Communion Seminar (details will be provided upon approval)</li>
+                                        <li style='margin-bottom: 10px;'>Complete all preparation requirements before the ceremony can be scheduled</li>
+                                        <li style='margin-bottom: 10px;'>Please arrive at least 15 minutes before your appointment time</li>
                                     </ul>
                                 </div>
                                 
@@ -165,7 +188,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             
                             <div style='background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;'>
                                 <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>This is an automated message. Please do not reply to this email.</p>
-                                <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>Parish of Divine Mercy | Contact: (your parish contact info)</p>
+                                <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>Parish of Divine Mercy | Contact: parishofdivinemercy@gmail.com</p>
                             </div>
                         </div>
                     </body>
@@ -174,14 +197,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Plain text version for non-HTML mail clients
                 $mail->AltBody = "Dear {$fullName},\n\n" .
-                    "Thank you for submitting your Holy Communion application to the Parish of Divine Mercy.\n" .
-                    "Your appointment is currently PENDING for review by our parish office.\n\n" .
-                    "Appointment Details:\n" .
+                    "Thank you for submitting your Holy Communion Appointment Request to the Parish of Divine Mercy.\n" .
+                    "Your appointment request is currently PENDING for review by our parish office.\n\n" .
+                    "Appointment Request Details:\n" .
                     "Candidate's Name: {$communionData['firstName']} {$communionData['middleName']} {$communionData['lastName']}\n" .
-                    "Date: {$formattedDate}\n" .
-                    "Time: {$communionData['time']}\n" .
+                    "Requested Date: {$formattedDate}\n" .
+                    "Requested Time: {$communionTime}\n" .
                     "Status: PENDING\n\n" .
-                    "Our parish staff will review your application. You will receive another email once approved.\n\n" .
+                    "Please Note: This is for an appointment scheduling only. The actual First Holy Communion ceremony will be scheduled after your appointment is approved and all preparation requirements are completed.\n\n" .
+                    "Our parish staff will review your appointment request. You will receive another email once approved.\n\n" .
                     "God bless,\nParish of Divine Mercy";
 
                 error_log('[SEND_EMAIL] Attempting to send email...');
@@ -217,4 +241,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $conn->close();
 
 // Return JSON response
-echo json_encode($response); 
+echo json_encode($response);

@@ -9,12 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
     exit();
 }
 
-// Enable error reporting for debugging
-// error_reporting(E_ALL);
-// ini_set('display_errors', 0); // Don't display errors to browser
-// ini_set('log_errors', 1);
-// ini_set('error_log', 'error.log');
-
 $servername = "localhost";
 $username = "u572625467_divine_mercy";
 $password = "Parish_12345";
@@ -32,7 +26,7 @@ try {
     $conn->begin_transaction();
 
     // Extract data from POST request
-   $clientID = isset($_POST['clientID']) && !empty($_POST['clientID']) ? $_POST['clientID'] : null;
+    $clientID = isset($_POST['clientID']) && !empty($_POST['clientID']) ? $_POST['clientID'] : null;
     
     // Get the JSON data from the anointingData field
     $anointingData = json_decode($_POST['anointingData'], true);
@@ -44,7 +38,7 @@ try {
     // Date/time details and sick person information
     $dateOfAnointing = $anointingData['dateOfAnointing'];
     $timeOfAnointing = $anointingData['timeOfAnointing'];
-    $priestName = $anointingData['priestName'];
+    $priestName = isset($anointingData['priestName']) ? $anointingData['priestName'] : '';
     
     $firstName = $anointingData['firstName'];
     $middleName = $anointingData['middleName'];
@@ -53,41 +47,60 @@ try {
     $age = $anointingData['age'];
     $dateOfBirth = $anointingData['dateOfBirth']; 
     $placeOfBirth = $anointingData['placeOfBirth'];
-    $religion = $anointingData['religion'];
-    $reasonForAnointing = $anointingData['reasonForAnointing'];
+    $religion = isset($anointingData['religion']) ? $anointingData['religion'] : '';
+    $reasonForAnointing = isset($anointingData['reasonForAnointing']) ? $anointingData['reasonForAnointing'] : '';
+    
+    // NEW: Marital status information
+    $maritalStatus = isset($anointingData['maritalStatus']) ? $anointingData['maritalStatus'] : '';
+    $yearsMarried = isset($anointingData['yearsMarried']) ? intval($anointingData['yearsMarried']) : null;
     
     // Contact person details
     $contactFirstName = $anointingData['contactFirstName'];
     $contactMiddleName = $anointingData['contactMiddleName'];
     $contactLastName = $anointingData['contactLastName'];
-    $contactRelationship = $anointingData['contactRelationship'];
+    $contactRelationship = isset($anointingData['contactRelationship']) ? $anointingData['contactRelationship'] : '';
     $contactPhone = $anointingData['contactPhone'];
-    $contactEmail = $anointingData['contactEmail'];
+    $contactEmail = isset($anointingData['contactEmail']) ? $anointingData['contactEmail'] : '';
+    
+    // NEW: Father information
+    $fatherFirstName = isset($anointingData['fatherFirstName']) ? $anointingData['fatherFirstName'] : '';
+    $fatherMiddleName = isset($anointingData['fatherMiddleName']) ? $anointingData['fatherMiddleName'] : '';
+    $fatherLastName = isset($anointingData['fatherLastName']) ? $anointingData['fatherLastName'] : '';
+    $fatherPhone = isset($anointingData['fatherPhone']) ? $anointingData['fatherPhone'] : '';
+    $fatherEmail = isset($anointingData['fatherEmail']) ? $anointingData['fatherEmail'] : '';
+    
+    // NEW: Mother information
+    $motherFirstName = isset($anointingData['motherFirstName']) ? $anointingData['motherFirstName'] : '';
+    $motherMiddleName = isset($anointingData['motherMiddleName']) ? $anointingData['motherMiddleName'] : '';
+    $motherLastName = isset($anointingData['motherLastName']) ? $anointingData['motherLastName'] : '';
+    $motherPhone = isset($anointingData['motherPhone']) ? $anointingData['motherPhone'] : '';
+    $motherEmail = isset($anointingData['motherEmail']) ? $anointingData['motherEmail'] : '';
     
     // Location details
-    $locationType = $anointingData['locationType'];
-    $locationName = $anointingData['locationName'];
-    $roomNumber = $anointingData['roomNumber'];
+    $locationType = isset($anointingData['locationType']) ? $anointingData['locationType'] : 'Hospital';
+    $locationName = isset($anointingData['locationName']) ? $anointingData['locationName'] : '';
+    $roomNumber = isset($anointingData['roomNumber']) ? $anointingData['roomNumber'] : '';
     $barangay = $anointingData['barangay'];
     $street = $anointingData['street'];
     $municipality = $anointingData['municipality'];
     $province = $anointingData['province'];
-    $locationRegion = $anointingData['locationRegion'];
+    $locationRegion = isset($anointingData['locationRegion']) ? $anointingData['locationRegion'] : '';
     
     // Additional details
     $isCritical = isset($anointingData['isCritical']) && $anointingData['isCritical'] === true ? 1 : 0;
     $needsViaticum = isset($anointingData['needsViaticum']) && $anointingData['needsViaticum'] === true ? 1 : 0;
     $needsReconciliation = isset($anointingData['needsReconciliation']) && $anointingData['needsReconciliation'] === true ? 1 : 0;
-    $additionalNotes = $anointingData['additionalNotes'];
+    $additionalNotes = isset($anointingData['additionalNotes']) ? $anointingData['additionalNotes'] : '';
 
-    // Step 1: Insert into anointing_application (main table)
+    // Step 1: Insert into anointing_application (main table) - UPDATED with marital info
     $stmt = $conn->prepare("INSERT INTO anointing_application (
         clientID, dateOfAnointing, timeOfAnointing, priestName,
         firstName, middleName, lastName, sex, age, 
-        dateOfBirth, placeOfBirth, religion, reasonForAnointing
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        dateOfBirth, placeOfBirth, religion, reasonForAnointing,
+        marital_status, years_married
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $stmt->bind_param("isssssssissss", 
+    $stmt->bind_param("issssssisssssi", 
         $clientID,
         $dateOfAnointing,
         $timeOfAnointing,
@@ -100,7 +113,9 @@ try {
         $dateOfBirth,
         $placeOfBirth,
         $religion,
-        $reasonForAnointing
+        $reasonForAnointing,
+        $maritalStatus,
+        $yearsMarried
     );
     
     $stmt->execute();
@@ -124,7 +139,45 @@ try {
     
     $stmt->execute();
 
-    // Step 3: Insert into anointing_location
+    // Step 3: NEW - Insert into anointing_father
+    if (!empty($fatherFirstName) || !empty($fatherLastName)) {
+        $stmt = $conn->prepare("INSERT INTO anointing_father (
+            anointingID, father_firstName, father_middleName, father_lastName,
+            father_phone, father_email
+        ) VALUES (?, ?, ?, ?, ?, ?)");
+        
+        $stmt->bind_param("isssss", 
+            $anointingID,
+            $fatherFirstName,
+            $fatherMiddleName,
+            $fatherLastName,
+            $fatherPhone,
+            $fatherEmail
+        );
+        
+        $stmt->execute();
+    }
+
+    // Step 4: NEW - Insert into anointing_mother
+    if (!empty($motherFirstName) || !empty($motherLastName)) {
+        $stmt = $conn->prepare("INSERT INTO anointing_mother (
+            anointingID, mother_firstName, mother_middleName, mother_lastName,
+            mother_phone, mother_email
+        ) VALUES (?, ?, ?, ?, ?, ?)");
+        
+        $stmt->bind_param("isssss", 
+            $anointingID,
+            $motherFirstName,
+            $motherMiddleName,
+            $motherLastName,
+            $motherPhone,
+            $motherEmail
+        );
+        
+        $stmt->execute();
+    }
+
+    // Step 5: Insert into anointing_location
     $stmt = $conn->prepare("INSERT INTO anointing_location (
         anointingID, locationType, locationName, roomNumber, street,
         barangay, municipality, province, locationRegion
@@ -144,7 +197,7 @@ try {
     
     $stmt->execute();
 
-    // Step 4: Insert into anointing_additionalinfo
+    // Step 6: Insert into anointing_additionalinfo
     $stmt = $conn->prepare("INSERT INTO anointing_additionalinfo (
         anointingID, isCritical, needsViaticum, needsReconciliation, additionalNotes
     ) VALUES (?, ?, ?, ?, ?)");
@@ -159,7 +212,7 @@ try {
     
     $stmt->execute();
 
-    // Step 5: Handle file uploads for requirements
+    // Step 7: Handle file uploads for requirements
     $uploadDir = "../uploads/anointing_requirements/";
     if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
     
@@ -224,4 +277,5 @@ try {
 }
 
 $conn->close();
-echo json_encode($response); 
+echo json_encode($response);
+?>

@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Host       = 'smtp.gmail.com';      // Gmail SMTP server
                 $mail->SMTPAuth   = true;                  // Enable SMTP authentication
                 $mail->Username   = 'parishofdivinemercy@gmail.com'; // SMTP username
-                $mail->Password   = 'scdq scnf milp uson';       // Replace with your App Password
+                $mail->Password   = 'obyk hxts jdsv lofs';       // Replace with your App Password
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Enable TLS encryption
                 $mail->Port       = 587;                   // TCP port to connect to
 
@@ -104,9 +104,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $funeralDate = new DateTime($funeralData['dateOfFuneralMass']);
                 $formattedDate = $funeralDate->format('F j, Y');
                 
+                // Format time to 12-hour format with AM/PM
+                $funeralTime = '';
+                if (isset($funeralData['timeOfFuneralMass']) && !empty($funeralData['timeOfFuneralMass'])) {
+                    // Convert 24-hour format to 12-hour format with AM/PM
+                    $timeObj = DateTime::createFromFormat('H:i:s', $funeralData['timeOfFuneralMass']);
+                    if ($timeObj) {
+                        $funeralTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                    } else {
+                        // Fallback: try without seconds
+                        $timeObj = DateTime::createFromFormat('H:i', $funeralData['timeOfFuneralMass']);
+                        if ($timeObj) {
+                            $funeralTime = $timeObj->format('g:i A');
+                        } else {
+                            $funeralTime = $funeralData['timeOfFuneralMass']; // Use original if conversion fails
+                        }
+                    }
+                }
+                
                 // Email content with matching color scheme
                 $mail->isHTML(true);
-                $mail->Subject = 'Funeral Mass Application Received - Parish of Divine Mercy';
+                $mail->Subject = 'Funeral Mass Application Pending - Parish of Divine Mercy';
                 $mail->Body = "
                     <html>
                     <body style='font-family: Roboto, Arial, sans-serif; line-height: 1.6; color: #000; margin: 0; padding: 0;'>
@@ -120,26 +138,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div style='padding: 30px 20px; background-color: #fff;'>
                                 <h2 style='color: #573901; font-family: Montserrat, sans-serif; margin-bottom: 20px;'>Dear {$fullName},</h2>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We have received your funeral mass application for your beloved departed. Our parish extends its deepest condolences to you and your family during this difficult time.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We have received your <b>Funeral Mass application</b> for your beloved departed. Our parish extends its deepest condolences to you and your family during this difficult time.</p>
                                 
                                 <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your application is currently <strong style='color: #b3701f;'>PENDING</strong> for review by our parish office.</p>
                                 
                                 <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #710808;'>
-                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Funeral Mass Details:</h3>
+                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Funeral Mass Request Details:</h3>
                                     <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Deceased:</td>
                                             <td style='padding: 8px 0;'>{$funeralData['deceasedFirstName']} {$funeralData['deceasedMiddleName']} {$funeralData['deceasedLastName']}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Date of Mass:</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Date:</td>
                                             <td style='padding: 8px 0;'>{$formattedDate}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                            <td style='padding: 8px 0;'>{$funeralData['timeOfFuneralMass']}</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Time:</td>
+                                            <td style='padding: 8px 0;'>{$funeralTime}</td>
                                         </tr>
-                                        <tr>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Status:</td>
                                             <td style='padding: 8px 0;'><span style='background-color: #f8d7da; color: #721c24; padding: 4px 12px; border-radius: 4px; font-weight: bold;'>PENDING</span></td>
@@ -149,12 +166,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 
                                 <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Our parish staff will review your application and documents shortly. You will receive another email once your application has been approved or if additional information is needed.</p>
                                 
+                                <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                    <p style='color: #856404; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                        <strong>Please Note:</strong> This is a request for scheduling a Funeral Mass. Final confirmation and scheduling will be provided once your application is approved and all requirements are verified.
+                                    </p>
+                                </div>
+                                
                                 <div style='margin-top: 30px;'>
                                     <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>What to Expect Next:</h3>
                                     <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
                                         <li style='margin-bottom: 10px;'>You will receive a confirmation once your application is approved</li>
-                                        <li style='margin-bottom: 10px;'>Our parish staff may contact you for any clarifications</li>
+                                        <li style='margin-bottom: 10px;'>Our parish staff may contact you for any clarifications or scheduling adjustments</li>
                                         <li style='margin-bottom: 10px;'>Please prepare all original documents for verification</li>
+                                        <li style='margin-bottom: 10px;'>Coordinate with the funeral home regarding the arrangements</li>
                                         <li style='margin-bottom: 10px;'>Arrive at least 30 minutes before the scheduled mass</li>
                                     </ul>
                                 </div>
@@ -163,6 +187,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin: 0;'><em>\"Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May they rest in peace. Amen.\"</em></p>
                                 </div>
                                 
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions, please contact our parish office.</p>
+                                
                                 <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>With deepest sympathy,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Funeral Ministry</p>
                             </div>
                             
@@ -170,7 +196,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             
                             <div style='background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;'>
                                 <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>This is an automated message. Please do not reply to this email.</p>
-                                <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>Parish of Divine Mercy | Contact: (your parish contact info)</p>
+                                <p style='color: #555; margin: 5px 0; font-family: Roboto, sans-serif;'>Parish of Divine Mercy | Contact: parishofdivinemercy@gmail.com</p>
                             </div>
                         </div>
                     </body>
@@ -179,13 +205,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Plain text version for non-HTML mail clients
                 $mail->AltBody = "Dear {$fullName},\n\n" .
-                    "We have received your funeral mass application for your beloved departed. Our parish extends its deepest condolences to you and your family during this difficult time.\n\n" .
+                    "We have received your Funeral Mass application for your beloved departed. Our parish extends its deepest condolences to you and your family during this difficult time.\n\n" .
                     "Your application is currently PENDING for review by our parish office.\n\n" .
-                    "Funeral Mass Details:\n" .
+                    "Funeral Mass Request Details:\n" .
                     "Deceased: {$funeralData['deceasedFirstName']} {$funeralData['deceasedMiddleName']} {$funeralData['deceasedLastName']}\n" .
-                    "Date of Mass: {$formattedDate}\n" .
-                    "Time: {$funeralData['timeOfFuneralMass']}\n" .
+                    "Requested Date: {$formattedDate}\n" .
+                    "Requested Time: {$funeralTime}\n" .
                     "Status: PENDING\n\n" .
+                    "Please Note: This is a request for scheduling a Funeral Mass. Final confirmation and scheduling will be provided once your application is approved and all requirements are verified.\n\n" .
                     "Our parish staff will review your application and documents shortly. You will receive another email once your application has been approved.\n\n" .
                     "With deepest sympathy,\nParish of Divine Mercy";
 

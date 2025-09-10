@@ -181,7 +181,7 @@ try {
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
             $mail->Username   = 'parishofdivinemercy@gmail.com';
-            $mail->Password   = 'scdq scnf milp uson'; // Your App Password
+            $mail->Password   = 'obyk hxts jdsv lofs'; // Your App Password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 

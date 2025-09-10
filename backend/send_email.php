@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'parishofdivinemercy@gmail.com';
-                $mail->Password   = 'scdq scnf milp uson'; // Your App Password
+                $mail->Password   = 'obyk hxts jdsv lofs'; // Your App Password
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
@@ -101,7 +101,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Format the date for display
                 $baptismDate = isset($baptismData['dateOfBaptism']) ? date('F j, Y', strtotime($baptismData['dateOfBaptism'])) : '';
-                $baptismTime = isset($baptismData['timeOfBaptism']) ? $baptismData['timeOfBaptism'] : '';
+                
+                // Format time to 12-hour format with AM/PM
+                $baptismTime = '';
+                if (isset($baptismData['timeOfBaptism']) && !empty($baptismData['timeOfBaptism'])) {
+                    // Convert 24-hour format to 12-hour format with AM/PM
+                    $timeObj = DateTime::createFromFormat('H:i:s', $baptismData['timeOfBaptism']);
+                    if ($timeObj) {
+                        $baptismTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                    } else {
+                        // Fallback: try without seconds
+                        $timeObj = DateTime::createFromFormat('H:i', $baptismData['timeOfBaptism']);
+                        if ($timeObj) {
+                            $baptismTime = $timeObj->format('g:i A');
+                        } else {
+                            $baptismTime = $baptismData['timeOfBaptism']; // Use original if conversion fails
+                        }
+                    }
+                }
                 
                 $childName = trim(($baptismData['firstName'] ?? '') . ' ' . 
                                   ($baptismData['middleName'] ?? '') . ' ' . 
@@ -124,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Email content with matching color scheme
                 $mail->isHTML(true);
-                $mail->Subject = 'Baptism Application Pending - Parish of Divine Mercy';
+                $mail->Subject = 'Baptism Appointment Request Pending - Parish of Divine Mercy';
                 $mail->Body = "
                     <html>
                     <body style='font-family: Roboto, Arial, sans-serif; line-height: 1.6; color: #000; margin: 0; padding: 0;'>
@@ -138,23 +155,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div style='padding: 30px 20px; background-color: #fff;'>
                                 <h2 style='color: #573901; font-family: Montserrat, sans-serif; margin-bottom: 20px;'>Dear {$fullName},</h2>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Thank you for submitting your <b>Baptism</b> application to the Parish of Divine Mercy.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Thank you for submitting your <b>Baptism Appointment Request</b> to the Parish of Divine Mercy.</p>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your request is currently <strong style='color: #b3701f;'>PENDING</strong> for review by our parish office.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your appointment request is currently <strong style='color: #b3701f;'>PENDING</strong> for review by our parish office.</p>
                                 
                                 <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #710808;'>
-                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Request Details:</h3>
+                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Appointment Request Details:</h3>
                                     <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                         <tr>
                                             <td style='padding: 8px 0; font-weight: 500;'>Child's Name:</td>
                                             <td style='padding: 8px 0;'>{$childName}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Date:</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Date:</td>
                                             <td style='padding: 8px 0;'>{$baptismDate}</td>
                                         </tr>
                                         <tr>
-                                            <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
+                                            <td style='padding: 8px 0; font-weight: 500;'>Requested Time:</td>
                                             <td style='padding: 8px 0;'>{$baptismTime}</td>
                                         </tr>
                                         <tr>
@@ -168,15 +185,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     </table>
                                 </div>
                                 
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Our parish staff will review your request. You will receive another email once your request has been approved or if additional information is needed.</p>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Our parish staff will review your appointment request. You will receive another email once your appointment has been approved or if additional information is needed.</p>
+                                
+                                <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                    <p style='color: #856404; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                        <strong>Please Note:</strong> This is for an appointment scheduling only. The actual baptism ceremony will be scheduled after your appointment is approved and all requirements are met.
+                                    </p>
+                                </div>
                                 
                                 <div style='margin-top: 30px;'>
-                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Notes:</h3>
+                                    <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Reminders:</h3>
                                     <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
-                                        <li style='margin-bottom: 10px;'>Please arrive at least 15 minutes before the scheduled time</li>
-                                        <li style='margin-bottom: 10px;'>Godparents should be present for the ceremony</li>
+                                        <li style='margin-bottom: 10px;'>Please arrive at least 15 minutes before your scheduled appointment time</li>
+                                        <li style='margin-bottom: 10px;'>Bring all required documents for verification</li>
                                         <li style='margin-bottom: 10px;'>Please bring your child's birth certificate</li>
-                                        <li style='margin-bottom: 10px;'>Baptismal donation can be arranged at the parish office</li>
+                                        <li style='margin-bottom: 10px;'>The actual baptism ceremony date will be discussed during your appointment</li>
                                     </ul>
                                 </div>
                                 
@@ -198,15 +221,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Plain text version for non-HTML mail clients
                 $mail->AltBody = "Dear {$fullName},\n\n" .
-                    "Thank you for submitting your Baptism application to the Parish of Divine Mercy.\n" .
-                    "Your request is currently PENDING for review by our parish office.\n\n" .
-                    "Request Details:\n" .
+                    "Thank you for submitting your Baptism Appointment Request to the Parish of Divine Mercy.\n" .
+                    "Your appointment request is currently PENDING for review by our parish office.\n\n" .
+                    "Appointment Request Details:\n" .
                     "Child's Name: {$childName}\n" .
-                    "Date: {$baptismDate}\n" .
-                    "Time: {$baptismTime}\n" .
+                    "Requested Date: {$baptismDate}\n" .
+                    "Requested Time: {$baptismTime}\n" .
                     "Address: {$address}\n" .
                     "Status: PENDING\n\n" .
-                    "Our parish staff will review your request. You will receive another email once approved.\n\n" .
+                    "Please Note: This is for an appointment scheduling only. The actual baptism ceremony will be scheduled after your appointment is approved.\n\n" .
+                    "Our parish staff will review your appointment request. You will receive another email once approved.\n\n" .
                     "God bless,\nParish of Divine Mercy";
 
                 error_log('[SEND_EMAIL] Attempting to send email...');
