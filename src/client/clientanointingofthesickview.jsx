@@ -56,6 +56,13 @@ const ClientAnointingOfTheSickView = () => {
     return <div className="client-anointing-view-value">{value || "N/A"}</div>;
   };
 
+  // Function to render spouse name
+  const renderSpouseName = (firstName, middleName, lastName) => {
+    const nameParts = [firstName, middleName, lastName].filter(part => part && part.trim() !== '');
+    const fullName = nameParts.length > 0 ? nameParts.join(' ') : '';
+    return renderReadOnlyField(fullName);
+  };
+
   // Function to render document status
   const renderDocumentStatus = (status, filePath) => {
     const isSubmitted = status === 'Submitted';
@@ -168,6 +175,24 @@ const ClientAnointingOfTheSickView = () => {
               <div className="client-anointing-view-field">
                 <label>Age:</label>
                 {renderReadOnlyField(anointing.age)}
+              </div>
+            </div>
+            
+            <div className="client-anointing-view-row">
+              <div className="client-anointing-view-field">
+                <label>Civil Status:</label>
+                {renderReadOnlyField(anointing.maritalStatus)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Years Married:</label>
+                {renderReadOnlyField(anointing.yearsMarried)}
+              </div>
+            </div>
+            
+            <div className="client-anointing-view-row">
+              <div className="client-anointing-view-field-wide">
+                <label>Spouse Name:</label>
+                {renderSpouseName(anointing.spouseFirstName, anointing.spouseMiddleName, anointing.spouseLastName)}
               </div>
             </div>
             

@@ -1303,56 +1303,6 @@ const handleSubmit = async () => {
          {/* Birth Place Fields - Separated into three fields */}
          <label className="sub-cc">Place of Birth <span className="required-marker">*</span></label>
          <div className="client-kumpil-row">
-           <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.birth_barangay ? 'field-error' : ''}`}>
-             <label>Birth Barangay <span className="required-marker">*</span></label>
-             <input
-               name="birth_barangay"
-               value={formData.birth_barangay || ""}
-               onChange={handleBirthBarangayChange}
-               onFocus={() => handleFocus('birth_barangay')}
-               placeholder="Type to search"
-               autoComplete="off"
-               className={showValidationErrors && validationErrors.birth_barangay ? 'input-error' : ''}
-             />
-             {focusedField === 'birth_barangay' && (
-               <div className="location-dropdown">
-                 {suggestions.birth_barangay && suggestions.birth_barangay.length > 0 ? (
-                   suggestions.birth_barangay.map((barangay, idx) => (
-                     <div key={idx} onClick={() => handleSelectBirthBarangay(barangay)} className="location-dropdown-item">
-                       {barangay}
-                     </div>
-                   ))
-                 ) : (
-                   <div className="location-dropdown-item">No barangays found</div>
-                 )}
-               </div>
-             )}
-           </div>
-           <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.birth_municipality ? 'field-error' : ''}`}>
-             <label>Birth Municipality <span className="required-marker">*</span></label>
-             <input
-               name="birth_municipality"
-               value={formData.birth_municipality || ""}
-               onChange={handleBirthMunicipalityChange}
-               onFocus={() => handleFocus('birth_municipality')}
-               placeholder="Type to search"
-               autoComplete="off"
-               className={showValidationErrors && validationErrors.birth_municipality ? 'input-error' : ''}
-             />
-             {focusedField === 'birth_municipality' && (
-               <div className="location-dropdown">
-                 {suggestions.birth_municipality && suggestions.birth_municipality.length > 0 ? (
-                   suggestions.birth_municipality.map((municipality, idx) => (
-                     <div key={idx} onClick={() => handleSelectBirthMunicipality(municipality)} className="location-dropdown-item">
-                       {municipality}
-                     </div>
-                   ))
-                 ) : (
-                   <div className="location-dropdown-item">No municipalities found</div>
-                 )}
-               </div>
-             )}
-           </div>
            <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.birth_province ? 'field-error' : ''}`}>
              <label>Birth Province <span className="required-marker">*</span></label>
              <input
@@ -1378,43 +1328,83 @@ const handleSubmit = async () => {
                </div>
              )}
            </div>
-         </div>
          
-         {/* Address Fields */}
-         <label className="sub-cc">Home Address <span className="required-marker">*</span></label>
-         <div className="client-kumpil-row">
-         <div className={`client-kumpil-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
-             <label>Street <span className="required-marker">*</span></label>
+           <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.birth_municipality ? 'field-error' : ''}`}>
+             <label>Birth Municipality <span className="required-marker">*</span></label>
              <input
-               name="street"
-               value={formData.street || ""}
-               onChange={e => setFormData(prev => ({ ...prev, street: e.target.value }))}
-               placeholder="Street"
-               autoComplete="off"
-               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
-             />
-           </div>
-           <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
-             <label>Barangay <span className="required-marker">*</span></label>
-             <input
-               name="barangay"
-               value={formData.barangay || ""}
-               onChange={handleBarangayChange}
-               onFocus={() => handleFocus('barangay')}
+               name="birth_municipality"
+               value={formData.birth_municipality || ""}
+               onChange={handleBirthMunicipalityChange}
+               onFocus={() => handleFocus('birth_municipality')}
                placeholder="Type to search"
                autoComplete="off"
-               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
+               className={showValidationErrors && validationErrors.birth_municipality ? 'input-error' : ''}
              />
-             {focusedField === 'barangay' && (
+             {focusedField === 'birth_municipality' && (
                <div className="location-dropdown">
-                 {suggestions.barangay && suggestions.barangay.length > 0 ? (
-                   suggestions.barangay.map((barangay, idx) => (
-                     <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                 {suggestions.birth_municipality && suggestions.birth_municipality.length > 0 ? (
+                   suggestions.birth_municipality.map((municipality, idx) => (
+                     <div key={idx} onClick={() => handleSelectBirthMunicipality(municipality)} className="location-dropdown-item">
+                       {municipality}
+                     </div>
+                   ))
+                 ) : (
+                   <div className="location-dropdown-item">No municipalities found</div>
+                 )}
+               </div>
+             )}
+           </div>
+            <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.birth_barangay ? 'field-error' : ''}`}>
+             <label>Birth Barangay <span className="required-marker">*</span></label>
+             <input
+               name="birth_barangay"
+               value={formData.birth_barangay || ""}
+               onChange={handleBirthBarangayChange}
+               onFocus={() => handleFocus('birth_barangay')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.birth_barangay ? 'input-error' : ''}
+             />
+             {focusedField === 'birth_barangay' && (
+               <div className="location-dropdown">
+                 {suggestions.birth_barangay && suggestions.birth_barangay.length > 0 ? (
+                   suggestions.birth_barangay.map((barangay, idx) => (
+                     <div key={idx} onClick={() => handleSelectBirthBarangay(barangay)} className="location-dropdown-item">
                        {barangay}
                      </div>
                    ))
                  ) : (
                    <div className="location-dropdown-item">No barangays found</div>
+                 )}
+               </div>
+             )}
+           </div>
+         </div>
+         
+         {/* Address Fields */}
+         <label className="sub-cc">Home Address <span className="required-marker">*</span></label>
+         <div className="client-kumpil-row">
+           <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
+             <label>Province <span className="required-marker">*</span></label>
+             <input
+               name="province"
+               value={formData.province || ""}
+               onChange={handleProvinceChange}
+               onFocus={() => handleFocus('province')}
+               placeholder="Type to search"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
+             />
+             {focusedField === 'province' && (
+               <div className="location-dropdown">
+                 {suggestions.province && suggestions.province.length > 0 ? (
+                   suggestions.province.map((province, idx) => (
+                     <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
+                       {province}
+                     </div>
+                   ))
+                 ) : (
+                   <div className="location-dropdown-item">No provinces found</div>
                  )}
                </div>
              )}
@@ -1444,31 +1434,43 @@ const handleSubmit = async () => {
                </div>
              )}
            </div>
-           <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
-             <label>Province <span className="required-marker">*</span></label>
+            <div className={`client-kumpil-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
+             <label>Barangay <span className="required-marker">*</span></label>
              <input
-               name="province"
-               value={formData.province || ""}
-               onChange={handleProvinceChange}
-               onFocus={() => handleFocus('province')}
+               name="barangay"
+               value={formData.barangay || ""}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
                placeholder="Type to search"
                autoComplete="off"
-               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
+               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
              />
-             {focusedField === 'province' && (
+             {focusedField === 'barangay' && (
                <div className="location-dropdown">
-                 {suggestions.province && suggestions.province.length > 0 ? (
-                   suggestions.province.map((province, idx) => (
-                     <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
-                       {province}
+                 {suggestions.barangay && suggestions.barangay.length > 0 ? (
+                   suggestions.barangay.map((barangay, idx) => (
+                     <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                       {barangay}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No provinces found</div>
+                   <div className="location-dropdown-item">No barangays found</div>
                  )}
                </div>
              )}
            </div>
+         <div className={`client-kumpil-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
+             <label>Street <span className="required-marker">*</span></label>
+             <input
+               name="street"
+               value={formData.street || ""}
+               onChange={e => setFormData(prev => ({ ...prev, street: e.target.value }))}
+               placeholder="Street"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
+             />
+           </div>
+
             <div className="client-kumpil-field location-dropdown-container">
   <label>Region</label>
   <input
@@ -1541,26 +1543,26 @@ const handleSubmit = async () => {
          {/* Father's Place of Birth - Separated into three fields */}
          <label className="sub-cc">Father's Place of Birth</label>
          <div className="client-kumpil-row">
-           <div className="client-kumpil-field location-dropdown-container">
-             <label>Father's Birth Barangay</label>
+             <div className="client-kumpil-field location-dropdown-container">
+             <label>Father's Birth Province</label>
              <input
-               name="father_birth_barangay"
-               value={formData.father_birth_barangay || ""}
-               onChange={handleFatherBirthBarangayChange}
-               onFocus={() => handleFocus('father_birth_barangay')}
+               name="father_birth_province"
+               value={formData.father_birth_province || ""}
+               onChange={handleFatherBirthProvinceChange}
+               onFocus={() => handleFocus('father_birth_province')}
                placeholder="Type to search"
                autoComplete="off"
-               />
-             {focusedField === 'father_birth_barangay' && (
+             />
+             {focusedField === 'father_birth_province' && (
                <div className="location-dropdown">
-                 {suggestions.father_birth_barangay && suggestions.father_birth_barangay.length > 0 ? (
-                   suggestions.father_birth_barangay.map((barangay, idx) => (
-                     <div key={idx} onClick={() => handleSelectFatherBirthBarangay(barangay)} className="location-dropdown-item">
-                       {barangay}
+                 {suggestions.father_birth_province && suggestions.father_birth_province.length > 0 ? (
+                   suggestions.father_birth_province.map((province, idx) => (
+                     <div key={idx} onClick={() => handleSelectFatherBirthProvince(province)} className="location-dropdown-item">
+                       {province}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No barangays found</div>
+                   <div className="location-dropdown-item">No provinces found</div>
                  )}
                </div>
              )}
@@ -1590,25 +1592,25 @@ const handleSubmit = async () => {
              )}
            </div>
            <div className="client-kumpil-field location-dropdown-container">
-             <label>Father's Birth Province</label>
+             <label>Father's Birth Barangay</label>
              <input
-               name="father_birth_province"
-               value={formData.father_birth_province || ""}
-               onChange={handleFatherBirthProvinceChange}
-               onFocus={() => handleFocus('father_birth_province')}
+               name="father_birth_barangay"
+               value={formData.father_birth_barangay || ""}
+               onChange={handleFatherBirthBarangayChange}
+               onFocus={() => handleFocus('father_birth_barangay')}
                placeholder="Type to search"
                autoComplete="off"
-             />
-             {focusedField === 'father_birth_province' && (
+               />
+             {focusedField === 'father_birth_barangay' && (
                <div className="location-dropdown">
-                 {suggestions.father_birth_province && suggestions.father_birth_province.length > 0 ? (
-                   suggestions.father_birth_province.map((province, idx) => (
-                     <div key={idx} onClick={() => handleSelectFatherBirthProvince(province)} className="location-dropdown-item">
-                       {province}
+                 {suggestions.father_birth_barangay && suggestions.father_birth_barangay.length > 0 ? (
+                   suggestions.father_birth_barangay.map((barangay, idx) => (
+                     <div key={idx} onClick={() => handleSelectFatherBirthBarangay(barangay)} className="location-dropdown-item">
+                       {barangay}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No provinces found</div>
+                   <div className="location-dropdown-item">No barangays found</div>
                  )}
                </div>
              )}
@@ -1661,31 +1663,31 @@ const handleSubmit = async () => {
          {/* Mother's Place of Birth - Separated into three fields */}
          <label className="sub-cc">Mother's Place of Birth</label>
          <div className="client-kumpil-row">
-           <div className="client-kumpil-field location-dropdown-container">
-             <label>Mother's Birth Barangay</label>
+                     <div className="client-kumpil-field location-dropdown-container">
+             <label>Mother's Birth Province</label>
              <input
-               name="mother_birth_barangay"
-               value={formData.mother_birth_barangay || ""}
-               onChange={handleMotherBirthBarangayChange}
-               onFocus={() => handleFocus('mother_birth_barangay')}
+               name="mother_birth_province"
+               value={formData.mother_birth_province || ""}
+               onChange={handleMotherBirthProvinceChange}
+               onFocus={() => handleFocus('mother_birth_province')}
                placeholder="Type to search"
                autoComplete="off"
              />
-             {focusedField === 'mother_birth_barangay' && (
+             {focusedField === 'mother_birth_province' && (
                <div className="location-dropdown">
-                 {suggestions.mother_birth_barangay && suggestions.mother_birth_barangay.length > 0 ? (
-                   suggestions.mother_birth_barangay.map((barangay, idx) => (
-                     <div key={idx} onClick={() => handleSelectMotherBirthBarangay(barangay)} className="location-dropdown-item">
-                       {barangay}
+                 {suggestions.mother_birth_province && suggestions.mother_birth_province.length > 0 ? (
+                   suggestions.mother_birth_province.map((province, idx) => (
+                     <div key={idx} onClick={() => handleSelectMotherBirthProvince(province)} className="location-dropdown-item">
+                       {province}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No barangays found</div>
+                   <div className="location-dropdown-item">No provinces found</div>
                  )}
                </div>
              )}
            </div>
-           <div className="client-kumpil-field location-dropdown-container">
+            <div className="client-kumpil-field location-dropdown-container">
              <label>Mother's Birth Municipality</label>
              <input
                name="mother_birth_municipality"
@@ -1710,25 +1712,25 @@ const handleSubmit = async () => {
              )}
            </div>
            <div className="client-kumpil-field location-dropdown-container">
-             <label>Mother's Birth Province</label>
+             <label>Mother's Birth Barangay</label>
              <input
-               name="mother_birth_province"
-               value={formData.mother_birth_province || ""}
-               onChange={handleMotherBirthProvinceChange}
-               onFocus={() => handleFocus('mother_birth_province')}
+               name="mother_birth_barangay"
+               value={formData.mother_birth_barangay || ""}
+               onChange={handleMotherBirthBarangayChange}
+               onFocus={() => handleFocus('mother_birth_barangay')}
                placeholder="Type to search"
                autoComplete="off"
              />
-             {focusedField === 'mother_birth_province' && (
+             {focusedField === 'mother_birth_barangay' && (
                <div className="location-dropdown">
-                 {suggestions.mother_birth_province && suggestions.mother_birth_province.length > 0 ? (
-                   suggestions.mother_birth_province.map((province, idx) => (
-                     <div key={idx} onClick={() => handleSelectMotherBirthProvince(province)} className="location-dropdown-item">
-                       {province}
+                 {suggestions.mother_birth_barangay && suggestions.mother_birth_barangay.length > 0 ? (
+                   suggestions.mother_birth_barangay.map((barangay, idx) => (
+                     <div key={idx} onClick={() => handleSelectMotherBirthBarangay(barangay)} className="location-dropdown-item">
+                       {barangay}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No provinces found</div>
+                   <div className="location-dropdown-item">No barangays found</div>
                  )}
                </div>
              )}

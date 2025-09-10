@@ -8,10 +8,11 @@
     padding-bottom: 100px;
 }
 
-/* Add today indicator */
+/* Updated today indicator - Light brown instead of blue */
 .today-cd {
-  border: 2px solid #4285f4 !important;
-  box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+  border: 2px solid #b3701f !important;
+  background-color: #fdf8e8 !important;
+  box-shadow: 0 0 8px rgba(179, 112, 31, 0.4);
   position: relative;
 }
 
@@ -21,8 +22,11 @@
   top: 3px;
   right: 3px;
   font-size: 8px;
-  color: #4285f4;
+  color: #573901;
   font-weight: bold;
+  background: rgba(253, 248, 232, 0.9);
+  padding: 1px 3px;
+  border-radius: 3px;
 }
 
 .dashboard-container-cd::-webkit-scrollbar {
@@ -211,6 +215,7 @@
   border: 2px solid #b3701f;
 }
 
+/* Fix selected day to preserve ceremony dot colors */
 .selected-day-cd {
   background-color: #b3701f !important;
   border-color: #b3701f !important;
@@ -228,6 +233,80 @@
 
 .selected-day-cd .holiday-name-cd {
   color: white;
+}
+
+/* Keep ceremony dots light brown even when selected */
+.selected-day-cd .ceremony-dot-cd {
+  background-color: #d19a15 !important;
+  box-shadow: 0 0 6px rgba(209, 154, 21, 0.6), 0 0 0 2px white;
+}
+
+/* Keep application dots dark brown even when selected */
+.selected-day-cd .application-dot-cd {
+  background-color: #573901 !important;
+  box-shadow: 0 0 0 2px white;
+}
+
+/* Legend Container Styles */
+.legend-container-cd {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legend-container-cd h3 {
+  margin: 0 0 15px 0;
+  color: #573901;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.legend-items-cd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Legend item styling */
+.legend-container-cd .legend-item-cd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.legend-container-cd .legend-item-cd span {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Make sure legend dots are visible and match calendar dots */
+.legend-container-cd .appointment-dot-cd {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: static;
+  box-shadow: 0 0 0 2px white, 0 0 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.legend-container-cd .application-dot-cd {
+  background-color: #573901 !important;
+}
+
+.legend-container-cd .ceremony-dot-cd {
+  background-color: #d19a15 !important;
+}
+
+.legend-container-cd .holiday-dot-cd {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* Legend */
@@ -260,6 +339,88 @@
 .appointment-legend-cd {
   background-color: #b3701f;
   box-shadow: 0 0 0 2px white;
+}
+
+/* Different appointment dot styles - Brown theme */
+.application-dot-cd {
+  background-color: #573901 !important;
+}
+
+.ceremony-dot-cd {
+  background-color: #d19a15 !important;
+  box-shadow: 0 0 6px rgba(209, 154, 21, 0.4);
+}
+
+/* Calendar day states for ceremony appointments - Brown theme */
+.has-ceremony-cd {
+  background: linear-gradient(135deg, #fef9e7 0%, #f9f1c2 100%);
+  border: 2px solid #d19a15;
+}
+
+.has-ceremony-cd:hover {
+  background: linear-gradient(135deg, #f9f1c2 0%, #f0e68c 100%);
+}
+
+/* When a day has both application and ceremony appointments */
+.has-appointment-cd.has-ceremony-cd {
+  background: linear-gradient(135deg, #fef9e7 0%, #fff7df 50%, #fef9e7 100%);
+  border: 2px solid #b3701f;
+}
+
+/* Multiple dots positioning */
+.calendar-day-cd .application-dot-cd {
+  bottom: 4px;
+  left: 4px;
+  top: auto;
+  right: auto;
+}
+
+.calendar-day-cd .ceremony-dot-cd {
+  bottom: 4px;
+  right: 4px;
+  top: auto;
+}
+
+/* Appointment list item styles for different types - Brown theme */
+.application-appointment-cd {
+  border-left: 4px solid #573901;
+  background: linear-gradient(135deg, #f5f3f0 0%, #ede8e0 100%);
+}
+
+.approved_ceremony-appointment-cd {
+  border-left: 4px solid #d19a15;
+  background: linear-gradient(135deg, #fef9e7 0%, #f9f1c2 100%);
+}
+
+.approved_ceremony-appointment-cd .appointment-type-cd {
+  color: #b8860b;
+  font-weight: 600;
+}
+
+.application-appointment-cd .appointment-type-cd {
+  color: #573901;
+  font-weight: 600;
+}
+
+/* Priest information styling */
+.appointment-priest-cd {
+  font-size: 12px;
+  color: #6c757d;
+  font-style: italic;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Enhanced appointment status styling for ceremonies - Brown theme */
+.approved_ceremony-appointment-cd .appointment-status-cd {
+  background: linear-gradient(135deg, #d19a15 0%, #b3701f 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Holiday info section */
@@ -418,6 +579,41 @@
   border-radius: 8px;
 }
 
+/* Enhanced scrollbar for appointment list */
+.selected-date-appointments-cd {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.selected-date-appointments-cd::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selected-date-appointments-cd::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.selected-date-appointments-cd::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.selected-date-appointments-cd::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Enhanced hover effect for appointment items */
+.appointment-item-cd {
+  transition: all 0.3s ease;
+}
+
+.appointment-item-cd:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .dashboard-container-cd {
@@ -464,6 +660,12 @@
   
   .calendar-section-cd {
     padding: 15px;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .calendar-sidebar-cd {
+    min-width: auto;
   }
   
   .calendar-grid-cd {
@@ -501,6 +703,36 @@
   
   .holiday-dot-cd {
     margin-right: 0;
+  }
+
+  /* Responsive adjustments for new elements */
+  .legend-items-cd {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .legend-container-cd {
+    padding: 10px;
+  }
+  
+  .legend-container-cd h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  .application-dot-cd,
+  .ceremony-dot-cd {
+    width: 6px;
+    height: 6px;
+    bottom: 2px;
+  }
+  
+  .calendar-day-cd .application-dot-cd {
+    left: 2px;
+  }
+  
+  .calendar-day-cd .ceremony-dot-cd {
+    right: 2px;
   }
 }
 
@@ -540,5 +772,14 @@
   
   .appointment-details-cd {
     gap: 8px;
+  }
+
+  .appointment-priest-cd {
+    font-size: 10px;
+  }
+  
+  .approved_ceremony-appointment-cd .appointment-status-cd {
+    font-size: 10px;
+    padding: 2px 6px;
   }
 }

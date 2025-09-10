@@ -4,6 +4,33 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "./ClientAnointingOfTheSick.css";
 import axios from 'axios';
 
+// Time formatting function
+const formatTimeTo12Hour = (time24) => {
+  if (!time24) return '';
+  
+  // Handle different time formats that might come from backend
+  let timeString = time24.toString();
+  
+  // If it's in HH:MM:SS format, extract just HH:MM
+  if (timeString.includes(':')) {
+    const parts = timeString.split(':');
+    timeString = `${parts[0]}:${parts[1]}`;
+  }
+  
+  // Create a date object with the time
+  const [hours, minutes] = timeString.split(':');
+  const date = new Date();
+  date.setHours(parseInt(hours, 10));
+  date.setMinutes(parseInt(minutes, 10));
+  
+  // Format to 12-hour time
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
 const ClientAnointingOfTheSick = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -14,7 +41,7 @@ const ClientAnointingOfTheSick = () => {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  // State for form data
+  // State for form data - UPDATED with new fields including spouse fields
   const [formData, setFormData] = useState({
     // Anointing Information
     dateOfAnointing: '',
@@ -31,6 +58,15 @@ const ClientAnointingOfTheSick = () => {
     religion: '',
     reasonForAnointing: '',
     
+    // Marital Status Information
+    maritalStatus: '',
+    yearsMarried: '',
+    
+    // ADDED: Spouse Information
+    spouseFirstName: '',
+    spouseMiddleName: '',
+    spouseLastName: '',
+    
     // Contact Person Information
     contactFirstName: '',
     contactMiddleName: '',
@@ -38,6 +74,20 @@ const ClientAnointingOfTheSick = () => {
     contactRelationship: '',
     contactPhone: '',
     contactEmail: '',
+    
+    // Father Information
+    fatherFirstName: '',
+    fatherMiddleName: '',
+    fatherLastName: '',
+    fatherPhone: '',
+    fatherEmail: '',
+    
+    // Mother Information
+    motherFirstName: '',
+    motherMiddleName: '',
+    motherLastName: '',
+    motherPhone: '',
+    motherEmail: '',
     
     // Location Information
     locationType: 'Hospital', // 'Hospital', 'Home', 'Hospice', 'Nursing Home', 'Other'
@@ -1098,15 +1148,17 @@ const updatePlaceOfBirth = (updatedFields) => {
     );
   };
 
-  // Add validate form function before the handleSubmit function
+  // Add validate form function before the handleSubmit function - UPDATED with new fields including spouse validation
   const validateForm = () => {
     const newErrors = {};
     
-    // Required fields validation
+    // Required fields validation - UPDATED with new parent fields
     const requiredFields = [
       'dateOfAnointing', 'timeOfAnointing',
       'firstName', 'lastName', 'sex', 'dateOfBirth',
       'contactFirstName', 'contactLastName', 'contactPhone',
+      'fatherFirstName', 'fatherLastName', 'fatherPhone',
+      'motherFirstName', 'motherLastName', 'motherPhone',
       'barangay', 'street', 'municipality', 'province'
     ];
     
@@ -1115,6 +1167,16 @@ const updatePlaceOfBirth = (updatedFields) => {
         newErrors[field] = 'This field is required';
       }
     });
+
+    // Conditional validation for spouse fields - require spouse name if marital status is selected
+    if (formData.maritalStatus && ['Married', 'Civil', 'Living Together'].includes(formData.maritalStatus)) {
+      if (!formData.spouseFirstName || formData.spouseFirstName.trim() === '') {
+        newErrors.spouseFirstName = 'Spouse first name is required when marital status is selected';
+      }
+      if (!formData.spouseLastName || formData.spouseLastName.trim() === '') {
+        newErrors.spouseLastName = 'Spouse last name is required when marital status is selected';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -1239,7 +1301,7 @@ const updatePlaceOfBirth = (updatedFields) => {
               <option value="">Select Time</option>
               {filteredTimes.map((time) => (
                 <option key={time} value={time}>
-                  {time}
+                  {formatTimeTo12Hour(time)}
                 </option>
               ))}
             </select>
@@ -1275,7 +1337,9 @@ const updatePlaceOfBirth = (updatedFields) => {
                 className={submitted && errors.lastName ? 'input-error' : ''}
               />
             </div>
-            <div className="aos-field">
+          </div>
+           <div className="aos-row">
+              <div className="aos-field">
               <label>Date of Birth <span className="required">*</span></label>
               <input 
                 type="date"
@@ -1283,9 +1347,7 @@ const updatePlaceOfBirth = (updatedFields) => {
                 onChange={(e) => handleDateChange('dateOfBirth', e.target.value)}
               />
             </div>
-          </div>
-          <div className="aos-row">
-            <div className="aos-field-ga">
+            <div className="aos-field">
               <label>Age</label>
               <input 
                 type="text"
@@ -1294,7 +1356,7 @@ const updatePlaceOfBirth = (updatedFields) => {
                 readOnly
               />
             </div>
-            <div className="aos-field-ga">
+           <div className="aos-field">
               <label>Sex <span className="required">*</span></label>
               <select 
                 value={formData.sex}
@@ -1308,32 +1370,122 @@ const updatePlaceOfBirth = (updatedFields) => {
             </div>
           </div>
 
+          {/* UPDATED Marital Status Section with Spouse Fields */}
+          <h3 className="client-sub-title">Status</h3>
+          <div className="client-baptismal-row-pms">
+            <div className="client-marital-status">
+              <label className="client-section-label">Select status by choosing one of the following options:</label>
+              <div className="client-marital-options">
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="married" 
+                    name="maritalStatus"
+                    value="Married"
+                    checked={formData.maritalStatus === "Married"}
+                    onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="married">Married</label>
+                </div>
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="civil"
+                    name="maritalStatus"
+                    value="Civil"
+                    checked={formData.maritalStatus === "Civil"}
+                    onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="civil">Civil</label>
+                </div>
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="living-together"
+                    name="maritalStatus"
+                    value="Living Together"
+                    checked={formData.maritalStatus === "Living Together"}
+                    onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="living-together">Living Together</label>
+                </div>
+              </div>
+            </div>
+
+            <div className="client-years-married">
+              <input 
+                type="text" 
+                className="client-short-input"
+                value={formData.yearsMarried}
+                onChange={(e) => handleInputChange('yearsMarried', e.target.value)}
+                placeholder="Enter number"
+              />
+              <label>Number of Years Married</label>
+            </div>
+          </div>
+
+          {/* NEW: Spouse Information Section - Conditionally shown */}
+          {formData.maritalStatus && ['Married', 'Civil', 'Living Together'].includes(formData.maritalStatus) && (
+            <>
+              <h3 className="aos-sub-title">Spouse Information</h3>
+              <div className="aos-row">
+                <div className="aos-field">
+                  <label>Spouse First Name <span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    value={formData.spouseFirstName}
+                    onChange={(e) => handleInputChange('spouseFirstName', e.target.value)}
+                    className={submitted && errors.spouseFirstName ? 'input-error' : ''}
+                  />
+                </div>
+                <div className="aos-field">
+                  <label>Spouse Middle Name</label>
+                  <input 
+                    type="text"
+                    value={formData.spouseMiddleName}
+                    onChange={(e) => handleInputChange('spouseMiddleName', e.target.value)}
+                  />
+                </div>
+                <div className="aos-field">
+                  <label>Spouse Last Name <span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    value={formData.spouseLastName}
+                    onChange={(e) => handleInputChange('spouseLastName', e.target.value)}
+                    className={submitted && errors.spouseLastName ? 'input-error' : ''}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Place of Birth with separated fields */}
-          <div className="aos-row">
-            <div className="aos-field aos-location-dropdown-container">
-              <label>Birth Barangay</label>
+          <h3 className="client-sub-title">Place of Birth</h3>
+         <div className="aos-row">
+                <div className="aos-field aos-location-dropdown-container">
+              <label>Birth Province</label>
               <input 
                 type="text"
                 placeholder="Type to search"
-                value={birthFields.barangay}
-                onChange={handleBirthBarangayChange}
-                onFocus={() => handleFocus('birthBarangay')}
+                value={birthFields.province}
+                onChange={handleBirthProvinceChange}
+                onFocus={() => handleFocus('birthProvince')}
               />
-              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
+              {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
                 <div className="aos-location-dropdown">
-                  {suggestions.birthBarangay.map((barangay, index) => (
+                  {suggestions.birthProvince.map((province, index) => (
                     <div 
                       key={index}
-                      onClick={() => handleSelectBirthBarangay(barangay)}
+                      onClick={() => handleSelectBirthProvince(province)}
                       className="aos-location-dropdown-item"
                     >
-                      {barangay}
+                      {province}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            <div className="aos-field aos-location-dropdown-container">
+             <div className="aos-field aos-location-dropdown-container">
               <label>Birth Municipality</label>
               <input 
                 type="text"
@@ -1357,23 +1509,23 @@ const updatePlaceOfBirth = (updatedFields) => {
               )}
             </div>
             <div className="aos-field aos-location-dropdown-container">
-              <label>Birth Province</label>
+              <label>Birth Barangay</label>
               <input 
                 type="text"
                 placeholder="Type to search"
-                value={birthFields.province}
-                onChange={handleBirthProvinceChange}
-                onFocus={() => handleFocus('birthProvince')}
+                value={birthFields.barangay}
+                onChange={handleBirthBarangayChange}
+                onFocus={() => handleFocus('birthBarangay')}
               />
-              {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
                 <div className="aos-location-dropdown">
-                  {suggestions.birthProvince.map((province, index) => (
+                  {suggestions.birthBarangay.map((barangay, index) => (
                     <div 
                       key={index}
-                      onClick={() => handleSelectBirthProvince(province)}
+                      onClick={() => handleSelectBirthBarangay(barangay)}
                       className="aos-location-dropdown-item"
                     >
-                      {province}
+                      {barangay}
                     </div>
                   ))}
                 </div>
@@ -1391,7 +1543,7 @@ const updatePlaceOfBirth = (updatedFields) => {
 
           <div className="aos-row">
             <div className="aos-field-wide">
-              <label>Reason for Anointing (Medical Condition)</label>
+              <label>Remarks (Medical Condition)</label>
               <textarea 
                 value={formData.reasonForAnointing}
                 onChange={(e) => handleInputChange('reasonForAnointing', e.target.value)}
@@ -1457,7 +1609,109 @@ const updatePlaceOfBirth = (updatedFields) => {
                 onChange={(e) => handleInputChange('contactEmail', e.target.value)}
               />
             </div>
+            
             </div>
+
+       {/* Father Personal Information */}
+<h3 className="aos-sub-title">Father Personal Information</h3>
+<div className="aos-row">
+  <div className="aos-field">
+    <label>First Name <span className="required">*</span></label>
+    <input 
+      type="text"
+      value={formData.fatherFirstName}
+      onChange={(e) => handleInputChange('fatherFirstName', e.target.value)}
+      className={submitted && errors.fatherFirstName ? 'input-error' : ''}
+    />
+  </div>
+  
+  <div className="aos-field">
+    <label>Middle Name</label>
+    <input 
+      type="text"
+      value={formData.fatherMiddleName}
+      onChange={(e) => handleInputChange('fatherMiddleName', e.target.value)}
+    />
+  </div>
+  <div className="aos-field">
+    <label>Last Name <span className="required">*</span></label>
+    <input 
+      type="text"
+      value={formData.fatherLastName}
+      onChange={(e) => handleInputChange('fatherLastName', e.target.value)}
+      className={submitted && errors.fatherLastName ? 'input-error' : ''}
+    />
+  </div>
+</div>
+<div className="aos-row">
+  <div className="aos-field">
+    <label>Phone Number <span className="required">*</span></label>
+    <input 
+      type="text"
+      value={formData.fatherPhone}
+      onChange={(e) => handleInputChange('fatherPhone', e.target.value)}
+      className={submitted && errors.fatherPhone ? 'input-error' : ''}
+    />
+  </div>
+  <div className="aos-field">
+    <label>Email Address</label>
+    <input 
+      type="email"
+      value={formData.fatherEmail}
+      onChange={(e) => handleInputChange('fatherEmail', e.target.value)}
+    />
+  </div>
+</div>
+
+{/* Mother Personal Information */}
+<h3 className="aos-sub-title">Mother Personal Information</h3>
+<div className="aos-row">
+  <div className="aos-field">
+    <label>First Name <span className="required">*</span></label>
+    <input 
+      type="text"
+      value={formData.motherFirstName}
+      onChange={(e) => handleInputChange('motherFirstName', e.target.value)}
+      className={submitted && errors.motherFirstName ? 'input-error' : ''}
+    />
+  </div>
+  <div className="aos-field">
+    <label>Middle Name</label>
+    <input 
+      type="text"
+      value={formData.motherMiddleName}
+      onChange={(e) => handleInputChange('motherMiddleName', e.target.value)}
+    />
+  </div>
+  <div className="aos-field">
+    <label>Last Name <span className="required">*</span></label>
+    <input 
+      type="text"
+      value={formData.motherLastName}
+      onChange={(e) => handleInputChange('motherLastName', e.target.value)}
+      className={submitted && errors.motherLastName ? 'input-error' : ''}
+    />
+  </div>
+</div>
+<div className="aos-row">
+  <div className="aos-field">
+    <label>Phone Number <span className="required">*</span></label>
+    <input 
+      type="text"
+      value={formData.motherPhone}
+      onChange={(e) => handleInputChange('motherPhone', e.target.value)}
+      className={submitted && errors.motherPhone ? 'input-error' : ''}
+    />
+  </div>
+  <div className="aos-field">
+    <label>Email Address</label>
+    <input 
+      type="email"
+      value={formData.motherEmail}
+      onChange={(e) => handleInputChange('motherEmail', e.target.value)}
+    />
+  </div>
+</div>
              {/* Location Information */}
           <h3 className="aos-sub-title">Location Information</h3>
           <div className="aos-row">
@@ -1498,64 +1752,7 @@ const updatePlaceOfBirth = (updatedFields) => {
 
           {/* Address Fields */}
           <div className="aos-row aos-address-row">
-          <div className="aos-field">
-              <label>Street <span className="required">*</span></label>
-              <input 
-                type="text"
-                value={formData.street}
-                onChange={(e) => handleInputChange('street', e.target.value)}
-                className={submitted && errors.street ? 'input-error' : ''}
-              />
-            </div>
-            <div className="aos-field aos-location-dropdown-container">
-              <label>Barangay <span className="required">*</span></label>
-              <input 
-                type="text"
-                value={formData.barangay}
-                onChange={handleBarangayChange}
-                onFocus={() => handleFocus('barangay')}
-                placeholder="Type to search"
-                className={submitted && errors.barangay ? 'input-error' : ''}
-              />
-              {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
-                <div className="aos-location-dropdown">
-                  {suggestions.barangay.map((barangay, index) => (
-                    <div 
-                      key={index}
-                      onClick={() => handleSelectBarangay(barangay)}
-                      className="aos-location-dropdown-item"
-                    >
-                      {barangay}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="aos-field aos-location-dropdown-container">
-              <label>Municipality <span className="required">*</span></label>
-              <input 
-                type="text"
-                value={formData.municipality}
-                onChange={handleMunicipalityChange}
-                onFocus={() => handleFocus('municipality')}
-                placeholder="Type to search"
-                className={submitted && errors.municipality ? 'input-error' : ''}
-              />
-              {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
-                <div className="aos-location-dropdown">
-                  {suggestions.municipality.map((municipality, index) => (
-                    <div 
-                      key={index}
-                      onClick={() => handleSelectMunicipality(municipality)}
-                      className="aos-location-dropdown-item"
-                    >
-                      {municipality}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="aos-field aos-location-dropdown-container">
+              <div className="aos-field aos-location-dropdown-container">
               <label>Province <span className="required">*</span></label>
               <input 
                 type="text"
@@ -1579,6 +1776,64 @@ const updatePlaceOfBirth = (updatedFields) => {
                 </div>
               )}
             </div>
+               <div className="aos-field aos-location-dropdown-container">
+              <label>Municipality <span className="required">*</span></label>
+              <input 
+                type="text"
+                value={formData.municipality}
+                onChange={handleMunicipalityChange}
+                onFocus={() => handleFocus('municipality')}
+                placeholder="Type to search"
+                className={submitted && errors.municipality ? 'input-error' : ''}
+              />
+              {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
+                <div className="aos-location-dropdown">
+                  {suggestions.municipality.map((municipality, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectMunicipality(municipality)}
+                      className="aos-location-dropdown-item"
+                    >
+                      {municipality}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+             <div className="aos-field aos-location-dropdown-container">
+              <label>Barangay <span className="required">*</span></label>
+              <input 
+                type="text"
+                value={formData.barangay}
+                onChange={handleBarangayChange}
+                onFocus={() => handleFocus('barangay')}
+                placeholder="Type to search"
+                className={submitted && errors.barangay ? 'input-error' : ''}
+              />
+              {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
+                <div className="aos-location-dropdown">
+                  {suggestions.barangay.map((barangay, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBarangay(barangay)}
+                      className="aos-location-dropdown-item"
+                    >
+                      {barangay}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          <div className="aos-field">
+              <label>Street <span className="required">*</span></label>
+              <input 
+                type="text"
+                value={formData.street}
+                onChange={(e) => handleInputChange('street', e.target.value)}
+                className={submitted && errors.street ? 'input-error' : ''}
+              />
+            </div>
+          
             <div className="aos-field aos-location-dropdown-container">
               <label>Region</label>
               <input 

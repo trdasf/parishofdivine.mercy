@@ -5,6 +5,32 @@ import "./ClientBlessing.css";
 
 import axios from "axios";
 
+const formatTimeTo12Hour = (time24) => {
+  if (!time24) return '';
+  
+  // Handle different time formats that might come from backend
+  let timeString = time24.toString();
+  
+  // If it's in HH:MM:SS format, extract just HH:MM
+  if (timeString.includes(':')) {
+    const parts = timeString.split(':');
+    timeString = `${parts[0]}:${parts[1]}`;
+  }
+  
+  // Create a date object with the time
+  const [hours, minutes] = timeString.split(':');
+  const date = new Date();
+  date.setHours(parseInt(hours, 10));
+  date.setMinutes(parseInt(minutes, 10));
+  
+  // Format to 12-hour time
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
 const ClientBlessing = () => {
   // Add location and navigate hooks
   const location = useLocation();
@@ -751,36 +777,44 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
       <h1 className="client-blessing-title">Blessing Registration Form</h1>
       <div className="client-blessing-data">
         <div className="client-blessing-row-date">
-          <div className="client-blessing-field-date">
-            <label>Date of Appointment <span className="required-marker">*</span></label>
-            <select
-              name="preferredDate"
-              className={showValidationErrors && validationErrors.preferredDate ? 'input-error' : ''}
-              value={formData.preferredDate}
-              onChange={e => setFormData(prev => ({ ...prev, preferredDate: e.target.value, preferredTime: '' }))}
-            >
-              <option value="">Select Date</option>
-              {uniqueDates.map(date => (
-                <option key={date} value={date}>{date}</option>
-              ))}
-            </select>
-          </div>
+        <div className="client-blessing-field-date">
+  <label>Date of Appointment <span className="required-marker">*</span></label>
+  <select
+    name="preferredDate"
+    value={formData.preferredDate}
+    onChange={e => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
+    className={showValidationErrors && validationErrors.preferredDate ? 'input-error' : ''}
+  >
+    <option value="">Select Date</option>
+    {uniqueDates.map(date => (
+      <option key={date} value={date}>
+        {new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+      </option>
+    ))}
+  </select>
+</div>
           
           <div className="client-blessing-field-time">
-            <label>Time of Appointment <span className="required-marker">*</span></label>
-            <select
-              name="preferredTime"
-              className={showValidationErrors && validationErrors.preferredTime ? 'input-error' : ''}
-              value={formData.preferredTime}
-              onChange={e => setFormData(prev => ({ ...prev, preferredTime: e.target.value }))}
-              disabled={!formData.preferredDate}
-            >
-              <option value="">Select Time</option>
-              {filteredTimes.map(time => (
-                <option key={time} value={time}>{time}</option>
-              ))}
-            </select>
-          </div>
+  <label>Time of Appointment <span className="required-marker">*</span></label>
+  <select
+    name="preferredTime"
+    value={formData.preferredTime}
+    onChange={e => setFormData(prev => ({ ...prev, preferredTime: e.target.value }))}
+    disabled={!formData.preferredDate}
+    className={showValidationErrors && validationErrors.preferredTime ? 'input-error' : ''}
+  >
+    <option value="">Select Time</option>
+    {filteredTimes.map(time => (
+      <option key={time} value={time}>
+        {formatTimeTo12Hour(time)}
+      </option>
+    ))}
+  </select>
+</div>
         </div>
         
         <div className="client-blessing-bypart">
@@ -843,30 +877,30 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
           {/* Place of Birth with separated fields */}
           <label className="sub-cc">Place of Birth <span className="required-marker">*</span></label>
           <div className="client-blessing-row">
-            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
-              <label>Birth Barangay</label>
-              <input
+           <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Province</label>
+              <input 
                 type="text"
                 placeholder="Type to search"
-                value={birthFields.barangay}
-                onChange={handleBirthBarangayChange}
-                onFocus={() => handleFocus('birthBarangay')}
-                className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
-              />
-              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
-                <div className="location-dropdown">
-                  {suggestions.birthBarangay.map((barangay, index) => (
-                    <div 
-                      key={index}
-                      onClick={() => handleSelectBirthBarangay(barangay)}
-                      className="location-dropdown-item"
-                    >
-                      {barangay}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              value={birthFields.province}
+               onChange={handleBirthProvinceChange}
+               onFocus={() => handleFocus('birthProvince')}
+               className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
+             />
+             {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.birthProvince.map((province, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBirthProvince(province)}
+                     className="location-dropdown-item"
+                   >
+                     {province}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
             <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
               <label>Birth Municipality</label>
               <input 
@@ -891,61 +925,51 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
                 </div>
               )}
             </div>
-            <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
-              <label>Birth Province</label>
-              <input 
+              <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Barangay</label>
+              <input
                 type="text"
                 placeholder="Type to search"
-              value={birthFields.province}
-               onChange={handleBirthProvinceChange}
-               onFocus={() => handleFocus('birthProvince')}
-               className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
-             />
-             {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.birthProvince.map((province, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBirthProvince(province)}
-                     className="location-dropdown-item"
-                   >
-                     {province}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
+                value={birthFields.barangay}
+                onChange={handleBirthBarangayChange}
+                onFocus={() => handleFocus('birthBarangay')}
+                className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
+              />
+              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
+                <div className="location-dropdown">
+                  {suggestions.birthBarangay.map((barangay, index) => (
+                    <div 
+                      key={index}
+                      onClick={() => handleSelectBirthBarangay(barangay)}
+                      className="location-dropdown-item"
+                    >
+                      {barangay}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+           
          </div>
 
          <label className="sub-cc">Current Address <span className="required-marker">*</span></label>
          <div className="client-blessing-row">
-           <div className={`client-blessing-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
-             <label>Street <span className="required-marker">*</span></label>
+          <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
+             <label>Province <span className="required-marker">*</span></label>
              <input
-               name="street"
-               value={formData.street || ""}
-               onChange={handleInputChange}
-               placeholder="Street"
-               autoComplete="off"
-               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
-             />
-           </div>
-           <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
-             <label>Barangay <span className="required-marker">*</span></label>
-             <input
-               name="barangay"
-               value={formData.barangay || ""}
-               onChange={handleBarangayChange}
-               onFocus={() => handleFocus('barangay')}
+               name="province"
+               value={formData.province || ""}
+               onChange={handleProvinceChange}
+               onFocus={() => handleFocus('province')}
                placeholder="Type to search"
                autoComplete="off"
-               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
+               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
              />
-             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
+             {focusedField === 'province' && suggestions.province.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.barangay.map((barangay, idx) => (
-                   <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
-                     {barangay}
+                 {suggestions.province.map((province, idx) => (
+                   <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
+                     {province}
                    </div>
                  ))}
                </div>
@@ -972,26 +996,37 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
                </div>
              )}
            </div>
-           <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
-             <label>Province <span className="required-marker">*</span></label>
+          <div className={`client-blessing-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
+             <label>Barangay <span className="required-marker">*</span></label>
              <input
-               name="province"
-               value={formData.province || ""}
-               onChange={handleProvinceChange}
-               onFocus={() => handleFocus('province')}
+               name="barangay"
+               value={formData.barangay || ""}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
                placeholder="Type to search"
                autoComplete="off"
-               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
+               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
              />
-             {focusedField === 'province' && suggestions.province.length > 0 && (
+             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.province.map((province, idx) => (
-                   <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
-                     {province}
+                 {suggestions.barangay.map((barangay, idx) => (
+                   <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                     {barangay}
                    </div>
                  ))}
                </div>
              )}
+           </div>
+           <div className={`client-blessing-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
+             <label>Street <span className="required-marker">*</span></label>
+             <input
+               name="street"
+               value={formData.street || ""}
+               onChange={handleInputChange}
+               placeholder="Street"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
+             />
            </div>
          </div>
 

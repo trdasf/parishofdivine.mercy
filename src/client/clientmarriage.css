@@ -196,7 +196,7 @@
     font-family: roboto;
   }
   
-  .client-marriage-field input {
+  .client-marriage-field input , .client-marriage-field select{
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;

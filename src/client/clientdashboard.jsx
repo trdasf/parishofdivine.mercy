@@ -8,8 +8,12 @@ import {
   faInfoCircle, 
   faCalendarAlt, 
   faCircle,
-  faCheckCircle
+  faCheckCircle,
+  faExclamationTriangle,
+  faCertificate,
+  faCalendarCheck
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const ClientDashboard = () => {
   const location = useLocation();
@@ -30,10 +34,24 @@ const ClientDashboard = () => {
     }
   }, [clientID, user, navigate]);
   
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Function to get current date in Philippines timezone
+  const getPhilippinesDate = () => {
+    return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+  };
+  
+  // Setting default date to current date in Philippines
+  const [currentDate, setCurrentDate] = useState(getPhilippinesDate());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showHolidayInfo, setShowHolidayInfo] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState(null);
+  
+  // State for appointments data
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // API Base URL
+  const API_BASE_URL = 'https://parishofdivinemercy.com/backend';
   
   // Function to calculate Easter Sunday (needed for Holy Week calculations)
   const calculateEaster = (year) => {
@@ -168,45 +186,78 @@ const ClientDashboard = () => {
     setHolidays(getHolidaysForYear(currentYear));
   }, [currentDate]);
 
-  // Sample appointments data - would normally come from API
-  const appointments = [
-    { 
-      id: 1, 
-      firstName: "Maria", 
-      lastName: "Santos", 
-      sacramentType: "Baptism", 
-      date: new Date(2025, 3, 15), 
-      time: "9:00 AM", 
-      status: "Confirmed" 
-    },
-    { 
-      id: 2, 
-      firstName: "Juan", 
-      lastName: "Dela Cruz", 
-      sacramentType: "Marriage", 
-      date: new Date(2025, 3, 20), 
-      time: "3:00 PM", 
-      status: "Pending" 
-    },
-    { 
-      id: 3, 
-      firstName: "Pedro", 
-      lastName: "Reyes", 
-      sacramentType: "Communion", 
-      date: new Date(2025, 3, 25), 
-      time: "10:30 AM", 
-      status: "Confirmed" 
-    },
-    { 
-      id: 4, 
-      firstName: "Ana", 
-      lastName: "Manalo", 
-      sacramentType: "Kumpil", 
-      date: new Date(2025, 3, 28), 
-      time: "11:00 AM", 
-      status: "Pending" 
-    }
-  ];
+  // Fetch client's appointments (both application and approved ceremony dates)
+  useEffect(() => {
+    const fetchClientAppointments = async () => {
+      if (!clientID) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch all appointments for this specific client
+        const response = await axios.get(`${API_BASE_URL}/fetch_all_client_appointments.php?clientID=${clientID}`);
+        
+        if (response.data && response.data.success && response.data.appointments) {
+          // Transform and process appointments
+          const processedAppointments = response.data.appointments
+            .map(app => {
+              let appointmentDate;
+              
+              // Parse the date from various possible formats
+              if (app.date) {
+                appointmentDate = new Date(app.date);
+                
+                // If date parsing fails, try different formats
+                if (isNaN(appointmentDate.getTime())) {
+                  // Try MM/DD/YYYY format
+                  const dateParts = app.date.split('/');
+                  if (dateParts.length === 3) {
+                    appointmentDate = new Date(parseInt(dateParts[2]), parseInt(dateParts[0]) - 1, parseInt(dateParts[1]));
+                  } else {
+                    // Try YYYY-MM-DD format
+                    const dashParts = app.date.split('-');
+                    if (dashParts.length === 3) {
+                      appointmentDate = new Date(parseInt(dashParts[0]), parseInt(dashParts[1]) - 1, parseInt(dashParts[2]));
+                    }
+                  }
+                }
+              } else {
+                // Skip appointments without dates
+                return null;
+              }
+              
+              return {
+                id: app.id,
+                firstName: app.firstName || '',
+                lastName: app.lastName || '',
+                sacramentType: app.sacramentType,
+                date: appointmentDate,
+                time: app.time || '12:00 PM',
+                status: app.status,
+                appointmentSource: app.appointmentSource || 'application', // New field to distinguish appointment types
+                priest: app.priest || null // For approved ceremonies
+              };
+            })
+            .filter(app => app !== null); // Remove null entries
+          
+          // Sort appointments by date
+          processedAppointments.sort((a, b) => a.date - b.date);
+          setAppointments(processedAppointments);
+        } else {
+          setAppointments([]);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching client appointments:', err);
+        setError('Failed to load your appointments. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchClientAppointments();
+  }, [clientID, API_BASE_URL]);
 
   // Navigate to previous month
   const prevMonth = () => {
@@ -239,6 +290,26 @@ const ClientDashboard = () => {
   // Check if a date has an appointment
   const hasAppointment = (date) => {
     return appointments.some(appointment => 
+      appointment.date.getDate() === date.getDate() && 
+      appointment.date.getMonth() === date.getMonth() && 
+      appointment.date.getFullYear() === date.getFullYear()
+    );
+  };
+
+  // Check if a date has an approved ceremony
+  const hasApprovedCeremony = (date) => {
+    return appointments.some(appointment => 
+      appointment.appointmentSource === 'approved_ceremony' &&
+      appointment.date.getDate() === date.getDate() && 
+      appointment.date.getMonth() === date.getMonth() && 
+      appointment.date.getFullYear() === date.getFullYear()
+    );
+  };
+
+  // Check if a date has an application appointment
+  const hasApplicationAppointment = (date) => {
+    return appointments.some(appointment => 
+      appointment.appointmentSource === 'application' &&
       appointment.date.getDate() === date.getDate() && 
       appointment.date.getMonth() === date.getMonth() && 
       appointment.date.getFullYear() === date.getFullYear()
@@ -309,25 +380,38 @@ const ClientDashboard = () => {
     );
   };
 
-  // Get status icon based on appointment status
-  const getStatusIcon = (status) => {
-    switch(status.toLowerCase()) {
+  // Get status icon based on appointment status and source
+  const getStatusIcon = (appointment) => {
+    if (appointment.appointmentSource === 'approved_ceremony') {
+      return <FontAwesomeIcon icon={faCertificate} style={{ marginRight: '5px', color: '#b3701f' }} />;
+    }
+    
+    switch(appointment.status.toLowerCase()) {
+      case 'approved':
       case 'confirmed':
-        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#155724' }} />;
+        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#573901' }} />;
       case 'pending':
         return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#856404' }} />;
       case 'cancelled':
         return <FontAwesomeIcon icon={faCircle} style={{ marginRight: '5px', color: '#721c24' }} />;
       case 'completed':
-        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#004085' }} />;
+        return <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: '5px', color: '#b3701f' }} />;
       default:
         return null;
     }
   };
 
-  // Check if a date is today
+  // Get appointment type display text
+  const getAppointmentTypeDisplay = (appointment) => {
+    if (appointment.appointmentSource === 'approved_ceremony') {
+      return `${appointment.sacramentType} - Ceremony Date`;
+    }
+    return `${appointment.sacramentType} - Application`;
+  };
+
+  // Check if a date is today - Updated to use current Philippines date
   const isToday = (date) => {
-    const today = new Date();
+    const today = getPhilippinesDate();
     return date.getDate() === today.getDate() && 
            date.getMonth() === today.getMonth() && 
            date.getFullYear() === today.getFullYear();
@@ -336,6 +420,37 @@ const ClientDashboard = () => {
   return (
     <div className="dashboard-container-cd">
       <h1 className="title-cd">CLIENT DASHBOARD</h1>
+      
+      {/* Error message */}
+      {error && (
+        <div className="error-message-container">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="error-icon" />
+          <span>{error}</span>
+        </div>
+      )}
+      
+      {/* Legend for different appointment types */}
+      <div className="legend-container-cd">
+        <h3>Legend:</h3>
+        <div className="legend-items-cd">
+          <div className="legend-item-cd">
+            <div className="appointment-dot-cd application-dot-cd"></div>
+            <span>Application Appointment</span>
+          </div>
+          <div className="legend-item-cd">
+            <div className="appointment-dot-cd ceremony-dot-cd"></div>
+            <span>Approved Ceremony Date</span>
+          </div>
+          <div className="legend-item-cd">
+            <div className="holiday-dot-cd" style={{ backgroundColor: "#e74c3c" }}></div>
+            <span>Regular Holiday</span>
+          </div>
+          <div className="legend-item-cd">
+            <div className="holiday-dot-cd" style={{ backgroundColor: "#f39c12" }}></div>
+            <span>Special Holiday</span>
+          </div>
+        </div>
+      </div>
       
       {/* Calendar Section */}
       <div className="calendar-section-cd">
@@ -352,57 +467,63 @@ const ClientDashboard = () => {
           </button>
         </div>
         
-        <div className="calendar-grid-cd">
-          {/* Calendar week days */}
-          <div className="weekday-cd">Sun</div>
-          <div className="weekday-cd">Mon</div>
-          <div className="weekday-cd">Tue</div>
-          <div className="weekday-cd">Wed</div>
-          <div className="weekday-cd">Thu</div>
-          <div className="weekday-cd">Fri</div>
-          <div className="weekday-cd">Sat</div>
-          
-          {/* Calendar days */}
-          {generateCalendarDays().map((date, index) => (
-            <div 
-              key={index} 
-              className={`calendar-day-cd 
-                ${!date ? 'empty-day-cd' : ''} 
-                ${date && hasAppointment(date) ? 'has-appointment-cd' : ''} 
-                ${date && hasHoliday(date) ? 'holiday-day-cd' : ''} 
-                ${date && isToday(date) ? 'today-cd' : ''}
-                ${date && selectedDate && 
-                  date.getDate() === selectedDate.getDate() && 
-                  date.getMonth() === selectedDate.getMonth() && 
-                  date.getFullYear() === selectedDate.getFullYear() 
-                    ? 'selected-day-cd' 
-                    : ''
-                }`}
-              onClick={() => handleDayClick(date)}
-              aria-label={date ? `${date.getDate()}, ${hasHoliday(date) ? 'Holiday' : ''} ${hasAppointment(date) ? 'Has appointment' : ''}` : 'Empty day'}
-            >
-              {date && (
-                <>
-                  <span className="day-number-cd">{date.getDate()}</span>
-                  {hasAppointment(date) && <div className="appointment-dot-cd"></div>}
-                  {hasHoliday(date) && (
-                    <div className="holiday-indicator-cd">
-                      <div 
-                        className="holiday-dot-cd" 
-                        style={{ 
-                          backgroundColor: getHoliday(date).type === "Regular" ? "#e74c3c" : "#f39c12" 
-                        }}
-                      ></div>
-                      <span className="holiday-name-cd">{getHoliday(date).name}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-        
-       
+        {loading ? (
+          <div className="loading-calendar">
+            <p>Loading your appointments...</p>
+          </div>
+        ) : (
+          <div className="calendar-grid-cd">
+            {/* Calendar week days */}
+            <div className="weekday-cd">Sun</div>
+            <div className="weekday-cd">Mon</div>
+            <div className="weekday-cd">Tue</div>
+            <div className="weekday-cd">Wed</div>
+            <div className="weekday-cd">Thu</div>
+            <div className="weekday-cd">Fri</div>
+            <div className="weekday-cd">Sat</div>
+            
+            {/* Calendar days */}
+            {generateCalendarDays().map((date, index) => (
+              <div 
+                key={index} 
+                className={`calendar-day-cd 
+                  ${!date ? 'empty-day-cd' : ''} 
+                  ${date && hasAppointment(date) ? 'has-appointment-cd' : ''} 
+                  ${date && hasApprovedCeremony(date) ? 'has-ceremony-cd' : ''} 
+                  ${date && hasHoliday(date) ? 'holiday-day-cd' : ''} 
+                  ${date && isToday(date) ? 'today-cd' : ''}
+                  ${date && selectedDate && 
+                    date.getDate() === selectedDate.getDate() && 
+                    date.getMonth() === selectedDate.getMonth() && 
+                    date.getFullYear() === selectedDate.getFullYear() 
+                      ? 'selected-day-cd' 
+                      : ''
+                  }`}
+                onClick={() => handleDayClick(date)}
+                aria-label={date ? `${date.getDate()}, ${hasHoliday(date) ? 'Holiday' : ''} ${hasAppointment(date) ? 'Has appointment' : ''}` : 'Empty day'}
+              >
+                {date && (
+                  <>
+                    <span className="day-number-cd">{date.getDate()}</span>
+                    {hasApplicationAppointment(date) && <div className="appointment-dot-cd application-dot-cd"></div>}
+                    {hasApprovedCeremony(date) && <div className="appointment-dot-cd ceremony-dot-cd"></div>}
+                    {hasHoliday(date) && (
+                      <div className="holiday-indicator-cd">
+                        <div 
+                          className="holiday-dot-cd" 
+                          style={{ 
+                            backgroundColor: getHoliday(date).type === "Regular" ? "#e74c3c" : "#f39c12" 
+                          }}
+                        ></div>
+                        <span className="holiday-name-cd">{getHoliday(date).name}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         
         {/* Holiday Information */}
         {showHolidayInfo && selectedHoliday && (
@@ -432,14 +553,17 @@ const ClientDashboard = () => {
                 <h4>Your Scheduled Appointments:</h4>
                 <ul className="appointment-list-cd">
                   {getAppointmentsForSelectedDate().map(appointment => (
-                    <li key={appointment.id} className="appointment-item-cd">
+                    <li key={`${appointment.id}-${appointment.appointmentSource}`} className={`appointment-item-cd ${appointment.appointmentSource}-appointment-cd`}>
                       <div className="appointment-time-cd">{appointment.time}</div>
                       <div className="appointment-details-cd">
                         <span className="appointment-name-cd">{appointment.firstName} {appointment.lastName}</span>
-                        <span className="appointment-type-cd">{appointment.sacramentType}</span>
+                        <span className="appointment-type-cd">{getAppointmentTypeDisplay(appointment)}</span>
+                        {appointment.priest && (
+                          <span className="appointment-priest-cd">Priest: {appointment.priest}</span>
+                        )}
                         <span className={`appointment-status-cd ${appointment.status.toLowerCase()}-cd`}>
-                          {getStatusIcon(appointment.status)}
-                          {appointment.status}
+                          {getStatusIcon(appointment)}
+                          {appointment.appointmentSource === 'approved_ceremony' ? 'Approved Ceremony' : appointment.status}
                         </span>
                       </div>
                     </li>

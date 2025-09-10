@@ -20,8 +20,13 @@ import axios from 'axios'; // Make sure axios is installed
 const ParishDashboard = () => {
   const navigate = useNavigate();
   
-  // Setting default date to May 2025 as specified
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 17)); // May 17, 2025
+  // Function to get current date in Philippines timezone
+  const getPhilippinesDate = () => {
+    return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
+  };
+  
+  // Setting default date to current date in Philippines
+  const [currentDate, setCurrentDate] = useState(getPhilippinesDate());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showHolidayInfo, setShowHolidayInfo] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState(null);
@@ -582,9 +587,9 @@ const ParishDashboard = () => {
     }
   };
 
-  // Check if a date is today
+  // Check if a date is today - Updated to use current Philippines date
   const isToday = (date) => {
-    const today = new Date(2025, 4, 17); // May 17, 2025 (hardcoded for the example)
+    const today = getPhilippinesDate();
     return date.getDate() === today.getDate() && 
            date.getMonth() === today.getMonth() && 
            date.getFullYear() === today.getFullYear();

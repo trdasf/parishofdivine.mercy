@@ -146,7 +146,18 @@ const MarriageView = () => {
     }
     
     // Get all data objects from the API response
-    const { marriage, groomAddress, brideAddress, firstWitness, secondWitness, requirements } = data;
+    const { 
+      marriage, 
+      groomAddress, 
+      brideAddress, 
+      firstWitness, 
+      secondWitness, 
+      requirements,
+      groomFather,
+      groomMother,
+      brideFather,
+      brideMother
+    } = data;
     
     // Create a fallback/sample data if requirements is missing
     const req = requirements || {};
@@ -167,12 +178,30 @@ const MarriageView = () => {
         placeOfBirth: marriage.groom_placeOfBirth || '',
         dateOfBaptism: marriage.groom_dateOfBaptism || '',
         churchOfBaptism: marriage.groom_churchOfBaptism || '',
+        civilStatus: marriage.groom_civil_status || '',
+        religion: marriage.groom_religion || '',
         email: marriage.groom_email || '', // Include email for notifications
         address: {
           street: groomAddress?.street || '',
           barangay: groomAddress?.barangay || '',
           municipality: groomAddress?.municipality || '',
           province: groomAddress?.province || ''
+        },
+        father: {
+          firstName: groomFather?.first_name || '',
+          middleName: groomFather?.middle_name || '',
+          lastName: groomFather?.last_name || '',
+          dateOfBirth: groomFather?.dateOfBirth || '',
+          age: groomFather?.age || '',
+          contactNumber: groomFather?.contact_number || ''
+        },
+        mother: {
+          firstName: groomMother?.first_name || '',
+          middleName: groomMother?.middle_name || '',
+          lastName: groomMother?.last_name || '',
+          dateOfBirth: groomMother?.dateOfBirth || '',
+          age: groomMother?.age || '',
+          contactNumber: groomMother?.contact_number || ''
         }
       },
       bride: {
@@ -184,12 +213,30 @@ const MarriageView = () => {
         placeOfBirth: marriage.bride_placeOfBirth || '',
         dateOfBaptism: marriage.bride_dateOfBaptism || '',
         churchOfBaptism: marriage.bride_churchOfBaptism || '',
+        civilStatus: marriage.bride_civil_status || '',
+        religion: marriage.bride_religion || '',
         email: marriage.bride_email || '', // Include email for notifications
         address: {
           street: brideAddress?.street || '',
           barangay: brideAddress?.barangay || '',
           municipality: brideAddress?.municipality || '',
           province: brideAddress?.province || ''
+        },
+        father: {
+          firstName: brideFather?.first_name || '',
+          middleName: brideFather?.middle_name || '',
+          lastName: brideFather?.last_name || '',
+          dateOfBirth: brideFather?.dateOfBirth || '',
+          age: brideFather?.age || '',
+          contactNumber: brideFather?.contact_number || ''
+        },
+        mother: {
+          firstName: brideMother?.first_name || '',
+          middleName: brideMother?.middle_name || '',
+          lastName: brideMother?.last_name || '',
+          dateOfBirth: brideMother?.dateOfBirth || '',
+          age: brideMother?.age || '',
+          contactNumber: brideMother?.contact_number || ''
         }
       },
       witnesses: [
@@ -925,27 +972,27 @@ const MarriageView = () => {
                               
                               <div className="person-field">
                                 <span className="field-label">6. Religion/Religious Sect</span>
-                                <span className="field-value">Roman Catholic</span>
+                                <span className="field-value">{marriageData.groom.religion || 'Roman Catholic'}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">7. Civil Status</span>
-                                <span className="field-value">Single</span>
+                                <span className="field-value">{marriageData.groom.civilStatus || 'Single'}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">8. Name of Father</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.groom.father.firstName}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.groom.father.middleName}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.groom.father.lastName}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -960,15 +1007,15 @@ const MarriageView = () => {
                                 <span className="field-label">10. Mother's Maiden Name</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.groom.mother.firstName}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.groom.mother.middleName}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.groom.mother.lastName}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1037,27 +1084,27 @@ const MarriageView = () => {
                               
                               <div className="person-field">
                                 <span className="field-label">6. Religion/Religious Sect</span>
-                                <span className="field-value">Roman Catholic</span>
+                                <span className="field-value">{marriageData.bride.religion || 'Roman Catholic'}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">7. Civil Status</span>
-                                <span className="field-value">Single</span>
+                                <span className="field-value">{marriageData.bride.civilStatus || 'Single'}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">8. Name of Father</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.bride.father.firstName}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.bride.father.middleName}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.bride.father.lastName}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1072,15 +1119,15 @@ const MarriageView = () => {
                                 <span className="field-label">10. Mother's Maiden Name</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.bride.mother.firstName}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.bride.mother.middleName}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value"></span>
+                                    <span className="name-value">{marriageData.bride.mother.lastName}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1279,6 +1326,17 @@ const MarriageView = () => {
                 <label>Date of Birth:</label>
                 {renderReadOnlyField(formatDate(marriageData.groom.dateOfBirth))}
               </div>
+              <div className="secretary-marriage-view-field">
+                <label>Civil Status:</label>
+                {renderReadOnlyField(marriageData.groom.civilStatus)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Religion:</label>
+                {renderReadOnlyField(marriageData.groom.religion)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
                <div className="client-marriage-view-field">
                 <label>Date of Baptism:</label>
                 <div className="client-marriage-view-value">{marriageData.groom.dateOfBaptism}</div>
@@ -1321,6 +1379,74 @@ const MarriageView = () => {
             </div>
           </div>
 
+          {/* Groom's Father Information */}
+          <h3 className="secretary-marriage-view-sub-title">Groom's Father Information</h3>
+          <div className="secretary-marriage-view-info-card">
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>First Name:</label>
+                {renderReadOnlyField(marriageData.groom.father.firstName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Middle Name:</label>
+                {renderReadOnlyField(marriageData.groom.father.middleName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Last Name:</label>
+                {renderReadOnlyField(marriageData.groom.father.lastName)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(formatDate(marriageData.groom.father.dateOfBirth))}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Age:</label>
+                {renderReadOnlyField(marriageData.groom.father.age)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Contact Number:</label>
+                {renderReadOnlyField(marriageData.groom.father.contactNumber)}
+              </div>
+            </div>
+          </div>
+
+          {/* Groom's Mother Information */}
+          <h3 className="secretary-marriage-view-sub-title">Groom's Mother Information</h3>
+          <div className="secretary-marriage-view-info-card">
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>First Name:</label>
+                {renderReadOnlyField(marriageData.groom.mother.firstName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Middle Name:</label>
+                {renderReadOnlyField(marriageData.groom.mother.middleName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Last Name:</label>
+                {renderReadOnlyField(marriageData.groom.mother.lastName)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(formatDate(marriageData.groom.mother.dateOfBirth))}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Age:</label>
+                {renderReadOnlyField(marriageData.groom.mother.age)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Contact Number:</label>
+                {renderReadOnlyField(marriageData.groom.mother.contactNumber)}
+              </div>
+            </div>
+          </div>
+
           {/* Bride's Information */}
           <h3 className="secretary-marriage-view-sub-title">Bride Information</h3>
           <div className="secretary-marriage-view-info-card">
@@ -1348,6 +1474,17 @@ const MarriageView = () => {
                 <label>Age:</label>
                 {renderReadOnlyField(marriageData.bride.age)}
               </div>
+              <div className="secretary-marriage-view-field">
+                <label>Civil Status:</label>
+                {renderReadOnlyField(marriageData.bride.civilStatus)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Religion:</label>
+                {renderReadOnlyField(marriageData.bride.religion)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
               <div className="secretary-marriage-view-field">
                 <label>Date of Baptism:</label>
                 {renderReadOnlyField(formatDate(marriageData.bride.dateOfBaptism))}
@@ -1384,6 +1521,74 @@ const MarriageView = () => {
               <div className="secretary-marriage-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(marriageData.bride.address.province)}
+              </div>
+            </div>
+          </div>
+
+          {/* Bride's Father Information */}
+          <h3 className="secretary-marriage-view-sub-title">Bride's Father Information</h3>
+          <div className="secretary-marriage-view-info-card">
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>First Name:</label>
+                {renderReadOnlyField(marriageData.bride.father.firstName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Middle Name:</label>
+                {renderReadOnlyField(marriageData.bride.father.middleName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Last Name:</label>
+                {renderReadOnlyField(marriageData.bride.father.lastName)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(formatDate(marriageData.bride.father.dateOfBirth))}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Age:</label>
+                {renderReadOnlyField(marriageData.bride.father.age)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Contact Number:</label>
+                {renderReadOnlyField(marriageData.bride.father.contactNumber)}
+              </div>
+            </div>
+          </div>
+
+          {/* Bride's Mother Information */}
+          <h3 className="secretary-marriage-view-sub-title">Bride's Mother Information</h3>
+          <div className="secretary-marriage-view-info-card">
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>First Name:</label>
+                {renderReadOnlyField(marriageData.bride.mother.firstName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Middle Name:</label>
+                {renderReadOnlyField(marriageData.bride.mother.middleName)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Last Name:</label>
+                {renderReadOnlyField(marriageData.bride.mother.lastName)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Date of Birth:</label>
+                {renderReadOnlyField(formatDate(marriageData.bride.mother.dateOfBirth))}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Age:</label>
+                {renderReadOnlyField(marriageData.bride.mother.age)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Contact Number:</label>
+                {renderReadOnlyField(marriageData.bride.mother.contactNumber)}
               </div>
             </div>
           </div>

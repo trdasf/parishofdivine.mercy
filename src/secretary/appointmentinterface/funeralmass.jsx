@@ -1178,23 +1178,23 @@ const handleYes = async () => {
          {/* Wake Location - Separated into three fields */}
          <label className="sub-cc">Wake Location <span className="required-marker">*</span></label>
          <div className="client-funeral-row">
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['wake_barangay'] ? 'error-field' : ''}`}>
-             <label>Wake Barangay <span className="required-marker">*</span></label>
+           <div className={`client-funeral-field location-dropdown-container ${validationErrors['wake_province'] ? 'error-field' : ''}`}>
+             <label>Wake Province <span className="required-marker">*</span></label>
              <input
                type="text"
-               name="wake_barangay"
-               value={formData.wake_barangay || ""}
-               onChange={handleWakeBarangayChange}
-               onFocus={() => handleFocus('wake_barangay')}
+               name="wake_province"
+               value={formData.wake_province || ""}
+               onChange={handleWakeProvinceChange}
+               onFocus={() => handleFocus('wake_province')}
                placeholder="Type to search"
                autoComplete="off"
              />
-             {validationErrors['wake_barangay'] && <div className="error-message">Required</div>}
-            {focusedField === 'wake_barangay' && suggestions.wake_barangay.length > 0 && (
+             {validationErrors['wake_province'] && <div className="error-message">Required</div>}
+            {focusedField === 'wake_province' && suggestions.wake_province.length > 0 && (
   <div className="location-dropdown">
-    {suggestions.wake_barangay.map((barangay, idx) => (
-      <div key={idx} onClick={() => handleSelectWakeBarangay(barangay)} className="location-dropdown-item">
-        {barangay}
+    {suggestions.wake_province.map((province, idx) => (
+      <div key={idx} onClick={() => handleSelectWakeProvince(province)} className="location-dropdown-item">
+        {province}
       </div>
     ))}
   </div>
@@ -1222,50 +1222,51 @@ const handleYes = async () => {
   </div>
 )}
            </div>
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['wake_province'] ? 'error-field' : ''}`}>
-             <label>Wake Province <span className="required-marker">*</span></label>
+            <div className={`client-funeral-field location-dropdown-container ${validationErrors['wake_barangay'] ? 'error-field' : ''}`}>
+             <label>Wake Barangay <span className="required-marker">*</span></label>
              <input
                type="text"
-               name="wake_province"
-               value={formData.wake_province || ""}
-               onChange={handleWakeProvinceChange}
-               onFocus={() => handleFocus('wake_province')}
+               name="wake_barangay"
+               value={formData.wake_barangay || ""}
+               onChange={handleWakeBarangayChange}
+               onFocus={() => handleFocus('wake_barangay')}
                placeholder="Type to search"
                autoComplete="off"
              />
-             {validationErrors['wake_province'] && <div className="error-message">Required</div>}
-            {focusedField === 'wake_province' && suggestions.wake_province.length > 0 && (
+             {validationErrors['wake_barangay'] && <div className="error-message">Required</div>}
+            {focusedField === 'wake_barangay' && suggestions.wake_barangay.length > 0 && (
   <div className="location-dropdown">
-    {suggestions.wake_province.map((province, idx) => (
-      <div key={idx} onClick={() => handleSelectWakeProvince(province)} className="location-dropdown-item">
-        {province}
+    {suggestions.wake_barangay.map((barangay, idx) => (
+      <div key={idx} onClick={() => handleSelectWakeBarangay(barangay)} className="location-dropdown-item">
+        {barangay}
       </div>
     ))}
   </div>
 )}
            </div>
+          
          </div>
          
          {/* Burial Location - Separated into three fields */}
          <label className="sub-cc">Burial Location <span className="required-marker">*</span></label>
          <div className="client-funeral-row">
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['burial_barangay'] ? 'error-field' : ''}`}>
-             <label>Burial Barangay <span className="required-marker">*</span></label>
+ <div className={`client-funeral-field location-dropdown-container ${validationErrors['burial_province'] ? 'error-field' : ''}`}>
+             <label>Burial Province <span className="required-marker">*</span></label>
              <input
                type="text"
-               name="burial_barangay"
-               value={formData.burial_barangay || ""}
-               onChange={handleBurialBarangayChange}
-               onFocus={() => handleFocus('burial_barangay')}
+               name="burial_province"
+               value={formData.burial_province || ""}
+               onChange={handleBurialProvinceChange}
+               onFocus={() => handleFocus('burial_province')}
                placeholder="Type to search"
                autoComplete="off"
              />
-             {validationErrors['burial_barangay'] && <div className="error-message">Required</div>}
-            {focusedField === 'burial_barangay' && suggestions.burial_barangay.length > 0 && (
+             {validationErrors['burial_province'] && <div className="error-message">Required</div>}
+             {focusedField === 'burial_province' && suggestions.burial_province.length > 0 && (
   <div className="location-dropdown">
-    {suggestions.burial_barangay.map((barangay, idx) => (
-      <div key={idx} onClick={() => handleSelectBurialBarangay(barangay)} className="location-dropdown-item">
-        {barangay}
+    {suggestions.burial_province.map((province, idx) => (
+      <div key={idx} onClick={() => handleSelectBurialProvince(province)} className="location-dropdown-item">
+        {province}
       </div>
     ))}
   </div>
@@ -1293,23 +1294,23 @@ const handleYes = async () => {
   </div>
 )}
            </div>
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['burial_province'] ? 'error-field' : ''}`}>
-             <label>Burial Province <span className="required-marker">*</span></label>
+                      <div className={`client-funeral-field location-dropdown-container ${validationErrors['burial_barangay'] ? 'error-field' : ''}`}>
+             <label>Burial Barangay <span className="required-marker">*</span></label>
              <input
                type="text"
-               name="burial_province"
-               value={formData.burial_province || ""}
-               onChange={handleBurialProvinceChange}
-               onFocus={() => handleFocus('burial_province')}
+               name="burial_barangay"
+               value={formData.burial_barangay || ""}
+               onChange={handleBurialBarangayChange}
+               onFocus={() => handleFocus('burial_barangay')}
                placeholder="Type to search"
                autoComplete="off"
              />
-             {validationErrors['burial_province'] && <div className="error-message">Required</div>}
-             {focusedField === 'burial_province' && suggestions.burial_province.length > 0 && (
+             {validationErrors['burial_barangay'] && <div className="error-message">Required</div>}
+            {focusedField === 'burial_barangay' && suggestions.burial_barangay.length > 0 && (
   <div className="location-dropdown">
-    {suggestions.burial_province.map((province, idx) => (
-      <div key={idx} onClick={() => handleSelectBurialProvince(province)} className="location-dropdown-item">
-        {province}
+    {suggestions.burial_barangay.map((barangay, idx) => (
+      <div key={idx} onClick={() => handleSelectBurialBarangay(barangay)} className="location-dropdown-item">
+        {barangay}
       </div>
     ))}
   </div>
@@ -1381,66 +1382,7 @@ const handleYes = async () => {
          {/* Address Fields */}
          <h3 className="client-funeral-sub-title">Address</h3>
          <div className="client-funeral-row client-funeral-address-row">
-         <div className={`client-funeral-field ${validationErrors['street'] ? 'error-field' : ''}`}>
-             <label>Street<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               value={formData.street}
-               onChange={(e) => handleInputChange('street', e.target.value)}
-             />
-             {validationErrors['street'] && <div className="error-message">Required</div>}
-           </div>
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['barangay'] ? 'error-field' : ''}`}>
-             <label>Barangay<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               value={formData.barangay}
-               onChange={handleBarangayChange}
-               onFocus={() => handleFocus('barangay')}
-               placeholder="Type to search"
-               name="barangay"
-             />
-             {validationErrors['barangay'] && <div className="error-message">Required</div>}
-             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.barangay.map((barangay, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBarangay(barangay)}
-                     className="location-dropdown-item"
-                   >
-                     {barangay}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['municipality'] ? 'error-field' : ''}`}>
-             <label>Municipality<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               value={formData.municipality}
-               onChange={handleMunicipalityChange}
-               onFocus={() => handleFocus('municipality')}
-               placeholder="Type to search"
-               name="municipality"
-             />
-             {validationErrors['municipality'] && <div className="error-message">Required</div>}
-             {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.municipality.map((municipality, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectMunicipality(municipality)}
-                     className="location-dropdown-item"
-                   >
-                     {municipality}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-           <div className={`client-funeral-field location-dropdown-container ${validationErrors['province'] ? 'error-field' : ''}`}>
+          <div className={`client-funeral-field location-dropdown-container ${validationErrors['province'] ? 'error-field' : ''}`}>
              <label>Province<span className="required-marker">*</span></label>
              <input 
                type="text"
@@ -1465,6 +1407,66 @@ const handleYes = async () => {
                </div>
              )}
            </div>
+          <div className={`client-funeral-field location-dropdown-container ${validationErrors['municipality'] ? 'error-field' : ''}`}>
+             <label>Municipality<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               value={formData.municipality}
+               onChange={handleMunicipalityChange}
+               onFocus={() => handleFocus('municipality')}
+               placeholder="Type to search"
+               name="municipality"
+             />
+             {validationErrors['municipality'] && <div className="error-message">Required</div>}
+             {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.municipality.map((municipality, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectMunicipality(municipality)}
+                     className="location-dropdown-item"
+                   >
+                     {municipality}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+          <div className={`client-funeral-field location-dropdown-container ${validationErrors['barangay'] ? 'error-field' : ''}`}>
+             <label>Barangay<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               value={formData.barangay}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
+               placeholder="Type to search"
+               name="barangay"
+             />
+             {validationErrors['barangay'] && <div className="error-message">Required</div>}
+             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.barangay.map((barangay, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBarangay(barangay)}
+                     className="location-dropdown-item"
+                   >
+                     {barangay}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         <div className={`client-funeral-field ${validationErrors['street'] ? 'error-field' : ''}`}>
+             <label>Street<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               value={formData.street}
+               onChange={(e) => handleInputChange('street', e.target.value)}
+             />
+             {validationErrors['street'] && <div className="error-message">Required</div>}
+           </div>
+           
            {/* New Region Field */}
            <div className={`client-funeral-field location-dropdown-container ${validationErrors['region'] ? 'error-field' : ''}`}>
              <label>Region<span className="required-marker">*</span></label>

@@ -585,68 +585,100 @@ const handleConfirmApproval = async () => {
               </div>
               <h1 className="certificate-title">CERTIFICATE OF BAPTISM</h1>
               
-              <div className="certificate-details">
-                <div className="certificate-row">
-                  <div className="certificate-label">NAME</div>
-                  <div className="certificate-value">{baptismData.child.firstName} {baptismData.child.middleName} {baptismData.child.lastName}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">DATE OF BIRTH</div>
-                  <div className="certificate-value">{formatDate(baptismData.child.dateOfBirth)}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">PLACE OF BIRTH</div>
-                  <div className="certificate-value">{baptismData.child.placeOfBirth}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">LEGITIMACY</div>
-                  <div className="certificate-value">{baptismData.maritalStatus.type === 'Married' ? 'Legitimate' : 'Natural'}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">FATHER</div>
-                  <div className="certificate-value">{baptismData.father.firstName} {baptismData.father.middleName} {baptismData.father.lastName}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">PLACE OF BIRTH</div>
-                  <div className="certificate-value">{baptismData.father.placeOfBirth}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">MOTHER</div>
-                  <div className="certificate-value">{baptismData.mother.firstName} {baptismData.mother.middleName} {baptismData.mother.lastName}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">PLACE OF BIRTH</div>
-                  <div className="certificate-value">{baptismData.mother.placeOfBirth}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">DATE OF BAPTISM</div>
-                  <div className="certificate-value">{formatDate(appointmentDate || baptismData.date)}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">RESIDENCE</div>
-                  <div className="certificate-value">{baptismData.address.street}, {baptismData.address.barangay}, {baptismData.address.municipality}, {baptismData.address.province}</div>
-                </div>
-                <div className="certificate-row">
-                  <div className="certificate-label">MINISTER</div>
-                  <div className="certificate-value">{selectedPriest || baptismData.priest || "N/A"}</div>
-                </div>
-                {baptismData.godParents.length > 0 && (
-                  <>
-                    <div className="certificate-row">
-                      <div className="certificate-label">GODFATHER</div>
-                      <div className="certificate-value">{baptismData.godParents[0]?.name || "N/A"}</div>
-                    </div>
-                  </>
-                )}
-                {baptismData.godParents.length > 1 && (
-                  <>
-                    <div className="certificate-row">
-                      <div className="certificate-label">GODMOTHER</div>
-                      <div className="certificate-value">{baptismData.godParents[1]?.name || "N/A"}</div>
-                    </div>
-                  </>
-                )}
-              </div>
+           <div className="certificate-details">
+  <div className="certificate-row">
+    <div className="certificate-label">NAME</div>
+    <div className="certificate-value">{baptismData.child.firstName} {baptismData.child.middleName} {baptismData.child.lastName}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">DATE OF BIRTH</div>
+    <div className="certificate-value">{formatDate(baptismData.child.dateOfBirth)}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">PLACE OF BIRTH</div>
+    <div className="certificate-value">{baptismData.child.placeOfBirth}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">AGE</div>
+    <div className="certificate-value">{baptismData.child.age}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">GENDER</div>
+    <div className="certificate-value">{baptismData.child.gender}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">REGION</div>
+    <div className="certificate-value">{baptismData.child.region}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">FATHER</div>
+    <div className="certificate-value">{baptismData.father.firstName} {baptismData.father.middleName} {baptismData.father.lastName}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">FATHER'S PLACE OF BIRTH</div>
+    <div className="certificate-value">{baptismData.father.placeOfBirth}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">FATHER'S DATE OF BIRTH</div>
+    <div className="certificate-value">{formatDate(baptismData.father.dateOfBirth)}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">FATHER'S CONTACT NUMBER</div>
+    <div className="certificate-value">{baptismData.father.contact}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">MOTHER</div>
+    <div className="certificate-value">{baptismData.mother.firstName} {baptismData.mother.middleName} {baptismData.mother.lastName}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">MOTHER'S PLACE OF BIRTH</div>
+    <div className="certificate-value">{baptismData.mother.placeOfBirth}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">MOTHER'S DATE OF BIRTH</div>
+    <div className="certificate-value">{formatDate(baptismData.mother.dateOfBirth)}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">MOTHER'S CONTACT NUMBER</div>
+    <div className="certificate-value">{baptismData.mother.contact}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">PARENTS' MARITAL STATUS</div>
+    <div className="certificate-value">{baptismData.maritalStatus.type}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">NUMBER OF YEARS MARRIED</div>
+    <div className="certificate-value">{baptismData.maritalStatus.yearsMarried}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">DATE OF BAPTISM</div>
+    <div className="certificate-value">{formatDate(appointmentDate || baptismData.date)}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">HOME ADDRESS</div>
+    <div className="certificate-value">{baptismData.address.street}, {baptismData.address.barangay}, {baptismData.address.municipality}, {baptismData.address.province}</div>
+  </div>
+  <div className="certificate-row">
+    <div className="certificate-label">PRIEST</div>
+    <div className="certificate-value">{selectedPriest || baptismData.priest || "N/A"}</div>
+  </div>
+  {baptismData.godParents.length > 0 && (
+    <>
+      <div className="certificate-row">
+        <div className="certificate-label">GODFATHER</div>
+        <div className="certificate-value">{baptismData.godParents[0]?.name || "N/A"}</div>
+      </div>
+    </>
+  )}
+  {baptismData.godParents.length > 1 && (
+    <>
+      <div className="certificate-row">
+        <div className="certificate-label">GODMOTHER</div>
+        <div className="certificate-value">{baptismData.godParents[1]?.name || "N/A"}</div>
+      </div>
+    </>
+  )}
+</div>
               
               <div className="certificate-footer">
                 <div className="certificate-reference">

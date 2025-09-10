@@ -1506,24 +1506,24 @@ const handleSelectBirthMunicipality = (municipality) => {
           <label className="sub-cc">Place of Birth <span className="required-marker">*</span></label>
           <div className="client-communion-row">
             <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
-              <label>Birth Barangay</label>
-              <input
+              <label>Birth Province</label>
+              <input 
                 type="text"
                 placeholder="Type to search"
-                value={birthFields.barangay}
-                onChange={handleBirthBarangayChange}
-                onFocus={() => handleFocus('birthBarangay')}
+                value={birthFields.province}
+                onChange={handleBirthProvinceChange}
+                onFocus={() => handleFocus('birthProvince')}
                 className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
               />
-              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
+              {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
                 <div className="location-dropdown">
-                  {suggestions.birthBarangay.map((barangay, index) => (
+                  {suggestions.birthProvince.map((province, index) => (
                     <div 
                       key={index}
-                      onClick={() => handleSelectBirthBarangay(barangay)}
+                      onClick={() => handleSelectBirthProvince(province)}
                       className="location-dropdown-item"
                     >
-                      {barangay}
+                      {province}
                     </div>
                   ))}
                 </div>
@@ -1553,25 +1553,25 @@ const handleSelectBirthMunicipality = (municipality) => {
                 </div>
               )}
             </div>
-            <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
-              <label>Birth Province</label>
-              <input 
+              <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.placeOfBirth ? 'field-error' : ''}`}>
+              <label>Birth Barangay</label>
+              <input
                 type="text"
                 placeholder="Type to search"
-                value={birthFields.province}
-                onChange={handleBirthProvinceChange}
-                onFocus={() => handleFocus('birthProvince')}
+                value={birthFields.barangay}
+                onChange={handleBirthBarangayChange}
+                onFocus={() => handleFocus('birthBarangay')}
                 className={showValidationErrors && validationErrors.placeOfBirth ? 'input-error' : ''}
               />
-              {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+              {focusedField === 'birthBarangay' && suggestions.birthBarangay.length > 0 && (
                 <div className="location-dropdown">
-                  {suggestions.birthProvince.map((province, index) => (
+                  {suggestions.birthBarangay.map((barangay, index) => (
                     <div 
                       key={index}
-                      onClick={() => handleSelectBirthProvince(province)}
+                      onClick={() => handleSelectBirthBarangay(barangay)}
                       className="location-dropdown-item"
                     >
-                      {province}
+                      {barangay}
                     </div>
                   ))}
                 </div>
@@ -1582,43 +1582,32 @@ const handleSelectBirthMunicipality = (municipality) => {
           {/* Address Fields */}
           <label className="sub-cc">Home Address <span className="required-marker">*</span></label>
           <div className="client-communion-row">
-          <div className={`client-communion-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
-              <label>Street <span className="required-marker">*</span></label>
-              <input
-               name="street"
-               value={formData.street || ""}
-               onChange={e => setFormData(prev => ({ ...prev, street: e.target.value }))}
-               placeholder="Street"
-               autoComplete="off"
-               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
-             />
-           </div>
-           <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
-             <label>Barangay <span className="required-marker">*</span></label>
+             <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
+             <label>Province <span className="required-marker">*</span></label>
              <input
-               name="barangay"
-               value={formData.barangay || ""}
-               onChange={handleBarangayChange}
-               onFocus={() => handleFocus('barangay')}
+               name="province"
+               value={formData.province || ""}
+               onChange={handleProvinceChange}
+               onFocus={() => handleFocus('province')}
                placeholder="Type to search"
                autoComplete="off"
-               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
+               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
              />
-             {focusedField === 'barangay' && (
+             {focusedField === 'province' && (
                <div className="location-dropdown">
-                 {suggestions.barangay && suggestions.barangay.length > 0 ? (
-                   suggestions.barangay.map((barangay, idx) => (
-                     <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
-                       {barangay}
+                 {suggestions.province && suggestions.province.length > 0 ? (
+                   suggestions.province.map((province, idx) => (
+                     <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
+                       {province}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No barangays found</div>
+                   <div className="location-dropdown-item">No provinces found</div>
                  )}
                </div>
              )}
            </div>
-           <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.municipality ? 'field-error' : ''}`}>
+                       <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.municipality ? 'field-error' : ''}`}>
              <label>Municipality <span className="required-marker">*</span></label>
              <input
                name="municipality"
@@ -1643,30 +1632,41 @@ const handleSelectBirthMunicipality = (municipality) => {
                </div>
              )}
            </div>
-           <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.province ? 'field-error' : ''}`}>
-             <label>Province <span className="required-marker">*</span></label>
+             <div className={`client-communion-field location-dropdown-container ${showValidationErrors && validationErrors.barangay ? 'field-error' : ''}`}>
+             <label>Barangay <span className="required-marker">*</span></label>
              <input
-               name="province"
-               value={formData.province || ""}
-               onChange={handleProvinceChange}
-               onFocus={() => handleFocus('province')}
+               name="barangay"
+               value={formData.barangay || ""}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
                placeholder="Type to search"
                autoComplete="off"
-               className={showValidationErrors && validationErrors.province ? 'input-error' : ''}
+               className={showValidationErrors && validationErrors.barangay ? 'input-error' : ''}
              />
-             {focusedField === 'province' && (
+             {focusedField === 'barangay' && (
                <div className="location-dropdown">
-                 {suggestions.province && suggestions.province.length > 0 ? (
-                   suggestions.province.map((province, idx) => (
-                     <div key={idx} onClick={() => handleSelectProvince(province)} className="location-dropdown-item">
-                       {province}
+                 {suggestions.barangay && suggestions.barangay.length > 0 ? (
+                   suggestions.barangay.map((barangay, idx) => (
+                     <div key={idx} onClick={() => handleSelectBarangay(barangay)} className="location-dropdown-item">
+                       {barangay}
                      </div>
                    ))
                  ) : (
-                   <div className="location-dropdown-item">No provinces found</div>
+                   <div className="location-dropdown-item">No barangays found</div>
                  )}
                </div>
              )}
+           </div>
+          <div className={`client-communion-field ${showValidationErrors && validationErrors.street ? 'field-error' : ''}`}>
+              <label>Street <span className="required-marker">*</span></label>
+              <input
+               name="street"
+               value={formData.street || ""}
+               onChange={e => setFormData(prev => ({ ...prev, street: e.target.value }))}
+               placeholder="Street"
+               autoComplete="off"
+               className={showValidationErrors && validationErrors.street ? 'input-error' : ''}
+             />
            </div>
            <div className="client-communion-field location-dropdown-container">
              <label>Region</label>
@@ -1734,24 +1734,24 @@ const handleSelectBirthMunicipality = (municipality) => {
          {/* Father's Place of Birth with separated fields */}
          <label className="sub-cc">Father's Place of Birth</label>
          <div className="client-communion-row">
-           <div className="client-communion-field location-dropdown-container">
-             <label>Father's Birth Barangay</label>
-             <input
+   <div className="client-communion-field location-dropdown-container">
+             <label>Father's Birth Province</label>
+             <input 
                type="text"
                placeholder="Type to search"
-               value={fatherBirthFields.barangay}
-               onChange={handleFatherBirthBarangayChange}
-               onFocus={() => handleFocus('fatherBirthBarangay')}
+               value={fatherBirthFields.province}
+               onChange={handleFatherBirthProvinceChange}
+               onFocus={() => handleFocus('fatherBirthProvince')}
              />
-             {focusedField === 'fatherBirthBarangay' && suggestions.fatherBirthBarangay.length > 0 && (
+             {focusedField === 'fatherBirthProvince' && suggestions.fatherBirthProvince.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.fatherBirthBarangay.map((barangay, index) => (
+                 {suggestions.fatherBirthProvince.map((province, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectFatherBirthBarangay(barangay)}
+                     onClick={() => handleSelectFatherBirthProvince(province)}
                      className="location-dropdown-item"
                    >
-                     {barangay}
+                     {province}
                    </div>
                  ))}
                </div>
@@ -1780,24 +1780,24 @@ const handleSelectBirthMunicipality = (municipality) => {
                </div>
              )}
            </div>
-           <div className="client-communion-field location-dropdown-container">
-             <label>Father's Birth Province</label>
-             <input 
+             <div className="client-communion-field location-dropdown-container">
+             <label>Father's Birth Barangay</label>
+             <input
                type="text"
                placeholder="Type to search"
-               value={fatherBirthFields.province}
-               onChange={handleFatherBirthProvinceChange}
-               onFocus={() => handleFocus('fatherBirthProvince')}
+               value={fatherBirthFields.barangay}
+               onChange={handleFatherBirthBarangayChange}
+               onFocus={() => handleFocus('fatherBirthBarangay')}
              />
-             {focusedField === 'fatherBirthProvince' && suggestions.fatherBirthProvince.length > 0 && (
+             {focusedField === 'fatherBirthBarangay' && suggestions.fatherBirthBarangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.fatherBirthProvince.map((province, index) => (
+                 {suggestions.fatherBirthBarangay.map((barangay, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectFatherBirthProvince(province)}
+                     onClick={() => handleSelectFatherBirthBarangay(barangay)}
                      className="location-dropdown-item"
                    >
-                     {province}
+                     {barangay}
                    </div>
                  ))}
                </div>
@@ -1846,23 +1846,23 @@ const handleSelectBirthMunicipality = (municipality) => {
          <label className="sub-cc">Mother's Place of Birth</label>
          <div className="client-communion-row">
            <div className="client-communion-field location-dropdown-container">
-             <label>Mother's Birth Barangay</label>
-             <input
+             <label>Mother's Birth Province</label>
+             <input 
                type="text"
                placeholder="Type to search"
-               value={motherBirthFields.barangay}
-               onChange={handleMotherBirthBarangayChange}
-               onFocus={() => handleFocus('motherBirthBarangay')}
+               value={motherBirthFields.province}
+               onChange={handleMotherBirthProvinceChange}
+               onFocus={() => handleFocus('motherBirthProvince')}
              />
-             {focusedField === 'motherBirthBarangay' && suggestions.motherBirthBarangay.length > 0 && (
+             {focusedField === 'motherBirthProvince' && suggestions.motherBirthProvince.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.motherBirthBarangay.map((barangay, index) => (
+                 {suggestions.motherBirthProvince.map((province, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectMotherBirthBarangay(barangay)}
+                     onClick={() => handleSelectMotherBirthProvince(province)}
                      className="location-dropdown-item"
                    >
-                     {barangay}
+                     {province}
                    </div>
                  ))}
                </div>
@@ -1891,29 +1891,30 @@ const handleSelectBirthMunicipality = (municipality) => {
                </div>
              )}
            </div>
-           <div className="client-communion-field location-dropdown-container">
-             <label>Mother's Birth Province</label>
-             <input 
+            <div className="client-communion-field location-dropdown-container">
+             <label>Mother's Birth Barangay</label>
+             <input
                type="text"
                placeholder="Type to search"
-               value={motherBirthFields.province}
-               onChange={handleMotherBirthProvinceChange}
-               onFocus={() => handleFocus('motherBirthProvince')}
+               value={motherBirthFields.barangay}
+               onChange={handleMotherBirthBarangayChange}
+               onFocus={() => handleFocus('motherBirthBarangay')}
              />
-             {focusedField === 'motherBirthProvince' && suggestions.motherBirthProvince.length > 0 && (
+             {focusedField === 'motherBirthBarangay' && suggestions.motherBirthBarangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.motherBirthProvince.map((province, index) => (
+                 {suggestions.motherBirthBarangay.map((barangay, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectMotherBirthProvince(province)}
+                     onClick={() => handleSelectMotherBirthBarangay(barangay)}
                      className="location-dropdown-item"
                    >
-                     {province}
+                     {barangay}
                    </div>
                  ))}
                </div>
              )}
            </div>
+          
          </div>
        </div>
        

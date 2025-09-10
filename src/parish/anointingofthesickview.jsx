@@ -168,6 +168,13 @@ const AnointingOfTheSickView = () => {
       religion: anointing.religion,
       reasonForAnointing: anointing.reasonForAnointing,
       
+      // Civil Status and Spouse Information
+      maritalStatus: anointing.maritalStatus || '',
+      yearsMarried: anointing.yearsMarried || '',
+      spouseFirstName: anointing.spouseFirstName || '',
+      spouseMiddleName: anointing.spouseMiddleName || '',
+      spouseLastName: anointing.spouseLastName || '',
+      
       // Contact Person Information - using the 'contact' field from API
       contactFirstName: contact.contactFirstName || '',
       contactMiddleName: contact.contactMiddleName || '',
@@ -351,6 +358,13 @@ const AnointingOfTheSickView = () => {
   // Function to render read-only input field
   const renderReadOnlyField = (value) => {
     return <div className="secretary-anointing-view-value">{value || "N/A"}</div>;
+  };
+
+  // Function to render spouse name
+  const renderSpouseName = (firstName, middleName, lastName) => {
+    const nameParts = [firstName, middleName, lastName].filter(part => part && part.trim() !== '');
+    const fullName = nameParts.length > 0 ? nameParts.join(' ') : '';
+    return renderReadOnlyField(fullName);
   };
 
   // Function to render document status with view button
@@ -644,6 +658,22 @@ const AnointingOfTheSickView = () => {
               <div className="secretary-anointing-view-field">
                 <label>Age:</label>
                 {renderReadOnlyField(anointingData.age)}
+              </div>
+            </div>
+            <div className="secretary-anointing-view-row">
+              <div className="secretary-anointing-view-field">
+                <label>Civil Status:</label>
+                {renderReadOnlyField(anointingData.maritalStatus)}
+              </div>
+              <div className="secretary-anointing-view-field">
+                <label>Years Married:</label>
+                {renderReadOnlyField(anointingData.yearsMarried)}
+              </div>
+            </div>
+            <div className="secretary-anointing-view-row">
+              <div className="secretary-anointing-view-field-wide">
+                <label>Spouse Name:</label>
+                {renderSpouseName(anointingData.spouseFirstName, anointingData.spouseMiddleName, anointingData.spouseLastName)}
               </div>
             </div>
             <div className="secretary-anointing-view-row">

@@ -55,6 +55,8 @@ const Marriage = () => {
     groom_last_name: '',
     groom_age: '',
     groom_dateOfBirth: '',
+    groom_civil_status: '',
+    groom_religion: '',
     groom_dateOfBaptism: '',
     groom_churchOfBaptism: '',
     groom_placeOfBirth: '',
@@ -68,12 +70,30 @@ const Marriage = () => {
     groom_province: '',
     groom_region: '',
 
+    // Groom's Father Information
+    groom_father_first_name: '',
+    groom_father_middle_name: '',
+    groom_father_last_name: '',
+    groom_father_dateOfBirth: '',
+    groom_father_age: '',
+    groom_father_contact_number: '',
+
+    // Groom's Mother Information
+    groom_mother_first_name: '',
+    groom_mother_middle_name: '',
+    groom_mother_last_name: '',
+    groom_mother_dateOfBirth: '',
+    groom_mother_age: '',
+    groom_mother_contact_number: '',
+
     // Bride Information
     bride_first_name: '',
     bride_middle_name: '',
     bride_last_name: '',
     bride_age: '',
     bride_dateOfBirth: '',
+    bride_civil_status: '',
+    bride_religion: '',
     bride_dateOfBaptism: '',
     bride_churchOfBaptism: '',
     bride_placeOfBirth: '',
@@ -86,6 +106,22 @@ const Marriage = () => {
     bride_municipality: '',
     bride_province: '',
     bride_region: '',
+
+    // Bride's Father Information
+    bride_father_first_name: '',
+    bride_father_middle_name: '',
+    bride_father_last_name: '',
+    bride_father_dateOfBirth: '',
+    bride_father_age: '',
+    bride_father_contact_number: '',
+
+    // Bride's Mother Information
+    bride_mother_first_name: '',
+    bride_mother_middle_name: '',
+    bride_mother_last_name: '',
+    bride_mother_dateOfBirth: '',
+    bride_mother_age: '',
+    bride_mother_contact_number: '',
 
     // Witness Information
     first_witness_first_name: '',
@@ -1153,18 +1189,22 @@ const handleFocus = (field) => {
        date: formData.date,
        time: formData.time,
        groom_first_name: formData.groom_first_name || '',
-       groom_middle_name: formData.groom_middle_name || '', // Added middle name
+       groom_middle_name: formData.groom_middle_name || '',
        groom_last_name: formData.groom_last_name || '',
        groom_age: formData.groom_age || '',
        groom_dateOfBirth: formData.groom_dateOfBirth || '',
+       groom_civil_status: formData.groom_civil_status || '',
+       groom_religion: formData.groom_religion || '',
        groom_dateOfBaptism: formData.groom_dateOfBaptism || '',
        groom_churchOfBaptism: formData.groom_churchOfBaptism || '',
        groom_placeOfBirth: combinedGroomPlaceOfBirth || '',
        bride_first_name: formData.bride_first_name || '',
-       bride_middle_name: formData.bride_middle_name || '', // Added middle name
+       bride_middle_name: formData.bride_middle_name || '',
        bride_last_name: formData.bride_last_name || '',
        bride_age: formData.bride_age || '',
        bride_dateOfBirth: formData.bride_dateOfBirth || '',
+       bride_civil_status: formData.bride_civil_status || '',
+       bride_religion: formData.bride_religion || '',
        bride_dateOfBaptism: formData.bride_dateOfBaptism || '',
        bride_churchOfBaptism: formData.bride_churchOfBaptism || '',
        bride_placeOfBirth: combinedBridePlaceOfBirth || ''
@@ -1186,11 +1226,48 @@ const handleFocus = (field) => {
        province: formData.bride_province || '',
        region: formData.bride_region || ''
      };
+
+     // Prepare parent data
+     const groomFatherData = {
+       first_name: formData.groom_father_first_name || '',
+       middle_name: formData.groom_father_middle_name || '',
+       last_name: formData.groom_father_last_name || '',
+       dateOfBirth: formData.groom_father_dateOfBirth || '',
+       age: formData.groom_father_age || '',
+       contact_number: formData.groom_father_contact_number || ''
+     };
+
+     const groomMotherData = {
+       first_name: formData.groom_mother_first_name || '',
+       middle_name: formData.groom_mother_middle_name || '',
+       last_name: formData.groom_mother_last_name || '',
+       dateOfBirth: formData.groom_mother_dateOfBirth || '',
+       age: formData.groom_mother_age || '',
+       contact_number: formData.groom_mother_contact_number || ''
+     };
+
+     const brideFatherData = {
+       first_name: formData.bride_father_first_name || '',
+       middle_name: formData.bride_father_middle_name || '',
+       last_name: formData.bride_father_last_name || '',
+       dateOfBirth: formData.bride_father_dateOfBirth || '',
+       age: formData.bride_father_age || '',
+       contact_number: formData.bride_father_contact_number || ''
+     };
+
+     const brideMotherData = {
+       first_name: formData.bride_mother_first_name || '',
+       middle_name: formData.bride_mother_middle_name || '',
+       last_name: formData.bride_mother_last_name || '',
+       dateOfBirth: formData.bride_mother_dateOfBirth || '',
+       age: formData.bride_mother_age || '',
+       contact_number: formData.bride_mother_contact_number || ''
+     };
  
      // Prepare witness data
      const firstWitnessData = {
        first_name: formData.first_witness_first_name || '',
-       middle_name: formData.first_witness_middle_name || '', // Added middle name
+       middle_name: formData.first_witness_middle_name || '',
        last_name: formData.first_witness_last_name || '',
        gender: formData.first_witness_gender || '',
        age: formData.first_witness_age || '',
@@ -1205,7 +1282,7 @@ const handleFocus = (field) => {
  
      const secondWitnessData = {
        first_name: formData.second_witness_first_name || '',
-       middle_name: formData.second_witness_middle_name || '', // Added middle name
+       middle_name: formData.second_witness_middle_name || '',
        last_name: formData.second_witness_last_name || '',
        gender: formData.second_witness_gender || '',
        age: formData.second_witness_age || '',
@@ -1221,13 +1298,14 @@ const handleFocus = (field) => {
      // Prepare form data for submission
      const formDataToSend = new FormData();
      
-     // Add client ID
-   
-     
      // Add JSON data with stringification
      formDataToSend.append('applicationData', JSON.stringify(applicationData));
      formDataToSend.append('groomAddressData', JSON.stringify(groomAddressData));
      formDataToSend.append('brideAddressData', JSON.stringify(brideAddressData));
+     formDataToSend.append('groomFatherData', JSON.stringify(groomFatherData));
+     formDataToSend.append('groomMotherData', JSON.stringify(groomMotherData));
+     formDataToSend.append('brideFatherData', JSON.stringify(brideFatherData));
+     formDataToSend.append('brideMotherData', JSON.stringify(brideMotherData));
      formDataToSend.append('firstWitnessData', JSON.stringify(firstWitnessData));
      formDataToSend.append('secondWitnessData', JSON.stringify(secondWitnessData));
  
@@ -1245,7 +1323,6 @@ const handleFocus = (field) => {
      console.log('Application response:', response.data);
  
      if (response.data.success) {
-      
        setShowSuccessModal(true);
      } else {
        throw new Error(response.data.message || 'Failed to submit application');
@@ -1258,6 +1335,7 @@ const handleFocus = (field) => {
      setIsLoading(false);
    }
  };
+
  const handleNo = () => {
    setShowModal(false);
  };
@@ -1457,13 +1535,34 @@ const handleFocus = (field) => {
          </div>
 
          <div className="client-marriage-row">
-         <div className="client-marriage-field-dob">
+           <div className="client-marriage-field-dob">
              <label>Age</label>
              <input 
                type="text"
                value={formData.groom_age}
                onChange={e => handleInputChange('groom_age', e.target.value)}
                readOnly
+             />
+           </div>
+           <div className="client-marriage-field">
+             <label>Civil Status</label>
+             <select
+               value={formData.groom_civil_status}
+               onChange={e => handleInputChange('groom_civil_status', e.target.value)}
+             >
+               <option value="">Select Civil Status</option>
+               <option value="Single">Single</option>
+               <option value="Married">Married</option>
+               <option value="Divorced">Divorced</option>
+             </select>
+           </div>
+           <div className="client-marriage-field">
+             <label>Religion</label>
+             <input 
+               type="text"
+               value={formData.groom_religion}
+               onChange={e => handleInputChange('groom_religion', e.target.value)}
+               placeholder="e.g., Roman Catholic, Protestant, etc."
              />
            </div>
            <div className={`client-marriage-field-dob ${validationErrors['groom_dateOfBaptism'] ? 'error-field' : ''}`}>
@@ -1476,6 +1575,9 @@ const handleFocus = (field) => {
              />
              {validationErrors['groom_dateOfBaptism'] && <div className="error-message">Required</div>}
            </div>
+         </div>
+         
+         <div className="client-marriage-row">
            <div className={`client-marriage-field ${validationErrors['groom_churchOfBaptism'] ? 'error-field' : ''}`}>
              <label>Church of Baptism<span className="required-marker">*</span></label>
              <input 
@@ -1485,7 +1587,7 @@ const handleFocus = (field) => {
              />
              {validationErrors['groom_churchOfBaptism'] && <div className="error-message">Required</div>}
            </div>
-           </div>
+         </div>
          
          {/* Groom Place of Birth - Separated into three fields */}
          <label className="mini-title">Place of Birth</label>
@@ -1569,38 +1671,178 @@ const handleFocus = (field) => {
              )}
            </div>
          </div>
+
+         {/* Groom's Parents Information */}
+         <div className="client-marriage-parents-container">
+           <h3 className="client-marriage-sub-title">Groom's Father Information</h3>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Father's First Name</label>
+               <input 
+                 type="text"
+                 value={formData.groom_father_first_name}
+                 onChange={e => handleInputChange('groom_father_first_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Middle Name</label>
+               <input 
+                 type="text"
+                 value={formData.groom_father_middle_name}
+                 onChange={e => handleInputChange('groom_father_middle_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Last Name</label>
+               <input 
+                 type="text"
+                 value={formData.groom_father_last_name}
+                 onChange={e => handleInputChange('groom_father_last_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Date of Birth</label>
+               <input 
+                 type="date"
+                 className="date-input"
+                 value={formData.groom_father_dateOfBirth || ''}
+                 onChange={e => {
+                   handleInputChange('groom_father_dateOfBirth', e.target.value);
+                   
+                   // Calculate age
+                   const today = new Date();
+                   const birthDate = new Date(e.target.value);
+                   
+                   if (!isNaN(birthDate.getTime())) {
+                     let age = today.getFullYear() - birthDate.getFullYear();
+                     const monthDiff = today.getMonth() - birthDate.getMonth();
+                     
+                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                       age--;
+                     }
+                     
+                     handleInputChange('groom_father_age', age.toString());
+                   }
+                 }}
+               />
+             </div>
+           </div>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Father's Age</label>
+               <input 
+                 type="text"
+                 value={formData.groom_father_age}
+                 onChange={e => handleInputChange('groom_father_age', e.target.value)}
+                 readOnly
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Contact Number</label>
+               <input 
+                 type="text"
+                 value={formData.groom_father_contact_number}
+                 onChange={e => handleInputChange('groom_father_contact_number', e.target.value)}
+               />
+             </div>
+           </div>
+
+           <h3 className="client-marriage-sub-title">Groom's Mother Information</h3>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Mother's First Name</label>
+               <input 
+                 type="text"
+                 value={formData.groom_mother_first_name}
+                 onChange={e => handleInputChange('groom_mother_first_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Middle Name</label>
+               <input 
+                 type="text"
+                 value={formData.groom_mother_middle_name}
+                 onChange={e => handleInputChange('groom_mother_middle_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Last Name</label>
+               <input 
+                 type="text"
+                 value={formData.groom_mother_last_name}
+                 onChange={e => handleInputChange('groom_mother_last_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Date of Birth</label>
+               <input 
+                 type="date"
+                 className="date-input"
+                 value={formData.groom_mother_dateOfBirth || ''}
+                 onChange={e => {
+                   handleInputChange('groom_mother_dateOfBirth', e.target.value);
+                   
+                   // Calculate age
+                   const today = new Date();
+                   const birthDate = new Date(e.target.value);
+                   
+                   if (!isNaN(birthDate.getTime())) {
+                     let age = today.getFullYear() - birthDate.getFullYear();
+                     const monthDiff = today.getMonth() - birthDate.getMonth();
+                     
+                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                       age--;
+                     }
+                     
+                     handleInputChange('groom_mother_age', age.toString());
+                   }
+                 }}
+               />
+             </div>
+           </div>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Mother's Age</label>
+               <input 
+                 type="text"
+                 value={formData.groom_mother_age}
+                 onChange={e => handleInputChange('groom_mother_age', e.target.value)}
+                 readOnly
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Contact Number</label>
+               <input 
+                 type="text"
+                 value={formData.groom_mother_contact_number}
+                 onChange={e => handleInputChange('groom_mother_contact_number', e.target.value)}
+               />
+             </div>
+           </div>
+         </div>
          
          {/* Address Fields with dropdowns */}
          <label className="mini-title">Home Address</label>
          <div className="client-marriage-row">
-         <div className={`client-marriage-field ${validationErrors['groom_street'] ? 'error-field' : ''}`}>
-             <label>Street<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               value={formData.groom_street}
-               onChange={e => handleInputChange('groom_street', e.target.value)}
-             />
-             {validationErrors['groom_street'] && <div className="error-message">Required</div>}
-           </div>
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['groom_barangay'] ? 'error-field' : ''}`}>
-             <label>Barangay<span className="required-marker">*</span></label>
+           <div className={`client-marriage-field location-dropdown-container ${validationErrors['groom_province'] ? 'error-field' : ''}`}>
+             <label>Province<span className="required-marker">*</span></label>
              <input 
                type="text"
                placeholder="Type to search"
-               value={formData.groom_barangay}
-               onChange={handleGroomBarangayChange}
-               onFocus={() => handleFocus('groomBarangay')}
+               value={formData.groom_province}
+               onChange={handleGroomProvinceChange}
+               onFocus={() => handleFocus('groomProvince')}
              />
-             {validationErrors['groom_barangay'] && <div className="error-message">Required</div>}
-             {focusedField === 'groomBarangay' && suggestions.groomBarangay && suggestions.groomBarangay.length > 0 && (
+             {validationErrors['groom_province'] && <div className="error-message">Required</div>}
+             {focusedField === 'groomProvince' && suggestions.groomProvince && suggestions.groomProvince.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.groomBarangay.map((barangay, index) => (
+                 {suggestions.groomProvince.map((province, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectGroomBarangay(barangay)}
+                     onClick={() => handleSelectGroomProvince(province)}
                      className="location-dropdown-item"
                    >
-                     {barangay}
+                     {province}
                    </div>
                  ))}
                </div>
@@ -1630,29 +1872,38 @@ const handleFocus = (field) => {
                </div>
              )}
            </div>
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['groom_province'] ? 'error-field' : ''}`}>
-             <label>Province<span className="required-marker">*</span></label>
+           <div className={`client-marriage-field location-dropdown-container ${validationErrors['groom_barangay'] ? 'error-field' : ''}`}>
+             <label>Barangay<span className="required-marker">*</span></label>
              <input 
                type="text"
                placeholder="Type to search"
-               value={formData.groom_province}
-               onChange={handleGroomProvinceChange}
-               onFocus={() => handleFocus('groomProvince')}
+               value={formData.groom_barangay}
+               onChange={handleGroomBarangayChange}
+               onFocus={() => handleFocus('groomBarangay')}
              />
-             {validationErrors['groom_province'] && <div className="error-message">Required</div>}
-             {focusedField === 'groomProvince' && suggestions.groomProvince && suggestions.groomProvince.length > 0 && (
+             {validationErrors['groom_barangay'] && <div className="error-message">Required</div>}
+             {focusedField === 'groomBarangay' && suggestions.groomBarangay && suggestions.groomBarangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.groomProvince.map((province, index) => (
+                 {suggestions.groomBarangay.map((barangay, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectGroomProvince(province)}
+                     onClick={() => handleSelectGroomBarangay(barangay)}
                      className="location-dropdown-item"
                    >
-                     {province}
+                     {barangay}
                    </div>
                  ))}
                </div>
              )}
+           </div>
+         <div className={`client-marriage-field ${validationErrors['groom_street'] ? 'error-field' : ''}`}>
+             <label>Street<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               value={formData.groom_street}
+               onChange={e => handleInputChange('groom_street', e.target.value)}
+             />
+             {validationErrors['groom_street'] && <div className="error-message">Required</div>}
            </div>
             <div className={`client-marriage-field location-dropdown-container ${validationErrors['groom_region'] ? 'error-field' : ''}`}>
              <label>Region<span className="required-marker">*</span></label>
@@ -1741,13 +1992,34 @@ const handleFocus = (field) => {
          </div>
 
          <div className="client-marriage-row">
-         <div className="client-marriage-field-dob">
+           <div className="client-marriage-field-dob">
              <label>Age</label>
              <input 
                type="text"
                value={formData.bride_age}
                onChange={e => handleInputChange('bride_age', e.target.value)}
                readOnly
+             />
+           </div>
+           <div className="client-marriage-field">
+             <label>Civil Status</label>
+             <select
+               value={formData.bride_civil_status}
+               onChange={e => handleInputChange('bride_civil_status', e.target.value)}
+             >
+               <option value="">Select Civil Status</option>
+               <option value="Single">Single</option>
+               <option value="Married">Married</option>
+               <option value="Divorced">Divorced</option>
+             </select>
+           </div>
+           <div className="client-marriage-field">
+             <label>Religion</label>
+             <input 
+               type="text"
+               value={formData.bride_religion}
+               onChange={e => handleInputChange('bride_religion', e.target.value)}
+               placeholder="e.g., Roman Catholic, Protestant, etc."
              />
            </div>
            <div className={`client-marriage-field-dob ${validationErrors['bride_dateOfBaptism'] ? 'error-field' : ''}`}>
@@ -1760,6 +2032,9 @@ const handleFocus = (field) => {
              />
              {validationErrors['bride_dateOfBaptism'] && <div className="error-message">Required</div>}
            </div>
+         </div>
+         
+         <div className="client-marriage-row">
            <div className={`client-marriage-field ${validationErrors['bride_churchOfBaptism'] ? 'error-field' : ''}`}>
              <label>Church of Baptism<span className="required-marker">*</span></label>
              <input 
@@ -1774,27 +2049,27 @@ const handleFocus = (field) => {
          {/* Bride Place of Birth - Separated into three fields */}
          <label className="mini-title">Place of Birth</label>
          <div className="client-marriage-row">
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_birth_barangay'] ? 'error-field' : ''}`}>
-             <label>Birth Barangay<span className="required-marker">*</span></label>
+ <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_birth_province'] ? 'error-field' : ''}`}>
+             <label>Birth Province<span className="required-marker">*</span></label>
              <input 
                type="text"
                placeholder="Type to search"
-               name="bride_birth_barangay"
-               value={formData.bride_birth_barangay || ""}
-               onChange={handleBrideBirthBarangayChange}
-               onFocus={() => handleFocus('bride_birth_barangay')}
+               name="bride_birth_province"
+               value={formData.bride_birth_province || ""}
+               onChange={handleBrideBirthProvinceChange}
+               onFocus={() => handleFocus('bride_birth_province')}
                autoComplete="off"
              />
-             {validationErrors['bride_birth_barangay'] && <div className="error-message">Required</div>}
-             {focusedField === 'bride_birth_barangay' && suggestions.bride_birth_barangay && suggestions.bride_birth_barangay.length > 0 && (
+             {validationErrors['bride_birth_province'] && <div className="error-message">Required</div>}
+             {focusedField === 'bride_birth_province' && suggestions.bride_birth_province && suggestions.bride_birth_province.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.bride_birth_barangay.map((barangay, index) => (
+                 {suggestions.bride_birth_province.map((province, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectBrideBirthBarangay(barangay)}
+                     onClick={() => handleSelectBrideBirthProvince(province)}
                      className="location-dropdown-item"
                    >
-                     {barangay}
+                     {province}
                    </div>
                  ))}
                </div>
@@ -1826,62 +2101,24 @@ const handleFocus = (field) => {
                </div>
              )}
            </div>
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_birth_province'] ? 'error-field' : ''}`}>
-             <label>Birth Province<span className="required-marker">*</span></label>
+                      <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_birth_barangay'] ? 'error-field' : ''}`}>
+             <label>Birth Barangay<span className="required-marker">*</span></label>
              <input 
                type="text"
                placeholder="Type to search"
-               name="bride_birth_province"
-               value={formData.bride_birth_province || ""}
-               onChange={handleBrideBirthProvinceChange}
-               onFocus={() => handleFocus('bride_birth_province')}
+               name="bride_birth_barangay"
+               value={formData.bride_birth_barangay || ""}
+               onChange={handleBrideBirthBarangayChange}
+               onFocus={() => handleFocus('bride_birth_barangay')}
                autoComplete="off"
              />
-             {validationErrors['bride_birth_province'] && <div className="error-message">Required</div>}
-             {focusedField === 'bride_birth_province' && suggestions.bride_birth_province && suggestions.bride_birth_province.length > 0 && (
+             {validationErrors['bride_birth_barangay'] && <div className="error-message">Required</div>}
+             {focusedField === 'bride_birth_barangay' && suggestions.bride_birth_barangay && suggestions.bride_birth_barangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.bride_birth_province.map((province, index) => (
+                 {suggestions.bride_birth_barangay.map((barangay, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectBrideBirthProvince(province)}
-                     className="location-dropdown-item"
-                   >
-                     {province}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-         </div>
-         
-         {/* Address Fields with dropdowns */}
-         <label className="mini-title">Home Address</label>
-         <div className="client-marriage-row">
-         <div className="client-marriage-field">
-             <label>Street<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               value={formData.bride_street}
-               onChange={e => handleInputChange('bride_street', e.target.value)}
-             />
-             {validationErrors['bride_street'] && <div className="error-message">Required</div>}
-           </div>
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_barangay'] ? 'error-field' : ''}`}>
-             <label>Barangay<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               placeholder="Type to search"
-               value={formData.bride_barangay}
-               onChange={handleBrideBarangayChange}
-               onFocus={() => handleFocus('brideBarangay')}
-             />
-             {validationErrors['bride_barangay'] && <div className="error-message">Required</div>}
-             {focusedField === 'brideBarangay' && suggestions.brideBarangay && suggestions.brideBarangay.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.brideBarangay.map((barangay, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBrideBarangay(barangay)}
+                     onClick={() => handleSelectBrideBirthBarangay(barangay)}
                      className="location-dropdown-item"
                    >
                      {barangay}
@@ -1890,31 +2127,161 @@ const handleFocus = (field) => {
                </div>
              )}
            </div>
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_municipality'] ? 'error-field' : ''}`}>
-             <label>Municipality<span className="required-marker">*</span></label>
-             <input 
-               type="text"
-               placeholder="Type to search"
-               value={formData.bride_municipality}
-               onChange={handleBrideMunicipalityChange}
-               onFocus={() => handleFocus('brideMunicipality')}
-             />
-             {validationErrors['bride_municipality'] && <div className="error-message">Required</div>}
-             {focusedField === 'brideMunicipality' && suggestions.brideMunicipality && suggestions.brideMunicipality.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.brideMunicipality.map((municipality, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBrideMunicipality(municipality)}
-                     className="location-dropdown-item"
-                   >
-                     {municipality}
+         </div>
+
+         {/* Bride's Parents Information */}
+         <div className="client-marriage-parents-container">
+           <h3 className="client-marriage-sub-title">Bride's Father Information</h3>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Father's First Name</label>
+               <input 
+                 type="text"
+                 value={formData.bride_father_first_name}
+                 onChange={e => handleInputChange('bride_father_first_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Middle Name</label>
+               <input 
+                 type="text"
+                 value={formData.bride_father_middle_name}
+                 onChange={e => handleInputChange('bride_father_middle_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Last Name</label>
+               <input 
+                 type="text"
+                 value={formData.bride_father_last_name}
+                 onChange={e => handleInputChange('bride_father_last_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Date of Birth</label>
+               <input 
+                 type="date"
+                 className="date-input"
+                 value={formData.bride_father_dateOfBirth || ''}
+                 onChange={e => {
+                   handleInputChange('bride_father_dateOfBirth', e.target.value);
+                   
+                   // Calculate age
+                   const today = new Date();
+                   const birthDate = new Date(e.target.value);
+                   
+                   if (!isNaN(birthDate.getTime())) {
+                     let age = today.getFullYear() - birthDate.getFullYear();
+                     const monthDiff = today.getMonth() - birthDate.getMonth();
+                     
+                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                       age--;
+                     }
+                     
+                     handleInputChange('bride_father_age', age.toString());
+                   }
+                 }}
+               />
+             </div>
            </div>
-                 ))}
-               </div>
-             )}
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Father's Age</label>
+               <input 
+                 type="text"
+                 value={formData.bride_father_age}
+                 onChange={e => handleInputChange('bride_father_age', e.target.value)}
+                 readOnly
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Father's Contact Number</label>
+               <input 
+                 type="text"
+                 value={formData.bride_father_contact_number}
+                 onChange={e => handleInputChange('bride_father_contact_number', e.target.value)}
+               />
+             </div>
            </div>
-           <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_province'] ? 'error-field' : ''}`}>
+
+           <h3 className="client-marriage-sub-title">Bride's Mother Information</h3>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Mother's First Name</label>
+               <input 
+                 type="text"
+                 value={formData.bride_mother_first_name}
+                 onChange={e => handleInputChange('bride_mother_first_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Middle Name</label>
+               <input 
+                 type="text"
+                 value={formData.bride_mother_middle_name}
+                 onChange={e => handleInputChange('bride_mother_middle_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Last Name</label>
+               <input 
+                 type="text"
+                 value={formData.bride_mother_last_name}
+                 onChange={e => handleInputChange('bride_mother_last_name', e.target.value)}
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Date of Birth</label>
+               <input 
+                 type="date"
+                 className="date-input"
+                 value={formData.bride_mother_dateOfBirth || ''}
+                 onChange={e => {
+                   handleInputChange('bride_mother_dateOfBirth', e.target.value);
+                   
+                   // Calculate age
+                   const today = new Date();
+                   const birthDate = new Date(e.target.value);
+                   
+                   if (!isNaN(birthDate.getTime())) {
+                     let age = today.getFullYear() - birthDate.getFullYear();
+                     const monthDiff = today.getMonth() - birthDate.getMonth();
+                     
+                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                       age--;
+                     }
+                     
+                     handleInputChange('bride_mother_age', age.toString());
+                   }
+                 }}
+               />
+             </div>
+           </div>
+           <div className="client-marriage-row">
+             <div className="client-marriage-field">
+               <label>Mother's Age</label>
+               <input 
+                 type="text"
+                 value={formData.bride_mother_age}
+                 onChange={e => handleInputChange('bride_mother_age', e.target.value)}
+                 readOnly
+               />
+             </div>
+             <div className="client-marriage-field">
+               <label>Mother's Contact Number</label>
+               <input 
+                 type="text"
+                 value={formData.bride_mother_contact_number}
+                 onChange={e => handleInputChange('bride_mother_contact_number', e.target.value)}
+               />
+             </div>
+           </div>
+         </div>
+         
+         {/* Address Fields with dropdowns */}
+         <label className="mini-title">Home Address</label>
+         <div className="client-marriage-row">
+          <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_province'] ? 'error-field' : ''}`}>
              <label>Province<span className="required-marker">*</span></label>
              <input 
                type="text"
@@ -1938,6 +2305,65 @@ const handleFocus = (field) => {
                </div>
              )}
            </div>
+              <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_municipality'] ? 'error-field' : ''}`}>
+             <label>Municipality<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={formData.bride_municipality}
+               onChange={handleBrideMunicipalityChange}
+               onFocus={() => handleFocus('brideMunicipality')}
+             />
+             {validationErrors['bride_municipality'] && <div className="error-message">Required</div>}
+             {focusedField === 'brideMunicipality' && suggestions.brideMunicipality && suggestions.brideMunicipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.brideMunicipality.map((municipality, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBrideMunicipality(municipality)}
+                     className="location-dropdown-item"
+                   >
+                     {municipality}
+           </div>
+                 ))}
+               </div>
+             )}
+           </div>
+             <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_barangay'] ? 'error-field' : ''}`}>
+             <label>Barangay<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={formData.bride_barangay}
+               onChange={handleBrideBarangayChange}
+               onFocus={() => handleFocus('brideBarangay')}
+             />
+             {validationErrors['bride_barangay'] && <div className="error-message">Required</div>}
+             {focusedField === 'brideBarangay' && suggestions.brideBarangay && suggestions.brideBarangay.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.brideBarangay.map((barangay, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBrideBarangay(barangay)}
+                     className="location-dropdown-item"
+                   >
+                     {barangay}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+
+         <div className="client-marriage-field">
+             <label>Street<span className="required-marker">*</span></label>
+             <input 
+               type="text"
+               value={formData.bride_street}
+               onChange={e => handleInputChange('bride_street', e.target.value)}
+             />
+             {validationErrors['bride_street'] && <div className="error-message">Required</div>}
+           </div>
+           
             <div className={`client-marriage-field location-dropdown-container ${validationErrors['bride_region'] ? 'error-field' : ''}`}>
              <label>Region<span className="required-marker">*</span></label>
              <input 
@@ -2046,32 +2472,25 @@ const handleFocus = (field) => {
            </div>
          
          <div className="client-marriage-row">
-         <div className="client-marriage-field">
-             <label>Street</label>
-               <input 
-                 type="text"
-                 value={formData.first_witness_street}
-                 onChange={e => handleInputChange('first_witness_street', e.target.value)}
-               />
-           </div>
+             
              <div className="client-marriage-field location-dropdown-container">
-             <label>Barangay</label>
+             <label>Province</label>
                <input 
                  type="text"
                  placeholder="Type to search"
-                 value={formData.first_witness_barangay}
-                 onChange={handleFirstWitnessBarangayChange}
-                 onFocus={() => handleFocus('firstWitnessBarangay')}
+                 value={formData.first_witness_province}
+                 onChange={handleFirstWitnessProvinceChange}
+                 onFocus={() => handleFocus('firstWitnessProvince')}
                />
-               {focusedField === 'firstWitnessBarangay' && suggestions.firstWitnessBarangay && suggestions.firstWitnessBarangay.length > 0 && (
+               {focusedField === 'firstWitnessProvince' && suggestions.firstWitnessProvince && suggestions.firstWitnessProvince.length > 0 && (
                  <div className="location-dropdown">
-                   {suggestions.firstWitnessBarangay.map((barangay, index) => (
+                   {suggestions.firstWitnessProvince.map((province, index) => (
                      <div 
                        key={index}
-                       onClick={() => handleSelectFirstWitnessBarangay(barangay)}
+                       onClick={() => handleSelectFirstWitnessProvince(province)}
                        className="location-dropdown-item"
                      >
-                       {barangay}
+                       {province}
                      </div>
                    ))}
                  </div>
@@ -2100,29 +2519,38 @@ const handleFocus = (field) => {
                  </div>
                )}
              </div>
-             <div className="client-marriage-field location-dropdown-container">
-             <label>Province</label>
+          <div className="client-marriage-field location-dropdown-container">
+             <label>Barangay</label>
                <input 
                  type="text"
                  placeholder="Type to search"
-                 value={formData.first_witness_province}
-                 onChange={handleFirstWitnessProvinceChange}
-                 onFocus={() => handleFocus('firstWitnessProvince')}
+                 value={formData.first_witness_barangay}
+                 onChange={handleFirstWitnessBarangayChange}
+                 onFocus={() => handleFocus('firstWitnessBarangay')}
                />
-               {focusedField === 'firstWitnessProvince' && suggestions.firstWitnessProvince && suggestions.firstWitnessProvince.length > 0 && (
+               {focusedField === 'firstWitnessBarangay' && suggestions.firstWitnessBarangay && suggestions.firstWitnessBarangay.length > 0 && (
                  <div className="location-dropdown">
-                   {suggestions.firstWitnessProvince.map((province, index) => (
+                   {suggestions.firstWitnessBarangay.map((barangay, index) => (
                      <div 
                        key={index}
-                       onClick={() => handleSelectFirstWitnessProvince(province)}
+                       onClick={() => handleSelectFirstWitnessBarangay(barangay)}
                        className="location-dropdown-item"
                      >
-                       {province}
+                       {barangay}
                      </div>
                    ))}
                  </div>
                )}
            </div>
+         <div className="client-marriage-field">
+             <label>Street</label>
+               <input 
+                 type="text"
+                 value={formData.first_witness_street}
+                 onChange={e => handleInputChange('first_witness_street', e.target.value)}
+               />
+           </div>
+        
             <div className="client-marriage-field location-dropdown-container">
              <label>Region</label>
                <input 
@@ -2231,61 +2659,7 @@ const handleFocus = (field) => {
            </div>
          
          <div className="client-marriage-row">
-         <div className="client-marriage-field">
-             <label>Street</label>
-               <input 
-                 type="text"
-                 value={formData.second_witness_street}
-                 onChange={e => handleInputChange('second_witness_street', e.target.value)}
-               />
-           </div>
            <div className="client-marriage-field location-dropdown-container">
-             <label>Barangay</label>
-               <input 
-                 type="text"
-                 placeholder="Type to search"
-                 value={formData.second_witness_barangay}
-                 onChange={handleSecondWitnessBarangayChange}
-                 onFocus={() => handleFocus('secondWitnessBarangay')}
-               />
-               {focusedField === 'secondWitnessBarangay' && suggestions.secondWitnessBarangay && suggestions.secondWitnessBarangay.length > 0 && (
-                 <div className="location-dropdown">
-                   {suggestions.secondWitnessBarangay.map((barangay, index) => (
-                     <div 
-                       key={index}
-                       onClick={() => handleSelectSecondWitnessBarangay(barangay)}
-                       className="location-dropdown-item"
-                     >
-                       {barangay}
-                     </div>
-                   ))}
-                 </div>
-               )}
-           </div>
-             <div className="client-marriage-field location-dropdown-container">
-             <label>Municipality</label>
-               <input 
-                 type="text"
-                 placeholder="Type to search"
-                 value={formData.second_witness_municipality}
-                 onChange={handleSecondWitnessMunicipalityChange}
-                 onFocus={() => handleFocus('secondWitnessMunicipality')}
-               />
-               {focusedField === 'secondWitnessMunicipality' && suggestions.secondWitnessMunicipality && suggestions.secondWitnessMunicipality.length > 0 && (
-                 <div className="location-dropdown">
-                   {suggestions.secondWitnessMunicipality.map((municipality, index) => (
-                     <div 
-                       key={index}
-                       onClick={() => handleSelectSecondWitnessMunicipality(municipality)}
-                       className="location-dropdown-item"
-                     >
-                       {municipality}
-           </div>
-                   ))}
-                 </div>
-               )}
-             </div>
-             <div className="client-marriage-field location-dropdown-container">
              <label>Province</label>
                <input 
                  type="text"
@@ -2308,6 +2682,61 @@ const handleFocus = (field) => {
                  </div>
                )}
            </div>
+          <div className="client-marriage-field location-dropdown-container">
+             <label>Municipality</label>
+               <input 
+                 type="text"
+                 placeholder="Type to search"
+                 value={formData.second_witness_municipality}
+                 onChange={handleSecondWitnessMunicipalityChange}
+                 onFocus={() => handleFocus('secondWitnessMunicipality')}
+               />
+               {focusedField === 'secondWitnessMunicipality' && suggestions.secondWitnessMunicipality && suggestions.secondWitnessMunicipality.length > 0 && (
+                 <div className="location-dropdown">
+                   {suggestions.secondWitnessMunicipality.map((municipality, index) => (
+                     <div 
+                       key={index}
+                       onClick={() => handleSelectSecondWitnessMunicipality(municipality)}
+                       className="location-dropdown-item"
+                     >
+                       {municipality}
+           </div>
+                   ))}
+                 </div>
+               )}
+             </div>
+          <div className="client-marriage-field location-dropdown-container">
+             <label>Barangay</label>
+               <input 
+                 type="text"
+                 placeholder="Type to search"
+                 value={formData.second_witness_barangay}
+                 onChange={handleSecondWitnessBarangayChange}
+                 onFocus={() => handleFocus('secondWitnessBarangay')}
+               />
+               {focusedField === 'secondWitnessBarangay' && suggestions.secondWitnessBarangay && suggestions.secondWitnessBarangay.length > 0 && (
+                 <div className="location-dropdown">
+                   {suggestions.secondWitnessBarangay.map((barangay, index) => (
+                     <div 
+                       key={index}
+                       onClick={() => handleSelectSecondWitnessBarangay(barangay)}
+                       className="location-dropdown-item"
+                     >
+                       {barangay}
+                     </div>
+                   ))}
+                 </div>
+               )}
+           </div>
+         <div className="client-marriage-field">
+             <label>Street</label>
+               <input 
+                 type="text"
+                 value={formData.second_witness_street}
+                 onChange={e => handleInputChange('second_witness_street', e.target.value)}
+               />
+           </div>
+        
             <div className="client-marriage-field location-dropdown-container">
              <label>Region</label>
                <input 

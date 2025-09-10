@@ -1721,14 +1721,6 @@ const location = useLocation();
                className={validationErrors.lastName ? 'client-error-input' : ''}
              />
            </div>
-           <div className="client-baptismal-field">
-             <label>Date of Birth</label>
-             <input 
-               type="date"
-               className={`date-input ${validationErrors.dateOfBirth ? 'client-error-input' : ''}`}
-               onChange={(e) => handleDateChange('dateOfBirth', e.target.value)}
-             />
-           </div>
             <div className="client-baptismal-field-ga">
              <label>Age</label>
              <input 
@@ -1738,9 +1730,7 @@ const location = useLocation();
                readOnly
              />
            </div>
-         </div>
-         <div className="client-baptismal-row">
-         <div className="client-baptismal-field-ga">
+            <div className="client-baptismal-field-ga">
              <label>Sex</label>
              <select 
                value={formData.sex}
@@ -1751,6 +1741,16 @@ const location = useLocation();
                <option value="Male">Male</option>
                <option value="Female">Female</option>
              </select>
+           </div>
+         </div>
+         <div className="client-baptismal-row">
+           <div className="client-baptismal-field">
+             <label>Date of Birth</label>
+             <input 
+               type="date"
+               className={`date-input ${validationErrors.dateOfBirth ? 'client-error-input' : ''}`}
+               onChange={(e) => handleDateChange('dateOfBirth', e.target.value)}
+             />
            </div>
            <div className="client-baptismal-field location-dropdown-container">
              <label>Birth Region</label>
@@ -1771,6 +1771,54 @@ const location = useLocation();
                      className="location-dropdown-item"
                    >
                      {region}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+            <div className="client-baptismal-field location-dropdown-container">
+             <label>Birth Province</label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={birthFields.province}
+               onChange={handleBirthProvinceChange}
+               onFocus={() => handleFocus('birthProvince')}
+               className={validationErrors.placeOfBirth ? 'client-error-input' : ''}
+             />
+             {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.birthProvince.map((province, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBirthProvince(province)}
+                     className="location-dropdown-item"
+                   >
+                     {province}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+            <div className="client-baptismal-field location-dropdown-container">
+             <label>Birth Municipality</label>
+             <input 
+               type="text"
+               placeholder="Type to search"
+               value={birthFields.municipality}
+               onChange={handleBirthMunicipalityChange}
+               onFocus={() => handleFocus('birthMunicipality')}
+               className={validationErrors.placeOfBirth ? 'client-error-input' : ''}
+             />
+             {focusedField === 'birthMunicipality' && suggestions.birthMunicipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.birthMunicipality.map((municipality, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBirthMunicipality(municipality)}
+                     className="location-dropdown-item"
+                   >
+                     {municipality}
                    </div>
                  ))}
                </div>
@@ -1800,54 +1848,7 @@ const location = useLocation();
                </div>
              )}
            </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Birth Municipality</label>
-             <input 
-               type="text"
-               placeholder="Type to search"
-               value={birthFields.municipality}
-               onChange={handleBirthMunicipalityChange}
-               onFocus={() => handleFocus('birthMunicipality')}
-               className={validationErrors.placeOfBirth ? 'client-error-input' : ''}
-             />
-             {focusedField === 'birthMunicipality' && suggestions.birthMunicipality.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.birthMunicipality.map((municipality, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBirthMunicipality(municipality)}
-                     className="location-dropdown-item"
-                   >
-                     {municipality}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Birth Province</label>
-             <input 
-               type="text"
-               placeholder="Type to search"
-               value={birthFields.province}
-               onChange={handleBirthProvinceChange}
-               onFocus={() => handleFocus('birthProvince')}
-               className={validationErrors.placeOfBirth ? 'client-error-input' : ''}
-             />
-             {focusedField === 'birthProvince' && suggestions.birthProvince.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.birthProvince.map((province, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBirthProvince(province)}
-                     className="location-dropdown-item"
-                   >
-                     {province}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
+          
          </div>
 
          {/* Father's Information */}
@@ -1899,30 +1900,31 @@ const location = useLocation();
                onChange={(e) => handleInputChange('fatherContact', e.target.value)}
              />
            </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Father's Birth Barangay</label>
+              <div className="client-baptismal-field location-dropdown-container">
+             <label>Father's Birth Province</label>
              <input 
                type="text"
                placeholder="Type to search"
-               value={fatherBirthFields.barangay}
-               onChange={handleFatherBirthBarangayChange}
-               onFocus={() => handleFocus('fatherBirthBarangay')}
+               value={fatherBirthFields.province}
+               onChange={handleFatherBirthProvinceChange}
+               onFocus={() => handleFocus('fatherBirthProvince')}
                className={validationErrors.fatherPlaceOfBirth ? 'client-error-input' : ''}
              />
-             {focusedField === 'fatherBirthBarangay' && suggestions.fatherBirthBarangay.length > 0 && (
+             {focusedField === 'fatherBirthProvince' && suggestions.fatherBirthProvince.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.fatherBirthBarangay.map((barangay, index) => (
+                 {suggestions.fatherBirthProvince.map((province, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectFatherBirthBarangay(barangay)}
+                     onClick={() => handleSelectFatherBirthProvince(province)}
                      className="location-dropdown-item"
                    >
-                     {barangay}
+                     {province}
                    </div>
                  ))}
                </div>
              )}
            </div>
+          
            <div className="client-baptismal-field location-dropdown-container">
              <label>Father's Birth Municipality</label>
              <input 
@@ -1947,25 +1949,25 @@ const location = useLocation();
                </div>
              )}
            </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Father's Birth Province</label>
+         <div className="client-baptismal-field location-dropdown-container">
+             <label>Father's Birth Barangay</label>
              <input 
                type="text"
                placeholder="Type to search"
-               value={fatherBirthFields.province}
-               onChange={handleFatherBirthProvinceChange}
-               onFocus={() => handleFocus('fatherBirthProvince')}
+               value={fatherBirthFields.barangay}
+               onChange={handleFatherBirthBarangayChange}
+               onFocus={() => handleFocus('fatherBirthBarangay')}
                className={validationErrors.fatherPlaceOfBirth ? 'client-error-input' : ''}
              />
-             {focusedField === 'fatherBirthProvince' && suggestions.fatherBirthProvince.length > 0 && (
+             {focusedField === 'fatherBirthBarangay' && suggestions.fatherBirthBarangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.fatherBirthProvince.map((province, index) => (
+                 {suggestions.fatherBirthBarangay.map((barangay, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectFatherBirthProvince(province)}
+                     onClick={() => handleSelectFatherBirthBarangay(barangay)}
                      className="location-dropdown-item"
                    >
-                     {province}
+                     {barangay}
                    </div>
                  ))}
                </div>
@@ -2023,24 +2025,24 @@ const location = useLocation();
              />
            </div>
            <div className="client-baptismal-field location-dropdown-container">
-             <label>Mother's Birth Barangay</label>
+             <label>Mother's Birth Province</label>
              <input 
                type="text"
                placeholder="Type to search"
-               value={motherBirthFields.barangay}
-               onChange={handleMotherBirthBarangayChange}
-               onFocus={() => handleFocus('motherBirthBarangay')}
+               value={motherBirthFields.province}
+               onChange={handleMotherBirthProvinceChange}
+               onFocus={() => handleFocus('motherBirthProvince')}
                className={validationErrors.motherPlaceOfBirth ? 'client-error-input' : ''}
              />
-             {focusedField === 'motherBirthBarangay' && suggestions.motherBirthBarangay.length > 0 && (
+             {focusedField === 'motherBirthProvince' && suggestions.motherBirthProvince.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.motherBirthBarangay.map((barangay, index) => (
+                 {suggestions.motherBirthProvince.map((province, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectMotherBirthBarangay(barangay)}
+                     onClick={() => handleSelectMotherBirthProvince(province)}
                      className="location-dropdown-item"
                    >
-                     {barangay}
+                     {province}
                    </div>
                  ))}
                </div>
@@ -2070,30 +2072,31 @@ const location = useLocation();
                </div>
              )}
            </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Mother's Birth Province</label>
+            <div className="client-baptismal-field location-dropdown-container">
+             <label>Mother's Birth Barangay</label>
              <input 
                type="text"
                placeholder="Type to search"
-               value={motherBirthFields.province}
-               onChange={handleMotherBirthProvinceChange}
-               onFocus={() => handleFocus('motherBirthProvince')}
+               value={motherBirthFields.barangay}
+               onChange={handleMotherBirthBarangayChange}
+               onFocus={() => handleFocus('motherBirthBarangay')}
                className={validationErrors.motherPlaceOfBirth ? 'client-error-input' : ''}
              />
-             {focusedField === 'motherBirthProvince' && suggestions.motherBirthProvince.length > 0 && (
+             {focusedField === 'motherBirthBarangay' && suggestions.motherBirthBarangay.length > 0 && (
                <div className="location-dropdown">
-                 {suggestions.motherBirthProvince.map((province, index) => (
+                 {suggestions.motherBirthBarangay.map((barangay, index) => (
                    <div 
                      key={index}
-                     onClick={() => handleSelectMotherBirthProvince(province)}
+                     onClick={() => handleSelectMotherBirthBarangay(barangay)}
                      className="location-dropdown-item"
                    >
-                     {province}
+                     {barangay}
                    </div>
                  ))}
                </div>
              )}
            </div>
+          
          </div>
 
          {/* Marital Status */}
@@ -2155,63 +2158,7 @@ const location = useLocation();
 
          {/* Address Fields */}
          <div className="client-baptismal-row client-address-row">
-         <div className="client-baptismal-field">
-             <label>Street</label>
-             <input 
-               type="text"
-               value={formData.street}
-               onChange={(e) => handleInputChange('street', e.target.value)}
-             />
-           </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Barangay</label>
-             <input 
-               type="text"
-               value={formData.barangay}
-               onChange={handleBarangayChange}
-               onFocus={() => handleFocus('barangay')}
-               placeholder="Type to search"
-               className={validationErrors.barangay ? 'client-error-input' : ''}
-             />
-             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.barangay.map((barangay, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectBarangay(barangay)}
-                     className="location-dropdown-item"
-                   >
-                     {barangay}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-           <div className="client-baptismal-field location-dropdown-container">
-             <label>Municipality</label>
-             <input 
-               type="text"
-               value={formData.municipality}
-               onChange={handleMunicipalityChange}
-               onFocus={() => handleFocus('municipality')}
-               placeholder="Type to search"
-               className={validationErrors.municipality ? 'client-error-input' : ''}
-             />
-             {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
-               <div className="location-dropdown">
-                 {suggestions.municipality.map((municipality, index) => (
-                   <div 
-                     key={index}
-                     onClick={() => handleSelectMunicipality(municipality)}
-                     className="location-dropdown-item"
-                   >
-                     {municipality}
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
-           <div className="client-baptismal-field location-dropdown-container">
+            <div className="client-baptismal-field location-dropdown-container">
              <label>Province</label>
              <input 
                type="text"
@@ -2235,6 +2182,63 @@ const location = useLocation();
                </div>
              )}
            </div>
+            <div className="client-baptismal-field location-dropdown-container">
+             <label>Municipality</label>
+             <input 
+               type="text"
+               value={formData.municipality}
+               onChange={handleMunicipalityChange}
+               onFocus={() => handleFocus('municipality')}
+               placeholder="Type to search"
+               className={validationErrors.municipality ? 'client-error-input' : ''}
+             />
+             {focusedField === 'municipality' && suggestions.municipality.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.municipality.map((municipality, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectMunicipality(municipality)}
+                     className="location-dropdown-item"
+                   >
+                     {municipality}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         <div className="client-baptismal-field location-dropdown-container">
+             <label>Barangay</label>
+             <input 
+               type="text"
+               value={formData.barangay}
+               onChange={handleBarangayChange}
+               onFocus={() => handleFocus('barangay')}
+               placeholder="Type to search"
+               className={validationErrors.barangay ? 'client-error-input' : ''}
+             />
+             {focusedField === 'barangay' && suggestions.barangay.length > 0 && (
+               <div className="location-dropdown">
+                 {suggestions.barangay.map((barangay, index) => (
+                   <div 
+                     key={index}
+                     onClick={() => handleSelectBarangay(barangay)}
+                     className="location-dropdown-item"
+                   >
+                     {barangay}
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         <div className="client-baptismal-field">
+             <label>Street</label>
+             <input 
+               type="text"
+               value={formData.street}
+               onChange={(e) => handleInputChange('street', e.target.value)}
+             />
+           </div>
+  
            <div className="client-baptismal-field location-dropdown-container">
              <label>Address Region</label>
              <input 
