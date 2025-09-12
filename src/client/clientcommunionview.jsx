@@ -10,6 +10,64 @@ const ClientCommunionView = () => {
   const [communionData, setCommunionData] = useState(null);
   const [error, setError] = useState(null);
 
+  // Helper function to format date to "December 23, 2025" format
+  const formatDate = (dateString) => {
+    if (!dateString || dateString === 'N/A') return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid date
+      }
+      
+      // Format to "Month Day, Year"
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString; // Return original if formatting fails
+    }
+  };
+
+  // Helper function to convert 24-hour time to 12-hour AM/PM format
+  const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    
+    try {
+      // Handle different time formats
+      let time = timeString;
+      
+      // If time includes seconds (HH:MM:SS), remove them
+      if (time.includes(':') && time.split(':').length === 3) {
+        time = time.substring(0, 5); // Keep only HH:MM
+      }
+      
+      // Split the time into hours and minutes
+      const [hours, minutes] = time.split(':');
+      const hour = parseInt(hours, 10);
+      const min = minutes || '00';
+      
+      // Convert to 12-hour format
+      if (hour === 0) {
+        return `12:${min} AM`;
+      } else if (hour < 12) {
+        return `${hour}:${min} AM`;
+      } else if (hour === 12) {
+        return `12:${min} PM`;
+      } else {
+        return `${hour - 12}:${min} PM`;
+      }
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return timeString; // Return original if formatting fails
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (communionID and clientID)
     const communionID = location.state?.communionID;
@@ -98,12 +156,12 @@ const ClientCommunionView = () => {
           <div className="client-communion-view-row-date">
             <div className="client-communion-view-field-date">
               <label>Date of Appointment:</label>
-              {renderReadOnlyField(communion.date)}
+              {renderReadOnlyField(formatDate(communion.date))}
             </div>
             
             <div className="client-communion-view-field-time">
               <label>Time of Appointment:</label>
-              {renderReadOnlyField(communion.time)}
+              {renderReadOnlyField(formatTime(communion.time))}
             </div>
           </div>
         </div>
@@ -126,7 +184,7 @@ const ClientCommunionView = () => {
               </div>
               <div className="client-communion-view-field">
                 <label>Date of Birth</label>
-                {renderReadOnlyField(communion.dateOfBirth)}
+                {renderReadOnlyField(formatDate(communion.dateOfBirth))}
               </div>
             </div>
 
@@ -141,7 +199,7 @@ const ClientCommunionView = () => {
               </div>
               <div className="client-communion-view-field">
                 <label>Date of Baptism</label>
-                {renderReadOnlyField(communion.dateOfBaptism)}
+                {renderReadOnlyField(formatDate(communion.dateOfBaptism))}
               </div>
               <div className="client-communion-view-field">
                 <label>Church of Baptism</label>
@@ -199,7 +257,7 @@ const ClientCommunionView = () => {
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>Father's Date of Birth</label>
-                {renderReadOnlyField(father.dateOfBirth)}
+                {renderReadOnlyField(formatDate(father.dateOfBirth))}
               </div>
               <div className="client-communion-view-field">
                 <label>Father's Contact Number</label>
@@ -233,7 +291,7 @@ const ClientCommunionView = () => {
             <div className="client-communion-view-row">
               <div className="client-communion-view-field">
                 <label>Mother's Date of Birth</label>
-                {renderReadOnlyField(mother.dateOfBirth)}
+                {renderReadOnlyField(formatDate(mother.dateOfBirth))}
               </div>
               <div className="client-communion-view-field">
                 <label>Mother's Contact Number</label>

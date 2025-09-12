@@ -25,6 +25,64 @@ const ClientBaptismView = () => {
     fetchBaptismDetails(baptismID);
   }, [location]);
 
+  // Helper function to format date to "December 23, 2025" format
+  const formatDate = (dateString) => {
+    if (!dateString || dateString === 'N/A') return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid date
+      }
+      
+      // Format to "Month Day, Year"
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString; // Return original if formatting fails
+    }
+  };
+
+  // Helper function to convert 24-hour time to 12-hour AM/PM format
+  const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    
+    try {
+      // Handle different time formats
+      let time = timeString;
+      
+      // If time includes seconds (HH:MM:SS), remove them
+      if (time.includes(':') && time.split(':').length === 3) {
+        time = time.substring(0, 5); // Keep only HH:MM
+      }
+      
+      // Split the time into hours and minutes
+      const [hours, minutes] = time.split(':');
+      const hour = parseInt(hours, 10);
+      const min = minutes || '00';
+      
+      // Convert to 12-hour format
+      if (hour === 0) {
+        return `12:${min} AM`;
+      } else if (hour < 12) {
+        return `${hour}:${min} AM`;
+      } else if (hour === 12) {
+        return `12:${min} PM`;
+      } else {
+        return `${hour - 12}:${min} PM`;
+      }
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return timeString; // Return original if formatting fails
+    }
+  };
+
   const fetchBaptismDetails = async (baptismID) => {
     try {
       const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_baptism_details.php?baptismID=${baptismID}`);
@@ -50,17 +108,17 @@ const ClientBaptismView = () => {
     const { baptism, parents, marital, address, godFathers, godMothers } = data;
 
     return {
-      date: baptism.dateOfBaptism,
-      time: baptism.timeOfBaptism,
+      date: formatDate(baptism.dateOfBaptism), // Apply date formatting here
+      time: formatTime(baptism.timeOfBaptism), // Apply time formatting here
       status: baptism.status,
-      createdAt: baptism.created_at ? new Date(baptism.created_at).toLocaleDateString() : 'N/A',
+      createdAt: baptism.created_at ? formatDate(baptism.created_at) : 'N/A',
       child: {
         firstName: baptism.firstName,
         middleName: baptism.middleName,
         lastName: baptism.lastName,
         gender: baptism.sex,
         age: baptism.age,
-        dateOfBirth: baptism.dateOfBirth,
+        dateOfBirth: formatDate(baptism.dateOfBirth), // Apply date formatting here
         placeOfBirth: baptism.placeOfBirth,
         regionOfBirth: baptism.region || 'N/A'
       },
@@ -69,7 +127,7 @@ const ClientBaptismView = () => {
         middleName: parents?.fatherMiddleName || 'N/A',
         lastName: parents?.fatherLastName || 'N/A',
         placeOfBirth: parents?.fatherPlaceOfBirth || 'N/A',
-        dateOfBirth: parents?.fatherDateOfBirth || 'N/A',
+        dateOfBirth: formatDate(parents?.fatherDateOfBirth) || 'N/A', // Apply date formatting here
         contact: parents?.fatherContact || 'N/A'
       },
       mother: {
@@ -77,7 +135,7 @@ const ClientBaptismView = () => {
         middleName: parents?.motherMiddleName || 'N/A',
         lastName: parents?.motherLastName || 'N/A',
         placeOfBirth: parents?.motherPlaceOfBirth || 'N/A',
-        dateOfBirth: parents?.motherDateOfBirth || 'N/A',
+        dateOfBirth: formatDate(parents?.motherDateOfBirth) || 'N/A', // Apply date formatting here
         contact: parents?.motherContact || 'N/A'
       },
       maritalStatus: {

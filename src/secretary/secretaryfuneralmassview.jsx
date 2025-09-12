@@ -33,6 +33,33 @@ const SecretaryFuneralMassView = () => {
   // API base URL that can be easily changed
   const API_BASE_URL = "https://parishofdivinemercy.com/backend";
 
+  // Function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    
+    try {
+      // Handle time strings that might have seconds
+      const timeParts = timeString.split(':');
+      let hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1];
+      
+      // Determine AM or PM
+      const period = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      if (hours === 0) {
+        hours = 12; // Midnight case
+      } else if (hours > 12) {
+        hours = hours - 12;
+      }
+      
+      return `${hours}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeString; // Return original string if formatting fails
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (funeralID)
     const funeralID = location.state?.funeralID;
@@ -668,7 +695,7 @@ const handleConfirmApproval = async () => {
                 </div>
                 <div className="certificate-row">
                   <div className="certificate-label">TIME OF FUNERAL MASS</div>
-                  <div className="certificate-value">{funeralTime}</div>
+                  <div className="certificate-value">{formatTime(funeralTime)}</div>
                 </div>
                 <div className="certificate-row">
                   <div className="certificate-label">OFFICIATING PRIEST</div>
@@ -747,7 +774,7 @@ const handleConfirmApproval = async () => {
             <h2>Are you sure?</h2>
             <p>Are you sure you want to approve this funeral mass appointment?</p>
             <p>Date: {selectedDate}</p>
-            <p>Time: {selectedTime}</p>
+            <p>Time: {formatTime(selectedTime)}</p>
             <p>Priest: {selectedPriest}</p>
             <p>This will send an email notification to the requester.</p>
             <div className="secretary-confirm-buttons">
@@ -876,7 +903,7 @@ const handleConfirmApproval = async () => {
             </div>
             <div className="secretary-funeral-view-field-time">
               <label>Time of Appointment Request:</label>
-              {renderReadOnlyField(funeralData.time)}
+              {renderReadOnlyField(formatTime(funeralData.time))}
             </div>
           </div>
         </div>
@@ -892,7 +919,7 @@ const handleConfirmApproval = async () => {
               </div>
               <div className="secretary-funeral-view-field-time">
                 <label>Time of Funeral Mass:</label>
-                {renderReadOnlyField(approvedData.time)}
+                {renderReadOnlyField(formatTime(approvedData.time))}
               </div>
             </div>
             <div className="secretary-funeral-view-field-date">

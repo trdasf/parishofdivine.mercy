@@ -103,6 +103,22 @@ const FuneralMass = () => {
     'certificate_confirmation'
   ];
 
+  // Time formatting function
+  const formatTimeTo12Hour = (time24) => {
+    if (!time24) return '';
+    
+    // Split the time into hours and minutes
+    const [hours, minutes] = time24.split(':');
+    const hour24 = parseInt(hours, 10);
+    const minute = minutes;
+    
+    // Convert to 12-hour format
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const period = hour24 >= 12 ? 'PM' : 'AM';
+    
+    return `${hour12}:${minute} ${period}`;
+  };
+
   // Fetch all necessary data on component mount
   useEffect(() => {
     fetchFuneralSchedules();
@@ -1080,7 +1096,7 @@ const handleYes = async () => {
              <option value="">Select Time</option>
              {availableTimes.map((time) => (
                <option key={time} value={time}>
-                 {time}
+                 {formatTimeTo12Hour(time)}
                </option>
              ))}
            </select>

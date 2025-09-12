@@ -10,6 +10,44 @@ const Blessing = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Helper function to convert 24-hour time to 12-hour format with AM/PM
+  const convertTo12Hour = (time24) => {
+    if (!time24) return '';
+    
+    const [hours, minutes] = time24.split(':');
+    const hour24 = parseInt(hours, 10);
+    
+    let hour12;
+    let ampm;
+    
+    if (hour24 === 0) {
+      hour12 = 12;
+      ampm = 'AM';
+    } else if (hour24 < 12) {
+      hour12 = hour24;
+      ampm = 'AM';
+    } else if (hour24 === 12) {
+      hour12 = 12;
+      ampm = 'PM';
+    } else {
+      hour12 = hour24 - 12;
+      ampm = 'PM';
+    }
+    
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to format date to "Month Day, Year" format
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   // State to track form data
   const [formData, setFormData] = useState({
@@ -744,7 +782,7 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
             >
               <option value="">Select Date</option>
               {uniqueDates.map(date => (
-                <option key={date} value={date}>{date}</option>
+                <option key={date} value={date}>{formatDateDisplay(date)}</option>
               ))}
             </select>
           </div>
@@ -760,7 +798,7 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
             >
               <option value="">Select Time</option>
               {filteredTimes.map(time => (
-                <option key={time} value={time}>{time}</option>
+                <option key={time} value={time}>{convertTo12Hour(time)}</option>
               ))}
             </select>
           </div>

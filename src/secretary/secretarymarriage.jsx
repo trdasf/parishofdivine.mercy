@@ -18,11 +18,28 @@ const SecretaryMarriage = () => {
   const fetchMarriageAppointments = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const response = await fetch("https://parishofdivinemercy.com/backend/fetch_approved_marriages.php");
       const data = await response.json();
 
       if (data.success) {
-        setMarriageAppointments(data.appointments);
+        const appointmentsData = data.appointments || [];
+        
+        // Create numbered appointments with originalID preservation
+        const numberedAppointments = appointmentsData.map((appointment, index) => ({
+          ...appointment,
+          originalId: appointment.id, // Preserve original database ID
+          displayNumber: index + 1,   // Sequential numbering for display
+          uniqueKey: `marriage-${appointment.id}` // Unique key for React
+        }));
+
+        setMarriageAppointments(numberedAppointments);
+        
+        console.log("=== MARRIAGE APPOINTMENTS LOADING ===");
+        console.log(`Total approved marriages loaded: ${numberedAppointments.length}`);
+        console.log("======================================");
+        
       } else {
         setError(data.message || "Failed to fetch marriage appointments");
       }
@@ -34,13 +51,83 @@ const SecretaryMarriage = () => {
     }
   };
 
-  const viewMarriageDetails = (marriageID, status) => {
+  // Helper function to convert 24-hour time to 12-hour format with AM/PM
+  const convertTo12Hour = (timeStr) => {
+    if (!timeStr) return '';
+    
+    // If already in 12-hour format, return as is
+    if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
+      return timeStr;
+    }
+    
+    // Parse 24-hour format
+    let [hours, minutes, seconds] = timeStr.split(':');
+    hours = parseInt(hours, 10);
+    
+    if (isNaN(hours)) return timeStr; // Return original if not valid
+    
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    
+    // Format minutes
+    minutes = minutes || '00';
+    
+    return `${hours}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to format date for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    } catch (e) {
+      return dateString; // Return original if parsing fails
+    }
+  };
+
+  // Helper function to normalize spaces in search term
+  const normalizeSpaces = (str) => {
+    return str.trim().replace(/\s+/g, ' ');
+  };
+
+  // Helper function to check if search term matches date (supports yyyy, yyyy-mm, yyyy-mm-dd)
+  const matchesDate = (appointmentDate, searchTerm) => {
+    if (!appointmentDate || !searchTerm) return false;
+    
+    const normalizedSearch = searchTerm.replace(/\s/g, '');
+    const formattedDate = formatDateForDisplay(appointmentDate);
+    
+    // Convert appointment date to different formats for comparison
+    const dateFormats = [
+      formattedDate, // yyyy-mm-dd format
+      formattedDate.substring(0, 7), // yyyy-mm format
+      formattedDate.substring(0, 4), // yyyy format
+    ];
+    
+    return dateFormats.some(format => 
+      format.toLowerCase().includes(normalizedSearch.toLowerCase())
+    );
+  };
+
+  const viewMarriageDetails = (appointmentData) => {
+    // Use the originalId for navigation to maintain compatibility with existing backend
     navigate("/secretary-marriage-view", {
-      state: { marriageID, status },
+      state: { 
+        marriageID: appointmentData.originalId, 
+        status: appointmentData.status 
+      }
     });
   };
 
   const handleDownload = () => {
+    if (filteredAppointments.length === 0) {
+      alert("No data to download");
+      return;
+    }
+
     // Create headers for CSV
     const headers = [
       "No.",
@@ -51,14 +138,14 @@ const SecretaryMarriage = () => {
       "Created At",
     ];
 
-    // Map appointments to rows
-    const rows = marriageAppointments.map(appointment => [
-      appointment.id,
+    // Map appointments to rows using displayNumber
+    const rows = filteredAppointments.map(appointment => [
+      appointment.displayNumber,
       appointment.groomName,
       appointment.brideName,
-      appointment.date,
-      appointment.time,
-      appointment.createdAt
+      formatDateForDisplay(appointment.date),
+      convertTo12Hour(appointment.time),
+      formatDateForDisplay(appointment.createdAt)
     ]);
 
     // Combine headers and rows
@@ -79,53 +166,96 @@ const SecretaryMarriage = () => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter appointments based on search term with flexible matching
-  const filteredAppointments = marriageAppointments.filter(appointment => {
-    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
-    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
-    const combinedNames = `${appointment.groomName} ${appointment.brideName}`.toLowerCase();
-    const formattedDate = new Date(appointment.date).toISOString().split('T')[0];
-    const formattedCreatedAt = new Date(appointment.createdAt).toISOString().split('T')[0];
-    
-    // If search ends with space, only match if the trimmed search is a prefix
-    const endsWithSpace = originalSearchValue !== searchValue;
-    
-    if (endsWithSpace && searchValue) {
-      // For searches ending with space, check if any field starts with the search term
-      return (
-        appointment.groomName?.toLowerCase().startsWith(searchValue) ||
-        appointment.brideName?.toLowerCase().startsWith(searchValue) ||
-        combinedNames.startsWith(searchValue) ||
-        formattedDate.startsWith(searchValue) ||
-        formattedCreatedAt.startsWith(searchValue) ||
-        appointment.status?.toLowerCase().startsWith(searchValue)
-      );
-    } else {
-      // Regular search - check if any field contains the search term
-      return (
-        appointment.groomName?.toLowerCase().includes(searchValue) ||
-        appointment.brideName?.toLowerCase().includes(searchValue) ||
-        combinedNames.includes(searchValue) ||
-        formattedDate.includes(searchValue) ||
-        formattedCreatedAt.includes(searchValue) ||
-        appointment.status?.toLowerCase().includes(searchValue)
-      );
-    }
-  });
+  // Enhanced filtering with flexible matching - adapted for marriage-specific fields
+  const filteredAppointments = React.useMemo(() => {
+    const filtered = marriageAppointments.filter(appointment => {
+      // If no search term, show all appointments
+      if (searchTerm.trim() === "") {
+        return true;
+      }
+      
+      const normalizedSearchTerm = normalizeSpaces(searchTerm);
+      
+      // Enhanced search behavior for groom/bride names, dates, and other fields
+      const groomName = appointment.groomName || '';
+      const brideName = appointment.brideName || '';
+      
+      // Create combined name combinations for searching
+      const combinedNames = normalizeSpaces(`${groomName} ${brideName}`);
+      const reverseCombinedNames = normalizeSpaces(`${brideName} ${groomName}`);
+      
+      // Check various search matches
+      const matchesGroomName = groomName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesBrideName = brideName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesCombinedNames = combinedNames.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesReverseCombinedNames = reverseCombinedNames.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesStatus = appointment.status && appointment.status.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesDateField = matchesDate(appointment.date, normalizedSearchTerm);
+      const matchesCreatedAt = matchesDate(appointment.createdAt, normalizedSearchTerm);
+      
+      return matchesGroomName || matchesBrideName || matchesCombinedNames || 
+             matchesReverseCombinedNames || matchesStatus ||
+             matchesDateField || matchesCreatedAt;
+    });
 
-  // If we have no real data yet, use sample data
-  const displayAppointments = marriageAppointments.length === 0 && !loading && !error ? 
-    [] : filteredAppointments;
+    // Renumber the filtered results for display
+    const numberedFiltered = filtered.map((appointment, index) => ({
+      ...appointment,
+      displayNumber: index + 1
+    }));
+
+    console.log("=== MARRIAGE FILTERING SUMMARY ===");
+    console.log(`Search Term: "${searchTerm}"`);
+    console.log(`Total Marriage Appointments: ${marriageAppointments.length}`);
+    console.log(`After Filtering: ${numberedFiltered.length}`);
+    console.log("===================================");
+
+    return numberedFiltered;
+  }, [marriageAppointments, searchTerm]);
+
+  // Add refresh button to force reload all data
+  const handleRefresh = () => {
+    console.log("Manual refresh triggered");
+    fetchMarriageAppointments();
+  };
 
   return (
     <div className="marriage-container-sm">
       <h1 className="title-sm">MARRIAGE</h1>
 
+      {/* Show loading status and record count */}
+      <div style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
+        {loading ? (
+          <span>Loading marriage appointments...</span>
+        ) : error ? (
+          <span style={{color: 'red'}}>Error: {error}</span>
+        ) : (
+          <span>
+            Showing {filteredAppointments.length} of {marriageAppointments.length} approved marriage appointments
+            <button 
+              onClick={handleRefresh} 
+              style={{
+                marginLeft: '10px', 
+                padding: '4px 8px', 
+                fontSize: '12px', 
+                background: '#b3701f', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              Refresh
+            </button>
+          </span>
+        )}
+      </div>
+
       <div className="marriage-actions-sm">
         <div className="search-bar-sm">
           <input 
             type="text" 
-            placeholder="Search" 
+            placeholder="Search by groom/bride name, date (yyyy-mm-dd), or status"
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -141,47 +271,58 @@ const SecretaryMarriage = () => {
       {loading ? (
         <div className="loading-container-sm">Loading marriage appointments...</div>
       ) : error ? (
-        <div className="error-container-sm">{error}</div>
+        <div className="error-container-sm">
+          {error}
+          <br />
+          <button onClick={handleRefresh} style={{ marginTop: '10px' }}>Try Again</button>
+        </div>
       ) : (
-        <table className="marriage-table-sm">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>Groom</th>
-              <th>Bride</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Created At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayAppointments.length === 0 ? (
+        <div className="marriage-table-wrapper-sm">
+          <table className="marriage-table-sm">
+            <thead>
               <tr>
-                <td colSpan="8" className="no-data-sm">No marriage appointments found</td>
+                <th>No.</th>
+                <th>Groom</th>
+                <th>Bride</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Created At</th>
+                <th>Action</th>
               </tr>
-            ) : (
-              displayAppointments.map((appointment) => (
-                <tr key={appointment.id}>
-                  <td>{appointment.id}</td>
-                  <td>{appointment.groomName}</td>
-                  <td>{appointment.brideName}</td>
-                  <td>{new Date(appointment.date).toISOString().split('T')[0]}</td>
-                  <td>{appointment.time}</td>
-                  <td>{new Date(appointment.createdAt).toISOString().split('T')[0]}</td>
-                  <td>
-                    <button
-                      className="sm-details"
-                      onClick={() => viewMarriageDetails(appointment.id, appointment.status)}
-                    >
-                      View
-                    </button>
+            </thead>
+            <tbody>
+              {filteredAppointments.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="no-data-sm">
+                    {searchTerm ? 
+                      "No marriage appointments found matching your search criteria" : 
+                      "No approved marriage appointments found"
+                    }
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredAppointments.map((appointment) => (
+                  <tr key={appointment.uniqueKey}>
+                    <td>{appointment.displayNumber}</td>
+                    <td>{appointment.groomName}</td>
+                    <td>{appointment.brideName}</td>
+                    <td>{formatDateForDisplay(appointment.date)}</td>
+                    <td>{convertTo12Hour(appointment.time)}</td>
+                    <td>{formatDateForDisplay(appointment.createdAt)}</td>
+                    <td>
+                      <button
+                        className="sm-details"
+                        onClick={() => viewMarriageDetails(appointment)}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

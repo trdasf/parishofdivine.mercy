@@ -11,6 +11,7 @@ const ClientAppointment = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("");
+  const [error, setError] = useState(null);
 
   // Sacrament Types list (for consistency)
   const sacramentTypes = [
@@ -33,12 +34,15 @@ const ClientAppointment = () => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       // Get clientID from localStorage
       const user = JSON.parse(localStorage.getItem('user'));
       const clientID = user?.clientID;
 
       if (!clientID) {
         console.error("No client ID found");
+        setError("No client ID found. Please log in again.");
         setLoading(false);
         return;
       }
@@ -62,7 +66,7 @@ const ClientAppointment = () => {
       const anointingData = await anointingResponse.json();
       const blessingData = await blessingResponse.json();
       
-      // Combine all types of appointments
+      // Combine all types of appointments with sequential numbering and originalId
       const allAppointments = [
         ...(baptismData.success ? baptismData.appointments || [] : []),
         ...(marriageData.success ? marriageData.appointments || [] : []),
@@ -73,43 +77,65 @@ const ClientAppointment = () => {
         ...(blessingData.success ? blessingData.appointments || [] : [])
       ];
 
-      setAppointments(allAppointments);
+      // Add sequential numbering and preserve originalId
+      const numberedAppointments = allAppointments.map((appointment, index) => ({
+        ...appointment,
+        originalId: appointment.id, // Preserve original database ID
+        displayNumber: index + 1,   // Sequential numbering for display
+        uniqueKey: `${appointment.sacramentType}-${appointment.id}`, // Unique key for React
+        normalizedStatus: formatStatus(appointment.status) // Normalize status for consistent filtering
+      }));
+
+      setAppointments(numberedAppointments);
+      
+      console.log("=== CLIENT APPOINTMENTS LOADING ===");
+      console.log(`Total appointments loaded: ${numberedAppointments.length}`);
+      console.log("====================================");
+      
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setError("An error occurred while fetching appointments");
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper function to normalize spaces in search term
-  const normalizeSpaces = (str) => {
-    return str.trim().replace(/\s+/g, ' ');
-  };
-
-  // Helper function to convert 12-hour time to 24-hour for comparison
-  const convertTo24Hour = (timeStr) => {
+  // Helper function to convert 24-hour time to 12-hour format with AM/PM
+  const convertTo12Hour = (timeStr) => {
     if (!timeStr) return '';
     
-    // If already in 24-hour format, return as is
-    if (timeStr.match(/^\d{1,2}:\d{2}:\d{2}$/)) {
+    // If already in 12-hour format, return as is
+    if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
       return timeStr;
     }
     
-    // Convert 12-hour to 24-hour
-    const time12h = timeStr.toLowerCase().replace(/\s/g, '');
-    let [time, modifier] = time12h.split(/(am|pm)/);
+    // Parse 24-hour format
+    let [hours, minutes, seconds] = timeStr.split(':');
+    hours = parseInt(hours, 10);
     
-    if (!modifier) return timeStr; // Not a 12-hour format
+    if (isNaN(hours)) return timeStr; // Return original if not valid
     
-    let [hours, minutes] = time.split(':');
-    if (hours === '12') {
-      hours = '00';
-    }
-    if (modifier === 'pm') {
-      hours = parseInt(hours, 10) + 12;
-    }
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
     
-    return `${hours.padStart(2, '0')}:${minutes || '00'}:00`;
+    // Format minutes
+    minutes = minutes || '00';
+    
+    return `${hours}:${minutes} ${ampm}`;
+  };
+
+  // Helper function to format status with proper capitalization
+  const formatStatus = (status) => {
+    if (!status) return '';
+    
+    // Ensure first letter is capitalized and rest are lowercase
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
+
+  // Helper function to normalize spaces in search term
+  const normalizeSpaces = (str) => {
+    return str.trim().replace(/\s+/g, ' ');
   };
 
   // Helper function to check if search term matches time (supports both 12h and 24h)
@@ -118,23 +144,15 @@ const ClientAppointment = () => {
     
     const normalizedSearch = searchTerm.toLowerCase().replace(/\s/g, '');
     const appointmentTime24 = appointmentTime;
+    const appointmentTime12 = convertTo12Hour(appointmentTime);
     
-    // Direct match with appointment time
-    if (appointmentTime24.toLowerCase().includes(normalizedSearch)) {
+    // Direct match with appointment time (both formats)
+    if (appointmentTime24.toLowerCase().includes(normalizedSearch) || 
+        appointmentTime12.toLowerCase().includes(normalizedSearch)) {
       return true;
     }
     
-    // Convert appointment time to 12-hour format for comparison
-    const [hours, minutes] = appointmentTime24.split(':');
-    const hour24 = parseInt(hours, 10);
-    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-    const ampm = hour24 >= 12 ? 'pm' : 'am';
-    const time12h = `${hour12}:${minutes}${ampm}`;
-    const time12hWithSpace = `${hour12}:${minutes} ${ampm}`;
-    
-    return time12h.includes(normalizedSearch) || 
-           time12hWithSpace.includes(normalizedSearch) ||
-           appointmentTime24.includes(normalizedSearch);
+    return false;
   };
 
   // Helper function to check if search term matches date (supports yyyy, yyyy-mm, yyyy-mm-dd with - or /)
@@ -183,19 +201,10 @@ const ClientAppointment = () => {
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
     
-    // If in dd/mm/yyyy format (less common but possible)
-    if (dateString.includes('/') && dateString.split('/')[2].length === 4) {
-      const parts = dateString.split('/');
-      if (parts[0].length <= 2 && parts[1].length <= 2) {
-        const [day, month, year] = parts;
-        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      }
-    }
-    
     return dateString; // Return original if format not recognized
   };
 
-  // Handle search input change with automatic sacrament type and status filtering
+  // Handle search input change with automatic sacrament type filtering
   const handleSearchChange = (e) => {
     const searchValue = e.target.value;
     setSearchTerm(searchValue);
@@ -295,6 +304,7 @@ const ClientAppointment = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const clientID = user?.clientID;
     
+    // Use originalId for navigation to maintain compatibility with existing backend
     // Navigate to appropriate form with viewOnly flag and appointment data
     switch(appointmentData.sacramentType) {
       case "Baptism":
@@ -303,7 +313,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            baptismID: appointmentData.id
+            baptismID: appointmentData.originalId
           } 
         });
         break;
@@ -313,7 +323,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            marriageID: appointmentData.id
+            marriageID: appointmentData.originalId
           } 
         });
         break;
@@ -323,7 +333,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            funeralID: appointmentData.id
+            funeralID: appointmentData.originalId
           } 
         });
         break;
@@ -333,7 +343,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            blessingID: appointmentData.id
+            blessingID: appointmentData.originalId
           } 
         });
         break;
@@ -343,7 +353,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            communionID: appointmentData.id
+            communionID: appointmentData.originalId
           } 
         });
         break;
@@ -353,7 +363,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            confirmationID: appointmentData.id
+            confirmationID: appointmentData.originalId
           } 
         });
         break;
@@ -363,7 +373,7 @@ const ClientAppointment = () => {
             viewOnly: true, 
             appointmentData,
             clientID,
-            anointingID: appointmentData.id
+            anointingID: appointmentData.originalId
           } 
         });
         break;
@@ -372,7 +382,7 @@ const ClientAppointment = () => {
     }
   };
 
-  // Enhanced filtering with flexible matching - similar to ParishAppointment and SecretaryAppointment
+  // Enhanced filtering with case-insensitive status matching
   const filteredAppointments = React.useMemo(() => {
     const filtered = appointments.filter(appointment => {
       const matchesSacramentFilter = filter === "" || appointment.sacramentType === filter;
@@ -393,14 +403,10 @@ const ClientAppointment = () => {
       );
       
       let result = false;
-      let reason = "";
       
       if (isSearchingSacramentType && filter !== "") {
         // If searching for a specific sacrament type, only show that type
         result = appointment.sacramentType === filter;
-        reason = result ? 
-          `Included: Sacrament type "${appointment.sacramentType}" matches active filter "${filter}"` :
-          `Excluded: Sacrament type "${appointment.sacramentType}" does not match active filter "${filter}"`;
       } else {
         // Enhanced search behavior for names, dates, times, status, and other fields
         const firstName = appointment.firstName || '';
@@ -410,83 +416,82 @@ const ClientAppointment = () => {
         const fullName = normalizeSpaces(`${firstName} ${lastName}`);
         const reverseFullName = normalizeSpaces(`${lastName} ${firstName}`);
         
-        // Check various search matches
+        // Check various search matches with case-insensitive status comparison
         const matchesFirstName = firstName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
         const matchesLastName = lastName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
         const matchesFullName = fullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
         const matchesReverseFullName = reverseFullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
         const matchesSacramentType = appointment.sacramentType.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+        // Case-insensitive status matching
         const matchesStatus = appointment.status && appointment.status.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
-        const matchesId = appointment.id && appointment.id.toString().includes(normalizedSearchTerm);
         const matchesDateField = matchesDate(appointment.date, normalizedSearchTerm);
         const matchesTimeField = matchesTime(appointment.time, normalizedSearchTerm);
         const matchesCreatedAt = matchesDate(appointment.createdAt, normalizedSearchTerm);
         
         const matchesSearch = matchesFirstName || matchesLastName || matchesFullName || 
                              matchesReverseFullName || matchesSacramentType || matchesStatus ||
-                             matchesId || matchesDateField || matchesTimeField || matchesCreatedAt;
+                             matchesDateField || matchesTimeField || matchesCreatedAt;
         
         result = matchesSacramentFilter && matchesSearch;
-        
-        // Build reason string
-        if (!result) {
-          if (!matchesSacramentFilter) {
-            reason = `Excluded: Sacrament filter mismatch - Filter: "${filter}", Appointment: "${appointment.sacramentType}"`;
-          } else if (!matchesSearch) {
-            reason = `Excluded: Search mismatch - Search term: "${normalizedSearchTerm}" not found in any field`;
-          }
-        } else {
-          let matchReasons = [];
-          if (matchesFirstName) matchReasons.push(`firstName: "${firstName}"`);
-          if (matchesLastName) matchReasons.push(`lastName: "${lastName}"`);
-          if (matchesFullName && !matchesFirstName && !matchesLastName) matchReasons.push(`fullName: "${fullName}"`);
-          if (matchesReverseFullName && !matchesFullName) matchReasons.push(`reverseFullName: "${reverseFullName}"`);
-          if (matchesSacramentType) matchReasons.push(`sacramentType: "${appointment.sacramentType}"`);
-          if (matchesStatus) matchReasons.push(`status: "${appointment.status}"`);
-          if (matchesId) matchReasons.push(`id: "${appointment.id}"`);
-          if (matchesDateField) matchReasons.push(`date: "${appointment.date}"`);
-          if (matchesTimeField) matchReasons.push(`time: "${appointment.time}"`);
-          if (matchesCreatedAt) matchReasons.push(`createdAt: "${appointment.createdAt}"`);
-          
-          reason = `Included: Matches ${matchReasons.join(", ")} with search term: "${normalizedSearchTerm}", filter: "${filter}"`;
-        }
       }
-      
-      // Console log for debugging
-      console.log(`ID: ${appointment.id} | ${reason}`);
       
       return result;
     });
 
-    // Remove duplicates based on appointment ID
-    const uniqueFiltered = filtered.filter((appointment, index, self) => 
-      index === self.findIndex(apt => apt.id === appointment.id)
-    );
+    // Renumber the filtered results for display
+    const numberedFiltered = filtered.map((appointment, index) => ({
+      ...appointment,
+      displayNumber: index + 1
+    }));
 
-    // Console log to debug data issues
-    console.log("=== CLIENT APPOINTMENT RAW DATA DEBUG ===");
-    console.log("Total raw appointments received:", appointments.length);
-    console.log("Sample appointments:", appointments.slice(0, 3));
-    console.log("Sacrament types in data:", [...new Set(appointments.map(apt => apt.sacramentType))]);
-    console.log("===========================================");
-
-    // Console log summary
-    console.log("=== CLIENT APPOINTMENT SEARCH SUMMARY ===");
+    console.log("=== CLIENT APPOINTMENT FILTERING SUMMARY ===");
     console.log(`Search Term: "${searchTerm}"`);
-    console.log(`Normalized Search Term: "${normalizeSpaces(searchTerm)}"`);
     console.log(`Sacrament Filter: "${filter}"`);
     console.log(`Total Appointments: ${appointments.length}`);
-    console.log(`Filtered Results (with duplicates): ${filtered.length}`);
-    console.log(`Unique Filtered Results: ${uniqueFiltered.length}`);
-    console.log("Filtered Appointment IDs:", uniqueFiltered.map(apt => apt.id));
-    console.log("==========================================");
+    console.log(`After Filtering: ${numberedFiltered.length}`);
+    console.log("=============================================");
 
-    return uniqueFiltered;
+    return numberedFiltered;
   }, [appointments, searchTerm, filter, sacramentTypes]);
+
+  // Add refresh button to force reload all data
+  const handleRefresh = () => {
+    console.log("Manual refresh triggered");
+    fetchAppointments();
+  };
 
   return (
     <div className="appointment-container-ca">
       <h1 className="title-ca">APPOINTMENT</h1>
+      
+      {/* Show loading status and record count */}
+      <div style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
+        {loading ? (
+          <span>Loading appointments...</span>
+        ) : error ? (
+          <span style={{color: 'red'}}>Error: {error}</span>
+        ) : (
+          <span>
+            Showing {filteredAppointments.length} of {appointments.length} appointments
+            <button 
+              onClick={handleRefresh} 
+              style={{
+                marginLeft: '10px', 
+                padding: '4px 8px', 
+                fontSize: '12px', 
+                background: '#b3701f', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              Refresh
+            </button>
+          </span>
+        )}
+      </div>
+      
       <div className="appointment-actions-ca">
         <div className="search-bar-ca">
           <input 
@@ -516,57 +521,68 @@ const ClientAppointment = () => {
         </div>
       </div>
 
-      <div className="table-container">
-        <table className="appointment-table-ca">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Sacrament Type</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+      {loading ? (
+        <div className="loading-container-ca">Loading appointments...</div>
+      ) : error ? (
+        <div className="error-container-ca">
+          {error}
+          <br />
+          <button onClick={handleRefresh} style={{ marginTop: '10px' }}>Try Again</button>
+        </div>
+      ) : (
+        <div className="appointment-table-wrapper-ca">
+          <table className="appointment-table-ca">
+            <thead>
               <tr>
-                <td colSpan="9" style={{ textAlign: "center" }}>Loading appointments...</td>
+                <th>No.</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Sacrament Type</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Action</th>
               </tr>
-            ) : filteredAppointments.length > 0 ? (
-              filteredAppointments.map((appointment, index) => (
-                <tr key={appointment.id}>
-                  <td>{index + 1}</td>
-                  <td>{appointment.firstName}</td>
-                  <td>{appointment.lastName}</td>
-                  <td>{appointment.sacramentType}</td>
-                  <td>{formatDateForDisplay(appointment.date)}</td>
-                  <td>{appointment.time}</td>
-                  <td>{appointment.status}</td>
-                  <td>{formatDateForDisplay(appointment.createdAt)}</td>
-                  <td>
-                    <button
-                      className="ca-details"
-                      onClick={() => viewAppointmentDetails(appointment)}
-                    >
-                      View
-                    </button>
+            </thead>
+            <tbody>
+              {filteredAppointments.length > 0 ? (
+                filteredAppointments.map((appointment) => (
+                  <tr key={appointment.uniqueKey}>
+                    <td>{appointment.displayNumber}</td>
+                    <td>{appointment.firstName}</td>
+                    <td>{appointment.lastName}</td>
+                    <td>{appointment.sacramentType}</td>
+                    <td>{formatDateForDisplay(appointment.date)}</td>
+                    <td>{convertTo12Hour(appointment.time)}</td>
+                    <td className={`status-${appointment.normalizedStatus?.toLowerCase()}`}>
+                      {appointment.normalizedStatus}
+                    </td>
+                    <td>{formatDateForDisplay(appointment.createdAt)}</td>
+                    <td>
+                      <button
+                        className="ca-details"
+                        onClick={() => viewAppointmentDetails(appointment)}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="9" className="no-data-ca">
+                    {searchTerm.trim() || filter ? 
+                      "No appointments found matching your search criteria" : 
+                      "No appointments found"
+                    }
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" style={{ textAlign: "center" }}>
-                  {searchTerm.trim() || filter ? "No appointments match your search criteria" : "No appointments found"}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Two-Column Sacrament Selection Modal */}
       {showModal && (

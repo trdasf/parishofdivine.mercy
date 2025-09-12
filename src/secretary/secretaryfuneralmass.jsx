@@ -11,7 +11,6 @@ const SecretaryFuneralMass = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     fetchFuneralMassData();
@@ -20,18 +19,33 @@ const SecretaryFuneralMass = () => {
     if (location.state?.refresh) {
       fetchFuneralMassData();
     }
-  }, [location, refreshTrigger]);
+  }, [location]);
 
   const fetchFuneralMassData = async () => {
     try {
       setLoading(true);
-      // Fetch funeral mass data from backend
+      setError(null);
+      
       const response = await fetch("https://parishofdivinemercy.com/backend/fetch_approved_funerals.php");
       const data = await response.json();
 
       if (data.success) {
-        console.log("Funeral mass data:", data.appointments);
-        setFuneralMassData(data.appointments || []);
+        const appointmentsData = data.appointments || [];
+        
+        // Create numbered appointments with originalID preservation
+        const numberedAppointments = appointmentsData.map((appointment, index) => ({
+          ...appointment,
+          originalId: appointment.id, // Preserve original database ID
+          displayNumber: index + 1,   // Sequential numbering for display
+          uniqueKey: `funeral-${appointment.id}` // Unique key for React
+        }));
+
+        setFuneralMassData(numberedAppointments);
+        
+        console.log("=== FUNERAL MASS APPOINTMENTS LOADING ===");
+        console.log(`Total approved funeral masses loaded: ${numberedAppointments.length}`);
+        console.log("==========================================");
+        
       } else {
         setError(data.message || "Failed to fetch funeral mass data");
       }
@@ -43,44 +57,101 @@ const SecretaryFuneralMass = () => {
     }
   };
 
-  // Function to manually refresh the data
-  const refreshData = () => {
-    setRefreshTrigger(prev => prev + 1);
+  // Helper function to convert 24-hour time to 12-hour format with AM/PM
+  const convertTo12Hour = (timeStr) => {
+    if (!timeStr) return '';
+    
+    // If already in 12-hour format, return as is
+    if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
+      return timeStr;
+    }
+    
+    // Parse 24-hour format
+    let [hours, minutes, seconds] = timeStr.split(':');
+    hours = parseInt(hours, 10);
+    
+    if (isNaN(hours)) return timeStr; // Return original if not valid
+    
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    
+    // Format minutes
+    minutes = minutes || '00';
+    
+    return `${hours}:${minutes} ${ampm}`;
   };
 
-  const viewFuneralMassDetails = (funeralID) => {
+  // Helper function to format date for display
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    } catch (e) {
+      return dateString; // Return original if parsing fails
+    }
+  };
+
+  // Helper function to normalize spaces in search term
+  const normalizeSpaces = (str) => {
+    return str.trim().replace(/\s+/g, ' ');
+  };
+
+  // Helper function to check if search term matches date (supports yyyy, yyyy-mm, yyyy-mm-dd)
+  const matchesDate = (appointmentDate, searchTerm) => {
+    if (!appointmentDate || !searchTerm) return false;
+    
+    const normalizedSearch = searchTerm.replace(/\s/g, '');
+    const formattedDate = formatDateForDisplay(appointmentDate);
+    
+    // Convert appointment date to different formats for comparison
+    const dateFormats = [
+      formattedDate, // yyyy-mm-dd format
+      formattedDate.substring(0, 7), // yyyy-mm format
+      formattedDate.substring(0, 4), // yyyy format
+    ];
+    
+    return dateFormats.some(format => 
+      format.toLowerCase().includes(normalizedSearch.toLowerCase())
+    );
+  };
+
+  const viewFuneralMassDetails = (appointmentData) => {
+    // Use the originalId for navigation to maintain compatibility with existing backend
     navigate("/secretary-funeral-mass-view", { 
       state: { 
-        funeralID: funeralID,
-        status: "Approved" 
+        funeralID: appointmentData.originalId,
+        status: appointmentData.status || "Approved"
       } 
     });
   };
 
   const handleDownload = () => {
-    if (funeralMassData.length === 0) {
+    if (filteredFuneralMassData.length === 0) {
       alert("No data to download");
       return;
     }
 
-    // Define headers for CSV
+    // Create headers for CSV
     const headers = [
       "No.",
       "Deceased First Name",
-      "Deceased Last Name",
+      "Deceased Last Name", 
       "Date",
       "Time",
       "Created At",
     ];
 
-    // Map data to CSV rows
-    const rows = funeralMassData.map(funeral => [
-      funeral.id,
+    // Map appointments to rows using displayNumber
+    const rows = filteredFuneralMassData.map(funeral => [
+      funeral.displayNumber,
       funeral.firstName,
       funeral.lastName,
-      funeral.date,
-      funeral.time,
-      funeral.createdAt,
+      formatDateForDisplay(funeral.date),
+      convertTo12Hour(funeral.time),
+      formatDateForDisplay(funeral.createdAt)
     ]);
 
     // Combine headers and rows
@@ -88,7 +159,6 @@ const SecretaryFuneralMass = () => {
       "data:text/csv;charset=utf-8," +
       [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
 
-    // Create a download link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -102,56 +172,96 @@ const SecretaryFuneralMass = () => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter funeral mass data based on search term with flexible matching
-  const filteredFuneralMassData = funeralMassData.filter(funeral => {
-    const searchValue = searchTerm.toLowerCase().trim(); // Remove leading/trailing spaces for comparison
-    const originalSearchValue = searchTerm.toLowerCase(); // Keep original for trailing space detection
-    const fullName = `${funeral.firstName} ${funeral.lastName}`.toLowerCase();
-    const formattedDate = new Date(funeral.date).toISOString().split('T')[0];
-    const formattedCreatedAt = new Date(funeral.createdAt).toISOString().split('T')[0];
-    
-    // If search ends with space, only match if the trimmed search is a prefix
-    const endsWithSpace = originalSearchValue !== searchValue;
-    
-    if (endsWithSpace && searchValue) {
-      // For searches ending with space, check if any field starts with the search term
-      return (
-        funeral.firstName?.toLowerCase().startsWith(searchValue) ||
-        funeral.lastName?.toLowerCase().startsWith(searchValue) ||
-        fullName.startsWith(searchValue) ||
-        formattedDate.startsWith(searchValue) ||
-        formattedCreatedAt.startsWith(searchValue) ||
-        funeral.status?.toLowerCase().startsWith(searchValue)
-      );
-    } else {
-      // Regular search - check if any field contains the search term
-      return (
-        funeral.firstName?.toLowerCase().includes(searchValue) ||
-        funeral.lastName?.toLowerCase().includes(searchValue) ||
-        fullName.includes(searchValue) ||
-        formattedDate.includes(searchValue) ||
-        formattedCreatedAt.includes(searchValue) ||
-        funeral.status?.toLowerCase().includes(searchValue)
-      );
-    }
-  });
+  // Enhanced filtering with flexible matching - similar to other components
+  const filteredFuneralMassData = React.useMemo(() => {
+    const filtered = funeralMassData.filter(funeral => {
+      // If no search term, show all appointments
+      if (searchTerm.trim() === "") {
+        return true;
+      }
+      
+      const normalizedSearchTerm = normalizeSpaces(searchTerm);
+      
+      // Enhanced search behavior for names, dates, and other fields
+      const firstName = funeral.firstName || '';
+      const lastName = funeral.lastName || '';
+      
+      // Create full name combinations for searching
+      const fullName = normalizeSpaces(`${firstName} ${lastName}`);
+      const reverseFullName = normalizeSpaces(`${lastName} ${firstName}`);
+      
+      // Check various search matches
+      const matchesFirstName = firstName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesLastName = lastName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesFullName = fullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesReverseFullName = reverseFullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesStatus = funeral.status && funeral.status.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
+      const matchesDateField = matchesDate(funeral.date, normalizedSearchTerm);
+      const matchesCreatedAt = matchesDate(funeral.createdAt, normalizedSearchTerm);
+      
+      return matchesFirstName || matchesLastName || matchesFullName || 
+             matchesReverseFullName || matchesStatus ||
+             matchesDateField || matchesCreatedAt;
+    });
 
-  if (loading) {
-    return <div className="loading-message">Loading funeral mass requests...</div>;
-  }
+    // Renumber the filtered results for display
+    const numberedFiltered = filtered.map((funeral, index) => ({
+      ...funeral,
+      displayNumber: index + 1
+    }));
 
-  if (error) {
-    return <div className="error-message">Error: {error}</div>;
-  }
+    console.log("=== FUNERAL MASS FILTERING SUMMARY ===");
+    console.log(`Search Term: "${searchTerm}"`);
+    console.log(`Total Funeral Mass Appointments: ${funeralMassData.length}`);
+    console.log(`After Filtering: ${numberedFiltered.length}`);
+    console.log("======================================");
+
+    return numberedFiltered;
+  }, [funeralMassData, searchTerm]);
+
+  // Add refresh button to force reload all data
+  const handleRefresh = () => {
+    console.log("Manual refresh triggered");
+    fetchFuneralMassData();
+  };
 
   return (
     <div className="funeralmass-container-sfm">
       <h1 className="title-sfm">FUNERAL MASS</h1>
+
+      {/* Show loading status and record count */}
+      <div style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
+        {loading ? (
+          <span>Loading funeral mass requests...</span>
+        ) : error ? (
+          <span style={{color: 'red'}}>Error: {error}</span>
+        ) : (
+          <span>
+            Showing {filteredFuneralMassData.length} of {funeralMassData.length} approved funeral mass requests
+            <button 
+              onClick={handleRefresh} 
+              style={{
+                marginLeft: '10px', 
+                padding: '4px 8px', 
+                fontSize: '12px', 
+                background: '#8e5200', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              Refresh
+            </button>
+          </span>
+        )}
+      </div>
+
       <div className="funeralmass-actions-sfm">
         <div className="search-bar-sfm">
           <input 
             type="text" 
-            placeholder="Search" 
+            placeholder="Search by deceased name, date (yyyy-mm-dd), or status"
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -165,11 +275,15 @@ const SecretaryFuneralMass = () => {
       </div>
 
       {loading ? (
-        <div className="loading-container-sb">Loading funeral mass requests...</div>
+        <div className="loading-container-sfm">Loading funeral mass requests...</div>
       ) : error ? (
-        <div className="error-container-sb">{error}</div>
+        <div className="error-container-sfm">
+          {error}
+          <br />
+          <button onClick={handleRefresh} style={{ marginTop: '10px' }}>Try Again</button>
+        </div>
       ) : (
-        <div className="table-wrapper-sfm">
+        <div className="funeralmass-table-wrapper-sfm">
           <table className="funeralmass-table-sfm">
             <thead>
               <tr>
@@ -184,20 +298,25 @@ const SecretaryFuneralMass = () => {
             <tbody>
               {filteredFuneralMassData.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="no-data-sb">No funeral mass requests found</td>
+                  <td colSpan="6" className="no-data-sfm">
+                    {searchTerm ? 
+                      "No funeral mass requests found matching your search criteria" : 
+                      "No approved funeral mass requests found"
+                    }
+                  </td>
                 </tr>
               ) : (
                 filteredFuneralMassData.map((funeral) => (
-                  <tr key={funeral.id}>
-                    <td>{funeral.id}</td>
+                  <tr key={funeral.uniqueKey}>
+                    <td>{funeral.displayNumber}</td>
                     <td>{`${funeral.firstName} ${funeral.lastName}`}</td>
-                    <td>{new Date(funeral.date).toISOString().split('T')[0]}</td>
-                    <td>{funeral.time}</td>
-                    <td>{new Date(funeral.createdAt).toISOString().split('T')[0]}</td>
+                    <td>{formatDateForDisplay(funeral.date)}</td>
+                    <td>{convertTo12Hour(funeral.time)}</td>
+                    <td>{formatDateForDisplay(funeral.createdAt)}</td>
                     <td>
                       <button
                         className="sfm-details"
-                        onClick={() => viewFuneralMassDetails(funeral.id)}
+                        onClick={() => viewFuneralMassDetails(funeral)}
                       >
                         View
                       </button>

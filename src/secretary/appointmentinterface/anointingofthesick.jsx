@@ -4,16 +4,42 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "../../client/ClientAnointingOfTheSick.css";
 import axios from 'axios';
 
+// Time formatting function
+const formatTimeTo12Hour = (time24) => {
+  if (!time24) return '';
+  
+  // Handle different time formats that might come from backend
+  let timeString = time24.toString();
+  
+  // If it's in HH:MM:SS format, extract just HH:MM
+  if (timeString.includes(':')) {
+    const parts = timeString.split(':');
+    timeString = `${parts[0]}:${parts[1]}`;
+  }
+  
+  // Create a date object with the time
+  const [hours, minutes] = timeString.split(':');
+  const date = new Date();
+  date.setHours(parseInt(hours, 10));
+  date.setMinutes(parseInt(minutes, 10));
+  
+  // Format to 12-hour time
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
 const AnointingOfTheSick = () => {
- const location = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
- 
  
   // State for form validation
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  // State for form data
+  // State for form data - UPDATED with all fields
   const [formData, setFormData] = useState({
     // Anointing Information
     dateOfAnointing: '',
@@ -30,7 +56,7 @@ const AnointingOfTheSick = () => {
     religion: '',
     reasonForAnointing: '',
     
-    // Marital Status
+    // Marital Status Information
     maritalStatus: '',
     yearsMarried: '',
     
@@ -255,59 +281,60 @@ const AnointingOfTheSick = () => {
     }
   };
 
- // Fetch anointing schedules and filter out already booked dates/times
-const fetchAnointingSchedules = async () => {
-  try {
-    const [schedulesResponse, anointingsResponse] = await Promise.all([
-      fetch('http://parishofdivinemercy.com/backend/schedule.php'),
-      fetch('http://parishofdivinemercy.com/backend/get_anointing_applications.php')
-    ]);
-    
-    const scheduleData = await schedulesResponse.json();
-    const anointingData = await anointingsResponse.json();
-    
-    if (scheduleData.success) {
-      // Filter only anointing schedules
-      const anointingSchedules = scheduleData.schedules.filter(
-        schedule => schedule.sacramentType.toLowerCase() === 'anointing of the sick and viaticum'
-      );
+  // Fetch anointing schedules and filter out already booked dates/times
+  const fetchAnointingSchedules = async () => {
+    try {
+      const [schedulesResponse, anointingsResponse] = await Promise.all([
+        fetch('http://parishofdivinemercy.com/backend/schedule.php'),
+        fetch('http://parishofdivinemercy.com/backend/get_anointing_applications.php')
+      ]);
       
-      // Create a set of booked date-time combinations
-      const existingAnointingSet = new Set();
-      if (anointingData.success) {
-        anointingData.applications.forEach(app => {
-          existingAnointingSet.add(`${app.dateOfAnointing}-${app.timeOfAnointing}`);
-        });
-      }
-
-      // Filter out already booked schedules
-      const availableSchedules = anointingSchedules.filter(schedule => {
-        const key = `${schedule.date}-${schedule.time}`;
-        return !existingAnointingSet.has(key);
-      });
-
-      setSchedules(availableSchedules);
+      const scheduleData = await schedulesResponse.json();
+      const anointingData = await anointingsResponse.json();
       
-      // Extract unique dates from available schedules
-      const uniqueDatesSet = new Set();
-      const uniqueDatesArray = [];
-      
-      availableSchedules.forEach(schedule => {
-        if (!uniqueDatesSet.has(schedule.date)) {
-          uniqueDatesSet.add(schedule.date);
-          uniqueDatesArray.push(schedule.date);
+      if (scheduleData.success) {
+        // Filter only anointing schedules
+        const anointingSchedules = scheduleData.schedules.filter(
+          schedule => schedule.sacramentType.toLowerCase() === 'anointing of the sick and viaticum'
+        );
+        
+        // Create a set of booked date-time combinations
+        const existingAnointingSet = new Set();
+        if (anointingData.success) {
+          anointingData.applications.forEach(app => {
+            existingAnointingSet.add(`${app.dateOfAnointing}-${app.timeOfAnointing}`);
+          });
         }
-      });
-      
-      // Sort dates chronologically
-      uniqueDatesArray.sort((a, b) => new Date(a) - new Date(b));
-      
-      setUniqueDates(uniqueDatesArray);
+
+        // Filter out already booked schedules
+        const availableSchedules = anointingSchedules.filter(schedule => {
+          const key = `${schedule.date}-${schedule.time}`;
+          return !existingAnointingSet.has(key);
+        });
+
+        setSchedules(availableSchedules);
+        
+        // Extract unique dates from available schedules
+        const uniqueDatesSet = new Set();
+        const uniqueDatesArray = [];
+        
+        availableSchedules.forEach(schedule => {
+          if (!uniqueDatesSet.has(schedule.date)) {
+            uniqueDatesSet.add(schedule.date);
+            uniqueDatesArray.push(schedule.date);
+          }
+        });
+        
+        // Sort dates chronologically
+        uniqueDatesArray.sort((a, b) => new Date(a) - new Date(b));
+        
+        setUniqueDates(uniqueDatesArray);
+      }
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
     }
-  } catch (error) {
-    console.error('Error fetching schedules:', error);
-  }
-};
+  };
+
   // Fetch priests from parish.php
   const fetchPriests = async () => {
     try {
@@ -554,6 +581,17 @@ const fetchAnointingSchedules = async () => {
       ...prev,
       [field]: value
     }));
+    
+    // Clear spouse fields if marital status changes to Single
+    if (field === 'maritalStatus' && value === 'Single') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        spouseFirstName: '',
+        spouseMiddleName: '',
+        spouseLastName: ''
+      }));
+    }
   };
 
   // Handle date changes to store in yyyy-mm-dd format
@@ -731,190 +769,191 @@ const fetchAnointingSchedules = async () => {
 
   // Add handlers for birth place fields
   const handleBirthBarangayChange = (e) => {
-  const value = e.target.value;
-  const updatedFields = {...birthFields, barangay: value};
-  setBirthFields(updatedFields);
-  updatePlaceOfBirth(updatedFields);
-  
-  if (focusedField === 'birthBarangay') {
-    setSuggestions(prev => ({ 
-      ...prev, 
-      birthBarangay: filterBarangays(value, birthFields.municipality, birthFields.province) 
-    }));
-  }
-};
-
-const handleBirthMunicipalityChange = (e) => {
-  const value = e.target.value;
-  const updatedFields = {...birthFields, municipality: value};
-  setBirthFields(updatedFields);
-  updatePlaceOfBirth(updatedFields);
-  
-  if (focusedField === 'birthMunicipality') {
-    setSuggestions(prev => ({ 
-      ...prev, 
-      birthMunicipality: filterMunicipalities(value, birthFields.province) 
-    }));
-  }
-  
-  // If typing a municipality, check if it has a province
-  if (value && locationIndexes.municipalities) {
-    const municipalityKey = value.toLowerCase();
-    const matchedLocations = locationIndexes.municipalities[municipalityKey];
+    const value = e.target.value;
+    const updatedFields = {...birthFields, barangay: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
     
-    if (matchedLocations && matchedLocations.length > 0 && !birthFields.province) {
-      const newFields = {...updatedFields, province: matchedLocations[0].province};
-      setBirthFields(newFields);
-      updatePlaceOfBirth(newFields);
+    if (focusedField === 'birthBarangay') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthBarangay: filterBarangays(value, birthFields.municipality, birthFields.province) 
+      }));
     }
-  }
-};
+  };
 
-const handleBirthProvinceChange = (e) => {
-  const value = e.target.value;
-  const updatedFields = {...birthFields, province: value};
-  setBirthFields(updatedFields);
-  updatePlaceOfBirth(updatedFields);
-  
-  if (focusedField === 'birthProvince') {
-    setSuggestions(prev => ({ 
-      ...prev, 
-      birthProvince: filterProvinces(value) 
-    }));
-  }
-};
+  const handleBirthMunicipalityChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...birthFields, municipality: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'birthMunicipality') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthMunicipality: filterMunicipalities(value, birthFields.province) 
+      }));
+    }
+    
+    // If typing a municipality, check if it has a province
+    if (value && locationIndexes.municipalities) {
+      const municipalityKey = value.toLowerCase();
+      const matchedLocations = locationIndexes.municipalities[municipalityKey];
+      
+      if (matchedLocations && matchedLocations.length > 0 && !birthFields.province) {
+        const newFields = {...updatedFields, province: matchedLocations[0].province};
+        setBirthFields(newFields);
+        updatePlaceOfBirth(newFields);
+      }
+    }
+  };
+
+  const handleBirthProvinceChange = (e) => {
+    const value = e.target.value;
+    const updatedFields = {...birthFields, province: value};
+    setBirthFields(updatedFields);
+    updatePlaceOfBirth(updatedFields);
+    
+    if (focusedField === 'birthProvince') {
+      setSuggestions(prev => ({ 
+        ...prev, 
+        birthProvince: filterProvinces(value) 
+      }));
+    }
+  };
+
   // Add select handlers for place of birth dropdowns
   const handleSelectBirthBarangay = (barangay) => {
-  // Create a copy with the updated barangay
-  const newFields = {
-    ...birthFields,
-    barangay: barangay
-  };
-  
-  // Update birth fields state
-  setBirthFields(newFields);
-  
-  // Update place of birth with all fields
-  updatePlaceOfBirth(newFields);
-  
-  setFocusedField(null);
-  
-  // Check if this barangay has a specific municipality and province
-  if (locationIndexes.barangays) {
-    const barangayKey = barangay.toLowerCase();
-    const matchedLocations = locationIndexes.barangays[barangayKey];
+    // Create a copy with the updated barangay
+    const newFields = {
+      ...birthFields,
+      barangay: barangay
+    };
     
-    if (matchedLocations && matchedLocations.length > 0) {
-      const foundMunicipality = matchedLocations[0].municipality;
-      const foundProvince = matchedLocations[0].province;
+    // Update birth fields state
+    setBirthFields(newFields);
+    
+    // Update place of birth with all fields
+    updatePlaceOfBirth(newFields);
+    
+    setFocusedField(null);
+    
+    // Check if this barangay has a specific municipality and province
+    if (locationIndexes.barangays) {
+      const barangayKey = barangay.toLowerCase();
+      const matchedLocations = locationIndexes.barangays[barangayKey];
       
-      // Only update municipality and province if they're not already set
-      const finalFields = {
-        ...newFields
-      };
-      
-      let shouldUpdate = false;
-      
-      if (!newFields.municipality && foundMunicipality) {
-        finalFields.municipality = foundMunicipality;
-        shouldUpdate = true;
+      if (matchedLocations && matchedLocations.length > 0) {
+        const foundMunicipality = matchedLocations[0].municipality;
+        const foundProvince = matchedLocations[0].province;
+        
+        // Only update municipality and province if they're not already set
+        const finalFields = {
+          ...newFields
+        };
+        
+        let shouldUpdate = false;
+        
+        if (!newFields.municipality && foundMunicipality) {
+          finalFields.municipality = foundMunicipality;
+          shouldUpdate = true;
+        }
+        
+        if (!newFields.province && foundProvince) {
+          finalFields.province = foundProvince;
+          shouldUpdate = true;
+        }
+        
+        if (shouldUpdate) {
+          // Update the state with the additional fields
+          setBirthFields(finalFields);
+          // Update place of birth with complete information
+          updatePlaceOfBirth(finalFields);
+        }
       }
+    }
+  };
+
+  const handleSelectBirthMunicipality = (municipality) => {
+    // Create a copy with the updated municipality
+    const newFields = {
+      ...birthFields,
+      municipality: municipality
+    };
+    
+    // Update birth fields state
+    setBirthFields(newFields);
+    
+    // Update place of birth with all fields
+    updatePlaceOfBirth(newFields);
+    
+    // Find the province for this municipality
+    if (locationIndexes.municipalities) {
+      const municipalityKey = municipality.toLowerCase();
+      const matchedLocations = locationIndexes.municipalities[municipalityKey];
       
-      if (!newFields.province && foundProvince) {
-        finalFields.province = foundProvince;
-        shouldUpdate = true;
-      }
-      
-      if (shouldUpdate) {
-        // Update the state with the additional fields
+      if (matchedLocations && matchedLocations.length > 0 && !birthFields.province) {
+        const foundProvince = matchedLocations[0].province;
+        
+        // Update with the province
+        const finalFields = {
+          ...newFields,
+          province: foundProvince
+        };
+        
+        // Update the state
         setBirthFields(finalFields);
         // Update place of birth with complete information
         updatePlaceOfBirth(finalFields);
       }
     }
-  }
-};
-  const handleSelectBirthMunicipality = (municipality) => {
-  // Create a copy with the updated municipality
-  const newFields = {
-    ...birthFields,
-    municipality: municipality
-  };
-  
-  // Update birth fields state
-  setBirthFields(newFields);
-  
-  // Update place of birth with all fields
-  updatePlaceOfBirth(newFields);
-  
-  // Find the province for this municipality
-  if (locationIndexes.municipalities) {
-    const municipalityKey = municipality.toLowerCase();
-    const matchedLocations = locationIndexes.municipalities[municipalityKey];
     
-    if (matchedLocations && matchedLocations.length > 0 && !birthFields.province) {
-      const foundProvince = matchedLocations[0].province;
+    setFocusedField(null);
+  };
+
+  const handleSelectBirthProvince = (province) => {
+    // Create a copy with the updated province
+    const newFields = {
+      ...birthFields,
+      province: province
+    };
+    
+    // Update birth fields state
+    setBirthFields(newFields);
+    
+    // Update place of birth with all fields
+    updatePlaceOfBirth(newFields);
+    
+    setFocusedField(null);
+  };
+
+  const updatePlaceOfBirth = (updatedFields) => {
+    // Get the current values, prioritizing the updated fields
+    const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : birthFields.barangay;
+    const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : birthFields.municipality;
+    const province = updatedFields.province !== undefined ? updatedFields.province : birthFields.province;
+    
+    // Build formatted place string with all three components when available
+    let parts = [];
+    if (barangay) parts.push(barangay);
+    if (municipality) parts.push(municipality); 
+    if (province) parts.push(province);
+    
+    const formattedPlace = parts.join(', ');
+    
+    // Only update if we have at least one component
+    if (formattedPlace) {
+      console.log('Updating placeOfBirth to:', formattedPlace); // Debug log
       
-      // Update with the province
-      const finalFields = {
-        ...newFields,
-        province: foundProvince
-      };
-      
-      // Update the state
-      setBirthFields(finalFields);
-      // Update place of birth with complete information
-      updatePlaceOfBirth(finalFields);
+      // Direct state update to ensure it happens immediately
+      setFormData(prevState => ({
+        ...prevState,
+        placeOfBirth: formattedPlace
+      }));
     }
-  }
-  
-  setFocusedField(null);
-};
-
- const handleSelectBirthProvince = (province) => {
-  // Create a copy with the updated province
-  const newFields = {
-    ...birthFields,
-    province: province
   };
-  
-  // Update birth fields state
-  setBirthFields(newFields);
-  
-  // Update place of birth with all fields
-  updatePlaceOfBirth(newFields);
-  
-  setFocusedField(null);
-};
-
-const updatePlaceOfBirth = (updatedFields) => {
-  // Get the current values, prioritizing the updated fields
-  const barangay = updatedFields.barangay !== undefined ? updatedFields.barangay : birthFields.barangay;
-  const municipality = updatedFields.municipality !== undefined ? updatedFields.municipality : birthFields.municipality;
-  const province = updatedFields.province !== undefined ? updatedFields.province : birthFields.province;
-  
-  // Build formatted place string with all three components when available
-  let parts = [];
-  if (barangay) parts.push(barangay);
-  if (municipality) parts.push(municipality); 
-  if (province) parts.push(province);
-  
-  const formattedPlace = parts.join(', ');
-  
-  // Only update if we have at least one component
-  if (formattedPlace) {
-    console.log('Updating placeOfBirth to:', formattedPlace); // Debug log
-    
-    // Direct state update to ensure it happens immediately
-    setFormData(prevState => ({
-      ...prevState,
-      placeOfBirth: formattedPlace
-    }));
-  }
-};
 
   // Updated focus handlers with optimized performance
- // Updated focus handlers with optimized performance
   const handleFocus = (field) => {
     setFocusedField(field);
     
@@ -1128,7 +1167,7 @@ const updatePlaceOfBirth = (updatedFields) => {
     );
   };
 
-  // Add validate form function before the handleSubmit function
+  // UPDATED validate form function with spouse validation
   const validateForm = () => {
     const newErrors = {};
     
@@ -1147,6 +1186,16 @@ const updatePlaceOfBirth = (updatedFields) => {
         newErrors[field] = 'This field is required';
       }
     });
+
+    // Conditional validation for spouse fields - require spouse name if marital status is selected (not Single)
+    if (formData.maritalStatus && ['Married', 'Civil', 'Living Together'].includes(formData.maritalStatus)) {
+      if (!formData.spouseFirstName || formData.spouseFirstName.trim() === '') {
+        newErrors.spouseFirstName = 'Spouse first name is required when marital status is selected';
+      }
+      if (!formData.spouseLastName || formData.spouseLastName.trim() === '') {
+        newErrors.spouseLastName = 'Spouse last name is required when marital status is selected';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -1162,19 +1211,119 @@ const updatePlaceOfBirth = (updatedFields) => {
     }
   };
 
+  // UPDATED handleYes function with better error handling (no clientID needed)
   const handleYes = async () => {
     setShowModal(false);
     setIsLoading(true);
     
     try {
-      // Create formData object for submission
+      // Debug logging - Form data validation
+      console.log('=== FORM SUBMISSION DEBUG ===');
+      console.log('Original Form Data:', formData);
+      
+      // Validate required fields
+      const requiredFields = [
+        'dateOfAnointing', 'timeOfAnointing', 'firstName', 'lastName', 'sex'
+      ];
+      
+      for (const field of requiredFields) {
+        if (!formData[field] || formData[field].toString().trim() === '') {
+          throw new Error(`${field} is required`);
+        }
+      }
+      
+      // Prepare form data with proper type conversion and validation
+      const processedFormData = {
+        // Basic anointing info
+        dateOfAnointing: formData.dateOfAnointing || '',
+        timeOfAnointing: formData.timeOfAnointing || '',
+        priestName: formData.priestName || '',
+        
+        // Sick person info
+        firstName: formData.firstName || '',
+        middleName: formData.middleName || '',
+        lastName: formData.lastName || '',
+        sex: formData.sex || '',
+        age: formData.age ? parseInt(formData.age, 10) || 0 : 0,
+        dateOfBirth: formData.dateOfBirth || '',
+        placeOfBirth: formData.placeOfBirth || '',
+        religion: formData.religion || '',
+        reasonForAnointing: formData.reasonForAnointing || '',
+        
+        // Marital status
+        maritalStatus: formData.maritalStatus || '',
+        yearsMarried: formData.yearsMarried ? parseInt(formData.yearsMarried, 10) || 0 : 0,
+        
+        // Spouse info
+        spouseFirstName: formData.spouseFirstName || '',
+        spouseMiddleName: formData.spouseMiddleName || '',
+        spouseLastName: formData.spouseLastName || '',
+        
+        // Contact person
+        contactFirstName: formData.contactFirstName || '',
+        contactMiddleName: formData.contactMiddleName || '',
+        contactLastName: formData.contactLastName || '',
+        contactRelationship: formData.contactRelationship || '',
+        contactPhone: formData.contactPhone || '',
+        contactEmail: formData.contactEmail || '',
+        
+        // Parents
+        fatherFirstName: formData.fatherFirstName || '',
+        fatherMiddleName: formData.fatherMiddleName || '',
+        fatherLastName: formData.fatherLastName || '',
+        fatherPhone: formData.fatherPhone || '',
+        fatherEmail: formData.fatherEmail || '',
+        
+        motherFirstName: formData.motherFirstName || '',
+        motherMiddleName: formData.motherMiddleName || '',
+        motherLastName: formData.motherLastName || '',
+        motherPhone: formData.motherPhone || '',
+        motherEmail: formData.motherEmail || '',
+        
+        // Location
+        locationType: formData.locationType || 'Hospital',
+        locationName: formData.locationName || '',
+        roomNumber: formData.roomNumber || '',
+        barangay: formData.barangay || '',
+        street: formData.street || '',
+        municipality: formData.municipality || '',
+        province: formData.province || '',
+        locationRegion: formData.locationRegion || '',
+        
+        // Additional info
+        isCritical: Boolean(formData.isCritical),
+        needsViaticum: Boolean(formData.needsViaticum),
+        needsReconciliation: Boolean(formData.needsReconciliation),
+        additionalNotes: formData.additionalNotes || ''
+      };
+      
+      console.log('Processed Form Data:', processedFormData);
+      
+      // Create FormData for submission
       const formDataToSend = new FormData();
       
-      // Add client ID
+      // Add the processed form data as JSON (NO clientID needed)
+      const jsonData = JSON.stringify(processedFormData);
+      console.log('JSON data being sent:', jsonData);
+      formDataToSend.append('anointingData', jsonData);
       
+      // Add file upload status for requirements
+      if (uploadStatus.medical_cert) {
+        formDataToSend.append('medical_cert_status', uploadStatus.medical_cert);
+      }
+      if (uploadStatus.valid_ids) {
+        formDataToSend.append('valid_ids_status', uploadStatus.valid_ids);
+      }
       
-      // Add the form data as JSON
-      formDataToSend.append('anointingData', JSON.stringify(formData));
+      // Add uploaded files if any
+      Object.keys(uploadedFiles).forEach(requirementId => {
+        if (uploadedFiles[requirementId] && uploadedFiles[requirementId].file) {
+          console.log(`Adding file for ${requirementId}:`, uploadedFiles[requirementId].name);
+          formDataToSend.append(`file_${requirementId}`, uploadedFiles[requirementId].file);
+        }
+      });
+      
+      console.log('Submitting to backend...');
       
       // Submit the form
       const response = await fetch('http://parishofdivinemercy.com/backend/anointing_application.php', {
@@ -1182,23 +1331,68 @@ const updatePlaceOfBirth = (updatedFields) => {
         body: formDataToSend
       });
       
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
+      // Get response text first for debugging
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+      
+      // Check if response is ok
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
+      }
+      
+      // Try to parse JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        console.error('Response that failed to parse:', responseText);
+        throw new Error('Invalid response from server. Check server logs for details.');
+      }
+      
+      console.log('Parsed response data:', data);
       setIsLoading(false);
       
       if (data.success) {
-       
+        console.log('✅ Application submitted successfully!');
+        console.log('Anointing ID:', data.anointingID);
+        
+        // Skip email notification since there's no clientID (no email address available)
+        console.log('Skipping email notification - no clientID provided');
+        
+        // Show success and navigate
         setShowSuccessModal(true);
         setTimeout(() => {
-          navigate('/client-appointment');
+          setShowSuccessModal(false);
+          navigate('/secretary-appointment');
         }, 2000);
+        
       } else {
+        console.error('❌ Server returned error:', data.message);
         setErrorMessage(data.message || 'Failed to submit application');
         setShowErrorModal(true);
       }
+      
     } catch (error) {
       setIsLoading(false);
-      console.error('Error submitting form:', error);
-      setErrorMessage('An error occurred while submitting the application');
+      console.error('❌ Error submitting form:', error);
+      
+      let userMessage = 'An error occurred while submitting the application';
+      
+      if (error.message.includes('HTTP error')) {
+        userMessage = 'Server connection error. Please try again.';
+      } else if (error.message.includes('Invalid response')) {
+        userMessage = 'Server error. Please check the console and server logs.';
+      } else if (error.message.includes('required')) {
+        userMessage = error.message;
+      } else if (error.message.includes('Failed to fetch')) {
+        userMessage = 'Network error. Please check your connection.';
+      }
+      
+      setErrorMessage(userMessage);
       setShowErrorModal(true);
     }
   };
@@ -1254,7 +1448,7 @@ const updatePlaceOfBirth = (updatedFields) => {
               <option value="">Select Time</option>
               {filteredTimes.map((time) => (
                 <option key={time} value={time}>
-                  {time}
+                  {formatTimeTo12Hour(time)}
                 </option>
               ))}
             </select>
@@ -1292,7 +1486,7 @@ const updatePlaceOfBirth = (updatedFields) => {
             </div>
           </div>
           <div className="aos-row">
-                 <div className="aos-field">
+            <div className="aos-field">
               <label>Date of Birth <span className="required">*</span></label>
               <input 
                 type="date"
@@ -1322,90 +1516,111 @@ const updatePlaceOfBirth = (updatedFields) => {
               </select>
             </div>
           </div>
- <h3 className="client-sub-title">Status</h3>
-<div className="client-baptismal-row-pms">
-  <div className="client-marital-status">
-                 <label className="client-section-label">Select status by choosing one of the following options:</label>
-    <div className="client-marital-options">
-      <div className="client-pms-label">
-        <input 
-          type="radio" 
-          id="married" 
-          name="maritalStatus"
-          value="Married"
-          checked={formData.maritalStatus === 'Married'}
-          onChange={(e) => handleRadioChange('maritalStatus', e.target.value)}
-        />
-        <label htmlFor="married">Married</label>
-      </div>
-      <div className="client-pms-label">
-        <input 
-          type="radio" 
-          id="civil"
-          name="maritalStatus"
-          value="Civil"
-          checked={formData.maritalStatus === 'Civil'}
-          onChange={(e) => handleRadioChange('maritalStatus', e.target.value)}
-        />
-        <label htmlFor="civil">Civil</label>
-      </div>
-      <div className="client-pms-label">
-        <input 
-          type="radio" 
-          id="living-together"
-          name="maritalStatus"
-          value="Living Together"
-          checked={formData.maritalStatus === 'Living Together'}
-          onChange={(e) => handleRadioChange('maritalStatus', e.target.value)}
-        />
-        <label htmlFor="living-together">Living Together</label>
-      </div>
-    </div>
-  </div>
 
-  <div className="client-years-married">
-    <input 
-      type="text" 
-      className="client-short-input"
-      value={formData.yearsMarried}
-      onChange={(e) => handleInputChange('yearsMarried', e.target.value)}
-    />
-    <label>Number of Years Married</label>
-  </div>
-</div>
+          {/* UPDATED Marital Status Section with Single option */}
+          <h3 className="client-sub-title">Status</h3>
+          <div className="client-baptismal-row-pms">
+            <div className="client-marital-status">
+              <label className="client-section-label">Select status by choosing one of the following options:</label>
+              <div className="client-marital-options">
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="single" 
+                    name="maritalStatus"
+                    value="Single"
+                    checked={formData.maritalStatus === "Single"}
+                    onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="single">Single</label>
+                </div>
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="married" 
+                    name="maritalStatus"
+                    value="Married"
+                    checked={formData.maritalStatus === 'Married'}
+                    onChange={(e) => handleRadioChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="married">Married</label>
+                </div>
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="civil"
+                    name="maritalStatus"
+                    value="Civil"
+                    checked={formData.maritalStatus === 'Civil'}
+                    onChange={(e) => handleRadioChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="civil">Civil</label>
+                </div>
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="living-together"
+                    name="maritalStatus"
+                    value="Living Together"
+                    checked={formData.maritalStatus === 'Living Together'}
+                    onChange={(e) => handleRadioChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="living-together">Living Together</label>
+                </div>
+              </div>
+            </div>
 
-          {/* Spouse Information Section */}
-          <h3 className="aos-sub-title">Spouse Information</h3>
-          <div className="aos-row">
-            <div className="aos-field">
-              <label>Spouse First Name</label>
+            <div className="client-years-married">
               <input 
-                type="text"
-                value={formData.spouseFirstName}
-                onChange={(e) => handleInputChange('spouseFirstName', e.target.value)}
+                type="text" 
+                className="client-short-input"
+                value={formData.yearsMarried}
+                onChange={(e) => handleInputChange('yearsMarried', e.target.value)}
+                placeholder="Enter number"
               />
-            </div>
-            <div className="aos-field">
-              <label>Spouse Middle Name</label>
-              <input 
-                type="text"
-                value={formData.spouseMiddleName}
-                onChange={(e) => handleInputChange('spouseMiddleName', e.target.value)}
-              />
-            </div>
-            <div className="aos-field">
-              <label>Spouse Last Name</label>
-              <input 
-                type="text"
-                value={formData.spouseLastName}
-                onChange={(e) => handleInputChange('spouseLastName', e.target.value)}
-              />
+              <label>Number of Years Married</label>
             </div>
           </div>
 
-        <h3 className="client-sub-title">Place of Birth</h3>
+          {/* UPDATED: Spouse Information Section - Conditionally shown */}
+          {formData.maritalStatus && ['Married', 'Civil', 'Living Together'].includes(formData.maritalStatus) && (
+            <>
+              <h3 className="aos-sub-title">Spouse Information</h3>
+              <div className="aos-row">
+                <div className="aos-field">
+                  <label>Spouse First Name <span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    value={formData.spouseFirstName}
+                    onChange={(e) => handleInputChange('spouseFirstName', e.target.value)}
+                    className={submitted && errors.spouseFirstName ? 'input-error' : ''}
+                  />
+                </div>
+                <div className="aos-field">
+                  <label>Spouse Middle Name</label>
+                  <input 
+                    type="text"
+                    value={formData.spouseMiddleName}
+                    onChange={(e) => handleInputChange('spouseMiddleName', e.target.value)}
+                  />
+                </div>
+                <div className="aos-field">
+                  <label>Spouse Last Name <span className="required">*</span></label>
+                  <input 
+                    type="text"
+                    value={formData.spouseLastName}
+                    onChange={(e) => handleInputChange('spouseLastName', e.target.value)}
+                    className={submitted && errors.spouseLastName ? 'input-error' : ''}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Place of Birth with separated fields */}
+          <h3 className="client-sub-title">Place of Birth</h3>
           <div className="aos-row">
-             <div className="aos-field aos-location-dropdown-container">
+            <div className="aos-field aos-location-dropdown-container">
               <label>Birth Province</label>
               <input 
                 type="text"
@@ -1428,7 +1643,6 @@ const updatePlaceOfBirth = (updatedFields) => {
                 </div>
               )}
             </div>
-           
             <div className="aos-field aos-location-dropdown-container">
               <label>Birth Municipality</label>
               <input 
@@ -1553,107 +1767,109 @@ const updatePlaceOfBirth = (updatedFields) => {
                 onChange={(e) => handleInputChange('contactEmail', e.target.value)}
               />
             </div>
-            </div>
-            <h3 className="aos-sub-title">Father Personal Information</h3>
-<div className="aos-row">
-  <div className="aos-field">
-    <label>First Name <span className="required">*</span></label>
-    <input 
-      type="text" 
-      value={formData.fatherFirstName}
-      onChange={(e) => handleInputChange('fatherFirstName', e.target.value)}
-      className={submitted && errors.fatherFirstName ? 'input-error' : ''}
-    />
-  </div>
-  
-  <div className="aos-field">
-    <label>Middle Name</label>
-    <input 
-      type="text" 
-      value={formData.fatherMiddleName}
-      onChange={(e) => handleInputChange('fatherMiddleName', e.target.value)}
-    />
-  </div>
-  <div className="aos-field">
-    <label>Last Name <span className="required">*</span></label>
-    <input 
-      type="text" 
-      value={formData.fatherLastName}
-      onChange={(e) => handleInputChange('fatherLastName', e.target.value)}
-      className={submitted && errors.fatherLastName ? 'input-error' : ''}
-    />
-  </div>
-</div>
-<div className="aos-row">
-  <div className="aos-field">
-    <label>Phone Number <span className="required">*</span></label>
-    <input 
-      type="text" 
-      value={formData.fatherPhone}
-      onChange={(e) => handleInputChange('fatherPhone', e.target.value)}
-      className={submitted && errors.fatherPhone ? 'input-error' : ''}
-    />
-  </div>
-  <div className="aos-field">
-    <label>Email Address</label>
-    <input 
-      type="email" 
-      value={formData.fatherEmail}
-      onChange={(e) => handleInputChange('fatherEmail', e.target.value)}
-    />
-  </div>
-</div>
+          </div>
 
-{/* Mother Personal Information */}
-<h3 className="aos-sub-title">Mother Personal Information</h3>
-<div className="aos-row">
-  <div className="aos-field">
-    <label>First Name <span className="required">*</span></label>
-    <input 
-      type="text" 
-      value={formData.motherFirstName}
-      onChange={(e) => handleInputChange('motherFirstName', e.target.value)}
-      className={submitted && errors.motherFirstName ? 'input-error' : ''}
-    />
-  </div>
-  <div className="aos-field">
-    <label>Middle Name</label>
-    <input 
-      type="text" 
-      value={formData.motherMiddleName}
-      onChange={(e) => handleInputChange('motherMiddleName', e.target.value)}
-    />
-  </div>
-  <div className="aos-field">
-    <label>Last Name <span className="required">*</span></label>
-    <input 
-      type="text" 
-      value={formData.motherLastName}
-      onChange={(e) => handleInputChange('motherLastName', e.target.value)}
-      className={submitted && errors.motherLastName ? 'input-error' : ''}
-    />
-  </div>
-</div>
-<div className="aos-row">
-  <div className="aos-field">
-    <label>Phone Number <span className="required">*</span></label>
-    <input 
-      type="text" 
-      value={formData.motherPhone}
-      onChange={(e) => handleInputChange('motherPhone', e.target.value)}
-      className={submitted && errors.motherPhone ? 'input-error' : ''}
-    />
-  </div>
-  <div className="aos-field">
-    <label>Email Address</label>
-    <input 
-      type="email" 
-      value={formData.motherEmail}
-      onChange={(e) => handleInputChange('motherEmail', e.target.value)}
-    />
-  </div>
-</div>
-             {/* Location Information */}
+          {/* Father Personal Information */}
+          <h3 className="aos-sub-title">Father Personal Information</h3>
+          <div className="aos-row">
+            <div className="aos-field">
+              <label>First Name <span className="required">*</span></label>
+              <input 
+                type="text" 
+                value={formData.fatherFirstName}
+                onChange={(e) => handleInputChange('fatherFirstName', e.target.value)}
+                className={submitted && errors.fatherFirstName ? 'input-error' : ''}
+              />
+            </div>
+            <div className="aos-field">
+              <label>Middle Name</label>
+              <input 
+                type="text" 
+                value={formData.fatherMiddleName}
+                onChange={(e) => handleInputChange('fatherMiddleName', e.target.value)}
+              />
+            </div>
+            <div className="aos-field">
+              <label>Last Name <span className="required">*</span></label>
+              <input 
+                type="text" 
+                value={formData.fatherLastName}
+                onChange={(e) => handleInputChange('fatherLastName', e.target.value)}
+                className={submitted && errors.fatherLastName ? 'input-error' : ''}
+              />
+            </div>
+          </div>
+          <div className="aos-row">
+            <div className="aos-field">
+              <label>Phone Number <span className="required">*</span></label>
+              <input 
+                type="text" 
+                value={formData.fatherPhone}
+                onChange={(e) => handleInputChange('fatherPhone', e.target.value)}
+                className={submitted && errors.fatherPhone ? 'input-error' : ''}
+              />
+            </div>
+            <div className="aos-field">
+              <label>Email Address</label>
+              <input 
+                type="email" 
+                value={formData.fatherEmail}
+                onChange={(e) => handleInputChange('fatherEmail', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Mother Personal Information */}
+          <h3 className="aos-sub-title">Mother Personal Information</h3>
+          <div className="aos-row">
+            <div className="aos-field">
+              <label>First Name <span className="required">*</span></label>
+              <input 
+                type="text" 
+                value={formData.motherFirstName}
+                onChange={(e) => handleInputChange('motherFirstName', e.target.value)}
+                className={submitted && errors.motherFirstName ? 'input-error' : ''}
+              />
+            </div>
+            <div className="aos-field">
+              <label>Middle Name</label>
+              <input 
+                type="text" 
+                value={formData.motherMiddleName}
+                onChange={(e) => handleInputChange('motherMiddleName', e.target.value)}
+              />
+            </div>
+            <div className="aos-field">
+              <label>Last Name <span className="required">*</span></label>
+              <input 
+                type="text" 
+                value={formData.motherLastName}
+                onChange={(e) => handleInputChange('motherLastName', e.target.value)}
+                className={submitted && errors.motherLastName ? 'input-error' : ''}
+              />
+            </div>
+          </div>
+          <div className="aos-row">
+            <div className="aos-field">
+              <label>Phone Number <span className="required">*</span></label>
+              <input 
+                type="text" 
+                value={formData.motherPhone}
+                onChange={(e) => handleInputChange('motherPhone', e.target.value)}
+                className={submitted && errors.motherPhone ? 'input-error' : ''}
+              />
+            </div>
+            <div className="aos-field">
+              <label>Email Address</label>
+              <input 
+                type="email" 
+                value={formData.motherEmail}
+                onChange={(e) => handleInputChange('motherEmail', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Location Information */}
           <h3 className="aos-sub-title">Location Information</h3>
           <div className="aos-row">
             <div className="aos-field">
@@ -1690,10 +1906,9 @@ const updatePlaceOfBirth = (updatedFields) => {
             </div>
           </div>
           
-
           {/* Address Fields */}
           <div className="aos-row aos-address-row">
-               <div className="aos-field aos-location-dropdown-container">
+            <div className="aos-field aos-location-dropdown-container">
               <label>Province <span className="required">*</span></label>
               <input 
                 type="text"
@@ -1717,7 +1932,7 @@ const updatePlaceOfBirth = (updatedFields) => {
                 </div>
               )}
             </div>
-              <div className="aos-field aos-location-dropdown-container">
+            <div className="aos-field aos-location-dropdown-container">
               <label>Municipality <span className="required">*</span></label>
               <input 
                 type="text"
@@ -1741,7 +1956,7 @@ const updatePlaceOfBirth = (updatedFields) => {
                 </div>
               )}
             </div>
-              <div className="aos-field aos-location-dropdown-container">
+            <div className="aos-field aos-location-dropdown-container">
               <label>Barangay <span className="required">*</span></label>
               <input 
                 type="text"
@@ -1765,7 +1980,7 @@ const updatePlaceOfBirth = (updatedFields) => {
                 </div>
               )}
             </div>
-          <div className="aos-field">
+            <div className="aos-field">
               <label>Street <span className="required">*</span></label>
               <input 
                 type="text"
@@ -1774,7 +1989,6 @@ const updatePlaceOfBirth = (updatedFields) => {
                 className={submitted && errors.street ? 'input-error' : ''}
               />
             </div>
-        
             <div className="aos-field aos-location-dropdown-container">
               <label>Region</label>
               <input 

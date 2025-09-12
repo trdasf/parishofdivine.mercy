@@ -2,9 +2,22 @@
   padding: 20px 50px;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  font-family: 'Roboto', sans-serif;
+}
+
+.appointment-container-ca::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.appointment-container-ca::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.appointment-container-ca::-webkit-scrollbar-track {
+  background-color: #ffffff;
 }
 
 .title-ca {
@@ -21,11 +34,13 @@
   justify-content: space-between;
   margin: 20px 0;
   align-items: center;
+  gap: 20px;
 }
 
 .search-bar-ca {
   position: relative;
-  width: 650px;
+  flex: 1;
+  max-width: 650px;
 }
 
 .search-bar-ca input {
@@ -41,6 +56,10 @@
   letter-spacing: 1px;
 }
 
+.search-bar-ca input::placeholder {
+  font-size: 18px;
+}
+
 .search-icon-ca {
   position: absolute;
   right: 10px;
@@ -52,6 +71,7 @@
 .filter-pdf-container-ca {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .filter-select-ca {
@@ -79,45 +99,50 @@
   font-family: Roboto;
   letter-spacing: 1px;
   width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .pdf-btn-ca:hover {
-  background: #d19a15;
-  border-color: #d19a15;
+  background: #8c4f14;
+  border-color: #8c4f14;
 }
 
-/* Table container with scroll */
-.table-container {
-  flex: 1;
-  overflow-y: auto;
+/* ===== ENHANCED SCROLLABLE TABLE WRAPPER ===== */
+.appointment-table-wrapper-ca {
+  overflow-x: auto;
+  overflow-y: visible;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
   margin-bottom: 20px;
-  position: relative;
 }
 
-/* For Firefox */
-.table-container {
-  scrollbar-width: thin;
-  scrollbar-color: #dbdbdb #ffffff;
+.appointment-table-wrapper-ca::-webkit-scrollbar {
+  height: 8px;
+  background-color: #f5f5f5;
 }
 
-/* For Chrome, Edge, and Safari */
-.table-container::-webkit-scrollbar {
-  width: 5px;
+.appointment-table-wrapper-ca::-webkit-scrollbar-thumb {
+  background-color: #b3701f;
+  border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-track {
-  background: #ffffff;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background-color: #dbdbdb;
-  border-radius: 5px;
+.appointment-table-wrapper-ca::-webkit-scrollbar-track {
+  background-color: #f5f5f5;
+  border-radius: 4px;
 }
 
 .appointment-table-ca {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 1px;
+  border-spacing: 0;
+  min-width: 800px; /* Ensures horizontal scroll on small screens */
 }
 
 .appointment-table-ca thead {
@@ -130,7 +155,6 @@
   background: #fff7df;
   font-family: Roboto;
   font-size: 14px;
-  padding: 20px;
 }
 
 .appointment-table-ca thead tr th:first-child {
@@ -143,9 +167,10 @@
 
 .appointment-table-ca th,
 .appointment-table-ca td {
-  padding: 10px;
-  border: 1px solid #ccc;
+  padding: 12px 15px;
   text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #ececec;
 }
 
 .appointment-table-ca th {
@@ -154,7 +179,13 @@
   font-family: Roboto;
   font-weight: 900;
   font-size: 15px;
-  border: none;
+  border-right: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+}
+
+.appointment-table-ca th:last-child {
+  border-right: none;
 }
 
 .appointment-table-ca td {
@@ -163,16 +194,32 @@
   font-family: Roboto;
   font-weight: 500;
   font-size: 14px;
-  border: 1px solid #ececec;
+  border-right: 1px solid #f0f0f0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .appointment-table-ca td:last-child {
   text-align: center;
   color: #b3701f;
+  border-right: none;
 }
 
-.appointment-table-ca tbody tr {
-  border-top: 0.1px solid #e7e7e7;
+.appointment-table-ca tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.appointment-table-ca tbody tr:hover td {
+  background-color: #f8f9fa;
+}
+
+.appointment-table-ca tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+.appointment-table-ca tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
 }
 
 .ca-details {
@@ -186,46 +233,90 @@
   color: #b3701f;
   border: none;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .ca-details:hover {
   border: 1px solid #b3701f;
-  background-color: #e7e7e7;
+  background-color: #f8f9fa;
   color: #b3701f;
+  text-decoration: none;
 }
 
-.total-count-ca {
-  position: absolute;
-  bottom: 30px;
-  right: 60px;
-  font-weight: 900;
-  color: #333;
-  padding: 15px 20px;
-  background: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  font-family: Roboto;
-  font-size: 35px;
+/* Enhanced loading and error states */
+.loading-container-ca,
+.error-container-ca {
+  text-align: center;
+  padding: 30px;
+  font-size: 16px;
+  color: #666;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin: 20px 0;
 }
 
-.total-count-ca::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30px;
-  height: 100%;
-  background: linear-gradient(to bottom, #b3701f, #d19a15);
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+.error-container-ca {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
 }
 
-.total-ca {
-  color: #b3701f;
-  font-size: 30px;
-  font-weight: 900;
-  font-family: montserrat;
+.no-data-ca {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
+}
+
+/* Enhanced status styling */
+.status-pending {
+  background-color: #ffefd5;
+  color: #cc7000;
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.status-approved {
+  background-color: #e6ffef;
+  color: #00994d;
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.status-rejected {
+  background-color: #ffe6e6;
+  color: #cc0000;
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.status-completed {
+  background-color: #e6f2ff;
+  color: #0066cc;
+  padding: 4px 8px;
+  border-radius: 15px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
+  font-size: 12px;
 }
 
 /* Modal overlay */
@@ -280,11 +371,11 @@
 }
 
 .close-modal-btn-ca:hover {
-  color: #d19a15;
+  color: #8c4f14;
 }
 
 .sacrament-options-ca {
-  margin: 20px 0;
+  padding: 20px 0;
   width: 100%;
 }
 
@@ -322,42 +413,20 @@
 }
 
 .sacrament-option-btn-ca:hover {
-  background-color: #d19a15;
+  background-color: #8c4f14;
   color: #fff;
   border: 1px solid #b3701f;
 }
 
-/* In your CSS */
 .custom-hr {
   border: none;
   height: 2px;
-  background: linear-gradient(to right, #710808, #ffcccc);
+  background: linear-gradient(to right, #b3701f, #8c4f14);
   width: 100%;
-  margin: 20px auto;
+  margin: 20px 0;
 }
 
-.loading-indicator {
-  text-align: center;
-  padding: 30px;
-  font-family: Roboto;
-  font-size: 18px;
-  color: #573901;
-  background-color: #fff7df;
-  border-radius: 8px;
-  margin-top: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.no-appointments {
-  text-align: center;
-  padding: 20px;
-  font-family: Roboto;
-  font-size: 16px;
-  color: #666;
-  font-style: italic;
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
+/* ===== ENHANCED RESPONSIVE DESIGN ===== */
 
 /* Small Laptop (1024px - 1279px) */
 @media screen and (max-width: 1280px) {
@@ -371,12 +440,16 @@
   }
   
   .search-bar-ca {
-    width: 450px;
+    max-width: 450px;
   }
   
   .search-bar-ca input {
     font-size: 16px;
-    padding: 8px 35px 8px 10px;
+    padding: 8px 30px 8px 8px;
+  }
+  
+  .search-bar-ca input::placeholder {
+    font-size: 14px;
   }
   
   .filter-select-ca {
@@ -391,14 +464,19 @@
     width: 90px;
   }
   
+  .appointment-table-ca {
+    min-width: 700px;
+  }
+  
   .appointment-table-ca th {
     font-size: 13px;
-    padding: 8px;
+    padding: 10px 12px;
   }
   
   .appointment-table-ca td {
     font-size: 12px;
-    padding: 8px;
+    padding: 10px 12px;
+    max-width: 150px;
   }
   
   .sacrament-modal-ca {
@@ -438,12 +516,16 @@
   }
   
   .search-bar-ca {
-    width: 350px;
+    max-width: 350px;
   }
   
   .search-bar-ca input {
     font-size: 14px;
-    padding: 8px 35px 8px 8px;
+    padding: 8px 25px 8px 8px;
+  }
+  
+  .search-bar-ca input::placeholder {
+    font-size: 14px;
   }
   
   .filter-pdf-container-ca {
@@ -462,23 +544,24 @@
     width: 80px;
   }
   
+  .appointment-table-ca {
+    min-width: 650px;
+  }
+  
   .appointment-table-ca th {
     font-size: 12px;
-    padding: 6px;
+    padding: 8px 10px;
   }
   
   .appointment-table-ca td {
     font-size: 11px;
-    padding: 6px;
+    padding: 8px 10px;
     max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   
   .ca-details {
     font-size: 11px;
-    padding: 3px 6px;
+    padding: 4px 8px;
   }
   
   .sacrament-modal-ca {
@@ -512,14 +595,17 @@
     margin-bottom: 15px;
   }
   
-  
   .search-bar-ca {
-    width: 100%;
+    max-width: 100%;
   }
   
   .search-bar-ca input {
     font-size: 14px;
-    padding: 6px 35px 6px 8px;
+    padding: 6px 25px 6px 6px;
+  }
+  
+  .search-bar-ca input::placeholder {
+    font-size: 12px;
   }
   
   .filter-pdf-container-ca {
@@ -540,11 +626,12 @@
   
   .appointment-table-ca {
     font-size: 10px;
+    min-width: 600px;
   }
   
   .appointment-table-ca th,
   .appointment-table-ca td {
-    padding: 8px;
+    padding: 6px 8px;
     font-size: 10px;
   }
   
@@ -554,7 +641,7 @@
   
   .ca-details {
     font-size: 10px;
-    padding: 2px 4px;
+    padding: 4px 6px;
   }
   
   .sacrament-modal-ca {
@@ -597,7 +684,11 @@
   
   .search-bar-ca input {
     font-size: 12px;
-    padding: 5px 30px 5px 6px;
+    padding: 5px 20px 5px 5px;
+  }
+  
+  .search-bar-ca input::placeholder {
+    font-size: 10px;
   }
   
   .search-icon-ca {
@@ -623,13 +714,13 @@
   
   .appointment-table-ca {
     font-size: 9px;
+    min-width: 550px;
   }
   
   .appointment-table-ca th,
   .appointment-table-ca td {
-    padding: 8px;
+    padding: 5px 6px;
     font-size: 8px;
-    white-space: nowrap;
   }
   
   .appointment-table-ca td {
@@ -638,7 +729,7 @@
   
   .ca-details {
     font-size: 8px;
-    padding: 1px 2px;
+    padding: 2px 4px;
   }
   
   .sacrament-modal-ca {
@@ -672,9 +763,23 @@
     margin-bottom: 8px;
   }
   
+  .appointment-actions-ca {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  
+  .search-bar-ca {
+    max-width: 100%;
+  }
+  
   .search-bar-ca input {
     font-size: 11px;
-    padding: 4px 25px 4px 5px;
+    padding: 4px 18px 4px 4px;
+  }
+  
+  .search-bar-ca input::placeholder {
+    font-size: 8px;
   }
   
   .search-icon-ca {
@@ -683,7 +788,8 @@
   }
   
   .filter-pdf-container-ca {
-    gap: 2px;
+    gap: 5px;
+    justify-content: center;
   }
   
   .filter-select-ca {
@@ -700,11 +806,12 @@
   
   .appointment-table-ca {
     font-size: 8px;
+    min-width: 500px;
   }
   
   .appointment-table-ca th,
   .appointment-table-ca td {
-    padding: 8px;
+    padding: 4px 5px;
     font-size: 7px;
   }
   
@@ -714,7 +821,7 @@
   
   .ca-details {
     font-size: 7px;
-    padding: 1px;
+    padding: 1px 2px;
   }
   
   .sacrament-modal-ca {
@@ -739,30 +846,15 @@
     font-size: 10px;
     padding: 8px 4px;
   }
-}
-
-/* Add overflow handling for mobile tables */
-@media screen and (max-width: 767px) {
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  
+  .loading-container-ca,
+  .error-container-ca {
+    padding: 15px;
+    font-size: 12px;
   }
   
-  .table-container::-webkit-scrollbar {
-    height: 3px;
-  }
-  
-  .table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-  }
-  
-  .table-container::-webkit-scrollbar-thumb {
-    background: #dbdbdb;
-    border-radius: 3px;
-  }
-  
-  .table-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  .no-data-ca {
+    padding: 10px;
+    font-size: 10px;
   }
 }

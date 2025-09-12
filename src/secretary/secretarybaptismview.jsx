@@ -31,6 +31,33 @@ const SecretaryBaptismView = () => {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
 
+  // Function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    
+    try {
+      // Handle time strings that might have seconds
+      const timeParts = timeString.split(':');
+      let hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1];
+      
+      // Determine AM or PM
+      const period = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      if (hours === 0) {
+        hours = 12; // Midnight case
+      } else if (hours > 12) {
+        hours = hours - 12;
+      }
+      
+      return `${hours}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeString; // Return original string if formatting fails
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (baptismID)
     const baptismID = location.state?.baptismID;
@@ -784,7 +811,7 @@ const handleConfirmApproval = async () => {
             <div className="secretary-confirm-icon">?</div>
             <p>Are you sure you want to approve this baptism appointment?</p>
             <p>Date: {appointmentDate}</p>
-            <p>Time: {appointmentTime}</p>
+            <p>Time: {formatTime(appointmentTime)}</p>
             <p>Priest: {selectedPriest}</p>
             
             <div className="secretary-confirm-buttons">
@@ -883,7 +910,7 @@ const handleConfirmApproval = async () => {
           
           <div className="secretary-baptismal-view-field-time">
             <label>Time of Appointment:</label>
-            {renderReadOnlyField(baptismData.time)}
+            {renderReadOnlyField(formatTime(baptismData.time))}
           </div>
         </div>
         </div>

@@ -6,7 +6,7 @@ import "../../client/clientconfirmation.css";
 
 const Confirmation = () => {
    const location = useLocation();
-
+   const navigate = useNavigate();
 
   // Form state
  const [formData, setFormData] = useState({
@@ -110,6 +110,22 @@ const Confirmation = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [validationErrorRef, setValidationErrorRef] = useState(null);
+
+  // Time formatting function
+  const formatTimeTo12Hour = (time24) => {
+    if (!time24) return '';
+    
+    // Split the time into hours and minutes
+    const [hours, minutes] = time24.split(':');
+    const hour24 = parseInt(hours, 10);
+    const minute = minutes;
+    
+    // Convert to 12-hour format
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const period = hour24 >= 12 ? 'PM' : 'AM';
+    
+    return `${hour12}:${minute} ${period}`;
+  };
 
   const fetchLocations = async () => {
     try {
@@ -1221,7 +1237,9 @@ const handleSubmit = async () => {
            >
              <option value="">Select Time</option>
              {filteredTimes.map(time => (
-               <option key={time} value={time}>{time}</option>
+               <option key={time} value={time}>
+                 {formatTimeTo12Hour(time)}
+               </option>
              ))}
            </select>
          </div>

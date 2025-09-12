@@ -43,6 +43,54 @@ const ClientMarriageView = () => {
     }
   };
 
+  // Function to convert 24-hour time to 12-hour format
+  const formatTimeTo12Hour = (time24) => {
+    if (!time24) return 'N/A';
+    
+    try {
+      // Handle different time formats that might come from backend
+      let timeString = time24.toString();
+      
+      // If it's in HH:MM:SS format, extract just HH:MM
+      if (timeString.includes(':')) {
+        const parts = timeString.split(':');
+        timeString = `${parts[0]}:${parts[1]}`;
+      }
+      
+      // Create a date object with the time
+      const [hours, minutes] = timeString.split(':');
+      const date = new Date();
+      date.setHours(parseInt(hours, 10));
+      date.setMinutes(parseInt(minutes, 10));
+      
+      // Format to 12-hour time
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return time24; // Return original if formatting fails
+    }
+  };
+
+  // Function to format date to readable format
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString; // Return original if formatting fails
+    }
+  };
+
   // Function to render read-only input field
   const renderReadOnlyField = (value) => {
     return <div className="client-view-value">{value || "N/A"}</div>;
@@ -110,11 +158,11 @@ const ClientMarriageView = () => {
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Date of Appointment:</label>
-                {renderReadOnlyField(marriage.date)}
+                {renderReadOnlyField(formatDate(marriage.date))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Time of Appointment:</label>
-                {renderReadOnlyField(marriage.time)}
+                {renderReadOnlyField(formatTimeTo12Hour(marriage.time))}
               </div>
             </div>
           </div>
@@ -145,7 +193,7 @@ const ClientMarriageView = () => {
               </div>
               <div className="client-marriage-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(marriage.groom_dateOfBirth)}
+                {renderReadOnlyField(formatDate(marriage.groom_dateOfBirth))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Civil Status:</label>
@@ -159,7 +207,7 @@ const ClientMarriageView = () => {
               </div>
               <div className="client-marriage-view-field">
                 <label>Date of Baptism:</label>
-                {renderReadOnlyField(marriage.groom_dateOfBaptism)}
+                {renderReadOnlyField(formatDate(marriage.groom_dateOfBaptism))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Church of Baptism:</label>
@@ -227,7 +275,7 @@ const ClientMarriageView = () => {
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(groomFather?.dateOfBirth)}
+                {renderReadOnlyField(formatDate(groomFather?.dateOfBirth))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Age:</label>
@@ -262,7 +310,7 @@ const ClientMarriageView = () => {
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(groomMother?.dateOfBirth)}
+                {renderReadOnlyField(formatDate(groomMother?.dateOfBirth))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Age:</label>
@@ -301,7 +349,7 @@ const ClientMarriageView = () => {
               </div>
               <div className="client-marriage-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(marriage.bride_dateOfBirth)}
+                {renderReadOnlyField(formatDate(marriage.bride_dateOfBirth))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Civil Status:</label>
@@ -315,7 +363,7 @@ const ClientMarriageView = () => {
               </div>
               <div className="client-marriage-view-field">
                 <label>Date of Baptism:</label>
-                {renderReadOnlyField(marriage.bride_dateOfBaptism)}
+                {renderReadOnlyField(formatDate(marriage.bride_dateOfBaptism))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Church of Baptism:</label>
@@ -383,7 +431,7 @@ const ClientMarriageView = () => {
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(brideFather?.dateOfBirth)}
+                {renderReadOnlyField(formatDate(brideFather?.dateOfBirth))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Age:</label>
@@ -418,7 +466,7 @@ const ClientMarriageView = () => {
             <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(brideMother?.dateOfBirth)}
+                {renderReadOnlyField(formatDate(brideMother?.dateOfBirth))}
               </div>
               <div className="client-marriage-view-field">
                 <label>Age:</label>
@@ -456,7 +504,7 @@ const ClientMarriageView = () => {
               <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                   <label>Date of Birth:</label>
-                  {renderReadOnlyField(firstWitness?.dateOfBirth)}
+                  {renderReadOnlyField(formatDate(firstWitness?.dateOfBirth))}
                 </div>
               <div className="client-marriage-view-field">
                   <label>Age:</label>
@@ -505,7 +553,7 @@ const ClientMarriageView = () => {
               <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                   <label>Date of Birth:</label>
-                  {renderReadOnlyField(secondWitness?.dateOfBirth)}
+                  {renderReadOnlyField(formatDate(secondWitness?.dateOfBirth))}
                 </div>
                 <div className="client-marriage-view-field">
                   <label>Age:</label>

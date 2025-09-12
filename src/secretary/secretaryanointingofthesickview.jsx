@@ -142,6 +142,9 @@ const SecretaryAnointingOfTheSickView = () => {
     const { 
       anointing = {}, 
       contact = {}, 
+      father = {},
+      mother = {},
+      spouse = {},
       locationInfo = {}, 
       additionalInfo = {}, 
       requirements = {} 
@@ -149,10 +152,15 @@ const SecretaryAnointingOfTheSickView = () => {
     
     // Log the structure to debug
     console.log("API Response Data:", data);
+    console.log("Anointing data:", anointing);
+    console.log("Father data:", father);
+    console.log("Mother data:", mother);
+    console.log("Spouse data:", spouse);
   
     return {
+      // Use formatted time from backend (12-hour format)
       date: anointing.dateOfAnointing,
-      time: anointing.timeOfAnointing,
+      time: anointing.timeOfAnointingFormatted || anointing.timeOfAnointing,
       priest: anointing.priestName,
       status: anointing.status,
       anointingID: anointing.anointingID,
@@ -168,48 +176,64 @@ const SecretaryAnointingOfTheSickView = () => {
       religion: anointing.religion,
       reasonForAnointing: anointing.reasonForAnointing,
       
-      // Civil Status and Spouse Information
-      maritalStatus: anointing.maritalStatus || '',
-      yearsMarried: anointing.yearsMarried || '',
-      spouseFirstName: anointing.spouseFirstName || '',
-      spouseMiddleName: anointing.spouseMiddleName || '',
-      spouseLastName: anointing.spouseLastName || '',
+      // Civil Status and Marriage Information
+      maritalStatus: anointing.marital_status || '',
+      yearsMarried: anointing.years_married || '',
       
-      // Contact Person Information - using the 'contact' field from API
-      contactFirstName: contact.contactFirstName || '',
-      contactMiddleName: contact.contactMiddleName || '',
-      contactLastName: contact.contactLastName || '',
-      contactRelationship: contact.contactRelationship || '',
-      contactPhone: contact.contactPhone || '',
-      contactEmail: contact.contactEmail || '',
+      // Spouse Information - handle potential null/undefined spouse object
+      spouseFirstName: spouse?.spouse_firstName || '',
+      spouseMiddleName: spouse?.spouse_middleName || '',
+      spouseLastName: spouse?.spouse_lastName || '',
       
-      // Location Information - using the 'locationInfo' field from API
-      locationType: locationInfo.locationType || '',
-      locationName: locationInfo.locationName || '',
-      roomNumber: locationInfo.roomNumber || '',
-      barangay: locationInfo.barangay || '',
-      street: locationInfo.street || '',
-      municipality: locationInfo.municipality || '',
-      province: locationInfo.province || '',
-      locationRegion: locationInfo.locationRegion || '',
+      // Contact Person Information
+      contactFirstName: contact?.contactFirstName || '',
+      contactMiddleName: contact?.contactMiddleName || '',
+      contactLastName: contact?.contactLastName || '',
+      contactRelationship: contact?.contactRelationship || '',
+      contactPhone: contact?.contactPhone || '',
+      contactEmail: contact?.contactEmail || '',
+      
+      // Father Information - handle potential null/undefined father object
+      fatherFirstName: father?.father_firstName || '',
+      fatherMiddleName: father?.father_middleName || '',
+      fatherLastName: father?.father_lastName || '',
+      fatherPhone: father?.father_phone || '',
+      fatherEmail: father?.father_email || '',
+      
+      // Mother Information - handle potential null/undefined mother object
+      motherFirstName: mother?.mother_firstName || '',
+      motherMiddleName: mother?.mother_middleName || '',
+      motherLastName: mother?.mother_lastName || '',
+      motherPhone: mother?.mother_phone || '',
+      motherEmail: mother?.mother_email || '',
+      
+      // Location Information
+      locationType: locationInfo?.locationType || '',
+      locationName: locationInfo?.locationName || '',
+      roomNumber: locationInfo?.roomNumber || '',
+      barangay: locationInfo?.barangay || '',
+      street: locationInfo?.street || '',
+      municipality: locationInfo?.municipality || '',
+      province: locationInfo?.province || '',
+      locationRegion: locationInfo?.locationRegion || '',
       
       // Additional Information
-      isCritical: additionalInfo.isCritical === 1,
-      needsViaticum: additionalInfo.needsViaticum === 1,
-      needsReconciliation: additionalInfo.needsReconciliation === 1, 
-      additionalNotes: additionalInfo.additionalNotes || '',
+      isCritical: additionalInfo?.isCritical === 1,
+      needsViaticum: additionalInfo?.needsViaticum === 1,
+      needsReconciliation: additionalInfo?.needsReconciliation === 1, 
+      additionalNotes: additionalInfo?.additionalNotes || '',
       
       // Requirements
       requirements: {
         medical_cert: {
-          submitted: requirements.medical_cert_status === 'Submitted',
-          fileName: requirements.medical_cert ? requirements.medical_cert.split('/').pop() : 'N/A',
-          status: requirements.medical_cert_status || 'Not Submitted'
+          submitted: requirements?.medical_cert_status === 'Submitted',
+          fileName: requirements?.medical_cert ? requirements.medical_cert.split('/').pop() : 'N/A',
+          status: requirements?.medical_cert_status || 'Not Submitted'
         },
         valid_ids: {
-          submitted: requirements.valid_ids_status === 'Submitted',
-          fileName: requirements.valid_ids ? requirements.valid_ids.split('/').pop() : 'N/A',
-          status: requirements.valid_ids_status || 'Not Submitted'
+          submitted: requirements?.valid_ids_status === 'Submitted',
+          fileName: requirements?.valid_ids ? requirements.valid_ids.split('/').pop() : 'N/A',
+          status: requirements?.valid_ids_status || 'Not Submitted'
         }
       }
     };
@@ -360,6 +384,7 @@ const SecretaryAnointingOfTheSickView = () => {
     setShowSuccessModal(true);
   }
 };
+
   // Handle cancel action
   const handleCancel = () => {
     // Reset the status to previous value or redirect
@@ -390,6 +415,20 @@ const SecretaryAnointingOfTheSickView = () => {
 
   // Function to render spouse name
   const renderSpouseName = (firstName, middleName, lastName) => {
+    const nameParts = [firstName, middleName, lastName].filter(part => part && part.trim() !== '');
+    const fullName = nameParts.length > 0 ? nameParts.join(' ') : '';
+    return renderReadOnlyField(fullName);
+  };
+
+  // Function to render father name
+  const renderFatherName = (firstName, middleName, lastName) => {
+    const nameParts = [firstName, middleName, lastName].filter(part => part && part.trim() !== '');
+    const fullName = nameParts.length > 0 ? nameParts.join(' ') : '';
+    return renderReadOnlyField(fullName);
+  };
+
+  // Function to render mother name
+  const renderMotherName = (firstName, middleName, lastName) => {
     const nameParts = [firstName, middleName, lastName].filter(part => part && part.trim() !== '');
     const fullName = nameParts.length > 0 ? nameParts.join(' ') : '';
     return renderReadOnlyField(fullName);
@@ -758,6 +797,53 @@ const SecretaryAnointingOfTheSickView = () => {
             </div>
           </div>
         </div>
+
+        {/* Father Personal Information Section */}
+        <div className="secretary-anointing-view-bypart">
+          <h3 className="secretary-anointing-view-sub-title">Father Personal Information</h3>
+          <div className="secretary-anointing-view-info-card">
+            <div className="secretary-anointing-view-row">
+              <div className="secretary-anointing-view-field-wide">
+                <label>Father's Full Name:</label>
+                {renderFatherName(anointingData.fatherFirstName, anointingData.fatherMiddleName, anointingData.fatherLastName)}
+              </div>
+            </div>
+            <div className="secretary-anointing-view-row">
+              <div className="secretary-anointing-view-field">
+                <label>Father's Phone Number:</label>
+                {renderReadOnlyField(anointingData.fatherPhone)}
+              </div>
+              <div className="secretary-anointing-view-field">
+                <label>Father's Email Address:</label>
+                {renderReadOnlyField(anointingData.fatherEmail)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mother Personal Information Section */}
+        <div className="secretary-anointing-view-bypart">
+          <h3 className="secretary-anointing-view-sub-title">Mother Personal Information</h3>
+          <div className="secretary-anointing-view-info-card">
+            <div className="secretary-anointing-view-row">
+              <div className="secretary-anointing-view-field-wide">
+                <label>Mother's Full Name:</label>
+                {renderMotherName(anointingData.motherFirstName, anointingData.motherMiddleName, anointingData.motherLastName)}
+              </div>
+            </div>
+            <div className="secretary-anointing-view-row">
+              <div className="secretary-anointing-view-field">
+                <label>Mother's Phone Number:</label>
+                {renderReadOnlyField(anointingData.motherPhone)}
+              </div>
+              <div className="secretary-anointing-view-field">
+                <label>Mother's Email Address:</label>
+                {renderReadOnlyField(anointingData.motherEmail)}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Location Information */}
         <div className="secretary-anointing-view-bypart">
           <h3 className="secretary-anointing-view-sub-title">Location Information</h3>

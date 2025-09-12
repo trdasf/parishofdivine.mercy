@@ -10,10 +10,37 @@ const ClientAnointingOfTheSickView = () => {
   const [anointingData, setAnointingData] = useState(null);
   const [error, setError] = useState(null);
 
+  // Helper function to format date to "December 23, 2025" format
+  const formatDate = (dateString) => {
+    if (!dateString || dateString === 'N/A') return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if invalid date
+      }
+      
+      // Format to "Month Day, Year"
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString; // Return original if formatting fails
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (anointingID and clientID)
     const anointingID = location.state?.anointingID;
     const clientID = location.state?.clientID;
+
+    console.log('Received anointingID:', anointingID);
+    console.log('Received clientID:', clientID);
 
     if (!anointingID || !clientID) {
       setError("Missing anointing information. Please try again.");
@@ -27,18 +54,30 @@ const ClientAnointingOfTheSickView = () => {
 
   const fetchAnointingDetails = async (anointingID) => {
     try {
+      console.log('Fetching anointing details for ID:', anointingID);
       const response = await fetch(`https://parishofdivinemercy.com/backend/fetch_anointing_details.php?anointingID=${anointingID}`);
-      const data = await response.json();
+      
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+      
+      const data = JSON.parse(responseText);
+      console.log('Parsed data:', data);
       
       if (data.success) {
         // Initialize empty objects for any missing data to prevent undefined errors
         const safeData = {
           anointing: data.data.anointing || {},
           contact: data.data.contact || {},
+          father: data.data.father || {},
+          mother: data.data.mother || {},
+          spouse: data.data.spouse || {},
           locationInfo: data.data.locationInfo || {},
           additionalInfo: data.data.additionalInfo || {},
           requirements: data.data.requirements || {}
         };
+        
+        console.log('Safe data structure:', safeData);
         setAnointingData(safeData);
       } else {
         setError(data.message || "Failed to fetch anointing details");
@@ -53,31 +92,15 @@ const ClientAnointingOfTheSickView = () => {
 
   // Function to render read-only input field
   const renderReadOnlyField = (value) => {
-    return <div className="client-anointing-view-value">{value || "N/A"}</div>;
+    const displayValue = value !== null && value !== undefined && value !== '' ? value : "N/A";
+    return <div className="client-anointing-view-value">{displayValue}</div>;
   };
 
-  // Function to render spouse name
-  const renderSpouseName = (firstName, middleName, lastName) => {
+  // Function to render full name from first, middle, last
+  const renderFullName = (firstName, middleName, lastName) => {
     const nameParts = [firstName, middleName, lastName].filter(part => part && part.trim() !== '');
     const fullName = nameParts.length > 0 ? nameParts.join(' ') : '';
     return renderReadOnlyField(fullName);
-  };
-
-  // Function to render document status
-  const renderDocumentStatus = (status, filePath) => {
-    const isSubmitted = status === 'Submitted';
-    let displayFileName = '';
-    
-    if (filePath && isSubmitted) {
-      // Extract the filename from the path if necessary
-      displayFileName = filePath.includes('/') ? filePath.split('/').pop() : filePath;
-    }
-    
-    return (
-      <div className={`client-anointing-view-status ${isSubmitted ? 'client-anointing-view-submitted' : 'client-anointing-view-not-submitted'}`}>
-        {isSubmitted ? `${status}: ${displayFileName || ''}` : status || "Not Submitted"}
-      </div>
-    );
   };
 
   if (loading) {
@@ -114,10 +137,25 @@ const ClientAnointingOfTheSickView = () => {
   const { 
     anointing = {}, 
     contact = {}, 
+    father = {},
+    mother = {},
+    spouse = {},
     locationInfo = {}, 
     additionalInfo = {}, 
     requirements = {} 
   } = anointingData;
+
+  // Debug logging
+  console.log('Final data structure:', {
+    anointing,
+    contact,
+    father,
+    mother,
+    spouse,
+    locationInfo,
+    additionalInfo,
+    requirements
+  });
 
   return (
     <div className="client-anointing-view-container">
@@ -136,12 +174,12 @@ const ClientAnointingOfTheSickView = () => {
         <div className="client-anointing-view-row-date">
           <div className="client-anointing-view-field-date">
             <label>Date of Appointment:</label>
-            {renderReadOnlyField(anointing.dateOfAnointing)}
+            {renderReadOnlyField(formatDate(anointing.dateOfAnointing))}
           </div>
           
           <div className="client-anointing-view-field-time">
             <label>Time of Appointment:</label>
-            {renderReadOnlyField(anointing.timeOfAnointing)}
+            {renderReadOnlyField(anointing.timeOfAnointingFormatted || anointing.timeOfAnointing)}
           </div>
         </div>
         
@@ -164,9 +202,9 @@ const ClientAnointingOfTheSickView = () => {
             </div>
             
             <div className="client-anointing-view-row">
-            <div className="client-anointing-view-field">
+              <div className="client-anointing-view-field">
                 <label>Date of Birth:</label>
-                {renderReadOnlyField(anointing.dateOfBirth)}
+                {renderReadOnlyField(formatDate(anointing.dateOfBirth))}
               </div>
               <div className="client-anointing-view-field">
                 <label>Sex:</label>
@@ -181,18 +219,18 @@ const ClientAnointingOfTheSickView = () => {
             <div className="client-anointing-view-row">
               <div className="client-anointing-view-field">
                 <label>Civil Status:</label>
-                {renderReadOnlyField(anointing.maritalStatus)}
+                {renderReadOnlyField(anointing.marital_status)}
               </div>
               <div className="client-anointing-view-field">
                 <label>Years Married:</label>
-                {renderReadOnlyField(anointing.yearsMarried)}
+                {renderReadOnlyField(anointing.years_married)}
               </div>
             </div>
             
             <div className="client-anointing-view-row">
               <div className="client-anointing-view-field-wide">
                 <label>Spouse Name:</label>
-                {renderSpouseName(anointing.spouseFirstName, anointing.spouseMiddleName, anointing.spouseLastName)}
+                {renderFullName(spouse?.spouse_firstName, spouse?.spouse_middleName, spouse?.spouse_lastName)}
               </div>
             </div>
             
@@ -200,6 +238,10 @@ const ClientAnointingOfTheSickView = () => {
               <div className="client-anointing-view-field">
                 <label>Place of Birth:</label>
                 {renderReadOnlyField(anointing.placeOfBirth)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Religion:</label>
+                {renderReadOnlyField(anointing.religion)}
               </div>
             </div>
             
@@ -217,29 +259,87 @@ const ClientAnointingOfTheSickView = () => {
             <div className="client-anointing-view-row">
               <div className="client-anointing-view-field">
                 <label>Contact Person's First Name:</label>
-                {renderReadOnlyField(contact.contactFirstName)}
+                {renderReadOnlyField(contact?.contactFirstName)}
               </div>
               <div className="client-anointing-view-field">
                 <label>Middle Name:</label>
-                {renderReadOnlyField(contact.contactMiddleName)}
+                {renderReadOnlyField(contact?.contactMiddleName)}
               </div>
               <div className="client-anointing-view-field">
                 <label>Last Name:</label>
-                {renderReadOnlyField(contact.contactLastName)}
+                {renderReadOnlyField(contact?.contactLastName)}
               </div>
             </div>
             <div className="client-anointing-view-row">
               <div className="client-anointing-view-field">
                 <label>Relationship to Sick Person:</label>
-                {renderReadOnlyField(contact.contactRelationship)}
+                {renderReadOnlyField(contact?.contactRelationship)}
               </div>
               <div className="client-anointing-view-field">
                 <label>Phone Number:</label>
-                {renderReadOnlyField(contact.contactPhone)}
+                {renderReadOnlyField(contact?.contactPhone)}
               </div>
               <div className="client-anointing-view-field">
                 <label>Email Address:</label>
-                {renderReadOnlyField(contact.contactEmail)}
+                {renderReadOnlyField(contact?.contactEmail)}
+              </div>
+            </div>
+          </div>
+
+          {/* Father Information */}
+          <h3 className="client-anointing-view-sub-title">Father Information</h3>
+          <div className="client-anointing-view-info-card">
+            <div className="client-anointing-view-row">
+              <div className="client-anointing-view-field">
+                <label>Father's First Name:</label>
+                {renderReadOnlyField(father?.father_firstName)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Middle Name:</label>
+                {renderReadOnlyField(father?.father_middleName)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Last Name:</label>
+                {renderReadOnlyField(father?.father_lastName)}
+              </div>
+            </div>
+            <div className="client-anointing-view-row">
+              <div className="client-anointing-view-field">
+                <label>Phone Number:</label>
+                {renderReadOnlyField(father?.father_phone)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Email Address:</label>
+                {renderReadOnlyField(father?.father_email)}
+              </div>
+            </div>
+          </div>
+
+          {/* Mother Information */}
+          <h3 className="client-anointing-view-sub-title">Mother Information</h3>
+          <div className="client-anointing-view-info-card">
+            <div className="client-anointing-view-row">
+              <div className="client-anointing-view-field">
+                <label>Mother's First Name:</label>
+                {renderReadOnlyField(mother?.mother_firstName)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Middle Name:</label>
+                {renderReadOnlyField(mother?.mother_middleName)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Last Name:</label>
+                {renderReadOnlyField(mother?.mother_lastName)}
+              </div>
+            </div>
+            <div className="client-anointing-view-row">
+              <div className="client-anointing-view-field">
+                <label>Phone Number:</label>
+                {renderReadOnlyField(mother?.mother_phone)}
+              </div>
+              <div className="client-anointing-view-field">
+                <label>Email Address:</label>
+                {renderReadOnlyField(mother?.mother_email)}
               </div>
             </div>
           </div>
@@ -318,7 +418,7 @@ const ClientAnointingOfTheSickView = () => {
         <div className="client-anointing-requirements-view-container">
           <h2 className="client-anointing-requirements-view-title">About Anointing of the Sick</h2>
           <div className="client-anointing-requirements-view-box">
-          <h3 className="client-anointing-view-section-header">Documents Required</h3>
+            <h3 className="client-anointing-view-section-header">Documents Required</h3>
             <div className="client-anointing-info-view-list">
               <div className="client-anointing-info-view-item">
                 <p>Medical Certificate or Doctor's note</p>

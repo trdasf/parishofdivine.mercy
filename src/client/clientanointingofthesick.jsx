@@ -582,6 +582,17 @@ const fetchAnointingSchedules = async () => {
       ...prev,
       [field]: value
     }));
+    
+    // Clear spouse fields if marital status changes to Single or Civil
+    if (field === 'maritalStatus' && ['Single', 'Civil'].includes(value)) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        spouseFirstName: '',
+        spouseMiddleName: '',
+        spouseLastName: ''
+      }));
+    }
   };
 
   // Handle date changes to store in yyyy-mm-dd format
@@ -1193,62 +1204,218 @@ const updatePlaceOfBirth = (updatedFields) => {
   };
 
   const handleYes = async () => {
-    setShowModal(false);
-    setIsLoading(true);
+  setShowModal(false);
+  setIsLoading(true);
+  
+  try {
+    // Debug logging - Form data validation
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('ClientID:', clientID, typeof clientID);
+    console.log('Original Form Data:', formData);
     
-    try {
-      // Create formData object for submission
-      const formDataToSend = new FormData();
-      
-      // Add client ID
-      formDataToSend.append('clientID', clientID);
-      
-      // Add the form data as JSON
-      formDataToSend.append('anointingData', JSON.stringify(formData));
-      
-      // Submit the form
-      const response = await fetch('http://parishofdivinemercy.com/backend/anointing_application.php', {
-        method: 'POST',
-        body: formDataToSend
-      });
-      
-      const data = await response.json();
-      setIsLoading(false);
-      
-      if (data.success) {
-        // Optionally send email notification
-        try {
-          const emailResponse = await fetch('http://parishofdivinemercy.com/backend/send_anointing_email.php', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              clientID: clientID,
-              anointingData: formData
-            })
-          });
-          
-          console.log('Email response:', await emailResponse.json());
-        } catch (emailError) {
-          console.error('Error sending email:', emailError);
-        }
-        
-        setShowSuccessModal(true);
-        setTimeout(() => {
-          navigate('/client-appointment');
-        }, 2000);
-      } else {
-        setErrorMessage(data.message || 'Failed to submit application');
-        setShowErrorModal(true);
+    // Validate required data before submission
+    if (!clientID) {
+      throw new Error('Client ID is missing');
+    }
+    
+    // Validate required fields
+    const requiredFields = [
+      'dateOfAnointing', 'timeOfAnointing', 'firstName', 'lastName', 'sex'
+    ];
+    
+    for (const field of requiredFields) {
+      if (!formData[field] || formData[field].toString().trim() === '') {
+        throw new Error(`${field} is required`);
       }
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Error submitting form:', error);
-      setErrorMessage('An error occurred while submitting the application');
+    }
+    
+    // Prepare form data with proper type conversion and validation
+    const processedFormData = {
+      // Basic anointing info
+      dateOfAnointing: formData.dateOfAnointing || '',
+      timeOfAnointing: formData.timeOfAnointing || '',
+      priestName: formData.priestName || '',
+      
+      // Sick person info
+      firstName: formData.firstName || '',
+      middleName: formData.middleName || '',
+      lastName: formData.lastName || '',
+      sex: formData.sex || '',
+      age: formData.age ? parseInt(formData.age, 10) || 0 : 0,
+      dateOfBirth: formData.dateOfBirth || '',
+      placeOfBirth: formData.placeOfBirth || '',
+      religion: formData.religion || '',
+      reasonForAnointing: formData.reasonForAnointing || '',
+      
+      // Marital status
+      maritalStatus: formData.maritalStatus || '',
+      yearsMarried: formData.yearsMarried ? parseInt(formData.yearsMarried, 10) || 0 : 0,
+      
+      // Spouse info
+      spouseFirstName: formData.spouseFirstName || '',
+      spouseMiddleName: formData.spouseMiddleName || '',
+      spouseLastName: formData.spouseLastName || '',
+      
+      // Contact person
+      contactFirstName: formData.contactFirstName || '',
+      contactMiddleName: formData.contactMiddleName || '',
+      contactLastName: formData.contactLastName || '',
+      contactRelationship: formData.contactRelationship || '',
+      contactPhone: formData.contactPhone || '',
+      contactEmail: formData.contactEmail || '',
+      
+      // Parents
+      fatherFirstName: formData.fatherFirstName || '',
+      fatherMiddleName: formData.fatherMiddleName || '',
+      fatherLastName: formData.fatherLastName || '',
+      fatherPhone: formData.fatherPhone || '',
+      fatherEmail: formData.fatherEmail || '',
+      
+      motherFirstName: formData.motherFirstName || '',
+      motherMiddleName: formData.motherMiddleName || '',
+      motherLastName: formData.motherLastName || '',
+      motherPhone: formData.motherPhone || '',
+      motherEmail: formData.motherEmail || '',
+      
+      // Location
+      locationType: formData.locationType || 'Hospital',
+      locationName: formData.locationName || '',
+      roomNumber: formData.roomNumber || '',
+      barangay: formData.barangay || '',
+      street: formData.street || '',
+      municipality: formData.municipality || '',
+      province: formData.province || '',
+      locationRegion: formData.locationRegion || '',
+      
+      // Additional info
+      isCritical: Boolean(formData.isCritical),
+      needsViaticum: Boolean(formData.needsViaticum),
+      needsReconciliation: Boolean(formData.needsReconciliation),
+      additionalNotes: formData.additionalNotes || ''
+    };
+    
+    console.log('Processed Form Data:', processedFormData);
+    console.log('Age type check:', typeof processedFormData.age, processedFormData.age);
+    console.log('Years married type check:', typeof processedFormData.yearsMarried, processedFormData.yearsMarried);
+    
+    // Create FormData for submission
+    const formDataToSend = new FormData();
+    
+    // Add client ID
+    formDataToSend.append('clientID', clientID.toString());
+    
+    // Add the processed form data as JSON
+    const jsonData = JSON.stringify(processedFormData);
+    console.log('JSON data being sent:', jsonData);
+    formDataToSend.append('anointingData', jsonData);
+    
+    // Add file upload status for requirements
+    if (uploadStatus.medical_cert) {
+      formDataToSend.append('medical_cert_status', uploadStatus.medical_cert);
+    }
+    if (uploadStatus.valid_ids) {
+      formDataToSend.append('valid_ids_status', uploadStatus.valid_ids);
+    }
+    
+    // Add uploaded files if any
+    Object.keys(uploadedFiles).forEach(requirementId => {
+      if (uploadedFiles[requirementId] && uploadedFiles[requirementId].file) {
+        console.log(`Adding file for ${requirementId}:`, uploadedFiles[requirementId].name);
+        formDataToSend.append(`file_${requirementId}`, uploadedFiles[requirementId].file);
+      }
+    });
+    
+    console.log('Submitting to backend...');
+    
+    // Submit the form
+    const response = await fetch('http://parishofdivinemercy.com/backend/anointing_application.php', {
+      method: 'POST',
+      body: formDataToSend
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    
+    // Get response text first for debugging
+    const responseText = await response.text();
+    console.log('Raw response text:', responseText);
+    
+    // Check if response is ok
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}, response: ${responseText}`);
+    }
+    
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Response that failed to parse:', responseText);
+      throw new Error('Invalid response from server. Check server logs for details.');
+    }
+    
+    console.log('Parsed response data:', data);
+    setIsLoading(false);
+    
+    if (data.success) {
+      console.log('✅ Application submitted successfully!');
+      console.log('Anointing ID:', data.anointingID);
+      
+      // Send email notification (optional)
+      try {
+        console.log('Sending email notification...');
+        const emailResponse = await fetch('http://parishofdivinemercy.com/backend/send_anointing_email.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clientID: clientID,
+            anointingData: processedFormData,
+            anointingID: data.anointingID
+          })
+        });
+        
+        const emailData = await emailResponse.json();
+        console.log('Email response:', emailData);
+      } catch (emailError) {
+        console.error('Email error (non-critical):', emailError);
+      }
+      
+      // Show success and navigate
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate('/client-appointment');
+      }, 2000);
+      
+    } else {
+      console.error('❌ Server returned error:', data.message);
+      setErrorMessage(data.message || 'Failed to submit application');
       setShowErrorModal(true);
     }
-  };
+    
+  } catch (error) {
+    setIsLoading(false);
+    console.error('❌ Error submitting form:', error);
+    
+    let userMessage = 'An error occurred while submitting the application';
+    
+    if (error.message.includes('HTTP error')) {
+      userMessage = 'Server connection error. Please try again.';
+    } else if (error.message.includes('Invalid response')) {
+      userMessage = 'Server error. Please check the console and server logs.';
+    } else if (error.message.includes('required')) {
+      userMessage = error.message;
+    } else if (error.message.includes('Failed to fetch')) {
+      userMessage = 'Network error. Please check your connection.';
+    }
+    
+    setErrorMessage(userMessage);
+    setShowErrorModal(true);
+  }
+};
 
   return (
     <div className="aos-container">
@@ -1370,12 +1537,23 @@ const updatePlaceOfBirth = (updatedFields) => {
             </div>
           </div>
 
-          {/* UPDATED Marital Status Section with Spouse Fields */}
+          {/* UPDATED Marital Status Section with Single and Spouse Fields */}
           <h3 className="client-sub-title">Status</h3>
           <div className="client-baptismal-row-pms">
             <div className="client-marital-status">
               <label className="client-section-label">Select status by choosing one of the following options:</label>
               <div className="client-marital-options">
+                <div className="client-pms-label">
+                  <input 
+                    type="radio" 
+                    id="single" 
+                    name="maritalStatus"
+                    value="Single"
+                    checked={formData.maritalStatus === "Single"}
+                    onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
+                  />
+                  <label htmlFor="single">Single</label>
+                </div>
                 <div className="client-pms-label">
                   <input 
                     type="radio" 

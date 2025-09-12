@@ -9,6 +9,32 @@ const Baptism = () => {
 const location = useLocation();
  const navigate = useNavigate();
 
+ // Helper function to convert 24-hour time to 12-hour format with AM/PM
+ const convertTo12Hour = (time24) => {
+   if (!time24) return '';
+   
+   const [hours, minutes] = time24.split(':');
+   const hour24 = parseInt(hours, 10);
+   
+   let hour12;
+   let ampm;
+   
+   if (hour24 === 0) {
+     hour12 = 12;
+     ampm = 'AM';
+   } else if (hour24 < 12) {
+     hour12 = hour24;
+     ampm = 'AM';
+   } else if (hour24 === 12) {
+     hour12 = 12;
+     ampm = 'PM';
+   } else {
+     hour12 = hour24 - 12;
+     ampm = 'PM';
+   }
+   
+   return `${hour12}:${minutes} ${ampm}`;
+ };
 
  // State for form data
  const [formData, setFormData] = useState({
@@ -1685,7 +1711,7 @@ const location = useLocation();
              <option value="">Select Time</option>
              {filteredTimes.map((time) => (
                <option key={time} value={time}>
-                 {time}
+                 {convertTo12Hour(time)}
                </option>
              ))}
            </select>

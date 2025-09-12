@@ -4,7 +4,6 @@ import "./ClientMarriage.css";
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
-
 const formatTimeTo12Hour = (time24) => {
   if (!time24) return '';
   
@@ -403,6 +402,33 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
     .slice(0, 10);
 };
 
+// Add filterRegions function
+const filterRegions = (input) => {
+  const inputLower = input.toLowerCase();
+  // List of regions in the Philippines
+  const regions = [
+    'NCR - National Capital Region',
+    'CAR - Cordillera Administrative Region',
+    'Region I - Ilocos Region',
+    'Region II - Cagayan Valley',
+    'Region III - Central Luzon',
+    'Region IV-A - CALABARZON',
+    'Region IV-B - MIMAROPA',
+    'Region V - Bicol Region',
+    'Region VI - Western Visayas',
+    'Region VII - Central Visayas',
+    'Region VIII - Eastern Visayas',
+    'Region IX - Zamboanga Peninsula',
+    'Region X - Northern Mindanao',
+    'Region XI - Davao Region',
+    'Region XII - SOCCSKSARGEN',
+    'Region XIII - Caraga',
+    'BARMM - Bangsamoro Autonomous Region in Muslim Mindanao'
+  ];
+  
+  return regions.filter(region => region.toLowerCase().includes(inputLower));
+};
+
   // Handlers for input changes
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -451,7 +477,51 @@ const filterProvinces = (input, municipality = null, barangay = null) => {
     }
   };
 
+  // Auto-fill helper function
+const autoFillLocationFields = (selectedValue, selectedType, fieldPrefix) => {
+  let updates = {};
   
+  if (selectedType === 'barangay') {
+    // Find all locations with this barangay
+    const matchingLocations = locationData.filter(loc => loc.barangay === selectedValue);
+    
+    // Get unique municipalities and provinces
+    const uniqueMunicipalities = [...new Set(matchingLocations.map(loc => loc.municipality))];
+    const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+    
+    console.log(`Barangay "${selectedValue}" found in:`, {
+      municipalities: uniqueMunicipalities,
+      provinces: uniqueProvinces
+    });
+    
+    // Auto-fill if only one option exists
+    if (uniqueMunicipalities.length === 1) {
+      updates[`${fieldPrefix}_municipality`] = uniqueMunicipalities[0];
+      console.log(`Auto-filling municipality: ${uniqueMunicipalities[0]}`);
+    }
+    if (uniqueProvinces.length === 1) {
+      updates[`${fieldPrefix}_province`] = uniqueProvinces[0];
+      console.log(`Auto-filling province: ${uniqueProvinces[0]}`);
+    }
+  } 
+  else if (selectedType === 'municipality') {
+    // Find all locations with this municipality
+    const matchingLocations = locationData.filter(loc => loc.municipality === selectedValue);
+    
+    // Get unique provinces
+    const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
+    
+    console.log(`Municipality "${selectedValue}" found in provinces:`, uniqueProvinces);
+    
+    // Auto-fill if only one option exists
+    if (uniqueProvinces.length === 1) {
+      updates[`${fieldPrefix}_province`] = uniqueProvinces[0];
+      console.log(`Auto-filling province: ${uniqueProvinces[0]}`);
+    }
+  }
+  
+  return updates;
+};
 
   // Groom birth place handlers
 const handleGroomBirthBarangayChange = (e) => {
@@ -476,7 +546,6 @@ const handleGroomBirthMunicipalityChange = (e) => {
       groom_birth_municipality: filterMunicipalities(value, formData.groom_birth_province, formData.groom_birth_barangay)
     }));
   }
-  // NO AUTO-FILL while typing
 };
 
 const handleGroomBirthProvinceChange = (e) => {
@@ -514,7 +583,6 @@ const handleBrideBirthMunicipalityChange = (e) => {
       bride_birth_municipality: filterMunicipalities(value, formData.bride_birth_province, formData.bride_birth_barangay)
     }));
   }
-  // NO AUTO-FILL while typing
 };
 
 const handleBrideBirthProvinceChange = (e) => {
@@ -528,8 +596,6 @@ const handleBrideBirthProvinceChange = (e) => {
     }));
   }
 };
-
-
 
   // Selection handlers for groom birth place
 const handleSelectGroomBirthBarangay = (barangay) => {
@@ -553,7 +619,6 @@ const handleSelectGroomBirthMunicipality = (municipality) => {
     setFormData(prev => ({ ...prev, ...autoFills }));
   }
 };
-
 
 const handleSelectGroomBirthProvince = (province) => {
   setFormData(prev => ({ ...prev, groom_birth_province: province }));
@@ -611,7 +676,6 @@ const handleGroomMunicipalityChange = (e) => {
       groomMunicipality: filterMunicipalities(value, formData.groom_province, formData.groom_barangay) 
     }));
   }
-  // NO AUTO-FILL while typing
 };
 
 const handleGroomProvinceChange = (e) => {
@@ -626,7 +690,17 @@ const handleGroomProvinceChange = (e) => {
   }
 };
 
-
+const handleGroomRegionChange = (e) => {
+  const value = e.target.value;
+  handleInputChange('groom_region', value);
+  
+  if (focusedField === 'groomRegion') {
+    setSuggestions(prev => ({
+      ...prev,
+      groomRegion: filterRegions(value)
+    }));
+  }
+};
 
   const handleSelectGroomBarangay = (barangay) => {
   handleInputChange('groom_barangay', barangay);
@@ -658,7 +732,13 @@ const handleSelectGroomProvince = (province) => {
   handleInputChange('groom_province', province);
   setFocusedField(null);
 };
-  // Handlers for bride address fields (similar to groom)
+
+const handleSelectGroomRegion = (region) => {
+  handleInputChange('groom_region', region);
+  setFocusedField(null);
+};
+
+  // Handlers for bride address fields
  const handleBrideBarangayChange = (e) => {
   const value = e.target.value;
   handleInputChange('bride_barangay', value);
@@ -681,7 +761,6 @@ const handleBrideMunicipalityChange = (e) => {
       brideMunicipality: filterMunicipalities(value, formData.bride_province, formData.bride_barangay) 
     }));
   }
-  // NO AUTO-FILL while typing
 };
 
 const handleBrideProvinceChange = (e) => {
@@ -695,6 +774,19 @@ const handleBrideProvinceChange = (e) => {
     }));
   }
 };
+
+const handleBrideRegionChange = (e) => {
+  const value = e.target.value;
+  handleInputChange('bride_region', value);
+  
+  if (focusedField === 'brideRegion') {
+    setSuggestions(prev => ({
+      ...prev,
+      brideRegion: filterRegions(value)
+    }));
+  }
+};
+
  const handleSelectBrideBarangay = (barangay) => {
   handleInputChange('bride_barangay', barangay);
   setFocusedField(null);
@@ -726,6 +818,10 @@ const handleSelectBrideProvince = (province) => {
   setFocusedField(null);
 };
 
+const handleSelectBrideRegion = (region) => {
+  handleInputChange('bride_region', region);
+  setFocusedField(null);
+};
 
   // Handlers for first witness address fields
  const handleFirstWitnessBarangayChange = (e) => {
@@ -750,7 +846,6 @@ const handleFirstWitnessMunicipalityChange = (e) => {
       firstWitnessMunicipality: filterMunicipalities(value, formData.first_witness_province, formData.first_witness_barangay) 
     }));
   }
-  // NO AUTO-FILL while typing
 };
 
 const handleFirstWitnessProvinceChange = (e) => {
@@ -765,7 +860,17 @@ const handleFirstWitnessProvinceChange = (e) => {
   }
 };
 
-
+const handleFirstWitnessRegionChange = (e) => {
+  const value = e.target.value;
+  handleInputChange('first_witness_region', value);
+  
+  if (focusedField === 'firstWitnessRegion') {
+    setSuggestions(prev => ({
+      ...prev,
+      firstWitnessRegion: filterRegions(value)
+    }));
+  }
+};
 
   const handleSelectFirstWitnessBarangay = (barangay) => {
   handleInputChange('first_witness_barangay', barangay);
@@ -798,8 +903,12 @@ const handleSelectFirstWitnessProvince = (province) => {
   setFocusedField(null);
 };
 
+const handleSelectFirstWitnessRegion = (region) => {
+  handleInputChange('first_witness_region', region);
+  setFocusedField(null);
+};
+
   // Handlers for second witness address fields
-// Second witness handlers
 const handleSecondWitnessBarangayChange = (e) => {
   const value = e.target.value;
   handleInputChange('second_witness_barangay', value);
@@ -822,7 +931,6 @@ const handleSecondWitnessMunicipalityChange = (e) => {
       secondWitnessMunicipality: filterMunicipalities(value, formData.second_witness_province, formData.second_witness_barangay) 
     }));
   }
-  // NO AUTO-FILL while typing
 };
 
 const handleSecondWitnessProvinceChange = (e) => {
@@ -833,6 +941,18 @@ const handleSecondWitnessProvinceChange = (e) => {
     setSuggestions(prev => ({ 
       ...prev, 
       secondWitnessProvince: filterProvinces(value, formData.second_witness_municipality, formData.second_witness_barangay) 
+    }));
+  }
+};
+
+const handleSecondWitnessRegionChange = (e) => {
+  const value = e.target.value;
+  handleInputChange('second_witness_region', value);
+  
+  if (focusedField === 'secondWitnessRegion') {
+    setSuggestions(prev => ({
+      ...prev,
+      secondWitnessRegion: filterRegions(value)
     }));
   }
 };
@@ -867,88 +987,16 @@ const handleSelectSecondWitnessProvince = (province) => {
   handleInputChange('second_witness_province', province);
   setFocusedField(null);
 };
-  // Add filterRegions function
-  const filterRegions = (input) => {
-    const inputLower = input.toLowerCase();
-    // List of regions in the Philippines
-    const regions = [
-      'NCR - National Capital Region',
-      'CAR - Cordillera Administrative Region',
-      'Region I - Ilocos Region',
-      'Region II - Cagayan Valley',
-      'Region III - Central Luzon',
-      'Region IV-A - CALABARZON',
-      'Region IV-B - MIMAROPA',
-      'Region V - Bicol Region',
-      'Region VI - Western Visayas',
-      'Region VII - Central Visayas',
-      'Region VIII - Eastern Visayas',
-      'Region IX - Zamboanga Peninsula',
-      'Region X - Northern Mindanao',
-      'Region XI - Davao Region',
-      'Region XII - SOCCSKSARGEN',
-      'Region XIII - Caraga',
-      'BARMM - Bangsamoro Autonomous Region in Muslim Mindanao'
-    ];
-    
-    return regions.filter(region => region.toLowerCase().includes(inputLower));
-  };
 
-  // State for existing marriage applications
-  const [existingMarriages, setExistingMarriages] = useState([]);
-
- // Auto-fill helper function - ADD THIS NEW FUNCTION
-// Updated auto-fill helper function with debugging - REPLACE THE EXISTING ONE
-const autoFillLocationFields = (selectedValue, selectedType, fieldPrefix) => {
-  let updates = {};
-  
-  if (selectedType === 'barangay') {
-    // Find all locations with this barangay
-    const matchingLocations = locationData.filter(loc => loc.barangay === selectedValue);
-    
-    // Get unique municipalities and provinces
-    const uniqueMunicipalities = [...new Set(matchingLocations.map(loc => loc.municipality))];
-    const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
-    
-    console.log(`Barangay "${selectedValue}" found in:`, {
-      municipalities: uniqueMunicipalities,
-      provinces: uniqueProvinces
-    });
-    
-    // Auto-fill if only one option exists
-    if (uniqueMunicipalities.length === 1) {
-      updates[`${fieldPrefix}_municipality`] = uniqueMunicipalities[0];
-      console.log(`Auto-filling municipality: ${uniqueMunicipalities[0]}`);
-    }
-    if (uniqueProvinces.length === 1) {
-      updates[`${fieldPrefix}_province`] = uniqueProvinces[0];
-      console.log(`Auto-filling province: ${uniqueProvinces[0]}`);
-    }
-  } 
-  else if (selectedType === 'municipality') {
-    // Find all locations with this municipality
-    const matchingLocations = locationData.filter(loc => loc.municipality === selectedValue);
-    
-    // Get unique provinces
-    const uniqueProvinces = [...new Set(matchingLocations.map(loc => loc.province))];
-    
-    console.log(`Municipality "${selectedValue}" found in provinces:`, uniqueProvinces);
-    
-    // Auto-fill if only one option exists
-    if (uniqueProvinces.length === 1) {
-      updates[`${fieldPrefix}_province`] = uniqueProvinces[0];
-      console.log(`Auto-filling province: ${uniqueProvinces[0]}`);
-    }
-  }
-  
-  return updates;
+const handleSelectSecondWitnessRegion = (region) => {
+  handleInputChange('second_witness_region', region);
+  setFocusedField(null);
 };
-  // Handle field focus for dropdowns
- // Updated handleFocus function - REPLACE THE EXISTING ONE
+
+ // Updated handleFocus function
 const handleFocus = (field) => {
   setFocusedField(field);
   
-  // Force immediate update of suggestions with setTimeout to ensure state updates
   setTimeout(() => {
     switch(field) {
       // Groom birth place fields
@@ -1120,8 +1168,9 @@ const handleFocus = (field) => {
       default:
         break;
     }
-  }, 0); // Use setTimeout to ensure state updates happen after the focus event
+  }, 0);
 };
+
  // Handle click outside to close dropdowns
  useEffect(() => {
    const handleClickOutside = (event) => {
@@ -1211,7 +1260,7 @@ const handleFocus = (field) => {
        formData.bride_birth_province
      ].filter(Boolean).join(', ');
 
-     // Basic application data with all required fields including new fields
+     // UPDATED: Basic application data with all required fields including civil status and religion
      const applicationData = {
        date: formData.date,
        time: formData.time,
@@ -1223,8 +1272,8 @@ const handleFocus = (field) => {
        groom_dateOfBaptism: formData.groom_dateOfBaptism || '',
        groom_churchOfBaptism: formData.groom_churchOfBaptism || '',
        groom_placeOfBirth: combinedGroomPlaceOfBirth || '',
-       groom_civil_status: formData.groom_civil_status || '',
-       groom_religion: formData.groom_religion || '',
+       groom_civil_status: formData.groom_civil_status || '', // ADDED
+       groom_religion: formData.groom_religion || '', // ADDED
        bride_first_name: formData.bride_first_name || '',
        bride_middle_name: formData.bride_middle_name || '',
        bride_last_name: formData.bride_last_name || '',
@@ -1233,8 +1282,8 @@ const handleFocus = (field) => {
        bride_dateOfBaptism: formData.bride_dateOfBaptism || '',
        bride_churchOfBaptism: formData.bride_churchOfBaptism || '',
        bride_placeOfBirth: combinedBridePlaceOfBirth || '',
-       bride_civil_status: formData.bride_civil_status || '',
-       bride_religion: formData.bride_religion || ''
+       bride_civil_status: formData.bride_civil_status || '', // ADDED
+       bride_religion: formData.bride_religion || '' // ADDED
      };
  
      // Prepare address data
@@ -1328,14 +1377,14 @@ const handleFocus = (field) => {
      // Add client ID
      formDataToSend.append('clientID', clientID);
      
-     // Add JSON data with stringification
+     // Add JSON data with stringification - NOW INCLUDING ALL PARENT DATA
      formDataToSend.append('applicationData', JSON.stringify(applicationData));
      formDataToSend.append('groomAddressData', JSON.stringify(groomAddressData));
      formDataToSend.append('brideAddressData', JSON.stringify(brideAddressData));
-     formDataToSend.append('groomFatherData', JSON.stringify(groomFatherData));
-     formDataToSend.append('groomMotherData', JSON.stringify(groomMotherData));
-     formDataToSend.append('brideFatherData', JSON.stringify(brideFatherData));
-     formDataToSend.append('brideMotherData', JSON.stringify(brideMotherData));
+     formDataToSend.append('groomFatherData', JSON.stringify(groomFatherData)); // ADDED
+     formDataToSend.append('groomMotherData', JSON.stringify(groomMotherData)); // ADDED
+     formDataToSend.append('brideFatherData', JSON.stringify(brideFatherData)); // ADDED
+     formDataToSend.append('brideMotherData', JSON.stringify(brideMotherData)); // ADDED
      formDataToSend.append('firstWitnessData', JSON.stringify(firstWitnessData));
      formDataToSend.append('secondWitnessData', JSON.stringify(secondWitnessData));
  
@@ -1380,6 +1429,7 @@ const handleFocus = (field) => {
      setIsLoading(false);
    }
  };
+
  const handleNo = () => {
    setShowModal(false);
  };
@@ -1391,75 +1441,6 @@ const handleFocus = (field) => {
 
  const handleCloseErrorModal = () => {
    setShowErrorModal(false);
- };
-
- // Add handlers for region fields
- const handleGroomRegionChange = (e) => {
-   const value = e.target.value;
-   handleInputChange('groom_region', value);
-   
-   if (focusedField === 'groomRegion') {
-     setSuggestions(prev => ({
-       ...prev,
-       groomRegion: filterRegions(value)
-     }));
-   }
- };
- 
- const handleBrideRegionChange = (e) => {
-   const value = e.target.value;
-   handleInputChange('bride_region', value);
-   
-   if (focusedField === 'brideRegion') {
-     setSuggestions(prev => ({
-       ...prev,
-       brideRegion: filterRegions(value)
-     }));
-   }
- };
- 
- const handleFirstWitnessRegionChange = (e) => {
-   const value = e.target.value;
-   handleInputChange('first_witness_region', value);
-   
-   if (focusedField === 'firstWitnessRegion') {
-     setSuggestions(prev => ({
-       ...prev,
-       firstWitnessRegion: filterRegions(value)
-     }));
-   }
- };
- 
- const handleSecondWitnessRegionChange = (e) => {
-   const value = e.target.value;
-   handleInputChange('second_witness_region', value);
-   
-   if (focusedField === 'secondWitnessRegion') {
-     setSuggestions(prev => ({
-       ...prev,
-       secondWitnessRegion: filterRegions(value)
-     }));
-   }
- };
- 
- const handleSelectGroomRegion = (region) => {
-   handleInputChange('groom_region', region);
-   setFocusedField(null);
- };
- 
- const handleSelectBrideRegion = (region) => {
-   handleInputChange('bride_region', region);
-   setFocusedField(null);
- };
- 
- const handleSelectFirstWitnessRegion = (region) => {
-   handleInputChange('first_witness_region', region);
-   setFocusedField(null);
- };
- 
- const handleSelectSecondWitnessRegion = (region) => {
-   handleInputChange('second_witness_region', region);
-   setFocusedField(null);
  };
 
  return (
@@ -2912,7 +2893,7 @@ const handleFocus = (field) => {
        <div className="client-marriage-modal-overlay">
          <div className="client-marriage-modal">
            <h2>Submit Application</h2>
-           <hr class="custom-hr-b"/>
+           <hr className="custom-hr-b"/>
            <p>Are you sure you want to submit your Holy Matrimony application?</p>
            <div className="client-marriage-modal-buttons">
              <button className="client-marriage-yes-btn" onClick={handleYes}>Yes</button>

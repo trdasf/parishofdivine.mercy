@@ -36,6 +36,57 @@ const SecretaryMarriageView = () => {
   // API base URL that can be easily changed
   const API_BASE_URL = "https://parishofdivinemercy.com/backend";
 
+  /**
+   * Converts 24-hour time format to 12-hour format with AM/PM
+   * @param {string} time24 - Time in 24-hour format (e.g., "15:00" or "15:00:00")
+   * @returns {string} - Time in 12-hour format (e.g., "3:00 PM")
+   */
+  const convertTo12Hour = (time24) => {
+    if (!time24) return "N/A";
+    
+    try {
+      // Handle both "HH:MM" and "HH:MM:SS" formats
+      const timeParts = time24.split(':');
+      const hours24 = parseInt(timeParts[0], 10);
+      const minutes = timeParts[1] || "00";
+      
+      // Convert to 12-hour format
+      const hours12 = hours24 === 0 ? 12 : hours24 > 12 ? hours24 - 12 : hours24;
+      const ampm = hours24 >= 12 ? 'PM' : 'AM';
+      
+      return `${hours12}:${minutes} ${ampm}`;
+    } catch (error) {
+      console.error("Error converting time format:", error);
+      return time24; // Return original if conversion fails
+    }
+  };
+
+  /**
+   * Converts 12-hour time format to 24-hour format for input fields
+   * @param {string} time12 - Time in 12-hour format (e.g., "3:00 PM")
+   * @returns {string} - Time in 24-hour format (e.g., "15:00")
+   */
+  const convertTo24Hour = (time12) => {
+    if (!time12) return "";
+    
+    try {
+      const [time, period] = time12.split(' ');
+      const [hours, minutes] = time.split(':');
+      let hours24 = parseInt(hours, 10);
+      
+      if (period === 'PM' && hours24 !== 12) {
+        hours24 += 12;
+      } else if (period === 'AM' && hours24 === 12) {
+        hours24 = 0;
+      }
+      
+      return `${hours24.toString().padStart(2, '0')}:${minutes}`;
+    } catch (error) {
+      console.error("Error converting time format:", error);
+      return time12;
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (marriageID)
     const marriageID = location.state?.marriageID;
@@ -776,7 +827,7 @@ const handleConfirmApproval = async () => {
             <div className="secretary-confirm-icon">?</div>
             <p>Are you sure you want to approve this marriage appointment?</p>
             <p>Date: {appointmentDate}</p>
-            <p>Time: {appointmentTime}</p>
+            <p>Time: {convertTo12Hour(appointmentTime)}</p>
             <p>Priest: {selectedPriest}</p>
            
             <div className="secretary-confirm-buttons">
@@ -1349,7 +1400,7 @@ const handleConfirmApproval = async () => {
           
           <div className="secretary-marriage-view-field-time">
             <label>Time of Appointment:</label>
-            {renderReadOnlyField(marriageData.time)}
+            {renderReadOnlyField(convertTo12Hour(marriageData.time))}
           </div>
         </div>
         </div>
