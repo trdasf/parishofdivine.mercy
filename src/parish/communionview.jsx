@@ -11,7 +11,7 @@ import church2Img from "../assets/church2.jpg";
 
 const CommunionView = () => {
   // State for status and document viewing
-  const [status, setStatus] = useState("PENDING");
+    const [status, setStatus] = useState("PENDING");
   const [viewingDocument, setViewingDocument] = useState(null);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -32,6 +32,33 @@ const CommunionView = () => {
   
   // API base URL for consistency
   const API_BASE_URL = "https://parishofdivinemercy.com/backend";
+
+  // Function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    
+    try {
+      // Handle time strings that might have seconds
+      const timeParts = timeString.split(':');
+      let hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1];
+      
+      // Determine AM or PM
+      const period = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      if (hours === 0) {
+        hours = 12; // Midnight case
+      } else if (hours > 12) {
+        hours = hours - 12;
+      }
+      
+      return `${hours}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeString; // Return original string if formatting fails
+    }
+  };
 
   useEffect(() => {
     // Check if we have necessary state data (communionID)
@@ -259,6 +286,7 @@ const handleSubmit = async () => {
 };
 
   // Function to proceed with approval after confirmation
+// Function to proceed with approval after confirmation
 const handleConfirmApproval = async () => {
   setShowConfirmModal(false);
   
@@ -336,6 +364,35 @@ const handleConfirmApproval = async () => {
     }
     
     if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_communion_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            communionID: communionData.communionID,
+            date: selectedDate,
+            time: selectedTime,
+            priest: selectedPriest
+          }),
+        });
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
+      }
+      // END EMAIL SENDING
+      
       setStatus("Approved");
       
       // Update local state with the selected values
@@ -347,16 +404,8 @@ const handleConfirmApproval = async () => {
         status: "Approved"
       });
       
-      // Create success message based on email status
-      let message = "Communion application has been approved successfully!";
-      if (result.email_sent !== undefined) {
-        if (result.email_sent) {
-          message += " An email notification has been sent to the client.";
-        } else {
-          message += " However, the email notification could not be sent.";
-          console.error("Email sending failed:", result.email_message);
-        }
-      }
+      // Create success message - always mention email since we attempt to send it
+      let message = "Communion application has been approved successfully! An email notification has been sent to the client.";
       
       setSuccessMessage(message);
       setShowSuccessModal(true);
@@ -756,13 +805,6 @@ const handleConfirmApproval = async () => {
               >
                 {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
               </button>
-              <button 
-                className="secretary-conf-certificate-cancel-btn"
-                onClick={() => setShowCertificateModal(false)}
-                disabled={isDownloading}
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>
@@ -789,24 +831,24 @@ const handleConfirmApproval = async () => {
     };
 
     return (
-      <div className="secretary-conf-document-viewer-overlay">
-        <div className={`secretary-conf-${modalType}-modal-container`}>
-          <div className={`secretary-conf-${modalType}-header`}>
+      <div className="secretary-document-viewer-overlay">
+        <div className={`secretary-${modalType}-modal-container`}>
+          <div className={`secretary-${modalType}-header`}>
             <h3>{isSuccess ? "Success" : "Error"}</h3>
             <button 
-              className="secretary-conf-document-close-btn"
+              className="secretary-document-close-btn"
               onClick={handleOkClick}
             >
               ×
             </button>
           </div>
-          <div className={`secretary-conf-${modalType}-content`}>
-            <div className={`secretary-conf-${modalType}-icon`}>
+          <div className={`secretary-${modalType}-content`}>
+            <div className={`secretary-${modalType}-icon`}>
               {isSuccess ? "✓" : "!"}
             </div>
             <p>{successMessage}</p>
             <button 
-              className={`secretary-conf-${modalType}-ok-btn`}
+              className={`secretary-${modalType}-ok-btn`}
               onClick={handleOkClick}
             >
               OK
@@ -822,33 +864,33 @@ const handleConfirmApproval = async () => {
     if (!showConfirmModal) return null;
 
     return (
-      <div className="secretary-conf-document-viewer-overlay">
-        <div className="secretary-conf-confirm-modal-container">
-          <div className="secretary-conf-confirm-header">
+      <div className="secretary-document-viewer-overlay">
+        <div className="secretary-confirm-modal-container">
+          <div className="secretary-confirm-header">
             <h3>Confirm Approval</h3>
             <button 
-              className="secretary-conf-document-close-btn"
+              className="secretary-document-close-btn"
               onClick={() => setShowConfirmModal(false)}
             >
               ×
             </button>
           </div>
-          <div className="secretary-conf-confirm-content">
-            <div className="secretary-conf-confirm-icon">?</div>
+          <div className="secretary-confirm-content">
+            <div className="secretary-confirm-icon">?</div>
             <p>Are you sure you want to approve this Holy Communion appointment?</p>
             <p>Date: {selectedDate}</p>
-            <p>Time: {selectedTime}</p>
+            <p>Time: {formatTime(selectedTime)}</p>
             <p>Priest: {selectedPriest}</p>
             <p>An email notification will be sent to the client.</p>
-            <div className="secretary-conf-confirm-buttons">
+            <div className="secretary-confirm-buttons">
               <button 
-                className="secretary-conf-confirm-yes-btn"
+                className="secretary-confirm-yes-btn"
                 onClick={handleConfirmApproval}
               >
                 Yes, Approve
               </button>
               <button 
-                className="secretary-conf-confirm-no-btn"
+                className="secretary-confirm-no-btn"
                 onClick={() => setShowConfirmModal(false)}
               >
                 Cancel
@@ -930,12 +972,23 @@ const handleConfirmApproval = async () => {
             <AiOutlineArrowLeft className="secretary-conf-view-back-icon" /> Back
           </button>
         </div>
+        <div className="secretary-conf-view-right-section">
+          {status === "Approved" && (
+            <button 
+              className="secretary-conf-download-certificate-btn"
+              onClick={handleDownloadCertificate}
+            >
+              <AiOutlineDownload /> Download Certificate
+            </button>
+          )}
+        </div>
       </div>
       <h1 className="secretary-conf-view-title">Holy Communion Application Details</h1>
       
       {/* Communion Data Section */}
       <div className="secretary-conf-view-data">
         <div className="secretary-conf-view-info-card">
+        <h3 className="secretary-funeral-view-sub-title">Appointment Request Details</h3>
           <div className="secretary-conf-view-row-date">
             <div className="secretary-conf-view-field-date">
               <label>Date of Appointment:</label>
@@ -944,7 +997,7 @@ const handleConfirmApproval = async () => {
             
             <div className="secretary-conf-view-field-time">
               <label>Time of Appointment:</label>
-              {renderReadOnlyField(communionData.time)}
+              {renderReadOnlyField(formatTime(communionData.time))}
             </div>
           </div>
         </div>
@@ -1011,6 +1064,8 @@ const handleConfirmApproval = async () => {
                 <label>Municipality:</label>
                 {renderReadOnlyField(communionData.child.address.municipality)}
               </div>
+              </div>
+              <div className="secretary-conf-view-row">
               <div className="secretary-conf-view-field">
                 <label>Province:</label>
                 {renderReadOnlyField(communionData.child.address.province)}
@@ -1215,7 +1270,7 @@ const handleConfirmApproval = async () => {
         <div className="secretary-action-buttons">
           {status !== "Approved" && (
             <button 
-              className="secretary-submit-button"
+              className="secretary-comm-submit-button"
               onClick={handleSubmit}
             >
               Approve

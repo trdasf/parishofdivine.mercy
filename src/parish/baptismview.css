@@ -1,25 +1,43 @@
-/* Main container styling */
+/* Main container styling - Fixed scrolling issues */
 .secretary-baptism-view-container {
   padding: 20px;
   width: 100%;
   min-height: 100vh;
+  max-height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
 }
 
-/* Scrollbar styling */
+/* Enhanced scrollbar styling for all devices */
 .secretary-baptism-view-container::-webkit-scrollbar {
-  width: 5px;
-  background-color: #ffffff;
+  width: 8px;
+  background-color: transparent;
 }
 
 .secretary-baptism-view-container::-webkit-scrollbar-thumb {
-  background-color: #dbdbdb;
-  border-radius: 5px;
+  background-color: #b3701f;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.secretary-baptism-view-container::-webkit-scrollbar-thumb:hover {
+  background-color: #8a5612;
 }
 
 .secretary-baptism-view-container::-webkit-scrollbar-track {
-  background-color: #ffffff;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+/* Firefox scrollbar */
+.secretary-baptism-view-container {
+  scrollbar-width: thin;
+  scrollbar-color: #b3701f #f8f9fa;
 }
 
 /* Header styling */
@@ -29,19 +47,20 @@
   justify-content: space-between;
   width: 100%;
   margin-bottom: 30px;
-  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 15px;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  padding: 10px 0;
+  border-radius: 8px;
 }
 
 .secretary-view-left-section {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.secretary-view-right-section {
-  display: flex;
-  align-items: center;
-  gap: 15px;
 }
 
 .secretary-view-back-button {
@@ -54,6 +73,10 @@
   font-family: Roboto;
   font-weight: 700;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: color 0.2s;
+  touch-action: manipulation;
 }
 
 .secretary-view-back-icon {
@@ -64,81 +87,93 @@
 
 .secretary-view-back-button:hover {
   color: #5a0606;
-}
-
-/* Status display */
-.secretary-baptism-view-status-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: Roboto;
-  font-size: 16px;
-  font-weight: 600;
-  color: #573901;
-}
-
-.secretary-baptism-status-label {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 700;
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-}
-
-/* Download Certificate Button */
-.secretary-baptism-download-certificate-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: #573901;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 15px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-family: Roboto;
-}
-
-.secretary-baptism-download-certificate-btn:hover {
-  background-color: #422b01;
+  background-color: rgba(113, 8, 8, 0.1);
 }
 
 .secretary-view-title {
-  margin-top: 10px;
-  font-size: clamp(24px, 4vw, 35px);
+  font-size: clamp(20px, 4vw, 35px);
   font-weight: 800;
   color: #573901;
   font-family: Montserrat;
   letter-spacing: 1px;
   text-align: center;
+  margin-bottom: 20px;
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+/* Status indicator */
+.secretary-status-indicator {
+  text-align: center;
   margin-bottom: 30px;
-}
-
-/* Baptismal data section */
-.secretary-baptismal-view-data h2 {
-  font-size: clamp(20px, 3vw, 24px);
-  font-weight: 900;
-  color: #b3701f;
   font-family: Roboto;
-  letter-spacing: 1px;
+  font-size: 16px;
+  color: #573901;
 }
 
+.secretary-status-indicator span {
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.status-approved {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Baptismal data section - Fixed scrolling container */
+.secretary-baptismal-view-data {
+  margin-bottom: 40px;
+  position: relative;
+  width: 100%;
+}
+
+/* Date and Time Row Styling - Grid Layout */
 .secretary-baptismal-view-row-date {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 15px;
-  align-items: center;
+  margin-bottom: 20px;
+  align-items: start;
+}
+
+.secretary-baptismal-view-field-date,
+.secretary-baptismal-view-field-time {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.secretary-baptismal-view-field-date label,
+.secretary-baptismal-view-field-time label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #573901;
+  font-family: Roboto;
+  margin-bottom: 5px;
 }
 
 /* Info cards */
 .secretary-view-bypart {
   margin-top: 40px;
+  width: 100%;
 }
 
 .secretary-baptismal-view-info-card {
@@ -147,54 +182,27 @@
   border-right: 1px solid #f8d7da;
   border-bottom: 1px solid #f8d7da;
   border-radius: 8px;
-  padding: 30px;
+  padding: 25px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   border-left: 4px solid #b3701f;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* Grid-based row layouts for better responsiveness */
 .secretary-baptismal-view-row,
 .secretary-baptismal-view-row-pms {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  margin-bottom: 15px;
-}
-
-/* Label & Value in a row */
-.secretary-baptismal-view-field-date,
-.secretary-baptismal-view-field-time {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-/* Labels Styling */
-.secretary-baptismal-view-field-date label,
-.secretary-baptismal-view-field-time label {
-  font-weight: 600;
-  font-size: 14px;
-  color: #573901;
-  margin-bottom: 5px;
-  font-family: Roboto;
-}
-
-/* Input styling */
-.secretary-view-input {
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
-  font-size: 14px;
-  font-family: Roboto;
+  margin-bottom: 20px;
   width: 100%;
-  box-sizing: border-box;
 }
 
-.secretary-view-input:focus {
-  outline: none;
-  border-color: #b3701f;
-  box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.1);
+/* Address specific styling */
+.secretary-address-view-row {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 /* Value styling for read-only fields */
@@ -207,25 +215,29 @@
   font-size: 14px;
   font-family: Roboto;
   word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .secretary-view-sub-title {
-  font-size: clamp(18px, 2.5vw, 20px);
+  font-size: clamp(16px, 2.5vw, 20px);
   font-weight: 900;
   color: #573901;
   font-family: Roboto;
   letter-spacing: 1px;
   text-align: left;
   margin-bottom: 15px;
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
-/* Baptismal row styling */
+/* Baptismal field styling */
 .secretary-baptismal-view-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  width: 100%;
 }
 
 .secretary-baptismal-view-field label {
@@ -236,11 +248,12 @@
   font-family: Roboto;
 }
 
-/* Marital Status Section */
+/* Marital Status Section - Responsive layout */
 .secretary-marital-view-status {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  width: 100%;
 }
 
 .secretary-view-section-label {
@@ -251,31 +264,51 @@
   margin-bottom: 10px;
 }
 
-/* Marital Options (Checkboxes) */
+/* Marital Options - Responsive grid */
 .secretary-marital-view-options {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
+  margin-top: 10px;
+  width: 100%;
 }
 
 .secretary-view-pms-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: #573901;
   font-family: "Roboto";
   font-weight: 600;
   font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+  cursor: default;
+  min-width: 0;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+/* Add a highlight for the selected marital status option */
+.secretary-view-selected-status {
+  background-color: rgba(179, 112, 31, 0.15);
+  border-color: #b3701f;
+  box-shadow: 0 2px 8px rgba(179, 112, 31, 0.2);
+  transform: translateY(-1px);
 }
 
 /* Checkbox styling for view-only mode */
 .secretary-view-checkbox {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 2px solid #ccc;
   border-radius: 4px;
   display: inline-block;
   position: relative;
+  transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
@@ -283,11 +316,13 @@
 .secretary-view-checked {
   background-color: #b3701f;
   border-color: #b3701f;
+  box-shadow: 0 0 8px rgba(179, 112, 31, 0.4);
+  transform: scale(1.05);
 }
 
 .secretary-view-checked::after {
   content: "✓";
-  font-size: 12px;
+  font-size: 14px;
   color: white;
   font-weight: bold;
   position: absolute;
@@ -296,17 +331,19 @@
   transform: translate(-50%, -50%);
 }
 
-.secretary-view-selected-status {
-  color: #b3701f;
-  font-weight: 700;
-}
-
-/* "Number of Years Married" */
+/* "Number of Years Married" - Responsive layout */
 .secretary-years-view-married {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 15px;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #b3701f;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .secretary-years-view-married label {
@@ -317,24 +354,31 @@
 }
 
 .secretary-view-years {
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: #b3701f;
   font-family: "Roboto";
-  font-size: 14px;
+  font-size: 16px;
+  background-color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid #b3701f;
 }
 
-/* Address row styling */
-.secretary-address-view-row {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-/* Godparent styling */
+/* Godparent styling - Enhanced */
 .secretary-godparent-item {
   margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #fafafa;
+  padding: 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  background-color: #fafbfc;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secretary-godparent-item:hover {
+  border-color: #b3701f;
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.1);
 }
 
 .secretary-baptismal-view-godparent-header {
@@ -342,13 +386,15 @@
   color: #b3701f;
   margin-bottom: 15px;
   font-family: Montserrat;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .secretary-baptismal-view-godparent-divider {
   border: none;
-  border-top: 1px dashed #ccc;
-  margin: 20px 0;
+  border-top: 2px dashed #dee2e6;
+  margin: 25px 0;
 }
 
 /* Requirements container styling */
@@ -356,10 +402,11 @@
   width: 100%;
   margin: 40px 0 20px;
   font-family: "Roboto", sans-serif;
+  box-sizing: border-box;
 }
 
 .secretary-requirements-view-title {
-  font-size: clamp(20px, 3vw, 22px);
+  font-size: clamp(18px, 3vw, 22px);
   font-weight: bold;
   color: #b36b09;
   margin-bottom: 15px;
@@ -368,39 +415,241 @@
 
 .secretary-requirements-view-box {
   border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 25px;
+  border-radius: 12px;
   background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .secretary-view-section-header {
-  font-size: clamp(16px, 2.2vw, 18px);
+  font-size: clamp(14px, 2.2vw, 18px);
   font-weight: bold;
   color: #333;
-  margin-top: 20px;
+  margin-top: 25px;
   margin-bottom: 15px;
   font-family: Montserrat;
-  border-bottom: 2px solid #b3701f;
+  border-bottom: 3px solid #b3701f;
   padding-bottom: 8px;
   display: inline-block;
+  position: relative;
 }
 
-/* Document status container */
+.secretary-view-section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background-color: #710808;
+}
+
+/* Info lists styling - Enhanced */
+.secretary-info-view-list {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  width: 100%;
+}
+
+.secretary-info-view-item {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #b3701f;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secretary-info-view-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.secretary-info-view-item p {
+  margin: 0;
+  font-size: clamp(13px, 1.5vw, 16px);
+  color: #495057;
+  line-height: 1.6;
+  font-family: Roboto;
+  font-weight: 400;
+}
+
+/* Action buttons - Responsive */
+.secretary-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 40px 0 50px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.secretary-bap-submit-button {
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  padding: 14px 35px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: Roboto;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.3);
+  min-width: 150px;
+  touch-action: manipulation;
+}
+
+.secretary-bap-submit-button:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 112, 31, 0.4);
+}
+
+.secretary-bap-submit-button:active {
+  transform: translateY(0);
+}
+
+/* Download certificate button */
+.secretary-download-certificate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: Roboto;
+  box-shadow: 0 2px 8px rgba(179, 112, 31, 0.2);
+  touch-action: manipulation;
+}
+
+.secretary-download-certificate-btn:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.3);
+}
+
+/* Loading and error states */
+.secretary-baptism-view-loading,
+.secretary-baptism-view-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+  font-family: Roboto;
+  color: #573901;
+  min-height: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secretary-baptism-view-loading {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.secretary-baptism-view-error {
+  gap: 20px;
+}
+
+.secretary-baptism-view-error button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Roboto;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.secretary-baptism-view-error button:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-1px);
+}
+
+/* Input field styling - Enhanced */
+.secretary-view-input {
+  padding: 12px 16px;
+  background-color: #fff;
+  color: #333;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Roboto;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.secretary-view-input:focus {
+  outline: none;
+  border-color: #b3701f;
+  box-shadow: 0 0 0 3px rgba(179, 112, 31, 0.1);
+  background-color: #fefefe;
+}
+
+.secretary-view-input:hover {
+  border-color: #b3701f;
+}
+
+.secretary-view-input[type="date"],
+.secretary-view-input[type="time"] {
+  cursor: pointer;
+}
+
+.secretary-view-input[type="date"]::-webkit-calendar-picker-indicator,
+.secretary-view-input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 8px;
+  filter: invert(0.5);
+  transition: filter 0.2s ease;
+}
+
+.secretary-view-input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.secretary-view-input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(0.3);
+}
+
+/* Document Status Styling */
 .secretary-document-status-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
-/* Status indicators */
 .secretary-view-status {
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
-  word-break: break-word;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .secretary-view-submitted {
@@ -421,330 +670,339 @@
   border: 1px solid #ffeeba;
 }
 
-/* View document button */
 .secretary-view-document-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background-color: #573901;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 6px 10px;
+  border-radius: 6px;
+  padding: 8px 12px;
   font-size: 12px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  white-space: nowrap;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  touch-action: manipulation;
 }
 
 .secretary-view-document-btn:hover {
   background-color: #422c01;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(87, 57, 1, 0.3);
 }
 
-/* Info lists */
-.secretary-info-view-list {
-  margin-left: 1rem;
-  padding-left: 1rem;
-  border-left: 3px solid #710808;
-}
-
-.secretary-info-view-item {
-  background-color: #f9f9f9;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.secretary-info-view-item p {
-  margin: 0;
-  font-size: clamp(14px, 1.5vw, 16px);
-  color: #555;
-  line-height: 1.5;
-  font-family: Roboto;
-  font-weight: 400;
-}
-
-/* Action buttons */
-.secretary-action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 30px 0;
-  flex-wrap: wrap;
-}
-
-.secretary-submit-button {
-  background-color: #b3701f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 30px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-family: Montserrat;
-  min-width: 120px;
-}
-
-.secretary-submit-button:hover {
-  background-color: #8a5612;
-}
-
-/* Document viewer modal */
+/* Modal Styling - Enhanced with fixed scrolling */
 .secretary-document-viewer-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   padding: 20px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
-.secretary-document-viewer-container {
-  background-color: white;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 800px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-}
-
+.secretary-document-viewer-container,
 .secretary-certificate-modal-container {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 100%;
-  max-width: 700px;
+  max-width: 900px;
   max-height: 90vh;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
+/* FIXED: Certificate Modal fixes for proper PDF generation */
+.secretary-certificate-modal-container.capturing {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.secretary-certificate-modal-content.capturing {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Modal scrollbar styling */
+.secretary-document-viewer-container::-webkit-scrollbar,
 .secretary-certificate-modal-container::-webkit-scrollbar {
-  width: 5px;
-  background-color: #ffffff;
+  width: 6px;
 }
 
+.secretary-document-viewer-container::-webkit-scrollbar-thumb,
 .secretary-certificate-modal-container::-webkit-scrollbar-thumb {
-  background-color: #dbdbdb;
-  border-radius: 5px;
+  background-color: #b3701f;
+  border-radius: 3px;
 }
 
+.secretary-document-viewer-container::-webkit-scrollbar-track,
 .secretary-certificate-modal-container::-webkit-scrollbar-track {
-  background-color: #ffffff;
+  background-color: #f1f1f1;
 }
 
 .secretary-document-viewer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  background-color: #573901;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #573901, #422c01);
   color: white;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
 }
 
 .secretary-document-viewer-header h3 {
   margin: 0;
   font-family: Montserrat;
-  font-size: clamp(16px, 2vw, 18px);
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 600;
 }
 
 .secretary-document-close-btn {
-  background: none;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
   font-size: 24px;
   cursor: pointer;
-  padding: 0;
-  width: 30px;
-  height: 30px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
 }
 
+.secretary-document-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Modal Content */
+.secretary-certificate-modal-content,
 .secretary-document-viewer-content {
-  padding: 20px;
-  overflow-y: auto;
-  max-height: calc(90vh - 60px);
-}
-
-.secretary-document-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 400px;
-  text-align: center;
-  color: #6c757d;
-}
-
-/* Certificate modal styles */
-.secretary-certificate-modal-content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  padding: 25px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .secretary-certificate-modal-actions {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 25px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .secretary-certificate-download-btn,
 .secretary-certificate-cancel-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: Roboto;
+  transition: all 0.3s ease;
+  min-width: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-family: Montserrat;
-  min-width: 120px;
+  touch-action: manipulation;
 }
 
 .secretary-certificate-download-btn {
-  background-color: #b3701f;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
   color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.3);
 }
 
 .secretary-certificate-download-btn:hover {
-  background-color: #8a5612;
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 112, 31, 0.4);
 }
 
 .secretary-certificate-cancel-btn {
   background-color: #6c757d;
   color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
 }
 
 .secretary-certificate-cancel-btn:hover {
   background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
 }
 
-/* Modal styles for success/error/confirm */
+/* Success/Error/Confirm Modal Styling */
 .secretary-success-modal-container,
 .secretary-error-modal-container,
 .secretary-confirm-modal-container {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 100%;
   max-width: 500px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .secretary-success-header,
 .secretary-error-header,
 .secretary-confirm-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  color: white;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
 }
 
 .secretary-success-header {
-  background-color: #28a745;
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  color: white;
 }
 
 .secretary-error-header {
-  background-color: #dc3545;
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
 }
 
 .secretary-confirm-header {
-  background-color: #ffc107;
-  color: #000;
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  color: #212529;
+}
+
+.secretary-success-header h3,
+.secretary-error-header h3,
+.secretary-confirm-header h3 {
+  margin: 0;
+  font-family: Montserrat;
+  font-weight: 600;
 }
 
 .secretary-success-content,
 .secretary-error-content,
 .secretary-confirm-content {
-  padding: 30px;
+  padding: 30px 25px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .secretary-success-icon,
 .secretary-error-icon,
 .secretary-confirm-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20px;
-  font-size: 30px;
-  font-weight: bold;
-  color: white;
+  font-size: 48px;
+  margin-bottom: 20px;
+  display: block;
 }
 
 .secretary-success-icon {
-  background-color: #28a745;
+  color: #28a745;
 }
 
 .secretary-error-icon {
-  background-color: #dc3545;
+  color: #dc3545;
 }
 
 .secretary-confirm-icon {
-  background-color: #ffc107;
-  color: #000;
+  color: #ffc107;
 }
 
 .secretary-success-ok-btn,
 .secretary-error-ok-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 30px;
+  padding: 12px 30px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  font-family: Montserrat;
+  font-family: Roboto;
   margin-top: 20px;
+  border: none;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.secretary-success-ok-btn {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  color: white;
+}
+
+.secretary-success-ok-btn:hover {
+  background: linear-gradient(135deg, #1e7e34, #155724);
+  transform: translateY(-1px);
+}
+
+.secretary-error-ok-btn {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: white;
+}
+
+.secretary-error-ok-btn:hover {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: translateY(-1px);
 }
 
 .secretary-confirm-buttons {
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-top: 20px;
+  margin-top: 25px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .secretary-confirm-yes-btn,
 .secretary-confirm-no-btn {
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
+  padding: 12px 24px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  font-family: Montserrat;
+  font-family: Roboto;
+  border: none;
+  transition: all 0.3s ease;
   min-width: 100px;
+  touch-action: manipulation;
 }
 
 .secretary-confirm-yes-btn {
-  background-color: #28a745;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
   color: white;
+}
+
+.secretary-confirm-yes-btn:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-1px);
 }
 
 .secretary-confirm-no-btn {
@@ -752,217 +1010,380 @@
   color: white;
 }
 
-/* Certificate Preview Styles */
-.baptism-certificate-preview {
-  width: 100%;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-  padding: 30px 20px;
-  margin: 20px 0;
-  position: relative;
-  font-family: "Times New Roman", serif;
-  color: #000;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+.secretary-confirm-no-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
 }
 
-.certificate-header {
-  text-align: center;
-  margin-bottom: 25px;
-  position: relative;
-  z-index: 2;
+/* FIXED: Certificate preview styling - Optimized for PDF generation */
+.baptism-certificate-preview {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  min-height: auto !important;
+  padding: 20px;
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  /* Default styling for modal display */
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Capture mode - remove ALL visual decorations for clean PDF */
+.baptism-certificate-preview.capture-mode {
+  width: auto !important;
+  min-width: auto !important;
+  max-width: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  background: #ffffff !important;
+  display: block !important;
+  position: static !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  margin-bottom: 10px !important;
+  width: 100% !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-label {
+  min-width: 200px !important;
+  width: 200px !important;
+  font-weight: bold !important;
+  margin-right: 10px !important;
+  flex-shrink: 0 !important;
+  color: #573901 !important;
+  font-size: 14px !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-value {
+  flex: 1 !important;
+  border-bottom: 1px solid #333 !important;
+  padding-bottom: 2px !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  min-width: 120px !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-logos {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  margin-bottom: 20px !important;
+  width: 100% !important;
+}
+
+.baptism-certificate-preview.capture-mode .parish-title {
+  order: 0 !important;
+  margin: 0 20px !important;
+  text-align: center !important;
+  flex-grow: 1 !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-reference {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 15px !important;
+  width: 100% !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-title {
+  text-align: center !important;
+  margin: 25px 0 !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #573901 !important;
+}
+
+.baptism-certificate-preview.capture-mode .parish-logo-left,
+.baptism-certificate-preview.capture-mode .parish-logo-right {
+  width: 70px !important;
+  height: 70px !important;
+  flex-shrink: 0 !important;
+}
+
+.baptism-certificate-preview.capture-mode .diocese-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #573901 !important;
+  margin-bottom: 5px !important;
+}
+
+.baptism-certificate-preview.capture-mode .parish-name {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #573901 !important;
+  margin-bottom: 5px !important;
+}
+
+.baptism-certificate-preview.capture-mode .parish-address {
+  font-size: 14px !important;
+  color: #666 !important;
+  font-style: italic !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-details {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100% !important;
+  margin-bottom: 30px !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-footer {
+  margin-top: 30px !important;
+  height: auto !important;
+  width: 100% !important;
+}
+
+.baptism-certificate-preview.capture-mode .certificate-header-bap {
+  width: 100% !important;
+  margin-bottom: 20px !important;
+}
+
+.baptism-certificate-preview.capture-mode .reference-row {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+.baptism-certificate-preview.capture-mode .reference-label {
+  font-size: 12px !important;
+  color: #666 !important;
+  font-weight: 500 !important;
+}
+
+.baptism-certificate-preview.capture-mode .reference-value {
+  font-size: 14px !important;
+  color: #333 !important;
+  font-weight: 600 !important;
+  padding: 4px 8px !important;
+  background-color: #f8f9fa !important;
+  border-radius: 4px !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+/* Certificate header */
+.certificate-header-bap {
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .certificate-logos {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 15px;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
 .parish-logo-left,
 .parish-logo-right {
+  width: 70px;
+  height: 70px;
   flex-shrink: 0;
 }
 
-.parish-logo-left {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #ccc;
-}
-
-.parish-logo-left img {
+.parish-logo-left img,
+.parish-logo-right img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-.parish-logo-right {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.parish-logo-right img {
-  max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
 }
 
 .parish-title {
   text-align: center;
   flex-grow: 1;
-  min-width: 200px;
+  margin: 0 20px;
 }
 
 .diocese-title {
-  font-size: clamp(14px, 2vw, 16px);
-  color: #720808;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 600;
+  color: #573901;
   margin-bottom: 5px;
 }
 
 .parish-name {
-  font-size: clamp(16px, 2.5vw, 20px);
-  color: #720808;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 700;
+  color: #573901;
   margin-bottom: 5px;
 }
 
 .parish-address {
-  font-size: clamp(12px, 1.5vw, 14px);
+  font-size: 14px;
+  color: #666;
   font-style: italic;
 }
 
 .certificate-title {
-  font-size: clamp(18px, 2.5vw, 22px);
-  font-weight: bold;
-  margin: 15px 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #573901;
+  margin: 25px 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: center;
 }
 
+/* Certificate details */
 .certificate-details {
-  margin-top: 20px;
-  position: relative;
-  z-index: 2;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  width: 100%;
+  margin-bottom: 30px;
 }
 
 .certificate-row {
-  display: flex;
   margin-bottom: 10px;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 5px;
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
 .certificate-label {
-  width: 140px;
   font-weight: bold;
-  font-size: clamp(10px, 1.2vw, 11px);
-  text-transform: uppercase;
+  margin-right: 10px;
+  min-width: 200px;
+  color: #573901;
+  font-size: 14px;
   flex-shrink: 0;
 }
 
 .certificate-value {
   flex: 1;
-  font-size: clamp(11px, 1.3vw, 12px);
-  padding-left: 5px;
-  border-bottom: 1px dotted #aaa;
-  min-height: 16px;
-  min-width: 150px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 2px;
+  color: #333;
+  font-size: 14px;
+  min-width: 120px;
 }
 
+/* Certificate footer */
 .certificate-footer {
   margin-top: 30px;
-  position: relative;
-  z-index: 2;
+  height: auto !important;
+  width: 100%;
 }
 
 .certificate-reference {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
   width: 100%;
-  max-width: 250px;
-  margin-bottom: 20px;
 }
 
 .reference-row {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: clamp(10px, 1.2vw, 11px);
+  flex-direction: column;
+  gap: 5px;
 }
 
 .reference-label {
-  font-weight: bold;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
 }
 
 .reference-value {
-  text-align: right;
-}
-
-/* Loading and Error States */
-.secretary-baptism-view-loading,
-.secretary-baptism-view-error {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  font-family: Roboto;
-  font-size: 18px;
-  color: #573901;
-}
-
-.secretary-baptism-view-error {
-  flex-direction: column;
-  gap: 20px;
-}
-
-.secretary-baptism-view-error button {
-  background-color: #b3701f;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
   font-size: 14px;
-  cursor: pointer;
-  font-family: Roboto;
+  color: #333;
+  font-weight: 600;
+  padding: 4px 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
 }
 
-/* Responsive breakpoints */
+/* Debug Info Styles */
+.secretary-baptism-view-container div[style*="debug"] {
+  border: 1px solid #ddd;
+  font-family: monospace;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  margin: 10px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
 
-/* Large tablets and small laptops (768px - 1024px) */
+/* Responsive Breakpoints - Enhanced for scrolling */
+
+/* Large tablets and small laptops (1024px and below) */
 @media (max-width: 1024px) {
   .secretary-baptism-view-container {
     padding: 15px;
+    max-height: 100vh;
   }
   
   .secretary-baptismal-view-info-card {
     padding: 20px;
+    margin-bottom: 110px;
+  }
+  
+  .secretary-baptismal-view-row-date {
+    grid-template-columns: 1fr 1fr;
   }
   
   .secretary-baptismal-view-row {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+  
+  .secretary-marital-view-options {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
   
   .certificate-logos {
-    justify-content: center;
-    gap: 20px;
+    gap: 15px;
+  }
+  
+  .parish-title {
+    min-width: 180px;
+  }
+  
+  .secretary-bap-submit-button {
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 120px;
   }
 }
 
 /* Tablets (768px and below) */
 @media (max-width: 768px) {
   .secretary-baptism-view-container {
-    padding: 10px;
+    padding: 12px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-baptism-view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    position: relative;
+    top: auto;
+    background-color: transparent;
+    backdrop-filter: none;
   }
   
   .secretary-baptismal-view-row-date {
@@ -970,24 +1391,26 @@
     gap: 15px;
   }
   
-  .secretary-baptismal-view-row {
+  .secretary-baptismal-view-row,
+  .secretary-address-view-row {
     grid-template-columns: 1fr;
     gap: 15px;
   }
   
-  .secretary-address-view-row {
-    grid-template-columns: 1fr;
-  }
-  
   .secretary-marital-view-options {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 10px;
   }
   
   .secretary-years-view-married {
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 8px;
+  }
+  
+  .secretary-view-pms-label {
+    padding: 10px 14px;
+    justify-content: center;
   }
   
   .certificate-logos {
@@ -996,15 +1419,23 @@
     gap: 15px;
   }
   
+  .parish-title {
+    order: -1;
+    min-width: unset;
+    width: 100%;
+    margin: 0;
+  }
+  
   .certificate-row {
     flex-direction: column;
+    gap: 3px;
     align-items: flex-start;
-    gap: 2px;
   }
   
   .certificate-label {
     width: 100%;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    min-width: auto;
   }
   
   .certificate-value {
@@ -1012,37 +1443,81 @@
     min-width: unset;
   }
   
-  .secretary-document-viewer-overlay {
-    padding: 10px;
+  .secretary-action-buttons {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .secretary-bap-submit-button {
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 120px;
   }
   
   .secretary-certificate-modal-actions {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
   }
   
+  .secretary-certificate-download-btn,
+  .secretary-certificate-cancel-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+  
   .secretary-confirm-buttons {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+  }
+  
+  .secretary-confirm-yes-btn,
+  .secretary-confirm-no-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .secretary-document-viewer-overlay {
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .secretary-document-viewer-container,
+  .secretary-certificate-modal-container {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+  
+  .secretary-document-viewer-header {
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+  }
+  
+  .secretary-certificate-modal-content,
+  .secretary-document-viewer-content {
+    padding: 20px;
+  }
+  
+  .certificate-reference {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 
 /* Mobile devices (480px and below) */
 @media (max-width: 480px) {
   .secretary-baptism-view-container {
-    padding: 8px;
+    padding: 10px;
+    padding-bottom: 20px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
   }
   
-  .secretary-baptism-view-header {
-    margin-bottom: 20px;
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-  
-  .secretary-view-right-section {
-    width: 100%;
-    justify-content: center;
+  .secretary-view-title {
+    margin-bottom: 15px;
+    font-size: clamp(18px, 5vw, 24px);
   }
   
   .secretary-baptismal-view-info-card {
@@ -1053,9 +1528,23 @@
     padding: 15px;
   }
   
-  .secretary-info-view-list {
-    margin-left: 0.5rem;
-    padding-left: 0.5rem;
+  .secretary-info-view-item {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+  }
+  
+  .secretary-godparent-item {
+    padding: 15px;
+  }
+  
+  .secretary-view-input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .secretary-view-value {
+    padding: 8px 12px;
+    font-size: 13px;
   }
   
   .secretary-document-status-container {
@@ -1066,7 +1555,6 @@
   
   .secretary-view-status {
     width: 100%;
-    text-align: center;
   }
   
   .secretary-view-document-btn {
@@ -1075,101 +1563,12 @@
   }
   
   .baptism-certificate-preview {
-    padding: 20px 15px;
-  }
-  
-  .parish-logo-left,
-  .parish-logo-right {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .certificate-reference {
-    font-size: 10px;
-  }
-  
-  .secretary-success-modal-container,
-  .secretary-error-modal-container,
-  .secretary-confirm-modal-container {
-    margin: 10px;
-    max-width: calc(100vw - 20px);
-  }
-  
-  .secretary-success-content,
-  .secretary-error-content,
-  .secretary-confirm-content {
-    padding: 20px;
-  }
-  
-  .secretary-success-icon,
-  .secretary-error-icon,
-  .secretary-confirm-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
-  }
-  .secretary-baptismal-view-row-date{
-    flex-direction: column;
-  }
-}
-
-/* Very small mobile devices (360px and below) */
-@media (max-width: 360px) {
-  .secretary-baptism-view-container {
-    padding: 5px;
-  }
-  
-  .secretary-view-title {
-    margin-bottom: 20px;
-  }
-  
-  .secretary-baptismal-view-info-card {
-    padding: 10px;
-  }
-  
-  .secretary-baptismal-view-field-date,
-  .secretary-baptismal-view-field-time {
-    gap: 5px;
-  }
-  
-  .secretary-view-input,
-  .secretary-view-value {
-    padding: 8px;
-    font-size: 13px;
-  }
-  
-  .secretary-requirements-view-box {
-    padding: 10px;
-  }
-  
-  .secretary-info-view-item {
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .secretary-action-buttons {
-    margin: 20px 0;
-  }
-  
-  .secretary-submit-button {
-    padding: 10px 20px;
-    font-size: 14px;
-    width: 100%;
-  }
-  
-  .baptism-certificate-preview {
     padding: 15px 10px;
   }
   
-  .certificate-details {
-    margin-top: 15px;
-  }
-  
-  .certificate-row {
-    margin-bottom: 8px;
-  }
-  
-  .certificate-footer {
-    margin-top: 20px;
+  .certificate-reference {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
   
   .parish-logo-left,
@@ -1178,12 +1577,189 @@
     height: 40px;
   }
   
-  .certificate-reference {
-    font-size: 9px;
+  .secretary-success-modal-container,
+  .secretary-error-modal-container,
+  .secretary-confirm-modal-container {
+    margin: 10px;
+    max-width: calc(100vw - 20px);
+    max-height: 95vh;
   }
   
-  .reference-row {
-    margin-bottom: 4px;
+  .secretary-certificate-modal-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .secretary-success-content,
+  .secretary-error-content,
+  .secretary-confirm-content {
+    padding: 20px 15px;
+  }
+  
+  .secretary-success-icon,
+  .secretary-error-icon,
+  .secretary-confirm-icon {
+    font-size: 32px;
+  }
+  
+  .secretary-document-viewer-header {
+    padding: 12px 15px;
+  }
+  
+  .secretary-certificate-modal-content,
+  .secretary-document-viewer-content {
+    padding: 15px;
+  }
+  
+  .secretary-document-viewer-overlay {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .secretary-bap-submit-button {
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 180px;
+  }
+}
+
+/* Very small mobile devices (360px and below) */
+@media (max-width: 360px) {
+  .secretary-baptism-view-container {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .secretary-baptismal-view-info-card {
+    padding: 12px;
+  }
+  
+  .secretary-requirements-view-box {
+    padding: 12px;
+  }
+  
+  .secretary-info-view-item {
+    padding: 10px 12px;
+  }
+  
+  .secretary-view-input,
+  .secretary-view-value {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  
+  .secretary-bap-submit-button {
+    padding: 12px 20px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 120px;
+  }
+  
+  .baptism-certificate-preview {
+    padding: 12px 8px;
+  }
+  
+  .parish-logo-left,
+  .parish-logo-right {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .certificate-title {
+    margin: 12px 0;
+  }
+  
+  .certificate-details {
+    margin-bottom: 15px;
+  }
+  
+  .certificate-footer {
+    margin-top: 15px;
+  }
+  
+  .secretary-success-content,
+  .secretary-error-content,
+  .secretary-confirm-content {
+    padding: 15px 10px;
+  }
+  
+  .secretary-success-icon,
+  .secretary-error-icon,
+  .secretary-confirm-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+}
+
+/* Landscape orientation adjustments for tablets */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .secretary-baptism-view-container {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .secretary-baptismal-view-row-date {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .secretary-baptismal-view-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  
+  .secretary-marital-view-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .certificate-logos {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .parish-title {
+    order: 0;
+  }
+}
+
+/* Portrait orientation adjustments for mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+  .secretary-baptism-view-container {
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-baptismal-view-row-date,
+  .secretary-baptismal-view-row,
+  .secretary-address-view-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .secretary-marital-view-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .certificate-logos {
+    flex-direction: column;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-appearance: none) {
+  .secretary-baptism-view-container {
+    height: 100vh;
+    height: -webkit-fill-available;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-view-input[type="date"],
+  .secretary-view-input[type="time"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
   }
 }
 
@@ -1191,13 +1767,23 @@
 @media print {
   .baptism-certificate-preview {
     box-shadow: none;
-    border: none;
+    border: 1px solid #000;
     page-break-inside: avoid;
+    width: 100%;
+    max-width: none;
   }
   
   .secretary-certificate-modal-actions,
   .secretary-document-viewer-header {
     display: none;
+  }
+  
+  .secretary-certificate-modal-content {
+    padding: 0;
+  }
+  
+  body {
+    overflow: visible;
   }
 }
 
@@ -1212,44 +1798,53 @@
 
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
   .secretary-view-input:focus,
-  .secretary-submit-button,
+  .secretary-bap-submit-button,
   .secretary-view-document-btn,
   .secretary-certificate-download-btn,
-  .secretary-certificate-cancel-btn {
+  .secretary-certificate-cancel-btn,
+  .secretary-godparent-item,
+  .secretary-info-view-item {
     transition: none;
+    transform: none;
   }
 }
 
-/* Dark mode support (if needed) */
-@media (prefers-color-scheme: dark) {
-  /* Add dark mode styles if required */
+/* Focus indicators for better accessibility */
+.secretary-view-input:focus,
+.secretary-bap-submit-button:focus,
+.secretary-view-document-btn:focus,
+.secretary-certificate-download-btn:focus,
+.secretary-certificate-cancel-btn:focus,
+.secretary-view-back-button:focus {
+  outline: 3px solid #b3701f;
+  outline-offset: 2px;
 }
 
-/* Landscape orientation adjustments for tablets */
-@media (max-width: 1024px) and (orientation: landscape) {
-  .secretary-baptismal-view-row-date {
-    grid-template-columns: 1fr 1fr;
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .secretary-bap-submit-button,
+  .secretary-view-document-btn,
+  .secretary-certificate-download-btn,
+  .secretary-certificate-cancel-btn,
+  .secretary-view-back-button {
+    min-height: 44px;
+    min-width: 44px;
   }
   
-  .secretary-baptismal-view-row {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .secretary-view-input {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
   }
   
-  .certificate-logos {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-/* Portrait orientation adjustments for mobile */
-@media (max-width: 768px) and (orientation: portrait) {
-  .secretary-baptismal-view-row-date,
-  .secretary-baptismal-view-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .certificate-logos {
-    flex-direction: column;
+  .secretary-godparent-item:hover,
+  .secretary-info-view-item:hover {
+    transform: none;
   }
 }

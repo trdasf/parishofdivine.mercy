@@ -29,26 +29,95 @@ const ParishAppointment = () => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
+        console.log("🚀 Starting to fetch appointments...");
         
-        // Try using a relative path first
-        const response = await fetch("/backend/fetch_all_approved_appointments.php");
+        const response = await fetch("https://parishofdivinemercy.com/backend/fetch_all_approved_appointments.php");
         
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log("📦 Raw response from server:", data);
         
         if (data.success) {
-          setAppointments(data.appointments);
+          const fetchedAppointments = data.appointments;
+          console.log("✅ Successfully fetched appointments:", fetchedAppointments);
+          
+          // Count appointments by sacrament type
+          const sacramentCounts = {};
+          allSacramentTypes.forEach(type => {
+            if (type !== "All") {
+              sacramentCounts[type] = 0;
+            }
+          });
+          
+          fetchedAppointments.forEach(appointment => {
+            const sacramentType = appointment.sacramentType;
+            if (sacramentCounts.hasOwnProperty(sacramentType)) {
+              sacramentCounts[sacramentType]++;
+            } else {
+              sacramentCounts[sacramentType] = 1;
+            }
+          });
+          
+          console.log("📊 APPOINTMENT COUNT BY SACRAMENT TYPE:");
+          console.log("==========================================");
+          Object.entries(sacramentCounts).forEach(([sacrament, count]) => {
+            console.log(`${sacrament}: ${count} appointments`);
+          });
+          console.log("==========================================");
+          console.log(`🔢 TOTAL APPOINTMENTS: ${fetchedAppointments.length}`);
+          
+          // Log server-provided breakdown if available
+          if (data.sacrament_breakdown) {
+            console.log("🔍 Server-provided sacrament breakdown:", data.sacrament_breakdown);
+          }
+          
+          // Log any errors from the server
+          if (data.errors && data.errors.length > 0) {
+            console.warn("⚠️ Server errors:", data.errors);
+          }
+          
+          // Detailed logging for each sacrament type with sample data
+          console.log("📋 DETAILED BREAKDOWN:");
+          allSacramentTypes.forEach(sacramentType => {
+            if (sacramentType !== "All") {
+              const appointmentsOfType = fetchedAppointments.filter(apt => apt.sacramentType === sacramentType);
+              console.log(`\n🔹 ${sacramentType}:`);
+              console.log(`   Count: ${appointmentsOfType.length}`);
+              if (appointmentsOfType.length > 0) {
+                console.log(`   Sample data:`, appointmentsOfType.slice(0, 2).map(apt => ({
+                  id: apt.id,
+                  uniqueId: apt.uniqueId, // Added uniqueId to logging
+                  name: `${apt.firstName} ${apt.lastName}`,
+                  date: apt.date,
+                  time: apt.time,
+                  status: apt.status
+                })));
+              } else {
+                console.log(`   ❌ No appointments found`);
+              }
+            }
+          });
+          
+          setAppointments(fetchedAppointments);
         } else {
-          throw new Error(data.message || "Failed to fetch appointments");
+          const errorMsg = data.message || "Failed to fetch appointments";
+          console.error("❌ Server returned error:", errorMsg);
+          if (data.errors) {
+            console.error("❌ Additional errors:", data.errors);
+          }
+          throw new Error(errorMsg);
         }
       } catch (err) {
+        console.error("💥 Error fetching appointments:");
+        console.error("Error message:", err.message);
+        console.error("Full error:", err);
         setError(err.message);
-        console.error("Error fetching appointments:", err);
       } finally {
         setLoading(false);
+        console.log("🏁 Fetch appointments process completed");
       }
     };
 
@@ -81,6 +150,7 @@ const ParishAppointment = () => {
     
     return dateString; // Return original if format not recognized
   };
+  
   const normalizeSpaces = (str) => {
     return str.trim().replace(/\s+/g, ' ');
   };
@@ -172,6 +242,8 @@ const ParishAppointment = () => {
     const searchValue = e.target.value;
     setSearchTerm(searchValue);
     
+    console.log(`🔍 Search changed to: "${searchValue}"`);
+    
     // Check if the search term matches any sacrament type (only if no filter is selected)
     if (searchValue.trim() !== "" && activeFilter === "All") {
       const matchingSacrament = allSacramentTypes.find(sacrament => 
@@ -180,6 +252,7 @@ const ParishAppointment = () => {
       );
       
       if (matchingSacrament) {
+        console.log(`🎯 Exact sacrament match found: ${matchingSacrament}`);
         setActiveFilter(matchingSacrament);
       } else {
         // Check for partial matches with exact sacrament type
@@ -189,17 +262,21 @@ const ParishAppointment = () => {
         );
         
         if (partialMatch) {
+          console.log(`🎯 Partial sacrament match found: ${partialMatch}`);
           setActiveFilter(partialMatch);
         }
       }
     } else if (searchValue.trim() === "") {
       // If search is cleared, reset filter to "All" only if no manual filter was selected
+      console.log("🔄 Search cleared, resetting filter to 'All'");
       setActiveFilter("All");
     }
   };
 
   // View appointment details
   const viewAppointmentDetails = (appointment) => {
+    console.log(`👁️ Viewing appointment details for: ${appointment.sacramentType} - ${appointment.firstName} ${appointment.lastName} (ID: ${appointment.id})`);
+    
     switch(appointment.sacramentType) {
       case "Baptism":
         navigate("/baptism-view", { 
@@ -258,12 +335,15 @@ const ParishAppointment = () => {
         });
         break;
       default:
-        console.log(`Unknown sacrament: ${appointment.sacramentType}`);
+        console.log(`❓ Unknown sacrament: ${appointment.sacramentType}`);
     }
   };
 
   // Filter appointments based on the active filter and search term
   const filteredAppointments = React.useMemo(() => {
+    console.log("🔍 Starting filtering process...");
+    console.log(`Filter: "${activeFilter}", Search: "${searchTerm}"`);
+    
     const filtered = appointments.filter(appointment => {
       const matchesFilter = activeFilter === "All" || appointment.sacramentType === activeFilter;
       
@@ -338,28 +418,50 @@ const ParishAppointment = () => {
       }
       
       // Console log for debugging
-      console.log(`ID: ${appointment.id} | ${reason}`);
+      console.log(`ID: ${appointment.id} | Sacrament: ${appointment.sacramentType} | UniqueId: ${appointment.uniqueId} | ${reason}`);
       
       return result;
     });
 
-    // Remove duplicates based on appointment ID
-    const uniqueFiltered = filtered.filter((appointment, index, self) => 
-      index === self.findIndex(apt => apt.id === appointment.id)
-    );
+    // No need for additional deduplication since backend handles it properly now
+    // Just add a unique React key using the server-provided uniqueId
+    const finalFiltered = filtered.map((appointment) => ({
+      ...appointment,
+      reactKey: appointment.uniqueId || `${appointment.sacramentType}-${appointment.id}-${Date.now()}` // Fallback if uniqueId missing
+    }));
 
-    // Console log summary
-    console.log("=== SEARCH SUMMARY ===");
+    // Enhanced console log summary
+    console.log("=== FILTERING SUMMARY ===");
     console.log(`Search Term: "${searchTerm}"`);
     console.log(`Normalized Search Term: "${normalizeSpaces(searchTerm)}"`);
     console.log(`Active Filter: "${activeFilter}"`);
     console.log(`Total Appointments: ${appointments.length}`);
-    console.log(`Filtered Results (with duplicates): ${filtered.length}`);
-    console.log(`Unique Filtered Results: ${uniqueFiltered.length}`);
-    console.log("Filtered Appointment IDs:", uniqueFiltered.map(apt => apt.id));
-    console.log("======================");
+    console.log(`Filtered Results: ${filtered.length}`);
+    console.log(`Final Results: ${finalFiltered.length}`);
+    
+    // Count filtered results by sacrament type
+    const filteredCounts = {};
+    finalFiltered.forEach(apt => {
+      const sacrament = apt.sacramentType;
+      filteredCounts[sacrament] = (filteredCounts[sacrament] || 0) + 1;
+    });
+    
+    console.log("📊 FILTERED RESULTS BY SACRAMENT:");
+    Object.entries(filteredCounts).forEach(([sacrament, count]) => {
+      console.log(`   ${sacrament}: ${count} appointments`);
+    });
+    
+    console.log("Filtered Appointment Details:", finalFiltered.map(apt => ({
+      id: apt.id,
+      uniqueId: apt.uniqueId,
+      sacrament: apt.sacramentType,
+      name: `${apt.firstName} ${apt.lastName}`,
+      date: apt.date,
+      status: apt.status
+    })));
+    console.log("=========================");
 
-    return uniqueFiltered;
+    return finalFiltered;
   }, [appointments, searchTerm, activeFilter, allSacramentTypes]);
 
   return (
@@ -381,7 +483,11 @@ const ParishAppointment = () => {
           <select 
             className="filter-select-pa"
             value={activeFilter}
-            onChange={(e) => setActiveFilter(e.target.value)}
+            onChange={(e) => {
+              const newFilter = e.target.value;
+              console.log(`🏷️ Filter changed to: "${newFilter}"`);
+              setActiveFilter(newFilter);
+            }}
           >
             {allSacramentTypes.map((type) => (
               <option key={type} value={type}>{type}</option>
@@ -402,7 +508,7 @@ const ParishAppointment = () => {
           <table className="appointment-table-pa">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>#</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Sacrament Type</th>
@@ -414,9 +520,9 @@ const ParishAppointment = () => {
             </thead>
             <tbody>
               {filteredAppointments.length > 0 ? (
-                filteredAppointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td>{appointment.id}</td>
+                filteredAppointments.map((appointment, index) => (
+                  <tr key={appointment.reactKey}>
+                    <td>{index + 1}</td>
                     <td>{appointment.firstName}</td>
                     <td>{appointment.lastName}</td>
                     <td>{appointment.sacramentType}</td>

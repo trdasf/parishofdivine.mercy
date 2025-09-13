@@ -33,6 +33,26 @@ try {
     // Initialize appointments array
     $allAppointments = [];
     
+    // Helper function to format status properly (standardized)
+    function formatStatus($status) {
+        if (empty($status)) return 'Pending';
+        
+        $cleanStatus = trim($status);
+        $lowerStatus = strtolower($cleanStatus);
+        
+        // Standardize status values
+        if ($lowerStatus === 'pending') {
+            return 'Pending';
+        } elseif ($lowerStatus === 'approved') {
+            return 'Approved';
+        } elseif ($lowerStatus === 'rejected' || $lowerStatus === 'declined') {
+            return 'Rejected';
+        }
+        
+        // Default fallback - capitalize first letter
+        return ucfirst($lowerStatus);
+    }
+    
     // 1. Fetch baptism appointments
     $baptismSql = "SELECT 
                       b.baptismID as id, 
@@ -41,7 +61,7 @@ try {
                       'Baptism' as sacramentType, 
                       b.dateOfBaptism as date, 
                       b.timeOfBaptism as time, 
-                      b.status, 
+                      COALESCE(b.status, 'Pending') as status, 
                       DATE(b.created_at) as createdAt
                    FROM 
                       baptism_application b
@@ -54,6 +74,7 @@ try {
     }
     
     while ($row = $baptismResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
     
@@ -65,7 +86,7 @@ try {
                        'Marriage' as sacramentType, 
                        m.date, 
                        m.time, 
-                       m.status, 
+                       COALESCE(m.status, 'Pending') as status, 
                        DATE(m.created_at) as createdAt
                     FROM 
                        marriage_application m
@@ -78,10 +99,11 @@ try {
     }
     
     while ($row = $marriageResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
     
-    // 3. Fetch funeral mass appointments - FIXED to use deceased_info properly
+    // 3. Fetch funeral mass appointments
     $funeralSql = "SELECT 
                       f.funeralID as id,
                       d.first_name as firstName, 
@@ -89,7 +111,7 @@ try {
                       'Funeral Mass' as sacramentType, 
                       f.dateOfFuneralMass as date, 
                       f.timeOfFuneralMass as time, 
-                      f.status, 
+                      COALESCE(f.status, 'Pending') as status, 
                       DATE(f.created_at) as createdAt
                    FROM 
                       funeral_mass_application f
@@ -104,6 +126,7 @@ try {
     }
     
     while ($row = $funeralResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
     
@@ -115,7 +138,7 @@ try {
                        'Blessing' as sacramentType, 
                        b.preferredDate as date, 
                        b.preferredTime as time, 
-                       b.status, 
+                       COALESCE(b.status, 'Pending') as status, 
                        DATE(b.dateCreated) as createdAt
                     FROM 
                        blessing_application b
@@ -128,6 +151,7 @@ try {
     }
     
     while ($row = $blessingResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
     
@@ -139,7 +163,7 @@ try {
                         'Communion' as sacramentType, 
                         date, 
                         time, 
-                        status, 
+                        COALESCE(status, 'Pending') as status, 
                         DATE(created_at) as createdAt
                      FROM 
                         communion_application
@@ -152,6 +176,7 @@ try {
     }
     
     while ($row = $communionResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
     
@@ -163,7 +188,7 @@ try {
                            'Confirmation' as sacramentType, 
                            date, 
                            time, 
-                           status, 
+                           COALESCE(status, 'Pending') as status, 
                            DATE(created_at) as createdAt
                         FROM 
                            confirmation_application
@@ -176,6 +201,7 @@ try {
     }
     
     while ($row = $confirmationResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
     
@@ -187,7 +213,7 @@ try {
                         'Anointing of the Sick and Viaticum' as sacramentType, 
                         dateOfAnointing as date, 
                         timeOfAnointing as time, 
-                        status, 
+                        COALESCE(status, 'Pending') as status, 
                         DATE(dateCreated) as createdAt
                      FROM 
                         anointing_application
@@ -200,14 +226,30 @@ try {
     }
     
     while ($row = $anointingResult->fetch_assoc()) {
+        $row['status'] = formatStatus($row['status']);
         $allAppointments[] = $row;
     }
+    
+    // Sort all appointments by created date (most recent first)
+    usort($allAppointments, function($a, $b) {
+        return strtotime($b['createdAt']) - strtotime($a['createdAt']);
+    });
+    
+    // Debug: Log status distribution
+    $statusCount = [];
+    foreach ($allAppointments as $appointment) {
+        $status = $appointment['status'];
+        $statusCount[$status] = ($statusCount[$status] ?? 0) + 1;
+    }
+    error_log("Status distribution: " . json_encode($statusCount));
     
     $conn->close();
     
     echo json_encode([
         "success" => true,
-        "appointments" => $allAppointments
+        "appointments" => $allAppointments,
+        "total_count" => count($allAppointments),
+        "status_breakdown" => $statusCount
     ]);
 
 } catch (Exception $e) {
@@ -218,4 +260,4 @@ try {
         "message" => $e->getMessage()
     ]);
 }
-?> 
+?>

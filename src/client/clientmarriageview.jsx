@@ -206,15 +206,19 @@ const ClientMarriageView = () => {
                 {renderReadOnlyField(marriage.groom_religion)}
               </div>
               <div className="client-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriage.groom_citizenship)}
+              </div>
+              <div className="client-marriage-view-field">
                 <label>Date of Baptism:</label>
                 {renderReadOnlyField(formatDate(marriage.groom_dateOfBaptism))}
               </div>
+            </div>
+            <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Church of Baptism:</label>
                 {renderReadOnlyField(marriage.groom_churchOfBaptism)}
               </div>
-            </div>
-            <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Place of Birth:</label>
                 {renderReadOnlyField(marriage.groom_placeOfBirth)}
@@ -286,6 +290,12 @@ const ClientMarriageView = () => {
                 {renderReadOnlyField(groomFather?.contact_number)}
               </div>
             </div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(groomFather?.citizenship)}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -319,6 +329,12 @@ const ClientMarriageView = () => {
               <div className="client-marriage-view-field">
                 <label>Contact Number:</label>
                 {renderReadOnlyField(groomMother?.contact_number)}
+              </div>
+            </div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(groomMother?.citizenship)}
               </div>
             </div>
           </div>
@@ -362,15 +378,19 @@ const ClientMarriageView = () => {
                 {renderReadOnlyField(marriage.bride_religion)}
               </div>
               <div className="client-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriage.bride_citizenship)}
+              </div>
+              <div className="client-marriage-view-field">
                 <label>Date of Baptism:</label>
                 {renderReadOnlyField(formatDate(marriage.bride_dateOfBaptism))}
               </div>
+            </div>
+            <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Church of Baptism:</label>
                 {renderReadOnlyField(marriage.bride_churchOfBaptism)}
               </div>
-            </div>
-            <div className="client-marriage-view-row">
               <div className="client-marriage-view-field">
                 <label>Place of Birth:</label>
                 {renderReadOnlyField(marriage.bride_placeOfBirth)}
@@ -442,6 +462,12 @@ const ClientMarriageView = () => {
                 {renderReadOnlyField(brideFather?.contact_number)}
               </div>
             </div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(brideFather?.citizenship)}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -475,6 +501,12 @@ const ClientMarriageView = () => {
               <div className="client-marriage-view-field">
                 <label>Contact Number:</label>
                 {renderReadOnlyField(brideMother?.contact_number)}
+              </div>
+            </div>
+            <div className="client-marriage-view-row">
+              <div className="client-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(brideMother?.citizenship)}
               </div>
             </div>
           </div>

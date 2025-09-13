@@ -266,9 +266,32 @@ try {
                 throw new Exception("No valid email recipients found for funeralID: " . $funeralID);
             }
             
-            // Format the date for display
-            $funeralDate = $scheduledDate ? date('F j, Y', strtotime($scheduledDate)) : 'TBD';
-            $funeralTime = $scheduledTime ? date('g:i A', strtotime($scheduledTime)) : 'TBD';
+            // CORRECTED: Format the date for display (December 23, 2025 format)
+            $funeralDate = 'TBD';
+            if ($scheduledDate) {
+                $funeralDate = date('F j, Y', strtotime($scheduledDate));
+            }
+            
+            // CORRECTED: Format time to 12-hour format with AM/PM (3:00 PM format)
+            $funeralTime = 'TBD';
+            if ($scheduledTime && !empty($scheduledTime)) {
+                // Convert 24-hour format to 12-hour format with AM/PM
+                $timeObj = DateTime::createFromFormat('H:i:s', $scheduledTime);
+                if ($timeObj) {
+                    $funeralTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                } else {
+                    // Fallback: try without seconds
+                    $timeObj = DateTime::createFromFormat('H:i', $scheduledTime);
+                    if ($timeObj) {
+                        $funeralTime = $timeObj->format('g:i A');
+                    } else {
+                        // Fallback: try with strtotime (original method)
+                        $timeFromStrtotime = date('g:i A', strtotime($scheduledTime));
+                        $funeralTime = $timeFromStrtotime !== false ? $timeFromStrtotime : $scheduledTime;
+                    }
+                }
+            }
+            
             $priestName = $assignedPriest ?: 'TBD';
             
             // Full name of deceased
@@ -292,7 +315,7 @@ try {
                 $recipientName = 'Valued Parishioner';
             }
 
-            // Email content with matching color scheme
+            // Email content with matching color scheme - UPDATED MESSAGING
             $mail->isHTML(true);
             $mail->Subject = 'Funeral Mass Application APPROVED - Parish of Divine Mercy';
             $mail->Body = "
@@ -308,7 +331,9 @@ try {
                         <div style='padding: 30px 20px; background-color: #fff;'>
                             <h2 style='color: #573901; font-family: Montserrat, sans-serif; margin-bottom: 20px;'>Dear {$recipientName},</h2>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We are writing to inform you that your funeral mass application has been <strong style='color: #28a745;'>APPROVED</strong>.</p>
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We are writing to inform you that your <b>Funeral Mass Application</b> for the Parish of Divine Mercy has been <strong style='color: #28a745;'>APPROVED</strong>.</p>
+                            
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>The funeral mass has been scheduled for the date and time indicated below:</p>
                             
                             <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #28a745;'>
                                 <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Funeral Mass Details:</h3>
@@ -318,16 +343,20 @@ try {
                                         <td style='padding: 8px 0;'>{$deceasedName}</td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Date of Mass:</td>
-                                        <td style='padding: 8px 0;'>{$funeralDate}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Mass Date:</td>
+                                        <td style='padding: 8px 0;'><strong>{$funeralDate}</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                        <td style='padding: 8px 0;'>{$funeralTime}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Mass Time:</td>
+                                        <td style='padding: 8px 0;'><strong>{$funeralTime}</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Celebrant:</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Celebrating Priest:</td>
                                         <td style='padding: 8px 0;'>{$priestName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Location:</td>
+                                        <td style='padding: 8px 0;'>Parish of Divine Mercy, Alawihao, Daet</td>
                                     </tr>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Status:</td>
@@ -336,24 +365,31 @@ try {
                                 </table>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Please note the following important information:</p>
+                            <div style='background-color: #e9f7ef; border: 1px solid #b8e6c1; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                <p style='color: #0f5132; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                    <strong>Important:</strong> Please arrive at the church at least 30 minutes before the scheduled mass time. This allows time for final preparations and coordination with our funeral ministry team.
+                                </p>
+                            </div>
                             
                             <div style='margin-top: 20px;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Reminders:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Reminders for the Funeral Mass:</h3>
                                 <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
-                                    <li style='margin-bottom: 10px;'>Please arrive at least 30 minutes before the scheduled mass</li>
-                                    <li style='margin-bottom: 10px;'>Bring all original documents for verification</li>
-                                    <li style='margin-bottom: 10px;'>Photos/memorial tables are allowed but not on the altar</li>
+                                    <li style='margin-bottom: 10px;'>Bring all original documents for final verification</li>
+                                    <li style='margin-bottom: 10px;'>Photos/memorial displays are allowed but not on the altar area</li>
                                     <li style='margin-bottom: 10px;'>Eulogies may be given before/after the Mass or at the cemetery</li>
                                     <li style='margin-bottom: 10px;'>Proper and modest attire is required for all attendees</li>
+                                    <li style='margin-bottom: 10px;'>Please coordinate with funeral home regarding flowers and arrangements</li>
+                                    <li style='margin-bottom: 10px;'>Mass cards and memorial donations can be arranged through the parish office</li>
                                 </ul>
                             </div>
                             
-                            <div style='margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 8px;'>
-                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin: 0;'><em>\"Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May they rest in peace. Amen.\"</em></p>
+                            <div style='margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #573901;'>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin: 0; font-style: italic;'>\"Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May they rest in peace. Amen.\"</p>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>With deepest sympathy,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Funeral Ministry</p>
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions or need to make any changes, please contact our parish office immediately.</p>
+                            
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>Our prayers are with you and your family during this difficult time.<br><br>With deepest sympathy,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Funeral Ministry</p>
                         </div>
                         
                         <div style='background: linear-gradient(to right, #710808, #ffcccc); height: 2px; width: 100%;'></div>
@@ -367,16 +403,20 @@ try {
                 </html>
             ";
             
-            // Plain text version for non-HTML mail clients
+            // Plain text version for non-HTML mail clients - UPDATED
             $mail->AltBody = "Dear {$recipientName},\n\n" .
-                "We are writing to inform you that your funeral mass application has been APPROVED.\n\n" .
+                "We are writing to inform you that your Funeral Mass Application for the Parish of Divine Mercy has been APPROVED.\n\n" .
+                "The funeral mass has been scheduled for the date and time indicated below:\n\n" .
                 "Funeral Mass Details:\n" .
                 "Deceased: {$deceasedName}\n" .
-                "Date of Mass: {$funeralDate}\n" .
-                "Time: {$funeralTime}\n" .
-                "Celebrant: {$priestName}\n" .
+                "Mass Date: {$funeralDate}\n" .
+                "Mass Time: {$funeralTime}\n" .
+                "Celebrating Priest: {$priestName}\n" .
+                "Location: Parish of Divine Mercy, Alawihao, Daet\n" .
                 "Status: APPROVED\n\n" .
-                "Please arrive at least 30 minutes before the scheduled mass and bring all original documents for verification.\n\n" .
+                "IMPORTANT: Please arrive at the church at least 30 minutes before the scheduled mass time.\n\n" .
+                "Please bring all original documents for final verification and coordinate with the funeral home regarding arrangements.\n\n" .
+                "Our prayers are with you and your family during this difficult time.\n\n" .
                 "With deepest sympathy,\nParish of Divine Mercy\nFuneral Ministry";
 
             error_log('[FUNERAL_EMAIL] Attempting to send email...');

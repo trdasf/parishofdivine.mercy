@@ -149,7 +149,7 @@ try {
         
         $blessingData = $blessingResult->fetch_assoc();
 
-        // Get the approved appointment details (this is the key fix!)
+        // Get the approved appointment details
         $stmt = $conn->prepare("
             SELECT date, time, priest 
             FROM approved_appointments 
@@ -189,9 +189,28 @@ try {
             $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
             $mail->addAddress($userEmail, $fullName);
 
-            // Format the date for display - USE APPOINTMENT DATA instead of blessing data
-            $blessingDate = isset($appointmentData['date']) ? date('F j, Y', strtotime($appointmentData['date'])) : '';
-            $blessingTime = isset($appointmentData['time']) ? $appointmentData['time'] : '';
+            // CORRECTED: Format the date for display (December 23, 2025 format)
+            $blessingDate = isset($appointmentData['date']) ? 
+                date('F j, Y', strtotime($appointmentData['date'])) : '';
+            
+            // CORRECTED: Format time to 12-hour format with AM/PM (3:00 PM format)
+            $blessingTime = '';
+            if (isset($appointmentData['time']) && !empty($appointmentData['time'])) {
+                // Convert 24-hour format to 12-hour format with AM/PM
+                $timeObj = DateTime::createFromFormat('H:i:s', $appointmentData['time']);
+                if ($timeObj) {
+                    $blessingTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                } else {
+                    // Fallback: try without seconds
+                    $timeObj = DateTime::createFromFormat('H:i', $appointmentData['time']);
+                    if ($timeObj) {
+                        $blessingTime = $timeObj->format('g:i A');
+                    } else {
+                        $blessingTime = $appointmentData['time']; // Use original if conversion fails
+                    }
+                }
+            }
+            
             $priest = isset($appointmentData['priest']) ? $appointmentData['priest'] : '';
             
             // These remain from blessing data since they don't change
@@ -207,7 +226,7 @@ try {
                 ($blessingData['province'] ?? '')
             );
 
-            // Email content with matching color scheme
+            // Email content with matching color scheme - UPDATED MESSAGING
             $mail->isHTML(true);
             $mail->Subject = 'Blessing Application APPROVED - Parish of Divine Mercy';
             $mail->Body = "
@@ -225,8 +244,10 @@ try {
                             
                             <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We are pleased to inform you that your <b>{$blessingType} Application</b> for the Parish of Divine Mercy has been <strong style='color: #28a745;'>APPROVED</strong>!</p>
                             
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>The blessing ceremony has been scheduled for the date and time indicated below:</p>
+                            
                             <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #28a745;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Blessing Details:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Blessing Ceremony Details:</h3>
                                 <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Blessing Type:</td>
@@ -237,19 +258,19 @@ try {
                                         <td style='padding: 8px 0;'>{$purpose}</td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Date:</td>
-                                        <td style='padding: 8px 0;'>{$blessingDate}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Ceremony Date:</td>
+                                        <td style='padding: 8px 0;'><strong>{$blessingDate}</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                        <td style='padding: 8px 0;'>{$blessingTime}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Ceremony Time:</td>
+                                        <td style='padding: 8px 0;'><strong>{$blessingTime}</strong></td>
                                     </tr>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Location:</td>
                                         <td style='padding: 8px 0;'>{$location}</td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Priest:</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Officiating Priest:</td>
                                         <td style='padding: 8px 0;'>{$priest}</td>
                                     </tr>
                                     <tr>
@@ -259,10 +280,14 @@ try {
                                 </table>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Please ensure you are at the location at least 30 minutes before the scheduled time. After the blessing ceremony, a certificate will be available for download through our website.</p>
+                            <div style='background-color: #e9f7ef; border: 1px solid #b8e6c1; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                <p style='color: #0f5132; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                    <strong>Important:</strong> Please ensure you are at the location at least 30 minutes before the scheduled ceremony time. This allows time for final preparations and ensures the blessing begins promptly.
+                                </p>
+                            </div>
                             
                             <div style='margin-top: 30px;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>What to Prepare:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>What to Prepare for the Ceremony:</h3>
                                 <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>";
             
             // Add blessing type specific preparations
@@ -271,33 +296,39 @@ try {
                     $mail->Body .= "
                                     <li style='margin-bottom: 10px;'>The house should be clean and ready for occupancy</li>
                                     <li style='margin-bottom: 10px;'>All family members should be present if possible</li>
-                                    <li style='margin-bottom: 10px;'>Prepare basic blessing items (holy water will be provided by the priest)</li>";
+                                    <li style='margin-bottom: 10px;'>Prepare basic blessing items (holy water will be provided by the priest)</li>
+                                    <li style='margin-bottom: 10px;'>Clear a path through the house for the blessing procession</li>";
                     break;
                 case 'business':
                     $mail->Body .= "
                                     <li style='margin-bottom: 10px;'>The business premises should be ready and clean</li>
                                     <li style='margin-bottom: 10px;'>Owner or authorized representative must be present</li>
-                                    <li style='margin-bottom: 10px;'>Staff may be included in the prayer or ceremony</li>";
+                                    <li style='margin-bottom: 10px;'>Staff may be included in the prayer or ceremony</li>
+                                    <li style='margin-bottom: 10px;'>Ensure proper access to all areas to be blessed</li>";
                     break;
                 case 'car':
                     $mail->Body .= "
                                     <li style='margin-bottom: 10px;'>The vehicle should be clean and parked properly at the venue</li>
                                     <li style='margin-bottom: 10px;'>Bring the actual vehicle to be blessed</li>
-                                    <li style='margin-bottom: 10px;'>Owner should be present during the blessing</li>";
+                                    <li style='margin-bottom: 10px;'>Owner should be present during the blessing</li>
+                                    <li style='margin-bottom: 10px;'>Vehicle registration documents should be available if requested</li>";
                     break;
                 default:
                     $mail->Body .= "
-                                    <li style='margin-bottom: 10px;'>Please prepare the location for the blessing</li>
-                                    <li style='margin-bottom: 10px;'>Ensure all relevant parties are present</li>";
+                                    <li style='margin-bottom: 10px;'>Please prepare the location for the blessing ceremony</li>
+                                    <li style='margin-bottom: 10px;'>Ensure all relevant parties are present</li>
+                                    <li style='margin-bottom: 10px;'>Have necessary documentation available if needed</li>";
             }
             
             $mail->Body .= "
                                 </ul>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions, please contact our parish office.</p>
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>After the blessing ceremony, a certificate will be available for download through our parish website within 2-3 business days.</p>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>God bless,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Blessing Ministry</p>
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions or need to make changes to the appointment, please contact our parish office immediately.</p>
+                            
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>We look forward to celebrating this blessed occasion with you.<br><br>God bless,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Blessing Ministry</p>
                         </div>
                         
                         <div style='background: linear-gradient(to right, #710808, #ffcccc); height: 2px; width: 100%;'></div>
@@ -311,18 +342,20 @@ try {
                 </html>
             ";
             
-            // Plain text version for non-HTML mail clients
+            // Plain text version for non-HTML mail clients - UPDATED
             $mail->AltBody = "Dear {$fullName},\n\n" .
                 "We are pleased to inform you that your {$blessingType} Application for the Parish of Divine Mercy has been APPROVED!\n\n" .
-                "Blessing Details:\n" .
+                "The blessing ceremony has been scheduled for the date and time indicated below:\n\n" .
+                "Blessing Ceremony Details:\n" .
                 "Blessing Type: {$blessingType}\n" .
                 "Purpose: {$purpose}\n" .
-                "Date: {$blessingDate}\n" .
-                "Time: {$blessingTime}\n" .
+                "Ceremony Date: {$blessingDate}\n" .
+                "Ceremony Time: {$blessingTime}\n" .
                 "Location: {$location}\n" .
-                "Priest: {$priest}\n" .
+                "Officiating Priest: {$priest}\n" .
                 "Status: APPROVED\n\n" .
-                "Please ensure you are at the location at least 30 minutes before the scheduled time.\n\n" .
+                "IMPORTANT: Please ensure you are at the location at least 30 minutes before the scheduled ceremony time.\n\n" .
+                "We look forward to celebrating this blessed occasion with you.\n\n" .
                 "God bless,\nParish of Divine Mercy\nBlessing Ministry";
 
             error_log('[BLESSING_EMAIL] Attempting to send email...');

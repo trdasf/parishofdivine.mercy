@@ -10,7 +10,7 @@ import church2Img from "../assets/church2.jpg";
 
 const ConfirmationView = () => {
   // State for status and document viewing
-  const [status, setStatus] = useState("PENDING");
+   const [status, setStatus] = useState("PENDING");
   const [viewingDocument, setViewingDocument] = useState(null);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -31,6 +31,33 @@ const ConfirmationView = () => {
   
   // API base URL for consistency
   const API_BASE_URL = "https://parishofdivinemercy.com/backend";
+
+  // Function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    
+    try {
+      // Handle time strings that might have seconds
+      const timeParts = timeString.split(':');
+      let hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1];
+      
+      // Determine AM or PM
+      const period = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      if (hours === 0) {
+        hours = 12; // Midnight case
+      } else if (hours > 12) {
+        hours = hours - 12;
+      }
+      
+      return `${hours}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeString; // Return original string if formatting fails
+    }
+  };
 
   useEffect(() => {
     // Check if we have necessary state data (confirmationID)
@@ -266,88 +293,117 @@ const ConfirmationView = () => {
   };
 
   // Function to proceed with approval after confirmation
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+ // Function to proceed with approval after confirmation
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    console.log(`Approving confirmation application with ID: ${confirmationData.confirmationID}`);
     
-    try {
-      console.log(`Approving confirmation application with ID: ${confirmationData.confirmationID}`);
-      
-      // Step 1: First save the appointment data to approved_appointments table
-      const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sacramentID: confirmationData.confirmationID,
-          sacrament_type: "Confirmation",
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest
-        }),
-      });
-      
-      const appointmentResult = await appointmentResponse.json();
-      console.log("Appointment save result:", appointmentResult);
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      // Step 2: Now update the confirmation status
-      const response = await fetch(`${API_BASE_URL}/update_confirmation_status.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          confirmationID: confirmationData.confirmationID,
-          status: "Approved",
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest
-        }),
-      });
+    // Step 1: First save the appointment data to approved_appointments table
+    const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sacramentID: confirmationData.confirmationID,
+        sacrament_type: "Confirmation",
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest
+      }),
+    });
+    
+    const appointmentResult = await appointmentResponse.json();
+    console.log("Appointment save result:", appointmentResult);
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    // Step 2: Now update the confirmation status
+    const response = await fetch(`${API_BASE_URL}/update_confirmation_status.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        confirmationID: confirmationData.confirmationID,
+        status: "Approved",
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest
+      }),
+    });
 
-      // First check if the response is valid JSON
-      let result;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        result = await response.json();
-      } else {
-        // If not JSON, get the text and show it as an error
-        const text = await response.text();
-        console.error("Non-JSON response:", text);
-        throw new Error("Invalid response from server. Please check server logs.");
-      }
-      
-      if (result.success) {
-        setStatus("Approved");
-        
-        // Update local state with the selected values
-        setConfirmationData({
-          ...confirmationData,
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest,
-          status: "Approved"
+    // First check if the response is valid JSON
+    let result;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      result = await response.json();
+    } else {
+      // If not JSON, get the text and show it as an error
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Invalid response from server. Please check server logs.");
+    }
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_confirmation_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            confirmationID: confirmationData.confirmationID,
+            date: selectedDate,
+            time: selectedTime,
+            priest: selectedPriest
+          }),
         });
+
+        const emailResult = await emailResponse.json();
         
-        setSuccessMessage("Confirmation application has been approved successfully! An email notification has been sent to the client.");
-        setShowSuccessModal(true);
-      } else {
-        // Show error message from server or a default one
-        const errorMessage = result.message || "Failed to approve confirmation application";
-        setSuccessMessage(errorMessage);
-        setShowSuccessModal(true);
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
       }
-    } catch (error) {
-      console.error("Error approving confirmation application:", error);
-      setSuccessMessage("An error occurred while approving the confirmation application: " + error.message);
+      // END EMAIL SENDING
+      
+      setStatus("Approved");
+      
+      // Update local state with the selected values
+      setConfirmationData({
+        ...confirmationData,
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest,
+        status: "Approved"
+      });
+      
+      setSuccessMessage("Confirmation application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+    } else {
+      // Show error message from server or a default one
+      const errorMessage = result.message || "Failed to approve confirmation application";
+      setSuccessMessage(errorMessage);
       setShowSuccessModal(true);
     }
-  };
-
+  } catch (error) {
+    console.error("Error approving confirmation application:", error);
+    setSuccessMessage("An error occurred while approving the confirmation application: " + error.message);
+    setShowSuccessModal(true);
+  }
+};
   // Handle cancel action
   const handleCancel = () => {
     // Reset the status to previous value or redirect
@@ -709,13 +765,6 @@ const ConfirmationView = () => {
               >
                 {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
               </button>
-              <button 
-                className="secretary-conf-certificate-cancel-btn"
-                onClick={() => setShowCertificateModal(false)}
-                disabled={isDownloading}
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>
@@ -742,24 +791,24 @@ const ConfirmationView = () => {
     };
 
     return (
-      <div className="secretary-conf-document-viewer-overlay">
-        <div className={`secretary-conf-${modalType}-modal-container`}>
-          <div className={`secretary-conf-${modalType}-header`}>
+      <div className="secretary-document-viewer-overlay">
+        <div className={`secretary-${modalType}-modal-container`}>
+          <div className={`secretary-${modalType}-header`}>
             <h3>{isSuccess ? "Success" : "Error"}</h3>
             <button 
-              className="secretary-conf-document-close-btn"
+              className="secretary-document-close-btn"
               onClick={() => setShowSuccessModal(false)}
             >
               ×
             </button>
           </div>
-          <div className={`secretary-conf-${modalType}-content`}>
-            <div className={`secretary-conf-${modalType}-icon`}>
+          <div className={`secretary-${modalType}-content`}>
+            <div className={`secretary-${modalType}-icon`}>
               {isSuccess ? "✓" : "!"}
             </div>
             <p>{successMessage}</p>
             <button 
-              className={`secretary-conf-${modalType}-ok-btn`}
+              className={`secretary-${modalType}-ok-btn`}
               onClick={handleOkClick}
             >
               OK
@@ -775,33 +824,33 @@ const ConfirmationView = () => {
     if (!showConfirmModal) return null;
 
     return (
-      <div className="secretary-conf-document-viewer-overlay">
-        <div className="secretary-conf-confirm-modal-container">
-          <div className="secretary-conf-confirm-header">
+      <div className="secretary-document-viewer-overlay">
+        <div className="secretary-confirm-modal-container">
+          <div className="secretary-confirm-header">
             <h3>Confirm Approval</h3>
             <button 
-              className="secretary-conf-document-close-btn"
+              className="secretary-document-close-btn"
               onClick={() => setShowConfirmModal(false)}
             >
               ×
             </button>
           </div>
-          <div className="secretary-conf-confirm-content">
-            <div className="secretary-conf-confirm-icon">?</div>
+          <div className="secretary-confirm-content">
+            <div className="secretary-confirm-icon">?</div>
             <p>Are you sure you want to approve this confirmation appointment?</p>
             <p>Date: {selectedDate}</p>
-            <p>Time: {selectedTime}</p>
+            <p>Time: {formatTime(selectedTime)}</p>
             <p>Priest: {selectedPriest}</p>
             <p>This will send an email notification to the client.</p>
-            <div className="secretary-conf-confirm-buttons">
+            <div className="secretary-confirm-buttons">
               <button 
-                className="secretary-conf-confirm-yes-btn"
+                className="secretary-confirm-yes-btn"
                 onClick={handleConfirmApproval}
               >
                 Yes, Approve
               </button>
               <button 
-                className="secretary-conf-confirm-no-btn"
+                className="secretary-confirm-no-btn"
                 onClick={() => setShowConfirmModal(false)}
               >
                 Cancel
@@ -864,11 +913,36 @@ const ConfirmationView = () => {
             <AiOutlineArrowLeft className="secretary-conf-view-back-icon" /> Back
           </button>
         </div>
+        <div className="secretary-conf-view-right-section">
+          {status === "Approved" && (
+            <button 
+              className="secretary-conf-download-certificate-btn"
+              onClick={handleDownloadCertificate}
+            >
+              <AiOutlineDownload /> Download Certificate
+            </button>
+          )}
+        </div>
       </div>
       <h1 className="secretary-conf-view-title">Confirmation Application Details</h1>
       
       {/* Confirmation Data Section */}
       <div className="secretary-conf-view-data">
+        <div className="secretary-conf-view-info-card">
+          <h3 className="secretary-conf-view-sub-title">Appointment Request Details</h3>
+          <div className="secretary-conf-view-row-date">
+            <div className="secretary-conf-view-field-date">
+              <label>Date of Appointment:</label>
+              {renderReadOnlyField(formatDate(confirmationData.date))}
+            </div>
+            
+            <div className="secretary-conf-view-field-time">
+              <label>Time of Appointment:</label>
+              {renderReadOnlyField(formatTime(confirmationData.time))}
+            </div>
+          </div>
+        </div>
+        
         <div className="secretary-conf-view-bypart">
           <h3 className="secretary-conf-view-sub-title">Personal Information</h3>
           <div className="secretary-conf-view-info-card">

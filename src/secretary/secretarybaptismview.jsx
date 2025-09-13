@@ -258,7 +258,6 @@ const SecretaryBaptismView = () => {
   };
 
   // Function to proceed with approval after confirmation
-// Function to proceed with approval after confirmation
 const handleConfirmApproval = async () => {
   setShowConfirmModal(false);
   
@@ -390,58 +389,185 @@ const handleConfirmApproval = async () => {
     }
   };
 
-  // Function to download the certificate as PDF
-  const downloadCertificateAsPDF = async () => {
-    if (!certificateRef.current) return;
+  // FIXED Function to download the certificate as PDF
+ // Replace your downloadCertificateAsPDF function with this fixed version:
+const downloadCertificateAsPDF = async () => {
+  if (!certificateRef.current) return;
+  
+  setIsDownloading(true);
+  
+  try {
+    // Get references to modal and certificate elements
+    const modalContainer = document.querySelector('.secretary-certificate-modal-container');
+    const modalContent = document.querySelector('.secretary-certificate-modal-content');
+    const certificateElement = certificateRef.current;
     
-    setIsDownloading(true);
+    // Add capture mode classes to temporarily modify styles
+    modalContainer?.classList.add('capturing');
+    modalContent?.classList.add('capturing');
+    certificateElement?.classList.add('capture-mode');
     
-    try {
-      // First ensure all images are loaded
-      const images = certificateRef.current.querySelectorAll('img');
-      await Promise.all([...images].map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      }));
-      
-      // Generate a canvas from the certificate element
-      const canvas = await html2canvas(certificateRef.current, {
-        scale: 2, // Higher scale for better quality
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
+    // First ensure all images are loaded
+    const images = certificateRef.current.querySelectorAll('img');
+    await Promise.all([...images].map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
       });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate PDF dimensions based on the canvas aspect ratio
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      // Add the image to the PDF
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      // Save the PDF
-      const fileName = `Baptism_Certificate_${baptismData.child.firstName}_${baptismData.child.lastName}.pdf`;
-      pdf.save(fileName);
-      
-      setShowCertificateModal(false);
-      alert(`Certificate downloaded successfully!`);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
-    } finally {
-      setIsDownloading(false);
+    }));
+    
+    // Add a delay to ensure content is fully rendered with new styles
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Generate a canvas from ONLY the certificate element (not the modal)
+    const canvas = await html2canvas(certificateElement, {
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: 0,
+      // Remove any height/width restrictions to capture natural size
+      removeContainer: true,
+      onclone: (clonedDoc) => {
+        // Find the certificate in the cloned document
+        const clonedCertificate = clonedDoc.querySelector('.baptism-certificate-preview');
+        if (clonedCertificate) {
+          // Remove all borders and shadows
+          clonedCertificate.style.border = 'none';
+          clonedCertificate.style.boxShadow = 'none';
+          clonedCertificate.style.borderRadius = '0';
+          clonedCertificate.style.margin = '0';
+          clonedCertificate.style.padding = '20px';
+          clonedCertificate.style.background = '#ffffff';
+          clonedCertificate.style.width = 'auto';
+          clonedCertificate.style.height = 'auto';
+          clonedCertificate.style.maxHeight = 'none';
+          clonedCertificate.style.overflow = 'visible';
+          
+          // Ensure certificate rows display properly
+          const rows = clonedCertificate.querySelectorAll('.certificate-row');
+          rows.forEach(row => {
+            row.style.display = 'flex';
+            row.style.flexDirection = 'row';
+            row.style.alignItems = 'center';
+            row.style.marginBottom = '10px';
+            row.style.flexWrap = 'nowrap';
+          });
+          
+          // Fix labels and values
+          const labels = clonedCertificate.querySelectorAll('.certificate-label');
+          labels.forEach(label => {
+            label.style.minWidth = '200px';
+            label.style.fontWeight = 'bold';
+            label.style.marginRight = '10px';
+            label.style.flexShrink = '0';
+          });
+          
+          const values = clonedCertificate.querySelectorAll('.certificate-value');
+          values.forEach(value => {
+            value.style.flex = '1';
+            value.style.borderBottom = '1px solid #333';
+            value.style.paddingBottom = '2px';
+          });
+          
+          // Fix header layout
+          const logos = clonedCertificate.querySelector('.certificate-logos');
+          if (logos) {
+            logos.style.display = 'flex';
+            logos.style.justifyContent = 'space-between';
+            logos.style.alignItems = 'center';
+            logos.style.flexWrap = 'nowrap';
+            logos.style.marginBottom = '20px';
+          }
+          
+          // Fix title centering
+          const title = clonedCertificate.querySelector('.certificate-title');
+          if (title) {
+            title.style.textAlign = 'center';
+            title.style.margin = '25px 0';
+          }
+          
+          // Fix reference grid
+          const reference = clonedCertificate.querySelector('.certificate-reference');
+          if (reference) {
+            reference.style.display = 'grid';
+            reference.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            reference.style.gap = '15px';
+          }
+        }
+      }
+    });
+    
+    console.log('Canvas dimensions:', { 
+      width: canvas.width, 
+      height: canvas.height 
+    });
+    
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    
+    // Calculate PDF dimensions to match the certificate size
+    const pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Get PDF page dimensions
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    // Calculate image dimensions to fit the page with margins
+    const margin = 10; // 10mm margin on all sides
+    const availableWidth = pageWidth - (2 * margin);
+    const availableHeight = pageHeight - (2 * margin);
+    
+    // Calculate scaling to fit within available space while maintaining aspect ratio
+    const aspectRatio = canvas.width / canvas.height;
+    let imgWidth, imgHeight;
+    
+    if (availableWidth / aspectRatio <= availableHeight) {
+      // Width is the limiting factor
+      imgWidth = availableWidth;
+      imgHeight = availableWidth / aspectRatio;
+    } else {
+      // Height is the limiting factor
+      imgHeight = availableHeight;
+      imgWidth = availableHeight * aspectRatio;
     }
-  };
-
+    
+    // Center the image on the page
+    const xPosition = (pageWidth - imgWidth) / 2;
+    const yPosition = (pageHeight - imgHeight) / 2;
+    
+    // Add the image to the PDF
+    pdf.addImage(imgData, 'PNG', xPosition, yPosition, imgWidth, imgHeight, undefined, 'FAST');
+    
+    // Save the PDF
+    const fileName = `Baptism_Certificate_${baptismData.child.firstName}_${baptismData.child.lastName}.pdf`;
+    pdf.save(fileName);
+    
+    setShowCertificateModal(false);
+    alert(`Certificate downloaded successfully!`);
+    
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    alert("Error generating PDF. Please try again.");
+  } finally {
+    // Clean up capture mode classes
+    const modalContainer = document.querySelector('.secretary-certificate-modal-container');
+    const modalContent = document.querySelector('.secretary-certificate-modal-content');
+    const certificateElement = certificateRef.current;
+    
+    modalContainer?.classList.remove('capturing');
+    modalContent?.classList.remove('capturing');
+    certificateElement?.classList.remove('capture-mode');
+    
+    setIsDownloading(false);
+  }
+};
   // Function to render read-only input field
   const renderReadOnlyField = (value) => {
     return <div className="secretary-view-value">{value || "N/A"}</div>;

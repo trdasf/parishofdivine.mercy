@@ -555,9 +555,7 @@ const ClientAppointment = () => {
                     <td>{appointment.sacramentType}</td>
                     <td>{formatDateForDisplay(appointment.date)}</td>
                     <td>{convertTo12Hour(appointment.time)}</td>
-                    <td className={`status-${appointment.normalizedStatus?.toLowerCase()}`}>
-                      {appointment.normalizedStatus}
-                    </td>
+                    <td>{appointment.normalizedStatus}</td>
                     <td>{formatDateForDisplay(appointment.createdAt)}</td>
                     <td>
                       <button

@@ -31,6 +31,33 @@ const BaptismView = () => {
   const [appointmentDate, setAppointmentDate] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
 
+  // Function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    
+    try {
+      // Handle time strings that might have seconds
+      const timeParts = timeString.split(':');
+      let hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1];
+      
+      // Determine AM or PM
+      const period = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      if (hours === 0) {
+        hours = 12; // Midnight case
+      } else if (hours > 12) {
+        hours = hours - 12;
+      }
+      
+      return `${hours}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeString; // Return original string if formatting fails
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (baptismID)
     const baptismID = location.state?.baptismID;
@@ -231,82 +258,108 @@ const BaptismView = () => {
   };
 
   // Function to proceed with approval after confirmation
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    // Insert into approved_appointments table (removed clientID)
+    const appointmentResponse = await fetch("https://parishofdivinemercy.com/backend/save_approved_appointment.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sacramentID: baptismData.baptismID,
+        sacrament_type: "Baptism",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      }),
+    });
     
-    try {
-      // Insert into approved_appointments table (removed clientID)
-      const appointmentResponse = await fetch("https://parishofdivinemercy.com/backend/save_approved_appointment.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sacramentID: baptismData.baptismID,
-          sacrament_type: "Baptism",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        }),
-      });
-      
-      const appointmentResult = await appointmentResponse.json();
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      // Then update the baptism status
-      const response = await fetch("https://parishofdivinemercy.com/backend/update_baptism_status.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          baptismID: baptismData.baptismID,
-          status: "Approved",
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
-        }),
-      });
+    const appointmentResult = await appointmentResponse.json();
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    // Then update the baptism status
+    const response = await fetch("https://parishofdivinemercy.com/backend/update_baptism_status.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        baptismID: baptismData.baptismID,
+        status: "Approved",
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      }),
+    });
 
-      // First check if the response is valid JSON
-      let result;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        result = await response.json();
-      } else {
-        // If not JSON, get the text and show it as an error
-        const text = await response.text();
-        console.error("Non-JSON response:", text);
-        throw new Error("Invalid response from server. Please check server logs.");
-      }
-      
-      if (result.success) {
-        setStatus("Approved");
-        setSuccessMessage("Baptism application has been approved successfully! An email notification has been sent to the client.");
-        setShowSuccessModal(true);
-        
-        // Update the baptismData to reflect the changes
-        setBaptismData({
-          ...baptismData,
-          date: appointmentDate,
-          time: appointmentTime,
-          priest: selectedPriest
+    // First check if the response is valid JSON
+    let result;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      result = await response.json();
+    } else {
+      // If not JSON, get the text and show it as an error
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Invalid response from server. Please check server logs.");
+    }
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch("https://parishofdivinemercy.com/backend/approved_baptism_email.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            baptismID: baptismData.baptismID
+          }),
         });
-      } else {
-        // Show error message from server or a default one
-        const errorMessage = result.message || "Failed to approve baptism application";
-        setSuccessMessage(errorMessage);
-        setShowSuccessModal(true);
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
       }
-    } catch (error) {
-      console.error("Error approving baptism application:", error);
-      setSuccessMessage("An error occurred while approving the baptism application: " + error.message);
+      // END EMAIL SENDING
+      
+      setStatus("Approved");
+      setSuccessMessage("Baptism application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+      
+      // Update the baptismData to reflect the changes
+      setBaptismData({
+        ...baptismData,
+        date: appointmentDate,
+        time: appointmentTime,
+        priest: selectedPriest
+      });
+    } else {
+      // Show error message from server or a default one
+      const errorMessage = result.message || "Failed to approve baptism application";
+      setSuccessMessage(errorMessage);
       setShowSuccessModal(true);
     }
-  };
+  } catch (error) {
+    console.error("Error approving baptism application:", error);
+    setSuccessMessage("An error occurred while approving the baptism application: " + error.message);
+    setShowSuccessModal(true);
+  }
+};
 
   // Handle cancel action
   const handleCancel = () => {
@@ -336,58 +389,185 @@ const BaptismView = () => {
     }
   };
 
-  // Function to download the certificate as PDF
-  const downloadCertificateAsPDF = async () => {
-    if (!certificateRef.current) return;
+  // FIXED Function to download the certificate as PDF
+ // Replace your downloadCertificateAsPDF function with this fixed version:
+const downloadCertificateAsPDF = async () => {
+  if (!certificateRef.current) return;
+  
+  setIsDownloading(true);
+  
+  try {
+    // Get references to modal and certificate elements
+    const modalContainer = document.querySelector('.secretary-certificate-modal-container');
+    const modalContent = document.querySelector('.secretary-certificate-modal-content');
+    const certificateElement = certificateRef.current;
     
-    setIsDownloading(true);
+    // Add capture mode classes to temporarily modify styles
+    modalContainer?.classList.add('capturing');
+    modalContent?.classList.add('capturing');
+    certificateElement?.classList.add('capture-mode');
     
-    try {
-      // First ensure all images are loaded
-      const images = certificateRef.current.querySelectorAll('img');
-      await Promise.all([...images].map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      }));
-      
-      // Generate a canvas from the certificate element
-      const canvas = await html2canvas(certificateRef.current, {
-        scale: 2, // Higher scale for better quality
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
+    // First ensure all images are loaded
+    const images = certificateRef.current.querySelectorAll('img');
+    await Promise.all([...images].map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
       });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate PDF dimensions based on the canvas aspect ratio
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      // Add the image to the PDF
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      // Save the PDF
-      const fileName = `Baptism_Certificate_${baptismData.child.firstName}_${baptismData.child.lastName}.pdf`;
-      pdf.save(fileName);
-      
-      setShowCertificateModal(false);
-      alert(`Certificate downloaded successfully!`);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
-    } finally {
-      setIsDownloading(false);
+    }));
+    
+    // Add a delay to ensure content is fully rendered with new styles
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Generate a canvas from ONLY the certificate element (not the modal)
+    const canvas = await html2canvas(certificateElement, {
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: 0,
+      // Remove any height/width restrictions to capture natural size
+      removeContainer: true,
+      onclone: (clonedDoc) => {
+        // Find the certificate in the cloned document
+        const clonedCertificate = clonedDoc.querySelector('.baptism-certificate-preview');
+        if (clonedCertificate) {
+          // Remove all borders and shadows
+          clonedCertificate.style.border = 'none';
+          clonedCertificate.style.boxShadow = 'none';
+          clonedCertificate.style.borderRadius = '0';
+          clonedCertificate.style.margin = '0';
+          clonedCertificate.style.padding = '20px';
+          clonedCertificate.style.background = '#ffffff';
+          clonedCertificate.style.width = 'auto';
+          clonedCertificate.style.height = 'auto';
+          clonedCertificate.style.maxHeight = 'none';
+          clonedCertificate.style.overflow = 'visible';
+          
+          // Ensure certificate rows display properly
+          const rows = clonedCertificate.querySelectorAll('.certificate-row');
+          rows.forEach(row => {
+            row.style.display = 'flex';
+            row.style.flexDirection = 'row';
+            row.style.alignItems = 'center';
+            row.style.marginBottom = '10px';
+            row.style.flexWrap = 'nowrap';
+          });
+          
+          // Fix labels and values
+          const labels = clonedCertificate.querySelectorAll('.certificate-label');
+          labels.forEach(label => {
+            label.style.minWidth = '200px';
+            label.style.fontWeight = 'bold';
+            label.style.marginRight = '10px';
+            label.style.flexShrink = '0';
+          });
+          
+          const values = clonedCertificate.querySelectorAll('.certificate-value');
+          values.forEach(value => {
+            value.style.flex = '1';
+            value.style.borderBottom = '1px solid #333';
+            value.style.paddingBottom = '2px';
+          });
+          
+          // Fix header layout
+          const logos = clonedCertificate.querySelector('.certificate-logos');
+          if (logos) {
+            logos.style.display = 'flex';
+            logos.style.justifyContent = 'space-between';
+            logos.style.alignItems = 'center';
+            logos.style.flexWrap = 'nowrap';
+            logos.style.marginBottom = '20px';
+          }
+          
+          // Fix title centering
+          const title = clonedCertificate.querySelector('.certificate-title');
+          if (title) {
+            title.style.textAlign = 'center';
+            title.style.margin = '25px 0';
+          }
+          
+          // Fix reference grid
+          const reference = clonedCertificate.querySelector('.certificate-reference');
+          if (reference) {
+            reference.style.display = 'grid';
+            reference.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            reference.style.gap = '15px';
+          }
+        }
+      }
+    });
+    
+    console.log('Canvas dimensions:', { 
+      width: canvas.width, 
+      height: canvas.height 
+    });
+    
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    
+    // Calculate PDF dimensions to match the certificate size
+    const pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    // Get PDF page dimensions
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    // Calculate image dimensions to fit the page with margins
+    const margin = 10; // 10mm margin on all sides
+    const availableWidth = pageWidth - (2 * margin);
+    const availableHeight = pageHeight - (2 * margin);
+    
+    // Calculate scaling to fit within available space while maintaining aspect ratio
+    const aspectRatio = canvas.width / canvas.height;
+    let imgWidth, imgHeight;
+    
+    if (availableWidth / aspectRatio <= availableHeight) {
+      // Width is the limiting factor
+      imgWidth = availableWidth;
+      imgHeight = availableWidth / aspectRatio;
+    } else {
+      // Height is the limiting factor
+      imgHeight = availableHeight;
+      imgWidth = availableHeight * aspectRatio;
     }
-  };
-
+    
+    // Center the image on the page
+    const xPosition = (pageWidth - imgWidth) / 2;
+    const yPosition = (pageHeight - imgHeight) / 2;
+    
+    // Add the image to the PDF
+    pdf.addImage(imgData, 'PNG', xPosition, yPosition, imgWidth, imgHeight, undefined, 'FAST');
+    
+    // Save the PDF
+    const fileName = `Baptism_Certificate_${baptismData.child.firstName}_${baptismData.child.lastName}.pdf`;
+    pdf.save(fileName);
+    
+    setShowCertificateModal(false);
+    alert(`Certificate downloaded successfully!`);
+    
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    alert("Error generating PDF. Please try again.");
+  } finally {
+    // Clean up capture mode classes
+    const modalContainer = document.querySelector('.secretary-certificate-modal-container');
+    const modalContent = document.querySelector('.secretary-certificate-modal-content');
+    const certificateElement = certificateRef.current;
+    
+    modalContainer?.classList.remove('capturing');
+    modalContent?.classList.remove('capturing');
+    certificateElement?.classList.remove('capture-mode');
+    
+    setIsDownloading(false);
+  }
+};
   // Function to render read-only input field
   const renderReadOnlyField = (value) => {
     return <div className="secretary-view-value">{value || "N/A"}</div>;
@@ -527,7 +707,7 @@ const BaptismView = () => {
             
             {/* Certificate Preview based on the image */}
             <div ref={certificateRef} className="baptism-certificate-preview">
-              <div className="certificate-header">
+              <div className="certificate-header-bap">
                 <div className="certificate-logos">
                   <div className="parish-logo-left">
                     {/* Use onError to provide a fallback if the image doesn't load */}
@@ -556,6 +736,8 @@ const BaptismView = () => {
                   </div>
                 </div>
               </div>
+              <h1 className="certificate-title">CERTIFICATE OF BAPTISM</h1>
+              
            <div className="certificate-details">
   <div className="certificate-row">
     <div className="certificate-label">NAME</div>
@@ -650,6 +832,7 @@ const BaptismView = () => {
     </>
   )}
 </div>
+              
               <div className="certificate-footer">
                 <div className="certificate-reference">
                   <div className="reference-row">
@@ -679,13 +862,6 @@ const BaptismView = () => {
                 disabled={isDownloading}
               >
                 {isDownloading ? 'Processing...' : <><AiOutlineDownload /> Download</>}
-              </button>
-              <button 
-                className="secretary-certificate-cancel-btn"
-                onClick={() => setShowCertificateModal(false)}
-                disabled={isDownloading}
-              >
-                Cancel
               </button>
             </div>
           </div>
@@ -761,9 +937,9 @@ const BaptismView = () => {
             <div className="secretary-confirm-icon">?</div>
             <p>Are you sure you want to approve this baptism appointment?</p>
             <p>Date: {appointmentDate}</p>
-            <p>Time: {appointmentTime}</p>
+            <p>Time: {formatTime(appointmentTime)}</p>
             <p>Priest: {selectedPriest}</p>
-            <p>An email notification will be sent to the client.</p>
+            
             <div className="secretary-confirm-buttons">
               <button 
                 className="secretary-confirm-yes-btn"
@@ -835,11 +1011,14 @@ const BaptismView = () => {
             <AiOutlineArrowLeft className="secretary-view-back-icon" /> Back
           </button>
         </div>
+       
       </div>
       <h1 className="secretary-view-title">Baptism Application Details</h1>
       
       {/* Baptismal Data Section */}
       <div className="secretary-baptismal-view-data">
+      <div className="secretary-anointing-view-info-card">
+      <h3 className="secretary-funeral-view-sub-title">Appointment Request Details</h3>
         <div className="secretary-baptismal-view-row-date">
           <div className="secretary-baptismal-view-field-date">
             <label>Date of Appointment:</label>
@@ -848,8 +1027,9 @@ const BaptismView = () => {
           
           <div className="secretary-baptismal-view-field-time">
             <label>Time of Appointment:</label>
-            {renderReadOnlyField(baptismData.time)}
+            {renderReadOnlyField(formatTime(baptismData.time))}
           </div>
+        </div>
         </div>
 
         <div className="secretary-view-bypart">
@@ -1145,7 +1325,7 @@ const BaptismView = () => {
         <div className="secretary-action-buttons">
           {status !== "Approved" && (
             <button 
-              className="secretary-submit-button"
+              className="secretary-bap-submit-button"
               onClick={handleSubmit}
             >
               Approve

@@ -231,6 +231,7 @@ const SecretaryMarriageView = () => {
         churchOfBaptism: marriage.groom_churchOfBaptism || '',
         civilStatus: marriage.groom_civil_status || '',
         religion: marriage.groom_religion || '',
+        citizenship: marriage.groom_citizenship || '', // ADDED: citizenship field
         email: marriage.groom_email || '', // Include email for notifications
         address: {
           street: groomAddress?.street || '',
@@ -244,7 +245,8 @@ const SecretaryMarriageView = () => {
           lastName: groomFather?.last_name || '',
           dateOfBirth: groomFather?.dateOfBirth || '',
           age: groomFather?.age || '',
-          contactNumber: groomFather?.contact_number || ''
+          contactNumber: groomFather?.contact_number || '',
+          citizenship: groomFather?.citizenship || '' // ADDED: citizenship field
         },
         mother: {
           firstName: groomMother?.first_name || '',
@@ -252,7 +254,8 @@ const SecretaryMarriageView = () => {
           lastName: groomMother?.last_name || '',
           dateOfBirth: groomMother?.dateOfBirth || '',
           age: groomMother?.age || '',
-          contactNumber: groomMother?.contact_number || ''
+          contactNumber: groomMother?.contact_number || '',
+          citizenship: groomMother?.citizenship || '' // ADDED: citizenship field
         }
       },
       bride: {
@@ -266,6 +269,7 @@ const SecretaryMarriageView = () => {
         churchOfBaptism: marriage.bride_churchOfBaptism || '',
         civilStatus: marriage.bride_civil_status || '',
         religion: marriage.bride_religion || '',
+        citizenship: marriage.bride_citizenship || '', // ADDED: citizenship field
         email: marriage.bride_email || '', // Include email for notifications
         address: {
           street: brideAddress?.street || '',
@@ -279,7 +283,8 @@ const SecretaryMarriageView = () => {
           lastName: brideFather?.last_name || '',
           dateOfBirth: brideFather?.dateOfBirth || '',
           age: brideFather?.age || '',
-          contactNumber: brideFather?.contact_number || ''
+          contactNumber: brideFather?.contact_number || '',
+          citizenship: brideFather?.citizenship || '' // ADDED: citizenship field
         },
         mother: {
           firstName: brideMother?.first_name || '',
@@ -287,7 +292,8 @@ const SecretaryMarriageView = () => {
           lastName: brideMother?.last_name || '',
           dateOfBirth: brideMother?.dateOfBirth || '',
           age: brideMother?.age || '',
-          contactNumber: brideMother?.contact_number || ''
+          contactNumber: brideMother?.contact_number || '',
+          citizenship: brideMother?.citizenship || '' // ADDED: citizenship field
         }
       },
       witnesses: [
@@ -605,7 +611,7 @@ const handleConfirmApproval = async () => {
     }
   };
 
-  // Function to download the certificate as PDF
+ // Function to download the certificate as PDF maintaining exact modal size
   const downloadCertificateAsPDF = async () => {
     if (!certificateRef.current) {
       return;
@@ -624,14 +630,23 @@ const handleConfirmApproval = async () => {
         });
       }));
       
-      // Create a new PDF document
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      // Get the actual dimensions of the certificate container as displayed in modal
+      const certificateElement = certificateRef.current;
+      const rect = certificateElement.getBoundingClientRect();
+      
+      // Convert pixels to mm for PDF (96 DPI standard: 1 inch = 25.4mm, 96px = 25.4mm)
+      const pixelsToMm = 25.4 / 96;
+      const pdfWidth = rect.width * pixelsToMm;
+      const pdfHeight = rect.height * pixelsToMm;
+      
+      // Create PDF with exact dimensions of the modal content
+      const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
       
       // For first page
       setCurrentCertificatePage(1);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Delay for page to render
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      let canvas = await html2canvas(certificateRef.current, {
+      let canvas = await html2canvas(certificateElement, {
         scale: 2,
         logging: false,
         useCORS: true,
@@ -641,18 +656,14 @@ const handleConfirmApproval = async () => {
       
       let imgData = canvas.toDataURL('image/png');
       
-      // Calculate PDF dimensions based on the canvas aspect ratio
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      // Add the first page
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Add image at exact size (0,0 position, full width and height)
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
       // For second page
       setCurrentCertificatePage(2);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Delay for page to render
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      canvas = await html2canvas(certificateRef.current, {
+      canvas = await html2canvas(certificateElement, {
         scale: 2,
         logging: false,
         useCORS: true,
@@ -662,9 +673,9 @@ const handleConfirmApproval = async () => {
       
       imgData = canvas.toDataURL('image/png');
       
-      // Add new page and add the second certificate page
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Add new page with same dimensions and add the second certificate page
+      pdf.addPage([pdfWidth, pdfHeight]);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
       // Save the PDF
       const fileName = `Marriage_Certificate_${marriageData.groom.lastName}_${marriageData.bride.lastName}.pdf`;
@@ -681,12 +692,11 @@ const handleConfirmApproval = async () => {
             sacramentID: marriageData.marriageID,
             sacrament_type: "Marriage",
             filename: fileName,
-            downloadedBy: "Secretary" // Could be dynamic if user info is available
+            downloadedBy: "Secretary"
           }),
         });
       } catch (logError) {
         console.error("Error logging certificate download:", logError);
-        // Non-critical error, don't interrupt the flow
       }
       
       setShowCertificateModal(false);
@@ -698,7 +708,6 @@ const handleConfirmApproval = async () => {
       setIsDownloading(false);
     }
   };
-
   // Function to render read-only input field
   const renderReadOnlyField = (value) => {
     return <div className="secretary-marriage-view-value">{value || "N/A"}</div>;
@@ -884,6 +893,7 @@ const handleConfirmApproval = async () => {
       </div>
     );
   };
+
   if (loading) {
     return (
       <div className="secretary-marriage-view-container">
@@ -919,7 +929,7 @@ const handleConfirmApproval = async () => {
       {/* Document Viewer Modal */}
       {renderDocumentViewer()}
       
-      {/* Certificate Download Modal - Direct Implementation */}
+     {/* Certificate Download Modal - Direct Implementation */}
       {showCertificateModal && marriageData && (() => {
         // Extract month and day from marriage date
         const { month, day } = extractMonthDayFromDate(appointmentDate || marriageData.date);
@@ -1013,15 +1023,15 @@ const handleConfirmApproval = async () => {
                                 <span className="field-label">1. Name of Contracting Party</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.firstName}</span>
+                                    <span className="name-value">{marriageData.groom.firstName || "N/A"}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.middleName}</span>
+                                    <span className="name-value">{marriageData.groom.middleName || "N/A"}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.lastName}</span>
+                                    <span className="name-value">{marriageData.groom.lastName || "N/A"}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1031,15 +1041,15 @@ const handleConfirmApproval = async () => {
                                 <span className="field-label">2. Date of Birth</span>
                                 <div className="date-parts">
                                   <div className="date-part">
-                                    <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getDate() || "-"}</span>
+                                    <span className="date-value">{marriageData.groom.dateOfBirth ? new Date(marriageData.groom.dateOfBirth).getDate() : "N/A"}</span>
                                     <span className="date-label">(Day)</span>
                                   </div>
                                   <div className="date-part">
-                                    <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getMonth() + 1 || "-"}</span>
+                                    <span className="date-value">{marriageData.groom.dateOfBirth ? new Date(marriageData.groom.dateOfBirth).getMonth() + 1 : "N/A"}</span>
                                     <span className="date-label">(Month)</span>
                                   </div>
                                   <div className="date-part">
-                                    <span className="date-value">{new Date(marriageData.groom.dateOfBirth).getFullYear() || "-"}</span>
+                                    <span className="date-value">{marriageData.groom.dateOfBirth ? new Date(marriageData.groom.dateOfBirth).getFullYear() : "N/A"}</span>
                                     <span className="date-label">(Year)</span>
                                   </div>
                                 </div>
@@ -1052,42 +1062,42 @@ const handleConfirmApproval = async () => {
                               
                               <div className="person-field">
                                 <span className="field-label">4. Place of Birth</span>
-                                <span className="field-value">{marriageData.groom.placeOfBirth}</span>
+                                <span className="field-value">{marriageData.groom.placeOfBirth || "N/A"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">5. Citizenship</span>
-                                <span className="field-value">Filipino</span>
+                                <span className="field-value">{marriageData.groom.citizenship || "Filipino"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">6. Residence</span>
-                                <span className="field-value">{`${marriageData.groom.address.street}, ${marriageData.groom.address.municipality}, ${marriageData.groom.address.province}`}</span>
+                                <span className="field-value">{`${marriageData.groom.address.street || ""}, ${marriageData.groom.address.barangay || ""}, ${marriageData.groom.address.municipality || ""}, ${marriageData.groom.address.province || ""}`.replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',') || "N/A"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">7. Religion/Religious Sect</span>
-                                <span className="field-value">{marriageData.groom.religion || 'Roman Catholic'}</span>
+                                <span className="field-value">{marriageData.groom.religion || "Roman Catholic"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">8. Civil Status</span>
-                                <span className="field-value">{marriageData.groom.civilStatus || 'Single'}</span>
+                                <span className="field-value">{marriageData.groom.civilStatus || "Single"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">9. Name of Father</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.father.firstName}</span>
+                                    <span className="name-value">{marriageData.groom.father.firstName || "N/A"}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.father.middleName}</span>
+                                    <span className="name-value">{marriageData.groom.father.middleName || "N/A"}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.father.lastName}</span>
+                                    <span className="name-value">{marriageData.groom.father.lastName || "N/A"}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1095,22 +1105,22 @@ const handleConfirmApproval = async () => {
                               
                               <div className="person-field">
                                 <span className="field-label">10. Citizenship</span>
-                                <span className="field-value">Filipino</span>
+                                <span className="field-value">{marriageData.groom.father.citizenship || "Filipino"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">11. Mother's Maiden Name</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.mother.firstName}</span>
+                                    <span className="name-value">{marriageData.groom.mother.firstName || "N/A"}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.mother.middleName}</span>
+                                    <span className="name-value">{marriageData.groom.mother.middleName || "N/A"}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.groom.mother.lastName}</span>
+                                    <span className="name-value">{marriageData.groom.mother.lastName || "N/A"}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1118,7 +1128,7 @@ const handleConfirmApproval = async () => {
                               
                               <div className="person-field">
                                 <span className="field-label">12. Citizenship</span>
-                                <span className="field-value">Filipino</span>
+                                <span className="field-value">{marriageData.groom.mother.citizenship || "Filipino"}</span>
                               </div>
                             </div>
                           </div>
@@ -1130,15 +1140,15 @@ const handleConfirmApproval = async () => {
                                 <span className="field-label">1. Name of Contracting Party</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.firstName}</span>
+                                    <span className="name-value">{marriageData.bride.firstName || "N/A"}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.middleName}</span>
+                                    <span className="name-value">{marriageData.bride.middleName || "N/A"}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.lastName}</span>
+                                    <span className="name-value">{marriageData.bride.lastName || "N/A"}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1148,15 +1158,15 @@ const handleConfirmApproval = async () => {
                                 <span className="field-label">2. Date of Birth</span>
                                 <div className="date-parts">
                                   <div className="date-part">
-                                    <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getDate() || "-"}</span>
+                                    <span className="date-value">{marriageData.bride.dateOfBirth ? new Date(marriageData.bride.dateOfBirth).getDate() : "N/A"}</span>
                                     <span className="date-label">(Day)</span>
                                   </div>
                                   <div className="date-part">
-                                    <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getMonth() + 1 || "-"}</span>
+                                    <span className="date-value">{marriageData.bride.dateOfBirth ? new Date(marriageData.bride.dateOfBirth).getMonth() + 1 : "N/A"}</span>
                                     <span className="date-label">(Month)</span>
                                   </div>
                                   <div className="date-part">
-                                    <span className="date-value">{new Date(marriageData.bride.dateOfBirth).getFullYear() || "-"}</span>
+                                    <span className="date-value">{marriageData.bride.dateOfBirth ? new Date(marriageData.bride.dateOfBirth).getFullYear() : "N/A"}</span>
                                     <span className="date-label">(Year)</span>
                                   </div>
                                 </div>
@@ -1169,42 +1179,42 @@ const handleConfirmApproval = async () => {
                               
                               <div className="person-field">
                                 <span className="field-label">4. Place of Birth</span>
-                                <span className="field-value">{marriageData.bride.placeOfBirth}</span>
+                                <span className="field-value">{marriageData.bride.placeOfBirth || "N/A"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">5. Citizenship</span>
-                                <span className="field-value">Filipino</span>
+                                <span className="field-value">{marriageData.bride.citizenship || "Filipino"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">6. Residence</span>
-                                <span className="field-value">{`${marriageData.bride.address.street}, ${marriageData.bride.address.municipality}, ${marriageData.bride.address.province}`}</span>
+                                <span className="field-value">{`${marriageData.bride.address.street || ""}, ${marriageData.bride.address.barangay || ""}, ${marriageData.bride.address.municipality || ""}, ${marriageData.bride.address.province || ""}`.replace(/^,\s*|,\s*$/g, '').replace(/,\s*,/g, ',') || "N/A"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">7. Religion/Religious Sect</span>
-                                <span className="field-value">{marriageData.bride.religion || 'Roman Catholic'}</span>
+                                <span className="field-value">{marriageData.bride.religion || "Roman Catholic"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">8. Civil Status</span>
-                                <span className="field-value">{marriageData.bride.civilStatus || 'Single'}</span>
+                                <span className="field-value">{marriageData.bride.civilStatus || "Single"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">9. Name of Father</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.father.firstName}</span>
+                                    <span className="name-value">{marriageData.bride.father.firstName || "N/A"}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.father.middleName}</span>
+                                    <span className="name-value">{marriageData.bride.father.middleName || "N/A"}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.father.lastName}</span>
+                                    <span className="name-value">{marriageData.bride.father.lastName || "N/A"}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1212,22 +1222,22 @@ const handleConfirmApproval = async () => {
                               
                               <div className="person-field">
                                 <span className="field-label">10. Citizenship</span>
-                                <span className="field-value">Filipino</span>
+                                <span className="field-value">{marriageData.bride.father.citizenship || "Filipino"}</span>
                               </div>
                               
                               <div className="person-field">
                                 <span className="field-label">11. Mother's Maiden Name</span>
                                 <div className="name-parts">
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.mother.firstName}</span>
+                                    <span className="name-value">{marriageData.bride.mother.firstName || "N/A"}</span>
                                     <span className="name-label">(First)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.mother.middleName}</span>
+                                    <span className="name-value">{marriageData.bride.mother.middleName || "N/A"}</span>
                                     <span className="name-label">(Middle)</span>
                                   </div>
                                   <div className="name-part">
-                                    <span className="name-value">{marriageData.bride.mother.lastName}</span>
+                                    <span className="name-value">{marriageData.bride.mother.lastName || "N/A"}</span>
                                     <span className="name-label">(Last)</span>
                                   </div>
                                 </div>
@@ -1235,7 +1245,7 @@ const handleConfirmApproval = async () => {
                               
                               <div className="person-field">
                                 <span className="field-label">12. Citizenship</span>
-                                <span className="field-value">Filipino</span>
+                                <span className="field-value">{marriageData.bride.mother.citizenship || "Filipino"}</span>
                               </div>
                             </div>
                           </div>
@@ -1284,7 +1294,10 @@ const handleConfirmApproval = async () => {
                           
                           <div className="certification-statement">
                             <p>
-                              This is to certify that <strong>{marriageData.groom.firstName} {marriageData.groom.middleName} {marriageData.groom.lastName}</strong>, age {marriageData.groom.age}, and <strong>{marriageData.bride.firstName} {marriageData.bride.middleName} {marriageData.bride.lastName}</strong>, age {marriageData.bride.age}, both of legal age, were united in the Holy Sacrament of Matrimony on the <strong>{day}th</strong> day of <strong>{month}</strong> in the year <strong>{year}</strong>, at the Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte, Philippines, according to the rites of the Roman Catholic Church.
+                              This is to certify that <strong>{marriageData.groom.firstName} {marriageData.groom.middleName} {marriageData.groom.lastName}</strong>, age {marriageData.groom.age}, {marriageData.groom.civilStatus || "Single"}, {marriageData.groom.citizenship || "Filipino"} citizen, of {marriageData.groom.religion || "Roman Catholic"} religion, and <strong>{marriageData.bride.firstName} {marriageData.bride.middleName} {marriageData.bride.lastName}</strong>, age {marriageData.bride.age}, {marriageData.bride.civilStatus || "Single"}, {marriageData.bride.citizenship || "Filipino"} citizen, of {marriageData.bride.religion || "Roman Catholic"} religion, both of legal age, were united in the Holy Sacrament of Matrimony on the <strong>{day}th</strong> day of <strong>{month}</strong> in the year <strong>{year}</strong>, at the Parish of the Divine Mercy, Alawihao, Daet, Camarines Norte, Philippines, according to the rites of the Roman Catholic Church.
+                            </p>
+                            <p>
+                              The groom is the son of <strong>{marriageData.groom.father.firstName} {marriageData.groom.father.middleName} {marriageData.groom.father.lastName}</strong> ({marriageData.groom.father.citizenship || "Filipino"} citizen) and <strong>{marriageData.groom.mother.firstName} {marriageData.groom.mother.middleName} {marriageData.groom.mother.lastName}</strong> ({marriageData.groom.mother.citizenship || "Filipino"} citizen). The bride is the daughter of <strong>{marriageData.bride.father.firstName} {marriageData.bride.father.middleName} {marriageData.bride.father.lastName}</strong> ({marriageData.bride.father.citizenship || "Filipino"} citizen) and <strong>{marriageData.bride.mother.firstName} {marriageData.bride.mother.middleName} {marriageData.bride.mother.lastName}</strong> ({marriageData.bride.mother.citizenship || "Filipino"} citizen).
                             </p>
                             <p>
                               The marriage was solemnized by <strong>{selectedPriest || marriageData.certificate.solemnizer.name}</strong>, {marriageData.certificate.solemnizer.position}, in the presence of witnesses <strong>{marriageData.witnesses[0].firstName} {marriageData.witnesses[0].middleName} {marriageData.witnesses[0].lastName}</strong> and <strong>{marriageData.witnesses[1].firstName} {marriageData.witnesses[1].middleName} {marriageData.witnesses[1].lastName}</strong>.
@@ -1361,6 +1374,7 @@ const handleConfirmApproval = async () => {
           </div>
         );
       })()}
+  
       
       {/* Confirmation Modal */}
       {renderConfirmModal()}
@@ -1440,24 +1454,27 @@ const handleConfirmApproval = async () => {
                 <label>Religion:</label>
                 {renderReadOnlyField(marriageData.groom.religion)}
               </div>
+              <div className="secretary-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriageData.groom.citizenship)}
+              </div>
             </div>
             
             <div className="secretary-marriage-view-row">
-               <div className="client-marriage-view-field">
+               <div className="secretary-marriage-view-field">
                 <label>Date of Baptism:</label>
-                <div className="client-marriage-view-value">{marriageData.groom.dateOfBaptism}</div>
+                {renderReadOnlyField(formatDate(marriageData.groom.dateOfBaptism))}
               </div>
-              <div className="client-marriage-view-field-dob">
+              <div className="secretary-marriage-view-field">
                 <label>Church of Baptism:</label>
-                <div className="client-marriage-view-value">{marriageData.groom.churchOfBaptism}</div>
+                {renderReadOnlyField(marriageData.groom.churchOfBaptism)}
               </div>
             </div>
-            <label className="mini-view">Place of Birth</label>
             
             <div className="secretary-marriage-view-row">
               <div className="secretary-marriage-view-field">
                 <label>Place of Birth:</label>
-                <div className="secretary-marriage-view-value">{marriageData.groom.placeOfBirth}</div>
+                {renderReadOnlyField(marriageData.groom.placeOfBirth)}
               </div>
             </div>
             
@@ -1515,6 +1532,13 @@ const handleConfirmApproval = async () => {
                 {renderReadOnlyField(marriageData.groom.father.contactNumber)}
               </div>
             </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriageData.groom.father.citizenship)}
+              </div>
+            </div>
           </div>
 
           {/* Groom's Mother Information */}
@@ -1547,6 +1571,13 @@ const handleConfirmApproval = async () => {
               <div className="secretary-marriage-view-field">
                 <label>Contact Number:</label>
                 {renderReadOnlyField(marriageData.groom.mother.contactNumber)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriageData.groom.mother.citizenship)}
               </div>
             </div>
           </div>
@@ -1586,6 +1617,10 @@ const handleConfirmApproval = async () => {
                 <label>Religion:</label>
                 {renderReadOnlyField(marriageData.bride.religion)}
               </div>
+              <div className="secretary-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriageData.bride.citizenship)}
+              </div>
             </div>
             
             <div className="secretary-marriage-view-row">
@@ -1609,12 +1644,12 @@ const handleConfirmApproval = async () => {
             <label className="mini-view">Home Address</label>
             <div className="secretary-marriage-view-row secretary-marriage-address-view-row">
               <div className="secretary-marriage-view-field">
-                <label>Barangay:</label>
-                {renderReadOnlyField(marriageData.bride.address.barangay)}
-              </div>
-              <div className="secretary-marriage-view-field">
                 <label>Street:</label>
                 {renderReadOnlyField(marriageData.bride.address.street)}
+              </div>
+              <div className="secretary-marriage-view-field">
+                <label>Barangay:</label>
+                {renderReadOnlyField(marriageData.bride.address.barangay)}
               </div>
               <div className="secretary-marriage-view-field">
                 <label>Municipality:</label>
@@ -1659,6 +1694,13 @@ const handleConfirmApproval = async () => {
                 {renderReadOnlyField(marriageData.bride.father.contactNumber)}
               </div>
             </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriageData.bride.father.citizenship)}
+              </div>
+            </div>
           </div>
 
           {/* Bride's Mother Information */}
@@ -1691,6 +1733,13 @@ const handleConfirmApproval = async () => {
               <div className="secretary-marriage-view-field">
                 <label>Contact Number:</label>
                 {renderReadOnlyField(marriageData.bride.mother.contactNumber)}
+              </div>
+            </div>
+            
+            <div className="secretary-marriage-view-row">
+              <div className="secretary-marriage-view-field">
+                <label>Citizenship:</label>
+                {renderReadOnlyField(marriageData.bride.mother.citizenship)}
               </div>
             </div>
           </div>

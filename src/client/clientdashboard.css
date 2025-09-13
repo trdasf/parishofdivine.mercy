@@ -235,6 +235,25 @@
   color: white;
 }
 
+/* NEW: Special styling for selected ceremony dates - lighter brown with dark text */
+.selected-day-cd.has-ceremony-cd {
+  background-color: #f0e68c !important;
+  border-color: #d19a15 !important;
+}
+
+.selected-day-cd.has-ceremony-cd .day-number-cd {
+  color: #573901 !important;
+  font-weight: 700;
+}
+
+.selected-day-cd.has-ceremony-cd .holiday-name-cd {
+  color: #573901 !important;
+}
+
+.selected-day-cd.has-ceremony-cd .holiday-indicator-cd {
+  background-color: rgba(87, 57, 1, 0.1);
+}
+
 /* Keep ceremony dots light brown even when selected */
 .selected-day-cd .ceremony-dot-cd {
   background-color: #d19a15 !important;
@@ -245,6 +264,17 @@
 .selected-day-cd .application-dot-cd {
   background-color: #573901 !important;
   box-shadow: 0 0 0 2px white;
+}
+
+/* For ceremony dates, make dots more visible on selected state */
+.selected-day-cd.has-ceremony-cd .ceremony-dot-cd {
+  background-color: #b3701f !important;
+  box-shadow: 0 0 6px rgba(179, 112, 31, 0.8), 0 0 0 2px #f0e68c;
+}
+
+.selected-day-cd.has-ceremony-cd .application-dot-cd {
+  background-color: #3d2601 !important;
+  box-shadow: 0 0 0 2px #f0e68c;
 }
 
 /* Legend Container Styles */

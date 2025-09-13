@@ -19,10 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Initialize appointments array
-$approvedAppointments = [];
-$errorMessages = [];
-
 try {
     // Database connection
     $servername = "localhost";
@@ -44,27 +40,69 @@ try {
         throw new Exception("Error setting charset: " . $conn->error);
     }
     
+    // Initialize appointments array
+    $approvedAppointments = [];
+    $errorMessages = [];
+    
+    // Helper function to format status properly (standardized)
+    function formatStatus($status) {
+        if (empty($status)) return 'Pending';
+        
+        $cleanStatus = trim($status);
+        $lowerStatus = strtolower($cleanStatus);
+        
+        // Standardize status values
+        if ($lowerStatus === 'pending') {
+            return 'Pending';
+        } elseif ($lowerStatus === 'approved') {
+            return 'Approved';
+        } elseif ($lowerStatus === 'rejected' || $lowerStatus === 'declined') {
+            return 'Rejected';
+        }
+        
+        // Default fallback - capitalize first letter
+        return ucfirst($lowerStatus);
+    }
+    
     // Function to safely execute queries and collect results
     function safelyExecuteQuery($conn, $sql, $queryName) {
         global $approvedAppointments, $errorMessages;
         
         try {
+            error_log("Executing $queryName query: " . $sql);
             $result = $conn->query($sql);
             
             if ($result === false) {
                 $errorMessages[] = "Error in $queryName query: " . $conn->error;
+                error_log("Error in $queryName query: " . $conn->error);
                 return;
             }
             
+            $count = 0;
             while ($row = $result->fetch_assoc()) {
+                // Add unique identifier using the actual database ID
+                $row['uniqueId'] = $queryName . '_' . $row['id'];
+                
+                // Format status to ensure consistency
+                if (isset($row['status'])) {
+                    $row['status'] = formatStatus($row['status']);
+                }
+                
                 $approvedAppointments[] = $row;
+                $count++;
+                
+                // Debug log each row
+                error_log("$queryName - Row $count: ID=" . $row['id'] . ", UniqueId=" . $row['uniqueId'] . ", Name=" . ($row['firstName'] ?? '') . " " . ($row['lastName'] ?? '') . ", Date=" . ($row['date'] ?? '') . ", Status=" . ($row['status'] ?? ''));
             }
+            
+            error_log("$queryName query returned $count approved appointments");
         } catch (Exception $e) {
             $errorMessages[] = "Exception in $queryName query: " . $e->getMessage();
+            error_log("Exception in $queryName query: " . $e->getMessage());
         }
     }
     
-    // 1. Fetch all baptism appointments with status Approved
+    // 1. Fetch baptism appointments with status Approved
     $baptismSql = "SELECT 
                       b.baptismID as id, 
                       b.firstName, 
@@ -77,13 +115,13 @@ try {
                    FROM 
                       baptism_application b
                    WHERE 
-                      b.status = 'Approved'
+                      LOWER(TRIM(COALESCE(b.status, ''))) = 'approved'
                    ORDER BY 
-                      b.dateOfBaptism ASC";
+                      b.dateOfBaptism ASC, b.baptismID ASC";
     
     safelyExecuteQuery($conn, $baptismSql, "baptism");
     
-    // 2. Fetch all marriage appointments with status Approved
+    // 2. Fetch marriage appointments with status Approved
     $marriageSql = "SELECT 
                        m.marriageID as id, 
                        m.groom_first_name as firstName, 
@@ -96,13 +134,15 @@ try {
                     FROM 
                        marriage_application m
                     WHERE 
-                       m.status = 'Approved'
+                       LOWER(TRIM(COALESCE(m.status, ''))) = 'approved'
+                    GROUP BY 
+                       m.marriageID, m.groom_first_name, m.groom_last_name, m.date, m.time, m.status
                     ORDER BY 
-                       m.date ASC";
+                       m.date ASC, m.marriageID ASC";
     
     safelyExecuteQuery($conn, $marriageSql, "marriage");
     
-    // 3. Fetch all funeral mass appointments with status Approved
+    // 3. Fetch funeral mass appointments with status Approved
     $funeralSql = "SELECT 
                       f.funeralID as id,
                       COALESCE(d.first_name, 'Unknown') as firstName, 
@@ -117,35 +157,35 @@ try {
                    LEFT JOIN 
                       deceased_info d ON f.funeralID = d.funeralID
                    WHERE 
-                      f.status = 'Approved'
+                      LOWER(TRIM(COALESCE(f.status, ''))) = 'approved'
                    ORDER BY 
-                      f.dateOfFuneralMass ASC";
+                      f.dateOfFuneralMass ASC, f.funeralID ASC";
     
     safelyExecuteQuery($conn, $funeralSql, "funeral");
     
-    // 4. Fetch all blessing appointments with status Approved - FIXED VERSION
-$blessingSql = "SELECT 
-                   b.blessingID as id, 
-                   b.firstName as firstName, 
-                   b.lastName as lastName, 
-                   'Blessing' as sacramentType, 
-                   bt.blessing_type as blessingType,
-                   b.preferredDate as date, 
-                   b.preferredTime as time, 
-                   b.status,
-                   DATE(b.dateCreated) as createdAt
-                FROM 
-                   blessing_application b
-                LEFT JOIN 
-                   blessing_type bt ON b.blessingID = bt.blessingID
-                WHERE 
-                   b.status = 'Approved'
-                ORDER BY 
-                   b.preferredDate ASC";
+    // 4. Fetch blessing appointments with status Approved
+    $blessingSql = "SELECT 
+                       b.blessingID as id, 
+                       b.firstName as firstName, 
+                       b.lastName as lastName, 
+                       'Blessing' as sacramentType, 
+                       bt.blessing_type as blessingType,
+                       b.preferredDate as date, 
+                       b.preferredTime as time, 
+                       b.status,
+                       DATE(b.dateCreated) as createdAt
+                    FROM 
+                       blessing_application b
+                    LEFT JOIN 
+                       blessing_type bt ON b.blessingID = bt.blessingID
+                    WHERE 
+                       LOWER(TRIM(COALESCE(b.status, ''))) = 'approved'
+                    ORDER BY 
+                       b.preferredDate ASC, b.blessingID ASC";
 
-safelyExecuteQuery($conn, $blessingSql, "blessing");
+    safelyExecuteQuery($conn, $blessingSql, "blessing");
     
-    // 5. Fetch all communion appointments with status Approved
+    // 5. Fetch communion appointments with status Approved
     $communionSql = "SELECT 
                         communionID as id, 
                         first_name as firstName, 
@@ -158,13 +198,13 @@ safelyExecuteQuery($conn, $blessingSql, "blessing");
                      FROM 
                         communion_application
                      WHERE 
-                        status = 'Approved'
+                        LOWER(TRIM(COALESCE(status, ''))) = 'approved'
                      ORDER BY 
-                        date ASC";
+                        date ASC, communionID ASC";
     
     safelyExecuteQuery($conn, $communionSql, "communion");
     
-    // 6. Fetch all confirmation appointments with status Approved
+    // 6. Fetch confirmation appointments with status Approved
     $confirmationSql = "SELECT 
                            confirmationID as id, 
                            first_name as firstName, 
@@ -177,33 +217,50 @@ safelyExecuteQuery($conn, $blessingSql, "blessing");
                         FROM 
                            confirmation_application
                         WHERE 
-                           status = 'Approved'
+                           LOWER(TRIM(COALESCE(status, ''))) = 'approved'
                         ORDER BY 
-                           date ASC";
+                           date ASC, confirmationID ASC";
     
     safelyExecuteQuery($conn, $confirmationSql, "confirmation");
     
-    // 7. Fetch all anointing appointments with status Approved
+    // 7. Fetch anointing appointments with status Approved
     $anointingSql = "SELECT 
-                        anointingID as id, 
-                        firstName as firstName, 
-                        lastName as lastName, 
+                        a.anointingID as id, 
+                        a.firstName as firstName, 
+                        a.lastName as lastName, 
                         'Anointing of the Sick and Viaticum' as sacramentType, 
-                        dateOfAnointing as date, 
-                        timeOfAnointing as time, 
-                        status,
-                        DATE(dateCreated) as createdAt
+                        a.dateOfAnointing as date, 
+                        a.timeOfAnointing as time, 
+                        a.status,
+                        DATE(a.dateCreated) as createdAt
                      FROM 
-                        anointing_application
+                        anointing_application a
                      WHERE 
-                        status = 'Approved'
+                        LOWER(TRIM(COALESCE(a.status, ''))) = 'approved'
                      ORDER BY 
-                        dateOfAnointing ASC";
+                        a.dateOfAnointing ASC, a.anointingID ASC";
+    
+    // Debug: Check anointing table before executing query
+    error_log("=== DEBUGGING ANOINTING TABLE ===");
+    $debugAnointingSql = "SELECT anointingID, firstName, lastName, status, dateOfAnointing, timeOfAnointing FROM anointing_application";
+    $debugResult = $conn->query($debugAnointingSql);
+    if ($debugResult) {
+        error_log("Total anointing records in database: " . $debugResult->num_rows);
+        while ($debugRow = $debugResult->fetch_assoc()) {
+            error_log("Anointing Record: ID=" . $debugRow['anointingID'] . 
+                     ", Name=" . $debugRow['firstName'] . " " . $debugRow['lastName'] . 
+                     ", Status='" . $debugRow['status'] . "'" . 
+                     ", Date=" . $debugRow['dateOfAnointing'] . 
+                     ", Time=" . $debugRow['timeOfAnointing']);
+        }
+    }
+    error_log("=== END ANOINTING DEBUG ===");
     
     safelyExecuteQuery($conn, $anointingSql, "anointing");
     
-    // Format dates for consistency
-    foreach ($approvedAppointments as &$appointment) {
+    // Format dates for consistency - SAFER VERSION
+    $formattedAppointments = [];
+    foreach ($approvedAppointments as $appointment) {
         try {
             // Format date if present and valid
             if (isset($appointment['date']) && !empty($appointment['date'])) {
@@ -224,17 +281,61 @@ safelyExecuteQuery($conn, $blessingSql, "blessing");
                     $appointment['createdAt'] = $createdAt->format('m/d/Y');
                 }
             }
+            
+            $formattedAppointments[] = $appointment;
         } catch (Exception $e) {
             // Log the error but continue processing other appointments
             error_log("Error formatting date for appointment: " . json_encode($appointment) . " - " . $e->getMessage());
+            // Still add the appointment even if date formatting failed
+            $formattedAppointments[] = $appointment;
         }
     }
+    
+    // Replace the original array with the safely formatted one
+    $approvedAppointments = $formattedAppointments;
+    
+    // Sort all appointments by appointment date
+    usort($approvedAppointments, function($a, $b) {
+        $dateA = isset($a['date']) ? strtotime($a['date']) : 0;
+        $dateB = isset($b['date']) ? strtotime($b['date']) : 0;
+        if ($dateA == $dateB) {
+            // If dates are the same, sort by uniqueId for consistency
+            return strcmp($a['uniqueId'], $b['uniqueId']);
+        }
+        return $dateA - $dateB;
+    });
+    
+    // Debug: Log appointment count by sacrament type
+    $sacramentCount = [];
+    foreach ($approvedAppointments as $appointment) {
+        $type = $appointment['sacramentType'];
+        $sacramentCount[$type] = ($sacramentCount[$type] ?? 0) + 1;
+    }
+    error_log("Approved appointments by sacrament type: " . json_encode($sacramentCount));
+    error_log("Total approved appointments found: " . count($approvedAppointments));
+    
+    // Enhanced debugging for anointing specifically
+    $anointingAppointments = array_filter($approvedAppointments, function($apt) {
+        return $apt['sacramentType'] === 'Anointing of the Sick and Viaticum';
+    });
+    error_log("=== ANOINTING APPOINTMENTS FOUND ===");
+    error_log("Count: " . count($anointingAppointments));
+    foreach ($anointingAppointments as $apt) {
+        error_log("Anointing Appointment: ID=" . $apt['id'] . 
+                 ", UniqueId=" . $apt['uniqueId'] . 
+                 ", Name=" . $apt['firstName'] . " " . $apt['lastName'] . 
+                 ", Date=" . $apt['date'] . 
+                 ", Status=" . $apt['status']);
+    }
+    error_log("=== END ANOINTING APPOINTMENTS ===");
     
     $conn->close();
     
     echo json_encode([
         "success" => true,
         "appointments" => $approvedAppointments,
+        "total_count" => count($approvedAppointments),
+        "sacrament_breakdown" => $sacramentCount,
         "errors" => $errorMessages
     ]);
 
@@ -244,7 +345,7 @@ safelyExecuteQuery($conn, $blessingSql, "blessing");
     echo json_encode([
         "success" => false,
         "message" => "An error occurred while fetching approved appointments: " . $e->getMessage(),
-        "errors" => $errorMessages
+        "errors" => $errorMessages ?? []
     ]);
 }
 ?>

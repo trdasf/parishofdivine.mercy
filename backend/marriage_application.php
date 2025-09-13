@@ -36,20 +36,26 @@ try {
     $applicationData = json_decode($_POST['applicationData'], true);
     $groomAddressData = json_decode($_POST['groomAddressData'], true);
     $brideAddressData = json_decode($_POST['brideAddressData'], true);
+    $groomFatherData = json_decode($_POST['groomFatherData'], true);
+    $groomMotherData = json_decode($_POST['groomMotherData'], true);
+    $brideFatherData = json_decode($_POST['brideFatherData'], true);
+    $brideMotherData = json_decode($_POST['brideMotherData'], true);
     $firstWitnessData = json_decode($_POST['firstWitnessData'], true);
     $secondWitnessData = json_decode($_POST['secondWitnessData'], true);
 
-    // Insert into marriage_application
+    // Insert into marriage_application - UPDATED with citizenship fields
     $stmt = $conn->prepare("INSERT INTO marriage_application (
         clientID, date, time,
         groom_first_name, groom_middle_name, groom_last_name, groom_age, 
         groom_dateOfBirth, groom_dateOfBaptism, groom_churchOfBaptism, groom_placeOfBirth,
+        groom_civil_status, groom_religion, groom_citizenship,
         bride_first_name, bride_middle_name, bride_last_name, bride_age,
-        bride_dateOfBirth, bride_dateOfBaptism, bride_churchOfBaptism, bride_placeOfBirth
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        bride_dateOfBirth, bride_dateOfBaptism, bride_churchOfBaptism, bride_placeOfBirth,
+        bride_civil_status, bride_religion, bride_citizenship
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $stmt->bind_param("issssssssssssssssss", 
-        $clientID,  // This can now be null
+    $stmt->bind_param("issssssssssssssssssssssss", 
+        $clientID,
         $applicationData['date'], 
         $applicationData['time'], 
         $applicationData['groom_first_name'],
@@ -60,6 +66,9 @@ try {
         $applicationData['groom_dateOfBaptism'],
         $applicationData['groom_churchOfBaptism'],
         $applicationData['groom_placeOfBirth'],
+        $applicationData['groom_civil_status'],
+        $applicationData['groom_religion'],
+        $applicationData['groom_citizenship'], // NEW FIELD
         $applicationData['bride_first_name'],
         $applicationData['bride_middle_name'],
         $applicationData['bride_last_name'],
@@ -67,7 +76,10 @@ try {
         $applicationData['bride_dateOfBirth'],
         $applicationData['bride_dateOfBaptism'],
         $applicationData['bride_churchOfBaptism'],
-        $applicationData['bride_placeOfBirth']
+        $applicationData['bride_placeOfBirth'],
+        $applicationData['bride_civil_status'],
+        $applicationData['bride_religion'],
+        $applicationData['bride_citizenship'] // NEW FIELD
     );
     
     if (!$stmt->execute()) {
@@ -113,6 +125,70 @@ try {
     
     if (!$stmt->execute()) {
         throw new Exception("Error inserting bride address: " . $stmt->error);
+    }
+    $stmt->close();
+
+    // UPDATED: Insert groom's parents information with citizenship fields
+    $stmt = $conn->prepare("INSERT INTO marriage_groom_parents (
+        marriageID, 
+        father_first_name, father_middle_name, father_last_name, 
+        father_dateOfBirth, father_age, father_contact_number, father_citizenship,
+        mother_first_name, mother_middle_name, mother_last_name,
+        mother_dateOfBirth, mother_age, mother_contact_number, mother_citizenship
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    
+    $stmt->bind_param("issssisssssssss", 
+        $marriageID,
+        $groomFatherData['first_name'],
+        $groomFatherData['middle_name'],
+        $groomFatherData['last_name'],
+        $groomFatherData['dateOfBirth'],
+        $groomFatherData['age'],
+        $groomFatherData['contact_number'],
+        $groomFatherData['citizenship'], // NEW FIELD
+        $groomMotherData['first_name'],
+        $groomMotherData['middle_name'],
+        $groomMotherData['last_name'],
+        $groomMotherData['dateOfBirth'],
+        $groomMotherData['age'],
+        $groomMotherData['contact_number'],
+        $groomMotherData['citizenship'] // NEW FIELD
+    );
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting groom parents: " . $stmt->error);
+    }
+    $stmt->close();
+
+    // UPDATED: Insert bride's parents information with citizenship fields
+    $stmt = $conn->prepare("INSERT INTO marriage_bride_parents (
+        marriageID, 
+        father_first_name, father_middle_name, father_last_name, 
+        father_dateOfBirth, father_age, father_contact_number, father_citizenship,
+        mother_first_name, mother_middle_name, mother_last_name,
+        mother_dateOfBirth, mother_age, mother_contact_number, mother_citizenship
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    
+    $stmt->bind_param("issssisssssssss", 
+        $marriageID,
+        $brideFatherData['first_name'],
+        $brideFatherData['middle_name'],
+        $brideFatherData['last_name'],
+        $brideFatherData['dateOfBirth'],
+        $brideFatherData['age'],
+        $brideFatherData['contact_number'],
+        $brideFatherData['citizenship'], // NEW FIELD
+        $brideMotherData['first_name'],
+        $brideMotherData['middle_name'],
+        $brideMotherData['last_name'],
+        $brideMotherData['dateOfBirth'],
+        $brideMotherData['age'],
+        $brideMotherData['contact_number'],
+        $brideMotherData['citizenship'] // NEW FIELD
+    );
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error inserting bride parents: " . $stmt->error);
     }
     $stmt->close();
 
@@ -235,7 +311,7 @@ try {
     $conn->commit();
     $response = [
         "success" => true, 
-        "message" => "Marriage application submitted successfully",
+        "message" => "Marriage application submitted successfully with citizenship information",
         "marriageID" => $marriageID
     ];
     

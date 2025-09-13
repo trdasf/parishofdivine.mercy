@@ -33,6 +33,33 @@ const FuneralMassView = () => {
   // API base URL that can be easily changed
   const API_BASE_URL = "https://parishofdivinemercy.com/backend";
 
+  // Function to convert 24-hour time to 12-hour format with AM/PM
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    
+    try {
+      // Handle time strings that might have seconds
+      const timeParts = timeString.split(':');
+      let hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1];
+      
+      // Determine AM or PM
+      const period = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      if (hours === 0) {
+        hours = 12; // Midnight case
+      } else if (hours > 12) {
+        hours = hours - 12;
+      }
+      
+      return `${hours}:${minutes} ${period}`;
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return timeString; // Return original string if formatting fails
+    }
+  };
+
   useEffect(() => {
     // Check if we have necessary state data (funeralID)
     const funeralID = location.state?.funeralID;
@@ -250,96 +277,124 @@ const FuneralMassView = () => {
     setShowConfirmModal(true);
   };
 
-  /**
-   * Handles the confirmation of the approval process
-   * Saves appointment details, updates status, and sends notification email
-   */
-  const handleConfirmApproval = async () => {
-    setShowConfirmModal(false);
+ /**
+ * Handles the confirmation of the approval process
+ * Saves appointment details, updates status, and sends notification email
+ */
+const handleConfirmApproval = async () => {
+  setShowConfirmModal(false);
+  
+  try {
+    // Step 1: First save the appointment data to approved_appointments table
+    // Using the selected date/time from the schedule selection section
+    const appointmentData = {
+      sacramentID: funeralData.funeralID,
+      sacrament_type: "Funeral",
+      date: selectedDate, // This is the date selected in the Schedule Selection section
+      time: selectedTime, // This is the time selected in the Schedule Selection section
+      priest: selectedPriest // This is the priest entered in the Schedule Selection section
+    };
     
-    try {
-      // Step 1: First save the appointment data to approved_appointments table
-      // Using the selected date/time from the schedule selection section
-      const appointmentData = {
-        sacramentID: funeralData.funeralID,
-        sacrament_type: "Funeral",
-        date: selectedDate, // This is the date selected in the Schedule Selection section
-        time: selectedTime, // This is the time selected in the Schedule Selection section
-        priest: selectedPriest // This is the priest entered in the Schedule Selection section
-      };
-      
-      console.log("Saving appointment data:", appointmentData);
-      
-      const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(appointmentData),
-      });
-      
-      if (!appointmentResponse.ok) {
-        throw new Error(`Server responded with status: ${appointmentResponse.status}`);
-      }
-      
-      const appointmentResult = await appointmentResponse.json();
-      
-      if (!appointmentResult.success) {
-        throw new Error(appointmentResult.message || "Failed to save appointment details");
-      }
-      
-      console.log("Appointment saved successfully:", appointmentResult);
-      
-      // Step 2: Now update the funeral status
-      const response = await fetch(`${API_BASE_URL}/update_funeral_status.php`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          funeralID: funeralData.funeralID,
-          status: "Approved",
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest,
-          requesterEmail: funeralData.requester.email,
-          requesterName: `${funeralData.requester.firstName} ${funeralData.requester.lastName}`,
-          deceasedName: `${funeralData.deceased.firstName} ${funeralData.deceased.lastName}`,
-          relationship: funeralData.requester.relationship
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        setStatus("Approved");
-        
-        // Update approvedData state with the newly approved details
-        setApprovedData({
-          date: selectedDate,
-          time: selectedTime,
-          priest: selectedPriest
-        });
-        
-        // Show success message for a short time
-        setSuccessMessage("Funeral mass application has been approved successfully!");
-        setShowSuccessModal(true);
-        
-        // After a short delay, navigate to the appointments page
-        setTimeout(() => {
-          setShowSuccessModal(false);
-          navigate("/secretary-appointment"); // Navigate to secretary-appointment page
-        }, 1500);  // 1.5 second delay to show the success message
-        
-      } else {
-        alert("Failed to approve funeral mass application: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error approving funeral mass application:", error);
-      alert("An error occurred while approving the funeral mass application: " + error.message);
+    console.log("Saving appointment data:", appointmentData);
+    
+    const appointmentResponse = await fetch(`${API_BASE_URL}/save_approved_appointment.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(appointmentData),
+    });
+    
+    if (!appointmentResponse.ok) {
+      throw new Error(`Server responded with status: ${appointmentResponse.status}`);
     }
-  };
+    
+    const appointmentResult = await appointmentResponse.json();
+    
+    if (!appointmentResult.success) {
+      throw new Error(appointmentResult.message || "Failed to save appointment details");
+    }
+    
+    console.log("Appointment saved successfully:", appointmentResult);
+    
+    // Step 2: Now update the funeral status
+    const response = await fetch(`${API_BASE_URL}/update_funeral_status.php`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        funeralID: funeralData.funeralID,
+        status: "Approved",
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest,
+        requesterEmail: funeralData.requester.email,
+        requesterName: `${funeralData.requester.firstName} ${funeralData.requester.lastName}`,
+        deceasedName: `${funeralData.deceased.firstName} ${funeralData.deceased.lastName}`,
+        relationship: funeralData.requester.relationship
+      }),
+    });
 
+    const result = await response.json();
+    
+    if (result.success) {
+      // ADD EMAIL SENDING HERE - AFTER SUCCESSFUL APPROVAL
+      try {
+        const emailResponse = await fetch(`${API_BASE_URL}/approved_funeral_email.php`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            funeralID: funeralData.funeralID,
+            date: selectedDate,
+            time: selectedTime,
+            priest: selectedPriest
+          }),
+        });
+
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          console.log("Email sent successfully:", emailResult.message);
+        } else {
+          console.warn("Email sending failed:", emailResult.message);
+          // Don't throw error here - approval was successful, email is just a bonus
+        }
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // Don't throw error here - approval was successful, email is just a bonus
+      }
+      // END EMAIL SENDING
+      
+      setStatus("Approved");
+      
+      // Update approvedData state with the newly approved details
+      setApprovedData({
+        date: selectedDate,
+        time: selectedTime,
+        priest: selectedPriest
+      });
+      
+      // Show success message for a short time
+      setSuccessMessage("Funeral mass application has been approved successfully! An email notification has been sent to the client.");
+      setShowSuccessModal(true);
+      
+      // After a short delay, navigate to the appointments page
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate("/secretary-appointment"); // Navigate to secretary-appointment page
+      }, 1500);  // 1.5 second delay to show the success message
+      
+    } else {
+      alert("Failed to approve funeral mass application: " + result.message);
+    }
+  } catch (error) {
+    console.error("Error approving funeral mass application:", error);
+    alert("An error occurred while approving the funeral mass application: " + error.message);
+  }
+};
   // Handle cancel action
   const handleCancel = () => {
     // Reset the status to previous value or redirect
@@ -640,7 +695,7 @@ const FuneralMassView = () => {
                 </div>
                 <div className="certificate-row">
                   <div className="certificate-label">TIME OF FUNERAL MASS</div>
-                  <div className="certificate-value">{funeralTime}</div>
+                  <div className="certificate-value">{formatTime(funeralTime)}</div>
                 </div>
                 <div className="certificate-row">
                   <div className="certificate-label">OFFICIATING PRIEST</div>
@@ -703,34 +758,34 @@ const FuneralMassView = () => {
     if (!showConfirmModal) return null;
     
     return (
-      <div className="secretary-funeral-document-viewer-overlay">
-        <div className="secretary-funeral-confirm-modal-container">
-          <div className="secretary-funeral-confirm-header">
+      <div className="secretary-document-viewer-overlay">
+        <div className="secretary-confirm-modal-container">
+          <div className="secretary-confirm-header">
             <h3>Confirm Approval</h3>
             <button 
-              className="secretary-funeral-document-close-btn"
+              className="secretary-document-close-btn"
               onClick={() => setShowConfirmModal(false)}
             >
               ×
             </button>
           </div>
-          <div className="secretary-funeral-confirm-content">
-            <div className="secretary-funeral-confirm-icon">?</div>
+          <div className="secretary-confirm-content">
+            <div className="secretary-confirm-icon">?</div>
             <h2>Are you sure?</h2>
             <p>Are you sure you want to approve this funeral mass appointment?</p>
             <p>Date: {selectedDate}</p>
-            <p>Time: {selectedTime}</p>
+            <p>Time: {formatTime(selectedTime)}</p>
             <p>Priest: {selectedPriest}</p>
             <p>This will send an email notification to the requester.</p>
-            <div className="secretary-funeral-confirm-buttons">
+            <div className="secretary-confirm-buttons">
               <button 
-                className="secretary-funeral-confirm-yes-button"
+                className="secretary-confirm-yes-btn"
                 onClick={handleConfirmApproval}
               >
                 Yes, Approve
               </button>
               <button 
-                className="secretary-funeral-confirm-no-button"
+                className="secretary-confirm-no-btn"
                 onClick={() => setShowConfirmModal(false)}
               >
                 Cancel
@@ -747,12 +802,12 @@ const FuneralMassView = () => {
     if (!showSuccessModal) return null;
     
     return (
-      <div className="secretary-funeral-document-viewer-overlay">
-        <div className="secretary-funeral-success-modal-container">
-          <div className="secretary-funeral-success-header">
+      <div className="secretary-document-viewer-overlay">
+        <div className="secretary-success-modal-container">
+          <div className="secretary-success-header">
             <h3>Success</h3>
             <button 
-              className="secretary-funeral-document-close-btn"
+              className="secretary-document-close-btn"
               onClick={() => {
                 setShowSuccessModal(false);
                 navigate("/secretary-appointment"); // Changed navigation destination
@@ -761,13 +816,13 @@ const FuneralMassView = () => {
               ×
             </button>
           </div>
-          <div className="secretary-funeral-success-content">
-            <div className="secretary-funeral-success-icon">✓</div>
+          <div className="secretary-success-content">
+            <div className="secretary-success-icon">✓</div>
             <h2>Success!</h2>
             <p>{successMessage}</p>
             <p>An email notification has been sent to the client.</p>
             <button 
-              className="secretary-funeral-success-button"
+              className="secretary-success-btn"
               onClick={() => {
                 setShowSuccessModal(false);
                 navigate("/secretary-appointment"); // Changed navigation destination
@@ -835,6 +890,7 @@ const FuneralMassView = () => {
       </div>
       <h1 className="secretary-funeral-view-title">Funeral Mass Application Details</h1>
       
+      
       {/* Funeral Mass Data Section */}
       <div className="secretary-funeral-view-data">
         {/* Original Appointment Details - Always show these */}
@@ -847,7 +903,7 @@ const FuneralMassView = () => {
             </div>
             <div className="secretary-funeral-view-field-time">
               <label>Time of Appointment Request:</label>
-              {renderReadOnlyField(funeralData.time)}
+              {renderReadOnlyField(formatTime(funeralData.time))}
             </div>
           </div>
         </div>
@@ -863,7 +919,7 @@ const FuneralMassView = () => {
               </div>
               <div className="secretary-funeral-view-field-time">
                 <label>Time of Funeral Mass:</label>
-                {renderReadOnlyField(approvedData.time)}
+                {renderReadOnlyField(formatTime(approvedData.time))}
               </div>
             </div>
             <div className="secretary-funeral-view-field-date">
@@ -1088,5 +1144,6 @@ const FuneralMassView = () => {
     </div>
   );
 };
+
 
 export default FuneralMassView;

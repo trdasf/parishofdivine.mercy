@@ -617,9 +617,7 @@ const SecretaryAppointment = () => {
                   <td>{appointment.sacramentType}</td>
                   <td>{formatDateForDisplay(appointment.date)}</td>
                   <td>{convertTo12Hour(appointment.time)}</td>
-                  <td className={`status-${appointment.status?.toLowerCase()}`}>
-                    {formatStatus(appointment.status)}
-                  </td>
+                  <td>{formatStatus(appointment.status)}</td>
                   <td>{formatDateForDisplay(appointment.createdAt)}</td>
                   <td className="actions-cell-sa">
                     <button

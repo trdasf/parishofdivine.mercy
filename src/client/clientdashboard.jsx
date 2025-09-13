@@ -39,6 +39,38 @@ const ClientDashboard = () => {
     return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
   };
   
+  // Function to convert 24-hour time to 12-hour format
+  const convertTo12HourFormat = (time24) => {
+    if (!time24) return '12:00 PM';
+    
+    // Handle different time formats
+    let timeString = time24.toString().trim();
+    
+    // If already in 12-hour format, return as is
+    if (timeString.includes('AM') || timeString.includes('PM')) {
+      return timeString;
+    }
+    
+    // Parse 24-hour format (HH:MM or H:MM)
+    const timeParts = timeString.split(':');
+    if (timeParts.length < 2) {
+      return '12:00 PM'; // Default fallback
+    }
+    
+    let hours = parseInt(timeParts[0], 10);
+    const minutes = timeParts[1];
+    
+    if (isNaN(hours)) {
+      return '12:00 PM'; // Default fallback
+    }
+    
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    
+    return `${hours}:${minutes} ${ampm}`;
+  };
+  
   // Setting default date to current date in Philippines
   const [currentDate, setCurrentDate] = useState(getPhilippinesDate());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -380,6 +412,23 @@ const ClientDashboard = () => {
     );
   };
 
+  // Get the header text based on appointment types for selected date
+  const getAppointmentHeaderText = () => {
+    if (!selectedDate) return "";
+    
+    const selectedDateAppointments = getAppointmentsForSelectedDate();
+    const hasApplications = selectedDateAppointments.some(app => app.appointmentSource === 'application');
+    const hasCeremonies = selectedDateAppointments.some(app => app.appointmentSource === 'approved_ceremony');
+    
+    if (hasCeremonies && hasApplications) {
+      return "Your Scheduled Items:";
+    } else if (hasCeremonies && !hasApplications) {
+      return "Your Approved Ceremony:";
+    } else {
+      return "Your Scheduled Appointments:";
+    }
+  };
+
   // Get status icon based on appointment status and source
   const getStatusIcon = (appointment) => {
     if (appointment.appointmentSource === 'approved_ceremony') {
@@ -550,11 +599,11 @@ const ClientDashboard = () => {
             
             {getAppointmentsForSelectedDate().length > 0 ? (
               <div className="selected-date-appointments-cd">
-                <h4>Your Scheduled Appointments:</h4>
+                <h4>{getAppointmentHeaderText()}</h4>
                 <ul className="appointment-list-cd">
                   {getAppointmentsForSelectedDate().map(appointment => (
                     <li key={`${appointment.id}-${appointment.appointmentSource}`} className={`appointment-item-cd ${appointment.appointmentSource}-appointment-cd`}>
-                      <div className="appointment-time-cd">{appointment.time}</div>
+                      <div className="appointment-time-cd">{convertTo12HourFormat(appointment.time)}</div>
                       <div className="appointment-details-cd">
                         <span className="appointment-name-cd">{appointment.firstName} {appointment.lastName}</span>
                         <span className="appointment-type-cd">{getAppointmentTypeDisplay(appointment)}</span>
@@ -563,7 +612,7 @@ const ClientDashboard = () => {
                         )}
                         <span className={`appointment-status-cd ${appointment.status.toLowerCase()}-cd`}>
                           {getStatusIcon(appointment)}
-                          {appointment.appointmentSource === 'approved_ceremony' ? 'Approved Ceremony' : appointment.status}
+                          {appointment.appointmentSource === 'approved_ceremony' ? 'Approved Ceremony' : 'Appointment'}
                         </span>
                       </div>
                     </li>

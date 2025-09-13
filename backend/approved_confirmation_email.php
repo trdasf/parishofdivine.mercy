@@ -148,7 +148,7 @@ try {
         
         $confirmationData = $confirmationResult->fetch_assoc();
 
-        // Get the approved appointment details (this is the key fix!)
+        // Get the approved appointment details
         $stmt = $conn->prepare("
             SELECT date, time, priest 
             FROM approved_appointments 
@@ -188,9 +188,28 @@ try {
             $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
             $mail->addAddress($userEmail, $fullName);
 
-            // Format the date for display - USE APPOINTMENT DATA instead of confirmation data
-            $confirmationDate = isset($appointmentData['date']) ? date('F j, Y', strtotime($appointmentData['date'])) : '';
-            $confirmationTime = isset($appointmentData['time']) ? $appointmentData['time'] : '';
+            // CORRECTED: Format the date for display (December 23, 2025 format)
+            $confirmationDate = isset($appointmentData['date']) ? 
+                date('F j, Y', strtotime($appointmentData['date'])) : '';
+            
+            // CORRECTED: Format time to 12-hour format with AM/PM (3:00 PM format)
+            $confirmationTime = '';
+            if (isset($appointmentData['time']) && !empty($appointmentData['time'])) {
+                // Convert 24-hour format to 12-hour format with AM/PM
+                $timeObj = DateTime::createFromFormat('H:i:s', $appointmentData['time']);
+                if ($timeObj) {
+                    $confirmationTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                } else {
+                    // Fallback: try without seconds
+                    $timeObj = DateTime::createFromFormat('H:i', $appointmentData['time']);
+                    if ($timeObj) {
+                        $confirmationTime = $timeObj->format('g:i A');
+                    } else {
+                        $confirmationTime = $appointmentData['time']; // Use original if conversion fails
+                    }
+                }
+            }
+            
             $priest = isset($appointmentData['priest']) ? $appointmentData['priest'] : '';
             
             // Format the candidate's name
@@ -206,7 +225,7 @@ try {
                 ($confirmationData['province'] ?? '')
             );
 
-            // Email content with matching color scheme
+            // Email content with matching color scheme - UPDATED MESSAGING
             $mail->isHTML(true);
             $mail->Subject = 'Confirmation Application APPROVED - Parish of Divine Mercy';
             $mail->Body = "
@@ -224,27 +243,29 @@ try {
                             
                             <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We are pleased to inform you that your <b>Confirmation Application</b> for the Parish of Divine Mercy has been <strong style='color: #28a745;'>APPROVED</strong>!</p>
                             
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>The Confirmation ceremony has been scheduled for the date and time indicated below:</p>
+                            
                             <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #28a745;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Confirmation Details:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Confirmation Ceremony Details:</h3>
                                 <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Candidate's Name:</td>
                                         <td style='padding: 8px 0;'>{$candidateName}</td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Date:</td>
-                                        <td style='padding: 8px 0;'>{$confirmationDate}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Ceremony Date:</td>
+                                        <td style='padding: 8px 0;'><strong>{$confirmationDate}</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                        <td style='padding: 8px 0;'>{$confirmationTime}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Ceremony Time:</td>
+                                        <td style='padding: 8px 0;'><strong>{$confirmationTime}</strong></td>
                                     </tr>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Location:</td>
                                         <td style='padding: 8px 0;'>Parish of Divine Mercy, Alawihao, Daet</td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Priest:</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Confirming Bishop/Priest:</td>
                                         <td style='padding: 8px 0;'>{$priest}</td>
                                     </tr>
                                     <tr>
@@ -254,21 +275,31 @@ try {
                                 </table>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Please arrive at the church at least 30 minutes before the scheduled time. After the confirmation ceremony, a certificate will be available for download through our website.</p>
+                            <div style='background-color: #e9f7ef; border: 1px solid #b8e6c1; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                <p style='color: #0f5132; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                    <strong>Important:</strong> Please arrive at the church at least 30 minutes before the scheduled ceremony time. This allows time for final preparations and ensures the ceremony begins promptly.
+                                </p>
+                            </div>
                             
                             <div style='margin-top: 30px;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>On the Day of Confirmation:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Preparation for the Confirmation Ceremony:</h3>
                                 <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
                                     <li style='margin-bottom: 10px;'>The candidate should dress appropriately (formal and modest attire)</li>
                                     <li style='margin-bottom: 10px;'>Bring a rosary and a personal prayer book if possible</li>
                                     <li style='margin-bottom: 10px;'>The sponsor must be present at the ceremony</li>
                                     <li style='margin-bottom: 10px;'>Please make sure to have received the Sacrament of Reconciliation (Confession) before the Confirmation</li>
+                                    <li style='margin-bottom: 10px;'>Candidate should fast for at least 1 hour before the ceremony (water is permitted)</li>
+                                    <li style='margin-bottom: 10px;'>Bring all original documents for final verification</li>
                                 </ul>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions, please contact our parish office.</p>
+                            <div style='margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #573901;'>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin: 0; font-style: italic;'>\"Be sealed with the Gift of the Holy Spirit.\" - The confirmation ceremony will strengthen your faith journey and commitment to Christ.</p>
+                            </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>God bless,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Confirmation Ministry</p>
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions or need to make any changes, please contact our parish office immediately.</p>
+                            
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>We are honored to celebrate this sacred milestone in your faith journey.<br><br>God bless,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Confirmation Ministry</p>
                         </div>
                         
                         <div style='background: linear-gradient(to right, #710808, #ffcccc); height: 2px; width: 100%;'></div>
@@ -282,22 +313,26 @@ try {
                 </html>
             ";
             
-            // Plain text version for non-HTML mail clients
+            // Plain text version for non-HTML mail clients - UPDATED
             $mail->AltBody = "Dear {$fullName},\n\n" .
                 "We are pleased to inform you that your Confirmation Application for the Parish of Divine Mercy has been APPROVED!\n\n" .
-                "Confirmation Details:\n" .
+                "The Confirmation ceremony has been scheduled for the date and time indicated below:\n\n" .
+                "Confirmation Ceremony Details:\n" .
                 "Candidate's Name: {$candidateName}\n" .
-                "Date: {$confirmationDate}\n" .
-                "Time: {$confirmationTime}\n" .
+                "Ceremony Date: {$confirmationDate}\n" .
+                "Ceremony Time: {$confirmationTime}\n" .
                 "Location: Parish of Divine Mercy, Alawihao, Daet\n" .
-                "Priest: {$priest}\n" .
+                "Confirming Bishop/Priest: {$priest}\n" .
                 "Status: APPROVED\n\n" .
-                "Please arrive at the church at least 30 minutes before the scheduled time. After the confirmation ceremony, a certificate will be available for download through our website.\n\n" .
-                "On the Day of Confirmation:\n" .
+                "IMPORTANT: Please arrive at the church at least 30 minutes before the scheduled ceremony time.\n\n" .
+                "Preparation for the Confirmation Ceremony:\n" .
                 "- The candidate should dress appropriately (formal and modest attire)\n" .
                 "- Bring a rosary and a personal prayer book if possible\n" .
                 "- The sponsor must be present at the ceremony\n" .
-                "- Please make sure to have received the Sacrament of Reconciliation (Confession) before the Confirmation\n\n" .
+                "- Please make sure to have received the Sacrament of Reconciliation (Confession) before the Confirmation\n" .
+                "- Candidate should fast for at least 1 hour before the ceremony (water is permitted)\n" .
+                "- Bring all original documents for final verification\n\n" .
+                "We are honored to celebrate this sacred milestone in your faith journey.\n\n" .
                 "God bless,\nParish of Divine Mercy\nConfirmation Ministry";
 
             error_log('[CONFIRMATION_EMAIL] Attempting to send email...');

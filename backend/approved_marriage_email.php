@@ -215,9 +215,27 @@ try {
             $mail->setFrom('parishofdivinemercy@gmail.com', 'Parish of Divine Mercy');
             $mail->addAddress($userEmail, $fullName);
 
-            // Format the date for display
+            // CORRECTED: Format the date for display (December 23, 2025 format)
             $marriageDate = isset($date) ? date('F j, Y', strtotime($date)) : '';
-            $marriageTime = isset($time) ? $time : '';
+            
+            // CORRECTED: Format time to 12-hour format with AM/PM (3:00 PM format)
+            $marriageTime = '';
+            if (isset($time) && !empty($time)) {
+                // Convert 24-hour format to 12-hour format with AM/PM
+                $timeObj = DateTime::createFromFormat('H:i:s', $time);
+                if ($timeObj) {
+                    $marriageTime = $timeObj->format('g:i A'); // e.g., "3:00 PM"
+                } else {
+                    // Fallback: try without seconds
+                    $timeObj = DateTime::createFromFormat('H:i', $time);
+                    if ($timeObj) {
+                        $marriageTime = $timeObj->format('g:i A');
+                    } else {
+                        $marriageTime = $time; // Use original if conversion fails
+                    }
+                }
+            }
+            
             $priestName = isset($priest) ? $priest : '';
             
             $groomName = trim(($marriageData['groom_first_name'] ?? '') . ' ' . 
@@ -228,7 +246,7 @@ try {
                        ($marriageData['bride_middle_name'] ?? '') . ' ' . 
                        ($marriageData['bride_last_name'] ?? ''));
 
-            // Email content with matching color scheme
+            // Email content with matching color scheme - UPDATED MESSAGING
             $mail->isHTML(true);
             $mail->Subject = 'Marriage Application APPROVED - Parish of Divine Mercy';
             $mail->Body = "
@@ -246,8 +264,10 @@ try {
                             
                             <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>We are pleased to inform you that your <b>Marriage Application</b> for the Parish of Divine Mercy has been <strong style='color: #28a745;'>APPROVED</strong>!</p>
                             
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px;'>Your wedding ceremony has been scheduled for the date and time indicated below:</p>
+                            
                             <div style='background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #28a745;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Marriage Details:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; margin-top: 0; font-size: 18px;'>Wedding Ceremony Details:</h3>
                                 <table style='width: 100%; font-family: Roboto, sans-serif; color: #000;'>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Groom:</td>
@@ -258,16 +278,20 @@ try {
                                         <td style='padding: 8px 0;'>{$brideName}</td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Date:</td>
-                                        <td style='padding: 8px 0;'>{$marriageDate}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Wedding Date:</td>
+                                        <td style='padding: 8px 0;'><strong>{$marriageDate}</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Time:</td>
-                                        <td style='padding: 8px 0;'>{$marriageTime}</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Wedding Time:</td>
+                                        <td style='padding: 8px 0;'><strong>{$marriageTime}</strong></td>
                                     </tr>
                                     <tr>
-                                        <td style='padding: 8px 0; font-weight: 500;'>Priest:</td>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Officiating Priest:</td>
                                         <td style='padding: 8px 0;'>{$priestName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style='padding: 8px 0; font-weight: 500;'>Location:</td>
+                                        <td style='padding: 8px 0;'>Parish of Divine Mercy, Alawihao, Daet</td>
                                     </tr>
                                     <tr>
                                         <td style='padding: 8px 0; font-weight: 500;'>Status:</td>
@@ -276,21 +300,34 @@ try {
                                 </table>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>Please arrive at the church at least 30 minutes before the scheduled time. After the ceremony, a marriage certificate will be available for download through our website.</p>
+                            <div style='background-color: #e9f7ef; border: 1px solid #b8e6c1; border-radius: 8px; padding: 15px; margin: 20px 0;'>
+                                <p style='color: #0f5132; font-family: Roboto, sans-serif; font-size: 14px; margin: 0; font-weight: 500;'>
+                                    <strong>Important:</strong> Please arrive at the church at least 30 minutes before the scheduled ceremony time. This allows time for final preparations and ensures the ceremony begins promptly.
+                                </p>
+                            </div>
                             
                             <div style='margin-top: 30px;'>
-                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Reminders:</h3>
+                                <h3 style='color: #573901; font-family: Montserrat, sans-serif; font-size: 18px;'>Important Wedding Reminders:</h3>
                                 <ul style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; padding-left: 20px;'>
-                                    <li style='margin-bottom: 10px;'>Confirm attendance of all wedding sponsors</li>
-                                    <li style='margin-bottom: 10px;'>Attend the wedding rehearsal</li>
-                                    <li style='margin-bottom: 10px;'>Make final arrangements for the ceremony</li>
+                                    <li style='margin-bottom: 10px;'>Confirm attendance of all wedding sponsors (ninong and ninang)</li>
+                                    <li style='margin-bottom: 10px;'>Attend the mandatory wedding rehearsal (schedule to be confirmed)</li>
+                                    <li style='margin-bottom: 10px;'>Bring all original documents for final verification</li>
+                                    <li style='margin-bottom: 10px;'>Coordinate with your wedding coordinator for ceremony arrangements</li>
+                                    <li style='margin-bottom: 10px;'>Ensure wedding rings are ready for the exchange of vows</li>
                                     <li style='margin-bottom: 10px;'>Prepare all necessary personal items for the ceremony</li>
+                                    <li style='margin-bottom: 10px;'>Both bride and groom should receive the Sacrament of Reconciliation before the wedding</li>
                                 </ul>
                             </div>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions, please contact our parish office.</p>
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 20px;'>After the wedding ceremony, your official marriage certificate will be available for download through our parish website within 7-10 business days. You will receive notification once it's ready.</p>
                             
-                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>God bless your union,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Marriage Ministry</p>
+                            <div style='margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #573901;'>
+                                <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin: 0; font-style: italic;'>\"What God has joined together, let no one separate.\" - Mark 10:9<br><br>May your marriage be blessed with love, joy, and faithfulness.</p>
+                            </div>
+                            
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 30px;'>If you have any questions or need to make any changes, please contact our parish office immediately.</p>
+                            
+                            <p style='color: #000; font-family: Roboto, sans-serif; font-size: 16px; margin-top: 40px;'>We are honored to celebrate this sacred union with you.<br><br>God bless your marriage,<br><strong style='color: #573901;'>Parish of Divine Mercy</strong><br>Marriage Ministry</p>
                         </div>
                         
                         <div style='background: linear-gradient(to right, #710808, #ffcccc); height: 2px; width: 100%;'></div>
@@ -304,23 +341,30 @@ try {
                 </html>
             ";
             
-            // Plain text version for non-HTML mail clients
+            // Plain text version for non-HTML mail clients - UPDATED
             $mail->AltBody = "Dear {$fullName},\n\n" .
                 "We are pleased to inform you that your Marriage Application for the Parish of Divine Mercy has been APPROVED!\n\n" .
-                "Marriage Details:\n" .
+                "Your wedding ceremony has been scheduled for the date and time indicated below:\n\n" .
+                "Wedding Ceremony Details:\n" .
                 "Groom: {$groomName}\n" .
                 "Bride: {$brideName}\n" .
-                "Date: {$marriageDate}\n" .
-                "Time: {$marriageTime}\n" .
-                "Priest: {$priestName}\n" .
+                "Wedding Date: {$marriageDate}\n" .
+                "Wedding Time: {$marriageTime}\n" .
+                "Officiating Priest: {$priestName}\n" .
+                "Location: Parish of Divine Mercy, Alawihao, Daet\n" .
                 "Status: APPROVED\n\n" .
-                "Please arrive at the church at least 30 minutes before the scheduled time. After the ceremony, a marriage certificate will be available for download through our website.\n\n" .
-                "Important Reminders:\n" .
-                "- Confirm attendance of all wedding sponsors\n" .
-                "- Attend the wedding rehearsal\n" .
-                "- Make final arrangements for the ceremony\n" .
-                "- Prepare all necessary personal items for the ceremony\n\n" .
-                "God bless your union,\nParish of Divine Mercy\nMarriage Ministry";
+                "IMPORTANT: Please arrive at the church at least 30 minutes before the scheduled ceremony time.\n\n" .
+                "Important Wedding Reminders:\n" .
+                "- Confirm attendance of all wedding sponsors (ninong and ninang)\n" .
+                "- Attend the mandatory wedding rehearsal (schedule to be confirmed)\n" .
+                "- Bring all original documents for final verification\n" .
+                "- Coordinate with your wedding coordinator for ceremony arrangements\n" .
+                "- Ensure wedding rings are ready for the exchange of vows\n" .
+                "- Prepare all necessary personal items for the ceremony\n" .
+                "- Both bride and groom should receive the Sacrament of Reconciliation before the wedding\n\n" .
+                "After the wedding ceremony, your official marriage certificate will be available for download through our parish website within 7-10 business days.\n\n" .
+                "We are honored to celebrate this sacred union with you.\n\n" .
+                "God bless your marriage,\nParish of Divine Mercy\nMarriage Ministry";
 
             error_log('[MARRIAGE_EMAIL] Attempting to send email...');
             if ($mail->send()) {

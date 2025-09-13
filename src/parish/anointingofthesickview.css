@@ -1,228 +1,272 @@
-/* Main container styling */
-.anointing-view-container {
-  padding-left: 50px;
-  padding-right: 50px;
-  padding-top: 20px;
+/* Main container styling - Fixed scrolling issues */
+.secretary-anointing-view-container {
+  padding: 20px;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
 }
 
-/* Scrollbar styling */
-.anointing-view-container::-webkit-scrollbar {
-  width: 5px;
-  background-color: #ffffff;
+/* Enhanced scrollbar styling for all devices */
+.secretary-anointing-view-container::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
 }
 
-.anointing-view-container::-webkit-scrollbar-thumb {
-  background-color: #dbdbdb;
-  border-radius: 5px;
+.secretary-anointing-view-container::-webkit-scrollbar-thumb {
+  background-color: #b3701f;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
-.anointing-view-container::-webkit-scrollbar-track {
-  background-color: #ffffff;
+.secretary-anointing-view-container::-webkit-scrollbar-thumb:hover {
+  background-color: #8a5612;
+}
+
+.secretary-anointing-view-container::-webkit-scrollbar-track {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+}
+
+/* Firefox scrollbar */
+.secretary-anointing-view-container {
+  scrollbar-width: thin;
+  scrollbar-color: #b3701f #f8f9fa;
 }
 
 /* Header styling */
-.anointing-view-header {
+.secretary-anointing-view-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 40px;
-  margin-top: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  padding: 10px 0;
+  border-radius: 8px;
 }
 
-.anointing-view-left-section {
+.secretary-anointing-view-left-section {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
 }
 
-.anointing-view-back-button {
+.secretary-anointing-view-back-button {
   background-color: transparent;
   color: #710808;
   border: none;
   display: flex;
   align-items: center;
   font-size: 18px;
-  font-family: Roboto, sans-serif;
+  font-family: Roboto;
   font-weight: 700;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: color 0.2s;
+  touch-action: manipulation;
 }
 
-.anointing-view-back-icon {
+.secretary-anointing-view-back-icon {
   font-size: 22px;
   margin-right: 5px;
   font-weight: 700;
 }
 
-.anointing-view-back-button:hover {
+.secretary-anointing-view-back-button:hover {
   color: #5a0606;
+  background-color: rgba(113, 8, 8, 0.1);
 }
 
-.anointing-view-title {
-  margin-top: 30px;
-  font-size: 35px;
+.secretary-anointing-view-title {
+  font-size: clamp(20px, 4vw, 35px);
   font-weight: 800;
   color: #573901;
-  font-family: Montserrat, sans-serif;
+  font-family: Montserrat;
   letter-spacing: 1px;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  word-wrap: break-word;
+  line-height: 1.2;
 }
 
 /* Anointing data section */
-.anointing-view-data h2 {
-  font-size: 24px;
+.secretary-anointing-view-data {
+  margin-bottom: 40px;
+  position: relative;
+  width: 100%;
+}
+
+.secretary-anointing-view-data h2 {
+  font-size: clamp(18px, 3vw, 24px);
   font-weight: 900;
   color: #b3701f;
-  font-family: Roboto, sans-serif;
+  font-family: Roboto;
   letter-spacing: 1px;
 }
 
-.anointing-view-row-date {
-  display: flex;
-  justify-content: space-between;
+/* Date and Time Row Styling - Grid Layout */
+.secretary-anointing-view-row-date {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 15px;
-  align-items: center;
+  margin-bottom: 20px;
+  align-items: start;
 }
 
 /* Info cards */
-.anointing-view-bypart {
+.secretary-anointing-view-bypart {
   margin-top: 40px;
+  width: 100%;
 }
 
 /* Add info card styling */
-.anointing-view-info-card {
+.secretary-anointing-view-info-card {
   background-color: #fff;
   border-top: 1px solid #f8d7da;
   border-right: 1px solid #f8d7da;
   border-bottom: 1px solid #f8d7da;
   border-radius: 8px;
-  padding: 30px;
+  padding: 25px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   border-left: 4px solid #b3701f;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.anointing-view-row {
-  display: flex;
+/* Grid-based row layouts for better responsiveness */
+.secretary-anointing-view-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
 /* Label & Value in a row */
-.anointing-view-field-date,
-.anointing-view-field-time {
+.secretary-anointing-view-field-date,
+.secretary-anointing-view-field-time {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
 }
 
 /* Labels Styling */
-.anointing-view-field-date label,
-.anointing-view-field-time label {
+.secretary-anointing-view-field-date label,
+.secretary-anointing-view-field-time label {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   color: #573901;
-  min-width: 180px;
-  text-align: left;
-  margin-top: 0;
-  font-family: Roboto, sans-serif;
+  font-family: Roboto;
+  margin-bottom: 5px;
 }
 
 /* Value styling for read-only fields */
-.anointing-view-value {
-  padding: 8px;
+.secretary-anointing-view-value {
+  padding: 10px;
   background-color: #f9f9f9;
   color: #333;
   border: 1px solid #e0e0e0;
   border-radius: 5px;
-  font-size: 16px;
-  min-width: 200px;
-  font-family: Roboto, sans-serif;
+  font-size: 14px;
+  font-family: Roboto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.anointing-view-sub-title {
-  font-size: 20px;
+.secretary-anointing-view-sub-title {
+  font-size: clamp(16px, 2.5vw, 20px);
   font-weight: 900;
   color: #573901;
-  font-family: Roboto, sans-serif;
+  font-family: Roboto;
   letter-spacing: 1px;
   text-align: left;
   margin-bottom: 15px;
-  margin-top: 40px;
+  margin-top: 30px;
 }
 
 /* Anointing row styling */
-.anointing-view-field {
-  flex: 1;
+.secretary-anointing-view-field,
+.secretary-anointing-view-field-ga,
+.secretary-anointing-view-field-fpob,
+.secretary-anointing-view-field-wide {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-}
-
-.anointing-view-field label {
-  font-weight: 600;
-  font-size: 14px;
-  color: #573901;
-  display: block;
-  margin-bottom: 5px;
-  font-family: Roboto, sans-serif;
-}
-
-.anointing-view-field-wide {
+  gap: 8px;
+  min-width: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
 }
 
-.anointing-view-field-wide label {
+.secretary-anointing-view-field label,
+.secretary-anointing-view-field-ga label,
+.secretary-anointing-view-field-fpob label,
+.secretary-anointing-view-field-wide label {
   font-weight: 600;
   font-size: 14px;
   color: #573901;
-  display: block;
   margin-bottom: 5px;
-  font-family: Roboto, sans-serif;
+  font-family: Roboto;
 }
 
-/* Checkbox container */
-.anointing-checkbox-container {
+/* Checkbox container styling for view-only */
+.secretary-anointing-checkbox-container {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
+  gap: 12px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #b3701f;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.anointing-checkbox-container label {
+.secretary-anointing-checkbox-container label {
   font-weight: 600;
-  font-size: 14px;
+  font-size: clamp(13px, 1.5vw, 16px);
   color: #573901;
-  font-family: Roboto, sans-serif;
+  font-family: Roboto;
+  line-height: 1.4;
+  flex-grow: 1;
 }
 
 /* Checkbox styling for view-only mode */
-.anointing-view-checkbox {
-  width: 18px;
-  height: 18px;
+.secretary-anointing-view-checkbox {
+  width: 20px;
+  height: 20px;
   border: 2px solid #ccc;
   border-radius: 4px;
   display: inline-block;
   position: relative;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
 /* Checked state for view-only checkbox */
-.anointing-view-checked {
+.secretary-anointing-view-checked {
   background-color: #b3701f;
   border-color: #b3701f;
 }
 
-.anointing-view-checked::after {
+.secretary-anointing-view-checked::after {
   content: "✓";
   font-size: 14px;
   color: white;
@@ -233,214 +277,1077 @@
   transform: translate(-50%, -50%);
 }
 
-/* Address row */
-.anointing-address-view-row {
-  flex-wrap: wrap;
-}
-
 /* Requirements container styling */
-.anointing-requirements-view-container {
+.secretary-anointing-requirements-view-container {
   width: 100%;
-  margin: 40px auto 20px;
+  margin: 40px 0 20px;
   font-family: "Roboto", sans-serif;
+  box-sizing: border-box;
 }
 
-.anointing-requirements-view-title {
-  font-size: 22px;
+.secretary-anointing-requirements-view-title {
+  font-size: clamp(18px, 3vw, 22px);
   font-weight: bold;
   color: #b36b09;
   margin-bottom: 15px;
-  font-family: Montserrat, sans-serif;
+  font-family: Montserrat;
 }
 
-.anointing-requirements-view-box {
+.secretary-anointing-requirements-view-box {
   border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 5px;
+  padding: 25px;
+  border-radius: 12px;
   background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.anointing-view-section-header {
-  font-size: 18px;
+.secretary-anointing-view-section-header {
+  font-size: clamp(14px, 2.2vw, 18px);
   font-weight: bold;
   color: #333;
-  margin-top: 20px;
+  margin-top: 25px;
   margin-bottom: 15px;
-  font-family: Montserrat, sans-serif;
-  border-bottom: 2px solid #b3701f;
+  font-family: Montserrat;
+  border-bottom: 3px solid #b3701f;
   padding-bottom: 8px;
-  width: fit-content;
-  margin-left: 0;
+  display: inline-block;
+  position: relative;
 }
 
-.anointing-view-checkbox-list {
+.secretary-anointing-view-section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background-color: #710808;
+}
+
+.secretary-anointing-view-checkbox-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-left: 0;
   margin-bottom: 30px;
+  width: 100%;
 }
 
-.anointing-requirement-view-item {
+.secretary-anointing-requirement-view-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  border-left: 3px solid #b3701f;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #b3701f;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.anointing-view-requirement-name {
-  font-size: 15px;
-  color: #333;
-  font-family: Roboto, sans-serif;
-  flex: 1;
+.secretary-anointing-requirement-view-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.secretary-anointing-view-requirement-name {
+  margin: 0;
+  font-size: clamp(13px, 1.5vw, 16px);
+  color: #495057;
+  line-height: 1.6;
+  font-family: Roboto;
+  font-weight: 400;
+}
+
+/* Info lists styling */
+.secretary-anointing-info-view-list {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  width: 100%;
+}
+
+.secretary-anointing-info-view-item {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #b3701f;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secretary-anointing-info-view-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.secretary-anointing-info-view-item p {
+  margin: 0;
+  font-size: clamp(13px, 1.5vw, 16px);
+  color: #495057;
+  line-height: 1.6;
+  font-family: Roboto;
+  font-weight: 400;
+}
+
+/* Document status container */
+.secretary-anointing-document-status-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* View document button */
+.secretary-anointing-view-document-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #573901;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  touch-action: manipulation;
+}
+
+.secretary-anointing-view-document-btn:hover {
+  background-color: #422c01;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(87, 57, 1, 0.3);
 }
 
 /* Status indicators */
-.anointing-view-status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  min-width: 100px;
+.secretary-anointing-view-status {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.anointing-view-submitted {
+.secretary-anointing-view-submitted {
   background-color: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
-.anointing-view-not-submitted {
+.secretary-anointing-view-not-submitted {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
 
-/* Info lists */
-.anointing-info-view-list {
-  margin-left: 1rem;
-  padding-left: 1rem;
-  border-left: 3px solid #710808;
-}
-
-.anointing-info-view-item {
-  background-color: #f9f9f9;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.anointing-info-view-item p {
-  margin: 0;
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.5;
-  font-family: Roboto, sans-serif;
-  font-weight: 400;
-}
-
-/* Document status container */
-.anointing-document-status-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* View document button */
-.anointing-view-document-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  background-color: #573901;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 4px 12px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
-}
-
-.anointing-view-document-btn:hover {
-  background-color: #422c01;
-}
-
-/* Document viewer modal */
-.anointing-document-viewer-overlay {
+/* Modal styling */
+.secretary-anointing-document-viewer-overlay,
+.secretary-document-viewer-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
-.anointing-document-viewer-container {
+.secretary-anointing-document-viewer-container,
+.secretary-document-modal-container,
+.secretary-confirm-modal-container,
+.secretary-success-modal-container,
+.secretary-error-modal-container {
   background-color: white;
-  border-radius: 8px;
-  width: 80%;
+  border-radius: 12px;
+  width: 100%;
   max-width: 900px;
-  max-height: 80vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
-.anointing-document-viewer-header {
+/* Modal scrollbar styling */
+.secretary-anointing-document-viewer-container::-webkit-scrollbar,
+.secretary-document-modal-container::-webkit-scrollbar,
+.secretary-confirm-modal-container::-webkit-scrollbar,
+.secretary-success-modal-container::-webkit-scrollbar,
+.secretary-error-modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.secretary-anointing-document-viewer-container::-webkit-scrollbar-thumb,
+.secretary-document-modal-container::-webkit-scrollbar-thumb,
+.secretary-confirm-modal-container::-webkit-scrollbar-thumb,
+.secretary-success-modal-container::-webkit-scrollbar-thumb,
+.secretary-error-modal-container::-webkit-scrollbar-thumb {
+  background-color: #b3701f;
+  border-radius: 3px;
+}
+
+.secretary-anointing-document-viewer-container::-webkit-scrollbar-track,
+.secretary-document-modal-container::-webkit-scrollbar-track,
+.secretary-confirm-modal-container::-webkit-scrollbar-track,
+.secretary-success-modal-container::-webkit-scrollbar-track,
+.secretary-error-modal-container::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.secretary-anointing-document-viewer-header,
+.secretary-document-header,
+.secretary-confirm-header,
+.secretary-success-header,
+.secretary-error-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #573901, #422c01);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
 }
 
-.anointing-document-viewer-header h3 {
+.secretary-anointing-document-viewer-header h3,
+.secretary-document-header h3,
+.secretary-confirm-header h3,
+.secretary-success-header h3,
+.secretary-error-header h3 {
   margin: 0;
-  font-family: Montserrat, sans-serif;
-  color: #573901;
+  font-family: Montserrat;
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 600;
 }
 
-.anointing-document-close-btn {
-  background: none;
+.secretary-anointing-document-close-btn,
+.secretary-document-close-btn {
+  background: rgba(255, 255, 255, 0.2);
   border: none;
+  color: white;
   font-size: 24px;
-  color: #666;
   cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
 }
 
-.anointing-document-viewer-content {
-  padding: 20px;
-  overflow-y: auto;
-  max-height: calc(80vh - 60px);
+.secretary-anointing-document-close-btn:hover,
+.secretary-document-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
-.anointing-document-placeholder {
+.secretary-anointing-document-viewer-content,
+.secretary-document-content,
+.secretary-confirm-content,
+.secretary-success-content,
+.secretary-error-content {
+  padding: 25px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secretary-anointing-document-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  padding: 20px;
+  height: 400px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.secretary-anointing-document-download-link {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  touch-action: manipulation;
+}
+
+.secretary-anointing-document-download-link:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.3);
+}
+
+/* Success/Error Modal styling */
+.secretary-success-modal-container,
+.secretary-error-modal-container {
+  max-width: 450px;
+  padding: 0;
+}
+
+.secretary-success-content,
+.secretary-error-content {
   text-align: center;
 }
 
-.anointing-document-placeholder p {
-  margin: 10px 0;
-  color: #666;
+.secretary-success-content p,
+.secretary-error-content p {
+  margin-bottom: 15px;
+  color: #555;
   font-family: Roboto, sans-serif;
+  font-size: 16px;
+}
+
+.secretary-success-icon,
+.secretary-error-icon,
+.secretary-confirm-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  display: block;
+  text-align: center;
+}
+
+.secretary-success-icon {
+  color: #28a745;
+}
+
+.secretary-error-icon {
+  color: #dc3545;
+}
+
+.secretary-confirm-icon {
+  color: #ffc107;
+}
+
+.secretary-success-ok-btn,
+.secretary-error-ok-btn,
+.secretary-confirm-yes-btn,
+.secretary-confirm-no-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: Roboto;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  touch-action: manipulation;
+}
+
+.secretary-success-ok-btn,
+.secretary-confirm-yes-btn {
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.3);
+}
+
+.secretary-success-ok-btn:hover,
+.secretary-confirm-yes-btn:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 112, 31, 0.4);
+}
+
+.secretary-error-ok-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+}
+
+.secretary-error-ok-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+}
+
+.secretary-confirm-no-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+}
+
+.secretary-confirm-no-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+}
+
+.secretary-confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Action buttons */
+.secretary-anointing-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 40px 0 50px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.secretary-ano-submit-button {
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  padding: 14px 35px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: Roboto;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(179, 112, 31, 0.3);
+  min-width: 150px;
+  touch-action: manipulation;
+}
+
+.secretary-ano-submit-button:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(179, 112, 31, 0.4);
+}
+
+.secretary-ano-submit-button:active {
+  transform: translateY(0);
+}
+
+/* Approved status styling */
+.secretary-approved-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 25px;
+  background-color: #d4edda;
+  color: #155724;
+  border: 2px solid #c3e6cb;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: Roboto;
+  font-size: 16px;
+}
+
+.secretary-approved-icon {
+  font-size: 20px;
+  color: #28a745;
+}
+
+.secretary-approved-text {
+  flex-grow: 1;
+}
+
+/* Input field styling - Enhanced */
+.secretary-view-input {
+  padding: 12px 16px;
+  background-color: #fff;
+  color: #333;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Roboto;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.secretary-view-input:focus {
+  outline: none;
+  border-color: #b3701f;
+  box-shadow: 0 0 0 3px rgba(179, 112, 31, 0.1);
+  background-color: #fefefe;
+}
+
+.secretary-view-input:hover {
+  border-color: #b3701f;
+}
+
+.secretary-view-input[type="date"],
+.secretary-view-input[type="time"] {
+  cursor: pointer;
+}
+
+.secretary-view-input[type="date"]::-webkit-calendar-picker-indicator,
+.secretary-view-input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 8px;
+  filter: invert(0.5);
+  transition: filter 0.2s ease;
+}
+
+.secretary-view-input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.secretary-view-input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(0.3);
+}
+
+/* Loading and error states */
+.secretary-anointing-view-loading,
+.secretary-anointing-view-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+  font-family: Roboto;
+  color: #573901;
+  min-height: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.secretary-anointing-view-loading {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.secretary-anointing-view-error {
+  gap: 20px;
+}
+
+.secretary-anointing-view-error button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #b3701f, #8a5612);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Roboto;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.secretary-anointing-view-error button:hover {
+  background: linear-gradient(135deg, #8a5612, #6d4009);
+  transform: translateY(-1px);
+}
+
+/* Responsive Breakpoints - Enhanced for scrolling */
+
+/* Large tablets and small laptops (1024px and below) */
+@media (max-width: 1024px) {
+  .secretary-anointing-view-container {
+    padding: 15px;
+    max-height: 100vh;
+  }
+  
+  .secretary-anointing-view-info-card {
+    padding: 20px;
+    margin-bottom: 100px;
+  }
+  
+  .secretary-anointing-view-row-date {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .secretary-anointing-view-row {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+    .secretary-ano-submit-button {
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 120px;
+  }
+}
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .secretary-anointing-view-container {
+    padding: 12px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-anointing-view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    position: relative;
+    top: auto;
+    background-color: transparent;
+    backdrop-filter: none;
+  }
+  
+  .secretary-anointing-view-row-date {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .secretary-anointing-view-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .secretary-anointing-checkbox-container {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 15px;
+  }
+  
+  .secretary-anointing-action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .secretary-ano-submit-button {
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 120px;
+  }
+  
+  .secretary-approved-status {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .secretary-confirm-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .secretary-confirm-yes-btn,
+  .secretary-confirm-no-btn,
+  .secretary-success-ok-btn,
+  .secretary-error-ok-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .secretary-anointing-document-viewer-overlay,
+  .secretary-document-viewer-overlay {
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .secretary-anointing-document-viewer-container,
+  .secretary-document-modal-container,
+  .secretary-confirm-modal-container,
+  .secretary-success-modal-container,
+  .secretary-error-modal-container {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+  
+  .secretary-anointing-document-viewer-header,
+  .secretary-document-header,
+  .secretary-confirm-header,
+  .secretary-success-header,
+  .secretary-error-header {
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+  }
+  
+  .secretary-anointing-document-viewer-content,
+  .secretary-document-content,
+  .secretary-confirm-content,
+  .secretary-success-content,
+  .secretary-error-content {
+    padding: 20px;
+  }
+  
+  .secretary-anointing-document-status-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .secretary-anointing-view-status {
+    width: 100%;
+  }
+  
+  .secretary-anointing-view-document-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .secretary-anointing-view-container {
+    padding: 10px;
+    padding-bottom: 20px;
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-anointing-view-title {
+    margin-bottom: 15px;
+    font-size: clamp(18px, 5vw, 24px);
+  }
+    .secretary-ano-submit-button {
+    width: 100%;
+    max-width: 300px;
+    margin-top: -50px;
+    margin-bottom: 180px;
+  }
+  
+  .secretary-anointing-view-info-card {
+    padding: 15px;
+  }
+  
+  .secretary-anointing-requirements-view-box {
+    padding: 15px;
+  }
+  
+  .secretary-anointing-requirement-view-item,
+  .secretary-anointing-info-view-item {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+  }
+  
+  .secretary-view-input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .secretary-anointing-view-value {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .secretary-anointing-checkbox-container {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .secretary-anointing-view-checkbox {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .secretary-document-modal-container,
+  .secretary-confirm-modal-container,
+  .secretary-success-modal-container,
+  .secretary-error-modal-container {
+    margin: 10px;
+    max-width: calc(100vw - 20px);
+    max-height: 95vh;
+  }
+  
+  .secretary-document-content,
+  .secretary-confirm-content,
+  .secretary-success-content,
+  .secretary-error-content {
+    padding: 20px 15px;
+  }
+  
+  .secretary-success-icon,
+  .secretary-error-icon,
+  .secretary-confirm-icon {
+    font-size: 32px;
+  }
+  
+  .secretary-anointing-document-viewer-header,
+  .secretary-document-header,
+  .secretary-confirm-header,
+  .secretary-success-header,
+  .secretary-error-header {
+    padding: 12px 15px;
+  }
+  
+  .secretary-anointing-document-viewer-content {
+    padding: 15px;
+  }
+  
+  .secretary-anointing-document-viewer-overlay,
+  .secretary-document-viewer-overlay {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
+  .secretary-approved-status {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  .secretary-approved-icon {
+    font-size: 18px;
+  }
+}
+
+/* Very small mobile devices (360px and below) */
+@media (max-width: 360px) {
+  .secretary-anointing-view-container {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .secretary-anointing-view-info-card {
+    padding: 12px;
+  }
+  
+  .secretary-anointing-requirements-view-box {
+    padding: 12px;
+  }
+  
+  .secretary-anointing-requirement-view-item,
+  .secretary-anointing-info-view-item {
+    padding: 10px 12px;
+  }
+  
+  .secretary-view-input,
+  .secretary-anointing-view-value {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  
+  .secretary-ano-submit-button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .secretary-anointing-checkbox-container {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  
+  .secretary-anointing-view-checkbox {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .secretary-anointing-view-checked::after {
+    font-size: 12px;
+  }
+  
+  .secretary-document-content,
+  .secretary-confirm-content,
+  .secretary-success-content,
+  .secretary-error-content {
+    padding: 15px 10px;
+  }
+  
+  .secretary-success-icon,
+  .secretary-error-icon,
+  .secretary-confirm-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  
+  .secretary-approved-status {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .secretary-approved-icon {
+    font-size: 16px;
+  }
+}
+
+/* Landscape orientation adjustments for tablets */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .secretary-anointing-view-container {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .secretary-anointing-view-row-date {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .secretary-anointing-view-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Portrait orientation adjustments for mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+  .secretary-anointing-view-container {
+    max-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-anointing-view-row-date,
+  .secretary-anointing-view-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-appearance: none) {
+  .secretary-anointing-view-container {
+    height: 100vh;
+    height: -webkit-fill-available;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .secretary-view-input[type="date"],
+  .secretary-view-input[type="time"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .secretary-anointing-view-container {
+    overflow: visible;
+    height: auto;
+    max-height: none;
+  }
+  
+  .secretary-anointing-action-buttons {
+    display: none;
+  }
+  
+  .secretary-anointing-view-header {
+    display: none;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .secretary-anointing-view-checkbox {
+    border-width: 1px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .secretary-view-input:focus,
+  .secretary-ano-submit-button,
+  .secretary-anointing-view-document-btn,
+  .secretary-success-ok-btn,
+  .secretary-error-ok-btn,
+  .secretary-confirm-yes-btn,
+  .secretary-confirm-no-btn,
+  .secretary-anointing-requirement-view-item,
+  .secretary-anointing-info-view-item {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Focus indicators for better accessibility */
+.secretary-view-input:focus,
+.secretary-ano-submit-button:focus,
+.secretary-anointing-view-document-btn:focus,
+.secretary-success-ok-btn:focus,
+.secretary-error-ok-btn:focus,
+.secretary-confirm-yes-btn:focus,
+.secretary-confirm-no-btn:focus,
+.secretary-anointing-view-back-button:focus {
+  outline: 3px solid #b3701f;
+  outline-offset: 2px;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .secretary-ano-submit-button,
+  .secretary-anointing-view-document-btn,
+  .secretary-success-ok-btn,
+  .secretary-error-ok-btn,
+  .secretary-confirm-yes-btn,
+  .secretary-confirm-no-btn,
+  .secretary-anointing-view-back-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .secretary-view-input {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .secretary-anointing-requirement-view-item:hover,
+  .secretary-anointing-info-view-item:hover {
+    transform: none;
+  }
+  
+  .secretary-anointing-view-checkbox {
+    min-width: 24px;
+    min-height: 24px;
+  }
+}
+
+/* Additional improvements for better UX */
+.secretary-anointing-view-field-wide {
+  grid-column: 1 / -1;
+}
+
+/* Better spacing for checkboxes on smaller screens */
+@media (max-width: 480px) {
+  .secretary-anointing-checkbox-container {
+    margin-bottom: 10px;
+  }
+}
+
+/* Ensure proper text wrapping */
+.secretary-anointing-view-field label,
+.secretary-anointing-view-field-wide label {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Better button positioning for mobile */
+@media (max-width: 768px) {
+  .secretary-anointing-action-buttons {
+    position: sticky;
+    bottom: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px -12px 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
