@@ -25,6 +25,42 @@ const SecretaryDashboard = () => {
     return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Manila"}));
   };
   
+  // Function to convert time to 12-hour format with AM/PM
+  const convertTo12HourFormat = (timeString) => {
+    if (!timeString) return 'N/A';
+    
+    // Handle different time formats
+    let time24 = timeString.toString().trim();
+    
+    // If already in 12-hour format, return as is
+    if (time24.toLowerCase().includes('am') || time24.toLowerCase().includes('pm')) {
+      return time24;
+    }
+    
+    // Remove seconds if present (e.g., "14:30:00" -> "14:30")
+    if (time24.includes(':')) {
+      const parts = time24.split(':');
+      if (parts.length >= 2) {
+        time24 = `${parts[0]}:${parts[1]}`;
+      }
+    }
+    
+    // Parse the time
+    const [hours, minutes] = time24.split(':');
+    if (!hours || !minutes) return timeString; // Return original if can't parse
+    
+    const hour24 = parseInt(hours, 10);
+    const min = parseInt(minutes, 10);
+    
+    if (isNaN(hour24) || isNaN(min)) return timeString; // Return original if invalid
+    
+    const period = hour24 >= 12 ? 'PM' : 'AM';
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const formattedMinutes = min.toString().padStart(2, '0');
+    
+    return `${hour12}:${formattedMinutes} ${period}`;
+  };
+  
   // Setting default date to current date in Philippines
   const [currentDate, setCurrentDate] = useState(getPhilippinesDate());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -467,9 +503,12 @@ const SecretaryDashboard = () => {
     return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   };
 
-  // Format date for table display
+  // Format date for table display in YYYY-MM-DD format
   const formatDateShort = (date) => {
-    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // View details functions - Updated to match requirements
@@ -751,7 +790,7 @@ const SecretaryDashboard = () => {
                 <ul className="appointment-list-sec">
                   {getAppointmentsForSelectedDate().map(appointment => (
                     <li key={appointment.id} className="appointment-item-sec">
-                      <div className="appointment-time-sec">{appointment.time}</div>
+                      <div className="appointment-time-sec">{convertTo12HourFormat(appointment.time)}</div>
                       <div className="appointment-details-sec">
                         <span className="appointment-name-sec">{appointment.firstName} {appointment.lastName}</span>
                         <span className="appointment-type-sec">{appointment.sacramentType}</span>
@@ -778,7 +817,7 @@ const SecretaryDashboard = () => {
                 <ul className="event-list-sec">
                   {getEventsForSelectedDate().map(activity => (
                     <li key={activity.activityID} className="event-item-sec">
-                      <div className="event-time-sec">{activity.startTime}</div>
+                      <div className="event-time-sec">{convertTo12HourFormat(activity.startTime)}</div>
                       <div className="event-details-sec">
                         <span className="event-name-sec">{activity.title}</span>
                         <span className="event-organizer-sec">{activity.proposedBy || activity.organizer}</span>
@@ -840,7 +879,7 @@ const SecretaryDashboard = () => {
                       <td>{appointment.lastName}</td>
                       <td>{appointment.sacramentType}</td>
                       <td>{formatDateShort(appointment.date)}</td>
-                      <td>{appointment.time}</td>
+                      <td>{convertTo12HourFormat(appointment.time)}</td>
                       <td className={`status-${appointment.status?.toLowerCase()}`}>
                         {appointment.status}
                       </td>
@@ -898,7 +937,7 @@ const SecretaryDashboard = () => {
                       <td>{activity.description}</td>
                       <td>{activity.category}</td>
                       <td>{formatDateShort(activity.date)}</td>
-                      <td>{activity.startTime}</td>
+                      <td>{convertTo12HourFormat(activity.startTime)}</td>
                       <td>{activity.location}</td>
                       <td>{activity.proposedBy}</td>
                       <td className={`status-${activity.status?.toLowerCase()}`}>
@@ -952,7 +991,7 @@ const SecretaryDashboard = () => {
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Start Time:</div>
-                <div className="detail-value-sae">{selectedEventData.startTime}</div>
+                <div className="detail-value-sae">{convertTo12HourFormat(selectedEventData.startTime)}</div>
               </div>
               <div className="detail-row-sae">
                 <div className="detail-label-sae">Location:</div>
