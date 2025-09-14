@@ -355,6 +355,10 @@ const ClientBaptismView = () => {
                     <span className={`client-view-checkbox ${baptismData.maritalStatus.type === 'Living Together' ? 'client-view-checked' : ''}`}></span>
                     <label>Living Together</label>
                   </div>
+                  <div className={`client-view-pms-label ${baptismData.maritalStatus.type === 'Single' ? 'client-view-selected-status' : ''}`}>
+                    <span className={`client-view-checkbox ${baptismData.maritalStatus.type === 'Single' ? 'client-view-checked' : ''}`}></span>
+                    <label>Single</label>
+                  </div>
                 </div>
               </div>
 

@@ -2145,61 +2145,73 @@ const ClientBaptism = () => {
 
         
          {/* Marital Status */}
-         <h3 className="client-sub-title">Parents Marital Status</h3>
-         <div className="client-baptismal-row-pms">
-           <div className="client-marital-status">
-             <label className="client-section-label">Select the parent's marital status by choosing one of the following options:</label>
-             <div className="client-marital-options">
-               <div className="client-pms-label">
-                 <input 
-                   type="radio" 
-                   id="married" 
-                   name="maritalStatus"
-                   value="Married"
-                   onChange={handleMaritalStatusChange}
-                   checked={formData.maritalStatus === 'Married'}
-                   className={validationErrors.maritalStatus ? 'client-error-input' : ''}
-                 />
-                 <label htmlFor="married">Married</label>
-               </div>
-               <div className="client-pms-label">
-                 <input 
-                   type="radio" 
-                   id="civil"
-                   name="maritalStatus"
-                   value="Civil"
-                   onChange={handleMaritalStatusChange}
-                   checked={formData.maritalStatus === 'Civil'}
-                   className={validationErrors.maritalStatus ? 'client-error-input' : ''}
-                 />
-                 <label htmlFor="civil">Civil</label>
-               </div>
-               <div className="client-pms-label">
-                 <input 
-                   type="radio" 
-                   id="living-together"
-                   name="maritalStatus"
-                   value="Living Together"
-                   onChange={handleMaritalStatusChange}
-                   checked={formData.maritalStatus === 'Living Together'}
-                   className={validationErrors.maritalStatus ? 'client-error-input' : ''}
-                 />
-                 <label htmlFor="living-together">Living Together</label>
-               </div>
-             </div>
-           </div>
+<h3 className="client-sub-title">Parents Marital Status</h3>
+<div className="client-baptismal-row-pms">
+  <div className="client-marital-status">
+    <label className="client-section-label">Select the parent's marital status by choosing one of the following options:</label>
+    <div className="client-marital-options">
+      <div className="client-pms-label">
+        <input 
+          type="radio" 
+          id="married" 
+          name="maritalStatus"
+          value="Married"
+          onChange={handleMaritalStatusChange}
+          checked={formData.maritalStatus === 'Married'}
+          className={validationErrors.maritalStatus ? 'client-error-input' : ''}
+        />
+        <label htmlFor="married">Married</label>
+      </div>
+      <div className="client-pms-label">
+        <input 
+          type="radio" 
+          id="civil"
+          name="maritalStatus"
+          value="Civil"
+          onChange={handleMaritalStatusChange}
+          checked={formData.maritalStatus === 'Civil'}
+          className={validationErrors.maritalStatus ? 'client-error-input' : ''}
+        />
+        <label htmlFor="civil">Civil</label>
+      </div>
+      <div className="client-pms-label">
+        <input 
+          type="radio" 
+          id="living-together"
+          name="maritalStatus"
+          value="Living Together"
+          onChange={handleMaritalStatusChange}
+          checked={formData.maritalStatus === 'Living Together'}
+          className={validationErrors.maritalStatus ? 'client-error-input' : ''}
+        />
+        <label htmlFor="living-together">Living Together</label>
+      </div>
+      <div className="client-pms-label">
+        <input 
+          type="radio" 
+          id="single"
+          name="maritalStatus"
+          value="Single"
+          onChange={handleMaritalStatusChange}
+          checked={formData.maritalStatus === 'Single'}
+          className={validationErrors.maritalStatus ? 'client-error-input' : ''}
+        />
+        <label htmlFor="single">Single</label>
+      </div>
+    </div>
+  </div>
 
-           <div className="client-years-married">
-             <input 
-               type="text" 
-               className="client-short-input"
-               value={formData.yearsMarried}
-               onChange={(e) => handleInputChange('yearsMarried', e.target.value)}
-               disabled={formData.maritalStatus !== 'Married'}
-             />
-             <label>Number of Years Married</label>
-           </div>
-         </div>
+  <div className="client-years-married">
+    <input 
+      type="text" 
+      className="client-short-input"
+      value={formData.yearsMarried}
+      onChange={(e) => handleInputChange('yearsMarried', e.target.value)}
+      disabled={formData.maritalStatus !== 'Married'}
+    />
+    <label>Number of Years Married</label>
+  </div>
+</div>
 
          {/* Address Fields */}
          <div className="client-baptismal-row client-address-row">

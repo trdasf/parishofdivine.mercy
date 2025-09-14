@@ -1172,6 +1172,10 @@ const downloadCertificateAsPDF = async () => {
                     <span className={`secretary-view-checkbox ${baptismData.maritalStatus.type === 'Living Together' ? 'secretary-view-checked' : ''}`}></span>
                     <label>Living Together</label>
                   </div>
+                  <div className={`secretary-view-pms-label ${baptismData.maritalStatus.type === 'Single' ? 'secretary-view-selected-status' : ''}`}>
+                    <span className={`secretary-view-checkbox ${baptismData.maritalStatus.type === 'Single' ? 'secretary-view-checked' : ''}`}></span>
+                    <label>Single</label>
+                  </div>
                 </div>
               </div>
 

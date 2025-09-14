@@ -2125,7 +2125,7 @@ const location = useLocation();
           
          </div>
 
-         {/* Marital Status */}
+        {/* Marital Status */}
          <h3 className="client-sub-title">Parents Marital Status</h3>
          <div className="client-baptismal-row-pms">
            <div className="client-marital-status">
@@ -2166,6 +2166,18 @@ const location = useLocation();
                    className={validationErrors.maritalStatus ? 'client-error-input' : ''}
                  />
                  <label htmlFor="living-together">Living Together</label>
+               </div>
+               <div className="client-pms-label">
+                 <input 
+                   type="radio" 
+                   id="single"
+                   name="maritalStatus"
+                   value="Single"
+                   onChange={handleMaritalStatusChange}
+                   checked={formData.maritalStatus === 'Single'}
+                   className={validationErrors.maritalStatus ? 'client-error-input' : ''}
+                 />
+                 <label htmlFor="single">Single</label>
                </div>
              </div>
            </div>
