@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./secretarycommunion.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faDownload, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFileExcel, faEye } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import * as XLSX from 'xlsx';
 
 const SecretaryCommunion = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [communionData, setCommunionData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,6 +18,21 @@ const SecretaryCommunion = () => {
   useEffect(() => {
     fetchCommunionData();
   }, []);
+
+  // Handle auto-search when component receives search parameters
+  useEffect(() => {
+    const searchParams = location.state;
+    if (searchParams && searchParams.autoSearch && searchParams.firstName && searchParams.lastName) {
+      const autoSearchTerm = `${searchParams.firstName} ${searchParams.lastName}`;
+      setSearchTerm(autoSearchTerm);
+      console.log(`Auto-searching for: ${autoSearchTerm}`);
+      
+      // Clear the location state to prevent re-triggering on subsequent renders
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [location.state]);
 
   // Function to fetch communion data
   const fetchCommunionData = async () => {
@@ -277,43 +294,38 @@ const SecretaryCommunion = () => {
     }
   };
 
-  // Handle download of communion data as CSV
+  // Handle download of communion data as Excel
   const handleDownload = () => {
     if (filteredData.length === 0) {
-      alert("No data available to download");
+      alert("No data to export");
       return;
     }
-    
-    const headers = [
-      "No.",
-      "First Name",
-      "Last Name",
-      "Date",
-      "Time",
-      "Created At",
-    ];
 
-    // Map filtered communion appointments to rows using displayNumber
-    const rows = filteredData.map(item => [
-      item.displayNumber,
-      item.firstName,
-      item.lastName,
-      formatDate(item.date),
-      convertTo12Hour(item.time),
-      formatDate(item.created_at)
-    ]);
+    // Create data for Excel export using filtered appointments
+    const dataToExport = filteredData.map(item => ({
+      'No.': item.displayNumber,
+      'First Name': item.firstName || '',
+      'Last Name': item.lastName || '',
+      'Date': formatDate(item.date),
+      'Time': convertTo12Hour(item.time),
+      'Created At': formatDate(item.created_at)
+    }));
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Communion Appointments");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "communion_appointments.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchTerm 
+      ? `Communion_Appointments_Filtered_${timestamp}.xlsx`
+      : `Communion_Appointments_${timestamp}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    console.log(`Exported ${filteredData.length} communion appointments to Excel`);
   };
 
   // Add refresh button to force reload all data
@@ -365,8 +377,8 @@ const SecretaryCommunion = () => {
           <FontAwesomeIcon icon={faSearch} className="search-icon-sc" />
         </div>
         <button className="download-button-sb" onClick={handleDownload}>
-          <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
-          Download
+          <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: "8px" }} />
+          Export to Excel
         </button>
       </div>
 

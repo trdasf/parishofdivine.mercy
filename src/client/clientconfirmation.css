@@ -620,6 +620,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
+
   }
   
   .date-input::-webkit-calendar-picker-indicator {

@@ -9,7 +9,6 @@ import SecretaryLogin from "./landingpage/secretarylogin";
 import MinistryLogin from "./landingpage/ministrylogin";
 import ClientLogin from "./landingpage/clientlogin";
 
-// Sidebar imports
 import ParishSidebar from "./sidebar/parishsidebar";
 import CommunitySidebar from "./sidebar/ministrysidebar";
 import SecretarySidebar from "./sidebar/secretarysidebar";
@@ -58,7 +57,13 @@ import Blessing from "./secretary/appointmentinterface/blessing";
 import Communion from "./secretary/appointmentinterface/communion";
 import AnointingOfTheSick from "./secretary/appointmentinterface/anointingofthesick";
 import Confirmation from "./secretary/appointmentinterface/confirmation";
-
+import SecretaryBaptismCertificateView from "./secretary/secretarybaptismcertificateview";
+import SecretaryMarriageCertificateView from "./secretary/secretarymarriagecertificateview";
+import SecretaryConfirmationCertificateView from "./secretary/secretaryconfirmationcertificateview";
+import SecretaryCommunionCertificateView from "./secretary/secretarycommunioncertificateview";
+import SecretaryRequestCertificate from "./secretary/secretaryrequestcertificate";
+import SecretaryDonation from "./secretary/secretarydonation";
+import SecretaryExpenses from "./secretary/secretaryexpenses";
 
 import ClientDashboard from "./client/clientdashboard";
 import ClientProfile from "./client/clientprofile";
@@ -77,13 +82,25 @@ import ClientBlessingView from "./client/clientblessingview";
 import ClientFuneralMassView from "./client/clientfuneralmassview";
 import ClientAnointingOfTheSick from "./client/clientanointingofthesick";
 import ClientAnointingOfTheSickView from "./client/clientanointingofthesickview";
-
+import RequestBaptismCertificate from "./client/requestbaptismcertificate";
+import RequestMarriageCertificate from "./client/requestmarriagecertificate";
+import RequestCommunionCertificate from "./client/requestcommunioncertificate";
+import RequestConfirmationCertificate from "./client/requestconfirmationcertificate";
+import ClientBaptismCertificate from "./client/clientbaptismcertificate";
+import ClientMarriageCertificate from "./client/clientmarriagecertificate";
+import ClientCommunionCertificate from "./client/clientcommunioncertificate";
+import ClientConfirmationCertificate from "./client/clientconfirmationcertificate";
+import ClientBaptismCertificateView from "./client/clientbaptismcertificateview";
+import ClientMarriageCertificateView from "./client/clientmarriagecertificateview";
+import ClientCommunionCertificateView from "./client/clientcommunioncertificateview";
+import ClientConfirmationCertificateView from "./client/clientconfirmationcertificateview";
+import ClientDonation from "./client/clientdonation";
 import "./App.css";
 
 // Login Page Component for handling all login types
 const LoginPage = () => {
   const location = useLocation();
-  const loginType = location.pathname.split('/')[1]; // Get login type from path
+  const loginType = location.pathname.split('/')[1];
 
   return (
     <div className="login-page-container">
@@ -200,6 +217,13 @@ const MainPage = () => {
         : location.pathname === "/communion" ? <Communion />
         : location.pathname === "/confirmation" ? <Confirmation />
         : location.pathname === "/anointing-of-the-sick" ? <AnointingOfTheSick />
+        : location.pathname === "/secretary-baptism-certificate-view" ? <SecretaryBaptismCertificateView />
+        : location.pathname === "/secretary-marriage-certificate-view" ? <SecretaryMarriageCertificateView />
+        : location.pathname === "/secretary-communion-certificate-view" ? <SecretaryCommunionCertificateView />
+        : location.pathname === "/secretary-confirmation-certificate-view" ? <SecretaryConfirmationCertificateView />
+        : location.pathname === "/secretary-request-certificate" ? <SecretaryRequestCertificate />
+        : location.pathname === "/secretary-donation" ? <SecretaryDonation />
+        : location.pathname === "/secretary-expenses" ? <SecretaryExpenses/>
 
         : location.pathname === "/client-dashboard" ? <ClientDashboard />
         : location.pathname === "/client-profile" ? <ClientProfile />        
@@ -218,6 +242,19 @@ const MainPage = () => {
         : location.pathname === "/client-blessing-view" ? <ClientBlessingView />
         : location.pathname === "/client-anointing-of-the-sick" ? <ClientAnointingOfTheSick />
         : location.pathname === "/client-anointing-of-the-sick-view" ? <ClientAnointingOfTheSickView />
+        : location.pathname === "/client-baptism-certificate" ? <ClientBaptismCertificate />
+        : location.pathname === "/client-marriage-certificate" ? <ClientMarriageCertificate />
+        : location.pathname === "/client-communion-certificate" ? <ClientCommunionCertificate />
+        : location.pathname === "/client-confirmation-certificate" ? <ClientConfirmationCertificate />
+        : location.pathname === "/client-baptism-certificate-view" ? <ClientBaptismCertificateView />
+        : location.pathname === "/client-marriage-certificate-view" ? <ClientMarriageCertificateView />
+        : location.pathname === "/client-communion-certificate-view" ? <ClientCommunionCertificateView />
+        : location.pathname === "/client-confirmation-certificate-view" ? <ClientConfirmationCertificateView />
+        : location.pathname === "/client-request-baptism-certificate" ? <RequestBaptismCertificate />
+        : location.pathname === "/client-request-marriage-certificate" ? <RequestMarriageCertificate />
+        : location.pathname === "/client-request-communion-certificate" ? <RequestCommunionCertificate />
+        : location.pathname === "/client-request-confirmation-certificate" ? <RequestConfirmationCertificate />
+        : location.pathname === "/client-donation" ? <ClientDonation />
         : <HomePage />}
       </div>
       <div className="main-divider"></div>
@@ -281,6 +318,13 @@ const App = () => {
         <Route path="/communion" element={<MainPage />} />
         <Route path="/confirmation" element={<MainPage />} />
         <Route path="/anointing-of-the-sick" element={<MainPage />} />
+        <Route path="/secretary-request-certificate" element={<MainPage />} />
+        <Route path="/secretary-baptism-certificate-view" element={<MainPage />} />
+        <Route path="/secretary-marriage-certificate-view" element={<MainPage />} />
+        <Route path="/secretary-communion-certificate-view" element={<MainPage />} />
+        <Route path="/secretary-confirmation-certificate-view" element={<MainPage />} />
+        <Route path="/secretary-donation" element={<MainPage />} />
+        <Route path="/secretary-expenses" element={<MainPage />} />
 
         <Route path="/client-dashboard" element={<MainPage />} />
         <Route path="/client-profile" element={<MainPage />} />        
@@ -299,6 +343,19 @@ const App = () => {
         <Route path="/client-blessing-view" element={<MainPage />} />
         <Route path="/client-anointing-of-the-sick" element={<MainPage />} />
         <Route path="/client-anointing-of-the-sick-view" element={<MainPage />} />
+        <Route path="/client-baptism-certificate" element={<MainPage />} />
+        <Route path="/client-marriage-certificate" element={<MainPage />} />
+        <Route path="/client-communion-certificate" element={<MainPage />} />
+        <Route path="/client-confirmation-certificate" element={<MainPage />} />
+        <Route path="/client-baptism-certificate-view" element={<MainPage />} />
+        <Route path="/client-marriage-certificate-view" element={<MainPage />} />
+        <Route path="/client-communion-certificate-view" element={<MainPage />} />
+        <Route path="/client-confirmation-certificate-view" element={<MainPage />} />
+        <Route path="/client-request-baptism-certificate" element={<MainPage />} />
+        <Route path="/client-request-marriage-certificate" element={<MainPage />} />
+        <Route path="/client-request-communion-certificate" element={<MainPage />} />
+        <Route path="/client-request-confirmation-certificate" element={<MainPage />} />
+        <Route path="/client-donation" element={<MainPage />} />
       </Routes>
     </Router>
   );

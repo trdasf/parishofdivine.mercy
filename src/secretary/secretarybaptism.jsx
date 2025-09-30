@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./secretarybaptism.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from 'xlsx';
 
 const SecretaryBaptism = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [baptismAppointments, setBaptismAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,6 +16,21 @@ const SecretaryBaptism = () => {
   useEffect(() => {
     fetchBaptismAppointments();
   }, []);
+
+  // Handle auto-search when component receives search parameters
+  useEffect(() => {
+    const searchParams = location.state;
+    if (searchParams && searchParams.autoSearch && searchParams.firstName && searchParams.lastName) {
+      const autoSearchTerm = `${searchParams.firstName} ${searchParams.lastName}`;
+      setSearchTerm(autoSearchTerm);
+      console.log(`Auto-searching for: ${autoSearchTerm}`);
+      
+      // Clear the location state to prevent re-triggering on subsequent renders
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [location.state]);
 
   const fetchBaptismAppointments = async () => {
     try {
@@ -190,38 +207,36 @@ const SecretaryBaptism = () => {
   };
 
   const handleDownload = () => {
-    // Create headers for CSV
-    const headers = [
-      "No.",
-      "First Name",
-      "Last Name",
-      "Date",
-      "Time",
-      "Created At",
-    ];
+    if (filteredAppointments.length === 0) {
+      alert("No data to export");
+      return;
+    }
 
-    // Map appointments to rows using displayNumber
-    const rows = filteredAppointments.map(appointment => [
-      appointment.displayNumber,
-      appointment.firstName,
-      appointment.lastName,
-      formatDateForDisplay(appointment.date),
-      convertTo12Hour(appointment.time),
-      formatDateForDisplay(appointment.createdAt)
-    ]);
+    // Create data for Excel export using filtered appointments
+    const dataToExport = filteredAppointments.map(appointment => ({
+      'No.': appointment.displayNumber,
+      'First Name': appointment.firstName,
+      'Last Name': appointment.lastName,
+      'Date': formatDateForDisplay(appointment.date),
+      'Time': convertTo12Hour(appointment.time),
+      'Created At': formatDateForDisplay(appointment.createdAt)
+    }));
 
-    // Combine headers and rows
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Baptism Appointments");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "baptism_appointments.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchTerm 
+      ? `Baptism_Appointments_Filtered_${timestamp}.xlsx`
+      : `Baptism_Appointments_${timestamp}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    console.log(`Exported ${filteredAppointments.length} baptism appointments to Excel`);
   };
 
   const handleSearch = (e) => {
@@ -326,8 +341,8 @@ const SecretaryBaptism = () => {
         </div>
 
         <button className="download-button-sb" onClick={handleDownload}>
-          <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
-          Download
+          <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: "8px" }} />
+          Export to Excel
         </button>
       </div>
 

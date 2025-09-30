@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./secretaryanointingofthesick.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from 'xlsx';
 
 const SecretaryAnointingOfTheSick = () => {
   const navigate = useNavigate();
@@ -175,38 +176,36 @@ const SecretaryAnointingOfTheSick = () => {
   };
 
   const handleDownload = () => {
-    // Create headers for CSV
-    const headers = [
-      "No.",
-      "First Name",
-      "Last Name",
-      "Date",
-      "Time",
-      "Created At",
-    ];
+    if (filteredAppointments.length === 0) {
+      alert("No data to export");
+      return;
+    }
 
-    // Map appointments to rows using displayNumber and filtered results
-    const rows = filteredAppointments.map(appointment => [
-      appointment.displayNumber,
-      appointment.firstName,
-      appointment.lastName,
-      formatDateForDisplay(appointment.date),
-      convertTo12Hour(appointment.time),
-      formatDateForDisplay(appointment.createdAt)
-    ]);
+    // Create data for Excel export using filtered appointments
+    const dataToExport = filteredAppointments.map(appointment => ({
+      'No.': appointment.displayNumber,
+      'First Name': appointment.firstName || '',
+      'Last Name': appointment.lastName || '',
+      'Date': formatDateForDisplay(appointment.date),
+      'Time': convertTo12Hour(appointment.time),
+      'Created At': formatDateForDisplay(appointment.createdAt)
+    }));
 
-    // Combine headers and rows
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Anointing Appointments");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "anointing_appointments.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchTerm 
+      ? `Anointing_Appointments_Filtered_${timestamp}.xlsx`
+      : `Anointing_Appointments_${timestamp}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    console.log(`Exported ${filteredAppointments.length} anointing appointments to Excel`);
   };
 
   const handleSearch = (e) => {
@@ -311,8 +310,8 @@ const SecretaryAnointingOfTheSick = () => {
         </div>
 
         <button className="download-button-sa" onClick={handleDownload}>
-          <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
-          Download
+          <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: "8px" }} />
+          Export to Excel
         </button>
       </div>
 

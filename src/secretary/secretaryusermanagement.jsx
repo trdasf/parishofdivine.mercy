@@ -693,6 +693,7 @@ const SecretaryUserManagement = () => {
             onChange={handlePositionFilterChange}
           >
             <option value="">All Positions</option>
+            <option value="Parish">Parish</option>
             <option value="Youth Ministry">Youth Ministry</option>
             <option value="Music Ministry">Music Ministry</option>
             <option value="Outreach Ministry">Outreach Ministry</option>
@@ -908,6 +909,7 @@ const SecretaryUserManagement = () => {
                     onChange={handlePositionChange}
                   >
                     <option value="">Select Position</option>
+                    <option value="Parish">Parish</option>
                     <option value="Youth Ministry">Youth Ministry</option>
                     <option value="Music Ministry">Music Ministry</option>
                     <option value="Outreach Ministry">Outreach Ministry</option>

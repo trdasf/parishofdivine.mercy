@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./secretaryfuneralmass.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from 'xlsx';
 
 const SecretaryFuneralMass = () => {
   const navigate = useNavigate();
@@ -130,42 +131,35 @@ const SecretaryFuneralMass = () => {
 
   const handleDownload = () => {
     if (filteredFuneralMassData.length === 0) {
-      alert("No data to download");
+      alert("No data to export");
       return;
     }
 
-    // Create headers for CSV
-    const headers = [
-      "No.",
-      "Deceased First Name",
-      "Deceased Last Name", 
-      "Date",
-      "Time",
-      "Created At",
-    ];
+    // Create data for Excel export using filtered appointments
+    const dataToExport = filteredFuneralMassData.map(funeral => ({
+      'No.': funeral.displayNumber,
+      'Deceased First Name': funeral.firstName || '',
+      'Deceased Last Name': funeral.lastName || '',
+      'Date': formatDateForDisplay(funeral.date),
+      'Time': convertTo12Hour(funeral.time),
+      'Created At': formatDateForDisplay(funeral.createdAt)
+    }));
 
-    // Map appointments to rows using displayNumber
-    const rows = filteredFuneralMassData.map(funeral => [
-      funeral.displayNumber,
-      funeral.firstName,
-      funeral.lastName,
-      formatDateForDisplay(funeral.date),
-      convertTo12Hour(funeral.time),
-      formatDateForDisplay(funeral.createdAt)
-    ]);
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Funeral Mass Requests");
 
-    // Combine headers and rows
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchTerm 
+      ? `Funeral_Mass_Requests_Filtered_${timestamp}.xlsx`
+      : `Funeral_Mass_Requests_${timestamp}.xlsx`;
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "funeral_mass_requests.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    console.log(`Exported ${filteredFuneralMassData.length} funeral mass requests to Excel`);
   };
 
   const handleSearch = (e) => {
@@ -269,8 +263,8 @@ const SecretaryFuneralMass = () => {
         </div>
 
         <button className="download-button-sb" onClick={handleDownload}>
-          <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
-          Download
+          <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: "8px" }} />
+          Export to Excel
         </button>
       </div>
 

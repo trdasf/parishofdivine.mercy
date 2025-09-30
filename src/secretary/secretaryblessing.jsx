@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./secretaryblessing.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from 'xlsx';
 
 const SecretaryBlessing = () => {
   const navigate = useNavigate();
@@ -253,40 +254,37 @@ const SecretaryBlessing = () => {
   };
 
   const handleDownload = () => {
-    // Create headers for CSV
-    const headers = [
-      "No.",
-      "First Name",
-      "Last Name",
-      "Blessing Type",
-      "Date",
-      "Time",
-      "Created At",
-    ];
+    if (filteredData.length === 0) {
+      alert("No data to export");
+      return;
+    }
 
-    // Map filtered appointments to rows using displayNumber
-    const rows = filteredData.map(appointment => [
-      appointment.displayNumber,
-      appointment.firstName,
-      appointment.lastName,
-      appointment.blessingType.charAt(0).toUpperCase() + appointment.blessingType.slice(1) + " Blessing",
-      formatDateForDisplay(appointment.date),
-      convertTo12Hour(appointment.time),
-      formatDateForDisplay(appointment.createdAt)
-    ]);
+    // Create data for Excel export using filtered appointments
+    const dataToExport = filteredData.map(appointment => ({
+      'No.': appointment.displayNumber,
+      'First Name': appointment.firstName || '',
+      'Last Name': appointment.lastName || '',
+      'Blessing Type': appointment.blessingType.charAt(0).toUpperCase() + appointment.blessingType.slice(1) + " Blessing",
+      'Date': formatDateForDisplay(appointment.date),
+      'Time': convertTo12Hour(appointment.time),
+      'Created At': formatDateForDisplay(appointment.createdAt)
+    }));
 
-    // Combine headers and rows
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Blessing Appointments");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "blessing_appointments.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchTerm || filterType
+      ? `Blessing_Appointments_Filtered_${timestamp}.xlsx`
+      : `Blessing_Appointments_${timestamp}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    console.log(`Exported ${filteredData.length} blessing appointments to Excel`);
   };
 
   // Add refresh button to force reload all data
@@ -350,8 +348,8 @@ const SecretaryBlessing = () => {
             <option value="car">Car Blessing</option>
           </select>
           <button className="download-button-sb" onClick={handleDownload}>
-            <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
-            Download
+            <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: "8px" }} />
+            Export to Excel
           </button>
         </div>
       </div>

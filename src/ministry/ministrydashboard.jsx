@@ -18,8 +18,8 @@ import axios from 'axios';
 const MinistryDashboard = () => {
   const navigate = useNavigate();
   
-  // Setting default date to May 2025 as specified
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 17)); // May 17, 2025
+  // Updated to use current date instead of hardcoded May 2025
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showHolidayInfo, setShowHolidayInfo] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState(null);
@@ -398,9 +398,9 @@ const MinistryDashboard = () => {
     }
   };
 
-  // Check if a date is today
+  // Updated isToday function to use actual current date
   const isToday = (date) => {
-    const today = new Date(2025, 4, 17); // May 17, 2025 (hardcoded for the example)
+    const today = new Date(); // Use actual current date
     return date.getDate() === today.getDate() && 
            date.getMonth() === today.getMonth() && 
            date.getFullYear() === today.getFullYear();

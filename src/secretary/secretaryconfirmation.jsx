@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./secretaryconfirmation.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from 'xlsx';
 
 const SecretaryConfirmation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [confirmationAppointments, setConfirmationAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,6 +16,21 @@ const SecretaryConfirmation = () => {
   useEffect(() => {
     fetchConfirmationAppointments();
   }, []);
+
+  // Handle auto-search when component receives search parameters
+  useEffect(() => {
+    const searchParams = location.state;
+    if (searchParams && searchParams.autoSearch && searchParams.firstName && searchParams.lastName) {
+      const autoSearchTerm = `${searchParams.firstName} ${searchParams.lastName}`;
+      setSearchTerm(autoSearchTerm);
+      console.log(`Auto-searching for: ${autoSearchTerm}`);
+      
+      // Clear the location state to prevent re-triggering on subsequent renders
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [location.state]);
 
   const fetchConfirmationAppointments = async () => {
     try {
@@ -76,10 +93,70 @@ const SecretaryConfirmation = () => {
     return `${hours}:${minutes} ${ampm}`;
   };
 
+  // Helper function to check if search term matches time (supports both 12h and 24h)
+  const matchesTime = (appointmentTime, searchTerm) => {
+    if (!appointmentTime || !searchTerm) return false;
+    
+    const normalizedSearch = searchTerm.toLowerCase().replace(/\s/g, '');
+    const appointmentTime24 = appointmentTime;
+    const appointmentTime12 = convertTo12Hour(appointmentTime);
+    
+    // Direct match with appointment time (both formats)
+    if (appointmentTime24.toLowerCase().includes(normalizedSearch) || 
+        appointmentTime12.toLowerCase().includes(normalizedSearch)) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  // Helper function to check if search term matches date (supports yyyy, yyyy-mm, yyyy-mm-dd with - or /)
+  const matchesDate = (appointmentDate, searchTerm) => {
+    if (!appointmentDate || !searchTerm) return false;
+    
+    const normalizedSearch = searchTerm.replace(/\s/g, '');
+    
+    // Convert appointment date to different formats for comparison
+    const dateFormats = [
+      appointmentDate, // Original format
+      appointmentDate.replace(/\//g, '-'), // Convert / to -
+      appointmentDate.replace(/-/g, '/'), // Convert - to /
+    ];
+    
+    // If appointment date is in mm/dd/yyyy format, also create yyyy-mm-dd format
+    if (appointmentDate.includes('/')) {
+      const [month, day, year] = appointmentDate.split('/');
+      dateFormats.push(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+      dateFormats.push(`${year}-${month.padStart(2, '0')}`);
+      dateFormats.push(year);
+    } else if (appointmentDate.includes('-')) {
+      const [year, month, day] = appointmentDate.split('-');
+      dateFormats.push(`${month}/${day}/${year}`);
+      dateFormats.push(`${year}-${month}`);
+      dateFormats.push(year);
+    }
+    
+    return dateFormats.some(format => 
+      format.toLowerCase().includes(normalizedSearch.toLowerCase())
+    );
+  };
+
   // Helper function to format date for display
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
     
+    // If already in yyyy-mm-dd format, return as is
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateString;
+    }
+    
+    // If in mm/dd/yyyy format, convert to yyyy-mm-dd
+    if (dateString.includes('/')) {
+      const [month, day, year] = dateString.split('/');
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    
+    // Try to parse as Date object and format
     try {
       const date = new Date(dateString);
       return date.toISOString().split('T')[0];
@@ -93,25 +170,6 @@ const SecretaryConfirmation = () => {
     return str.trim().replace(/\s+/g, ' ');
   };
 
-  // Helper function to check if search term matches date (supports yyyy, yyyy-mm, yyyy-mm-dd)
-  const matchesDate = (appointmentDate, searchTerm) => {
-    if (!appointmentDate || !searchTerm) return false;
-    
-    const normalizedSearch = searchTerm.replace(/\s/g, '');
-    const formattedDate = formatDateForDisplay(appointmentDate);
-    
-    // Convert appointment date to different formats for comparison
-    const dateFormats = [
-      formattedDate, // yyyy-mm-dd format
-      formattedDate.substring(0, 7), // yyyy-mm format
-      formattedDate.substring(0, 4), // yyyy format
-    ];
-    
-    return dateFormats.some(format => 
-      format.toLowerCase().includes(normalizedSearch.toLowerCase())
-    );
-  };
-
   const viewConfirmationDetails = (appointmentData) => {
     // Use the originalId for navigation to maintain compatibility with existing backend
     navigate("/secretary-confirmation-view", {
@@ -123,45 +181,43 @@ const SecretaryConfirmation = () => {
   };
 
   const handleDownload = () => {
-    // Create headers for CSV
-    const headers = [
-      "No.",
-      "First Name",
-      "Last Name",
-      "Date",
-      "Time",
-      "Created At",
-    ];
+    if (filteredAppointments.length === 0) {
+      alert("No data to export");
+      return;
+    }
 
-    // Map appointments to rows using displayNumber
-    const rows = filteredAppointments.map(appointment => [
-      appointment.displayNumber,
-      appointment.firstName,
-      appointment.lastName,
-      formatDateForDisplay(appointment.date),
-      convertTo12Hour(appointment.time),
-      formatDateForDisplay(appointment.createdAt)
-    ]);
+    // Create data for Excel export using filtered appointments
+    const dataToExport = filteredAppointments.map(appointment => ({
+      'No.': appointment.displayNumber,
+      'First Name': appointment.firstName || '',
+      'Last Name': appointment.lastName || '',
+      'Date': formatDateForDisplay(appointment.date),
+      'Time': convertTo12Hour(appointment.time),
+      'Created At': formatDateForDisplay(appointment.createdAt)
+    }));
 
-    // Combine headers and rows
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+    // Create worksheet and workbook
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Confirmation Appointments");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "confirmation_appointments.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchTerm 
+      ? `Confirmation_Appointments_Filtered_${timestamp}.xlsx`
+      : `Confirmation_Appointments_${timestamp}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    console.log(`Exported ${filteredAppointments.length} confirmation appointments to Excel`);
   };
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Enhanced filtering with flexible matching - similar to SecretaryBaptism
+  // Enhanced filtering with flexible matching - similar to SecretaryBaptism and SecretaryCommunion
   const filteredAppointments = React.useMemo(() => {
     const filtered = confirmationAppointments.filter(appointment => {
       // If no search term, show all appointments
@@ -171,7 +227,7 @@ const SecretaryConfirmation = () => {
       
       const normalizedSearchTerm = normalizeSpaces(searchTerm);
       
-      // Enhanced search behavior for names, dates, and other fields
+      // Enhanced search behavior for names, dates, times, and other fields
       const firstName = appointment.firstName || '';
       const lastName = appointment.lastName || '';
       
@@ -186,11 +242,12 @@ const SecretaryConfirmation = () => {
       const matchesReverseFullName = reverseFullName.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
       const matchesStatus = appointment.status && appointment.status.toLowerCase().includes(normalizedSearchTerm.toLowerCase());
       const matchesDateField = matchesDate(appointment.date, normalizedSearchTerm);
+      const matchesTimeField = matchesTime(appointment.time, normalizedSearchTerm);
       const matchesCreatedAt = matchesDate(appointment.createdAt, normalizedSearchTerm);
       
       return matchesFirstName || matchesLastName || matchesFullName || 
              matchesReverseFullName || matchesStatus ||
-             matchesDateField || matchesCreatedAt;
+             matchesDateField || matchesTimeField || matchesCreatedAt;
     });
 
     // Renumber the filtered results for display
@@ -250,7 +307,7 @@ const SecretaryConfirmation = () => {
         <div className="search-bar-sc-sc">
           <input 
             type="text" 
-            placeholder="Search by name, date (yyyy-mm-dd), or status"
+            placeholder="Search by name, date (yyyy-mm-dd), time, or status"
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -258,8 +315,8 @@ const SecretaryConfirmation = () => {
         </div>
 
         <button className="download-button-sb" onClick={handleDownload}>
-          <FontAwesomeIcon icon={faDownload} style={{ marginRight: "8px" }} />
-          Download
+          <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: "8px" }} />
+          Export to Excel
         </button>
       </div>
 

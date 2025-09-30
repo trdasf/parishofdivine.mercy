@@ -1,0 +1,895 @@
+/* Main container styling */
+.cbc-container {
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 20px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.cbc-container::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.cbc-container::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.cbc-container::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+/* Header styling */
+.cbc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.cbc-left-section {
+  display: flex;
+  align-items: center;
+}
+
+.cbc-right-section {
+  display: flex;
+  align-items: center;
+}
+
+.cbc-back-button {
+  background-color: transparent;
+  color: #710808;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-family: Roboto;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cbc-back-icon {
+  font-size: 22px;
+  margin-right: 5px;
+  font-weight: 700;
+}
+
+.cbc-back-button:hover {
+  color: #5a0606;
+}
+
+.cbc-date-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cbc-date-field label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  font-family: Roboto;
+}
+
+.cbc-date-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  cursor: pointer;
+      font-family: Roboto;
+}
+
+.cbc-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+/* Title styling */
+.cbc-title {
+  font-size: 35px;
+  font-weight: 800;
+  color: #573901;
+  font-family: Montserrat;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Form container */
+.cbc-form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Error message */
+.cbc-error-message {
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-family: Roboto;
+  text-align: center;
+}
+
+/* Section styling */
+.cbc-section {
+  margin-bottom: 40px;
+}
+
+.cbc-section-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #b3701f;
+}
+
+/* Row and field styling */
+.cbc-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.cbc-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cbc-field-wide {
+  width: 100%;
+}
+
+.cbc-field label {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto;
+}
+
+.cbc-field input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  font-family: Roboto;
+  transition: border-color 0.3s ease;
+}
+
+.cbc-field input:focus {
+  outline: none;
+  border-color: #b3701f;
+  box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.2);
+}
+
+.cbc-field input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Required field indicator */
+.cbc-required {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Input error styling */
+.cbc-input-error {
+  border: 1px solid #f44336 !important;
+  background-color: #ffebee !important;
+}
+
+/* Purpose of request section */
+.cbc-purpose-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cbc-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cbc-checkbox-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.cbc-checkbox-container input[type="checkbox"]:checked {
+  background-color: #b3701f;
+  border-color: #b3701f;
+}
+
+.cbc-checkbox-container input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cbc-checkbox-container label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  font-family: Roboto;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Others container special styling */
+.cbc-others-container {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cbc-others-container input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.cbc-others-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  font-family: Roboto;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+}
+
+.cbc-others-input:focus {
+  outline: none;
+  border-color: #b3701f;
+  box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.2);
+}
+
+.cbc-others-input.cbc-disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Purpose error styling */
+.cbc-purpose-error {
+  color: #f44336;
+  font-size: 14px;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border: 1px solid #f44336;
+}
+
+/* Button styling */
+.cbc-button-container {
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+  margin-top: 60px;
+  margin-bottom: 100px;
+}
+
+.cbc-submit-btn,
+.cbc-cancel-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: Roboto;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  text-align: center;
+}
+
+.cbc-submit-btn {
+  background-color: #b3701f;
+  color: white;
+}
+
+.cbc-submit-btn:hover {
+  background-color: #d19a15;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cbc-cancel-btn {
+  background-color: #a32835;
+  color: white;
+}
+
+.cbc-cancel-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal styling */
+.cbc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.cbc-modal {
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: cbc-modal-appear 0.3s ease-out;
+}
+
+@keyframes cbc-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cbc-modal h2 {
+  margin-top: 0;
+  color: #573901;
+  font-family: Montserrat;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  font-size: 22px;
+}
+
+.cbc-modal p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 20px;
+  font-family: Roboto;
+  color: #000;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.cbc-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.cbc-yes-btn,
+.cbc-no-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  font-size: 14px;
+  min-width: 100px;
+  transition: all 0.3s ease;
+}
+
+.cbc-yes-btn {
+  background-color: #b3701f;
+  color: white;
+}
+
+.cbc-yes-btn:hover {
+  background-color: #d19a15;
+  transform: translateY(-1px);
+}
+
+.cbc-no-btn {
+  background-color: #a32835;
+  color: white;
+}
+
+.cbc-no-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+/* Custom hr styling */
+.cbc-custom-hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, #710808, #ffcccc);
+  width: 100%;
+  margin: 0;
+}
+
+/* Loading spinner */
+.cbc-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  height: 60px;
+  width: 100%;
+}
+
+.cbc-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #b3701f;
+  border-radius: 50%;
+  animation: cbc-spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes cbc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .cbc-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .cbc-title {
+    font-size: 32px;
+  }
+  
+  .cbc-button-container {
+    gap: 80px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .cbc-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .cbc-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+  
+  .cbc-header {
+    margin-bottom: 20px;
+  }
+  
+  .cbc-back-button {
+    font-size: 16px;
+  }
+  
+  .cbc-back-icon {
+    font-size: 20px;
+  }
+  
+  /* Stack form fields vertically on tablet */
+  .cbc-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .cbc-section-title {
+    font-size: 16px;
+  }
+  
+  .cbc-button-container {
+    gap: 50px;
+    margin-top: 40px;
+  }
+  
+  .cbc-submit-btn,
+  .cbc-cancel-btn {
+    min-width: 100px;
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  .cbc-modal {
+    width: 90%;
+    max-width: 350px;
+  }
+  
+  .cbc-modal-buttons {
+    gap: 20px;
+  }
+  
+  .cbc-yes-btn,
+  .cbc-no-btn {
+    min-width: 80px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .cbc-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .cbc-title {
+    font-size: 24px;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+  }
+  
+  .cbc-header {
+    margin-bottom: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .cbc-back-button {
+    font-size: 14px;
+  }
+  
+  .cbc-back-icon {
+    font-size: 18px;
+  }
+  
+  .cbc-section-title {
+    font-size: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .cbc-section {
+    margin-bottom: 30px;
+  }
+  
+  .cbc-field label {
+    font-size: 13px;
+  }
+  
+  .cbc-field input {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .cbc-checkbox-container label {
+    font-size: 13px;
+  }
+  
+  .cbc-others-input {
+    font-size: 13px;
+    padding: 6px;
+  }
+  
+  .cbc-button-container {
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+  }
+  
+  .cbc-submit-btn,
+  .cbc-cancel-btn {
+    min-width: 90px;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  .cbc-modal {
+    width: 95%;
+    max-width: 320px;
+  }
+  
+  .cbc-modal h2 {
+    font-size: 18px;
+  }
+  
+  .cbc-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .cbc-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .cbc-yes-btn,
+  .cbc-no-btn {
+    min-width: 70px;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .cbc-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .cbc-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+  }
+  
+  .cbc-header {
+    margin-bottom: 12px;
+  }
+  
+  .cbc-back-button {
+    font-size: 13px;
+  }
+  
+  .cbc-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .cbc-date-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .cbc-date-field label {
+    font-size: 12px;
+  }
+  
+  .cbc-date-input {
+    padding: 6px;
+    font-size: 12px;
+    width: 150px;
+  }
+  
+  .cbc-section-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .cbc-section {
+    margin-bottom: 25px;
+  }
+  
+  .cbc-row {
+    gap: 12px;
+  }
+  
+  .cbc-field label {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .cbc-field input {
+    padding: 7px;
+    font-size: 13px;
+  }
+  
+  .cbc-checkbox-container {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .cbc-checkbox-container input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .cbc-checkbox-container label {
+    font-size: 12px;
+  }
+  
+  .cbc-others-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .cbc-others-input {
+    margin-left: 0;
+    width: 100%;
+    font-size: 12px;
+    padding: 6px;
+  }
+  
+  .cbc-button-container {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 40px;
+  }
+  
+  .cbc-submit-btn,
+  .cbc-cancel-btn {
+    width: 200px;
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  .cbc-modal {
+    width: 95%;
+    max-width: 280px;
+    margin: 10px;
+  }
+  
+  .cbc-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .cbc-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .cbc-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .cbc-yes-btn,
+  .cbc-no-btn {
+    width: 120px;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  .cbc-error-message {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .cbc-purpose-error {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .cbc-loading-spinner {
+    height: 50px;
+  }
+  
+  .cbc-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .cbc-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .cbc-title {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .cbc-section-title {
+    font-size: 13px;
+  }
+  
+  .cbc-field label {
+    font-size: 11px;
+  }
+  
+  .cbc-field input {
+    font-size: 12px;
+    padding: 6px;
+  }
+  
+  .cbc-checkbox-container label {
+    font-size: 11px;
+  }
+  
+  .cbc-others-input {
+    font-size: 11px;
+    padding: 5px;
+  }
+  
+  .cbc-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .cbc-modal h2 {
+    font-size: 15px;
+  }
+  
+  .cbc-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .cbc-submit-btn,
+  .cbc-cancel-btn {
+    width: 180px;
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+  
+  .cbc-yes-btn,
+  .cbc-no-btn {
+    width: 100px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+/* Read-only date input styling */
+.cbc-date-input[readonly] {
+  background-color: #f8f9fa;
+  border: 1px solid #6c757d;
+  color: #000000 !important;
+  cursor: default;
+  font-weight: 500;
+}
+
+.cbc-date-input[readonly]:focus {
+  outline: none;
+  border-color: #6c757d;
+  box-shadow: none;
+}
+
+/* Ensure the date text is always visible */
+.cbc-date-input {
+  min-width: 130px;
+  text-align: center;
+  color: #000000;
+}

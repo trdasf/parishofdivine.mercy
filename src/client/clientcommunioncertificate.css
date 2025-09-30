@@ -1,0 +1,874 @@
+/* Main container styling */
+.ccc-container {
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 20px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.ccc-container::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ffffff;
+}
+
+.ccc-container::-webkit-scrollbar-thumb {
+  background-color: #dbdbdb;
+  border-radius: 5px;
+}
+
+.ccc-container::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+/* Header styling */
+.ccc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.ccc-left-section {
+  display: flex;
+  align-items: center;
+}
+
+.ccc-right-section {
+  display: flex;
+  align-items: center;
+}
+
+.ccc-back-button {
+  background-color: transparent;
+  color: #710808;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-family: Roboto;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ccc-back-icon {
+  font-size: 22px;
+  margin-right: 5px;
+  font-weight: 700;
+}
+
+.ccc-back-button:hover {
+  color: #5a0606;
+}
+
+.ccc-date-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ccc-date-field label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  font-family: Roboto;
+}
+
+.ccc-date-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  cursor: pointer;
+      font-family: Roboto;
+}
+
+.ccc-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+/* Title styling */
+.ccc-title {
+  font-size: 35px;
+  font-weight: 800;
+  color: #573901;
+  font-family: Montserrat;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Form container */
+.ccc-form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Error message */
+.ccc-error-message {
+  background-color: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-family: Roboto;
+  text-align: center;
+}
+
+/* Section styling */
+.ccc-section {
+  margin-bottom: 40px;
+}
+
+.ccc-section-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #573901;
+  font-family: Roboto;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #b3701f;
+}
+
+/* Row and field styling */
+.ccc-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.ccc-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ccc-field-wide {
+  width: 100%;
+}
+
+.ccc-field label {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #000;
+  font-family: Roboto;
+}
+
+.ccc-field input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  font-family: Roboto;
+  transition: border-color 0.3s ease;
+}
+
+.ccc-field input:focus {
+  outline: none;
+  border-color: #b3701f;
+  box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.2);
+}
+
+.ccc-field input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Required field indicator */
+.ccc-required {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Input error styling */
+.ccc-input-error {
+  border: 1px solid #f44336 !important;
+  background-color: #ffebee !important;
+}
+
+/* Purpose of request section */
+.ccc-purpose-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ccc-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ccc-checkbox-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  border-radius: 4px;
+  appearance: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.ccc-checkbox-container input[type="checkbox"]:checked {
+  background-color: #b3701f;
+  border-color: #b3701f;
+}
+
+.ccc-checkbox-container input[type="checkbox"]:checked::after {
+  content: "✓";
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ccc-checkbox-container label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #000;
+  font-family: Roboto;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Others container special styling */
+.ccc-others-container {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ccc-others-container input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.ccc-others-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  font-family: Roboto;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+}
+
+.ccc-others-input:focus {
+  outline: none;
+  border-color: #b3701f;
+  box-shadow: 0 0 0 2px rgba(179, 112, 31, 0.2);
+}
+
+.ccc-others-input.ccc-disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Purpose error styling */
+.ccc-purpose-error {
+  color: #f44336;
+  font-size: 14px;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border: 1px solid #f44336;
+}
+
+/* Button styling */
+.ccc-button-container {
+  display: flex;
+  gap: 100px;
+  justify-content: center;
+  margin-top: 60px;
+  margin-bottom: 100px;
+}
+
+.ccc-submit-btn,
+.ccc-cancel-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: Roboto;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  text-align: center;
+}
+
+.ccc-submit-btn {
+  background-color: #b3701f;
+  color: white;
+}
+
+.ccc-submit-btn:hover {
+  background-color: #d19a15;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.ccc-cancel-btn {
+  background-color: #a32835;
+  color: white;
+}
+
+.ccc-cancel-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal styling */
+.ccc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.ccc-modal {
+  background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: ccc-modal-appear 0.3s ease-out;
+}
+
+@keyframes ccc-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ccc-modal h2 {
+  margin-top: 0;
+  color: #573901;
+  font-family: Montserrat;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  font-size: 22px;
+}
+
+.ccc-modal p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 20px;
+  font-family: Roboto;
+  color: #000;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.ccc-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.ccc-yes-btn,
+.ccc-no-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: Roboto;
+  font-size: 14px;
+  min-width: 100px;
+  transition: all 0.3s ease;
+}
+
+.ccc-yes-btn {
+  background-color: #b3701f;
+  color: white;
+}
+
+.ccc-yes-btn:hover {
+  background-color: #d19a15;
+  transform: translateY(-1px);
+}
+
+.ccc-no-btn {
+  background-color: #a32835;
+  color: white;
+}
+
+.ccc-no-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+/* Custom hr styling */
+.ccc-custom-hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, #710808, #ffcccc);
+  width: 100%;
+  margin: 0;
+}
+
+/* Loading spinner */
+.ccc-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  height: 60px;
+  width: 100%;
+}
+
+.ccc-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #b3701f;
+  border-radius: 50%;
+  animation: ccc-spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes ccc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =================================================================== */
+/* RESPONSIVE DESIGN STARTS HERE */
+/* =================================================================== */
+
+/* Small Laptop (1024px - 1366px) */
+@media screen and (max-width: 1366px) {
+  .ccc-container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .ccc-title {
+    font-size: 32px;
+  }
+  
+  .ccc-button-container {
+    gap: 80px;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media screen and (max-width: 1023px) {
+  .ccc-container {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+  }
+  
+  .ccc-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+  
+  .ccc-header {
+    margin-bottom: 20px;
+  }
+  
+  .ccc-back-button {
+    font-size: 16px;
+  }
+  
+  .ccc-back-icon {
+    font-size: 20px;
+  }
+  
+  /* Stack form fields vertically on tablet */
+  .ccc-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .ccc-section-title {
+    font-size: 16px;
+  }
+  
+  .ccc-button-container {
+    gap: 50px;
+    margin-top: 40px;
+  }
+  
+  .ccc-submit-btn,
+  .ccc-cancel-btn {
+    min-width: 100px;
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  .ccc-modal {
+    width: 90%;
+    max-width: 350px;
+  }
+  
+  .ccc-modal-buttons {
+    gap: 20px;
+  }
+  
+  .ccc-yes-btn,
+  .ccc-no-btn {
+    min-width: 80px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile Landscape (568px - 767px) */
+@media screen and (max-width: 767px) {
+  .ccc-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+  }
+  
+  .ccc-title {
+    font-size: 24px;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+  }
+  
+  .ccc-header {
+    margin-bottom: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .ccc-back-button {
+    font-size: 14px;
+  }
+  
+  .ccc-back-icon {
+    font-size: 18px;
+  }
+  
+  .ccc-section-title {
+    font-size: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .ccc-section {
+    margin-bottom: 30px;
+  }
+  
+  .ccc-field label {
+    font-size: 13px;
+  }
+  
+  .ccc-field input {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .ccc-checkbox-container label {
+    font-size: 13px;
+  }
+  
+  .ccc-others-input {
+    font-size: 13px;
+    padding: 6px;
+  }
+  
+  .ccc-button-container {
+    gap: 30px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+  }
+  
+  .ccc-submit-btn,
+  .ccc-cancel-btn {
+    min-width: 90px;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  .ccc-modal {
+    width: 95%;
+    max-width: 320px;
+  }
+  
+  .ccc-modal h2 {
+    font-size: 18px;
+  }
+  
+  .ccc-modal p {
+    font-size: 14px;
+    padding: 15px;
+  }
+  
+  .ccc-modal-buttons {
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .ccc-yes-btn,
+  .ccc-no-btn {
+    min-width: 70px;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* Mobile Portrait (320px - 567px) */
+@media screen and (max-width: 567px) {
+  .ccc-container {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+  }
+  
+  .ccc-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+  }
+  
+  .ccc-header {
+    margin-bottom: 12px;
+  }
+  
+  .ccc-back-button {
+    font-size: 13px;
+  }
+  
+  .ccc-back-icon {
+    font-size: 16px;
+    margin-right: 3px;
+  }
+  
+  .ccc-date-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .ccc-date-field label {
+    font-size: 12px;
+  }
+  
+  .ccc-date-input {
+    padding: 6px;
+    font-size: 12px;
+    width: 150px;
+  }
+  
+  .ccc-section-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .ccc-section {
+    margin-bottom: 25px;
+  }
+  
+  .ccc-row {
+    gap: 12px;
+  }
+  
+  .ccc-field label {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .ccc-field input {
+    padding: 7px;
+    font-size: 13px;
+  }
+  
+  .ccc-checkbox-container {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .ccc-checkbox-container input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .ccc-checkbox-container label {
+    font-size: 12px;
+  }
+  
+  .ccc-others-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .ccc-others-input {
+    margin-left: 0;
+    width: 100%;
+    font-size: 12px;
+    padding: 6px;
+  }
+  
+  .ccc-button-container {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+    margin-bottom: 40px;
+  }
+  
+  .ccc-submit-btn,
+  .ccc-cancel-btn {
+    width: 200px;
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  .ccc-modal {
+    width: 95%;
+    max-width: 280px;
+    margin: 10px;
+  }
+  
+  .ccc-modal h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .ccc-modal p {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .ccc-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .ccc-yes-btn,
+  .ccc-no-btn {
+    width: 120px;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  .ccc-error-message {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .ccc-purpose-error {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .ccc-loading-spinner {
+    height: 50px;
+  }
+  
+  .ccc-spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
+  }
+}
+
+/* Extra Small Mobile (320px and below) */
+@media screen and (max-width: 320px) {
+  .ccc-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .ccc-title {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .ccc-section-title {
+    font-size: 13px;
+  }
+  
+  .ccc-field label {
+    font-size: 11px;
+  }
+  
+  .ccc-field input {
+    font-size: 12px;
+    padding: 6px;
+  }
+  
+  .ccc-checkbox-container label {
+    font-size: 11px;
+  }
+  
+  .ccc-others-input {
+    font-size: 11px;
+    padding: 5px;
+  }
+  
+  .ccc-modal {
+    width: 98%;
+    margin: 5px;
+  }
+  
+  .ccc-modal h2 {
+    font-size: 15px;
+  }
+  
+  .ccc-modal p {
+    font-size: 12px;
+    padding: 10px;
+  }
+  
+  .ccc-submit-btn,
+  .ccc-cancel-btn {
+    width: 180px;
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+  
+  .ccc-yes-btn,
+  .ccc-no-btn {
+    width: 100px;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}

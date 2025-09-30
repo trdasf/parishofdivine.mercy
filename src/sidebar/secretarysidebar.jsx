@@ -20,7 +20,10 @@ import {
   faCalendarCheck,
   faTasks,
   faBars,
-  faTimes
+  faTimes,
+  faFile,
+  faCoins,
+  faMoneyBillWave
 } from "@fortawesome/free-solid-svg-icons";
 import "./secretarysidebar.css";
 
@@ -310,6 +313,22 @@ const SecretarySidebar = () => {
               >
                 <FontAwesomeIcon icon={faBookOpen} /> Schedule
               </Link>
+              <Link 
+                to="/secretary-request-certificate" 
+                state={createLocationState()}
+                className={`secretary-submenu-item ${location.pathname === "/secretary-request-certificate" ? "active" : ""}`}
+                onClick={handleMenuItemClick}
+              >
+                <FontAwesomeIcon icon={faFile} /> Request Certificates
+              </Link>
+              <Link 
+                to="/secretary-donation" 
+                state={createLocationState()}
+                className={`secretary-submenu-item ${location.pathname === "/secretary-donation" ? "active" : ""}`}
+                onClick={handleMenuItemClick}
+              >
+                <FontAwesomeIcon icon={faCoins} /> Donation
+              </Link>
             </div>
           )}
 
@@ -389,6 +408,17 @@ const SecretarySidebar = () => {
           >
             <FontAwesomeIcon icon={faCalendarCheck} />
             <span>Event and Activities</span>
+          </Link>
+
+          {/* Expenses */}
+          <Link 
+            to="/secretary-expenses" 
+            state={createLocationState()}
+            className={`secretary-menu-item ${location.pathname === "/secretary-expenses" ? "active" : ""}`}
+            onClick={handleMenuItemClick}
+          >
+            <FontAwesomeIcon icon={faMoneyBillWave} />
+            <span>Expenses</span>
           </Link>
 
           {/* Report */}

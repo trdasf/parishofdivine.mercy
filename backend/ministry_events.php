@@ -87,17 +87,18 @@ try {
         
         // Prepare and bind parameters
         $stmt = $conn->prepare("INSERT INTO activity (userID, title, description, category, startDate, 
-                                startTime, location, organizer, status) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                                startTime, location, organizer, nameOfParish, status) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
         
-        // Default status to "Pending"
+        // Default status to "Pending" and nameOfParish to "N/A" for ministry
         $status = "Pending";
+        $nameOfParish = "N/A";
         
-        $stmt->bind_param("issssssss", 
+        $stmt->bind_param("isssssssss", 
             $data->userID,
             $data->title, 
             $data->description, 
@@ -106,6 +107,7 @@ try {
             $data->startTime,
             $data->location,
             $data->organizer,
+            $nameOfParish,
             $status
         );
         
@@ -248,4 +250,4 @@ try {
         "debug" => $e->getMessage() // Remove this line in production
     ]);
 }
-?> 
+?>

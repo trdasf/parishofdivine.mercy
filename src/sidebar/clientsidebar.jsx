@@ -7,7 +7,13 @@ import {
   faUser,
   faCalendarAlt,
   faBars,
-  faTimes
+  faTimes,
+  faChevronDown,
+  faCertificate,
+  faWater,
+  faRing,
+  faBreadSlice,
+  faHeart
 } from "@fortawesome/free-solid-svg-icons";
 import "./clientsidebar.css";
 
@@ -18,6 +24,19 @@ const ClientSidebar = () => {
   const [clientID, setClientID] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // State for dropdown menus
+  const [openMenus, setOpenMenus] = useState({
+    certificate: false
+  });
+
+  // Toggle dropdown menu
+  const toggleMenu = (menu) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [menu]: !prev[menu]
+    }));
+  };
 
   // Toggle sidebar for mobile
   const toggleSidebar = (e) => {
@@ -200,6 +219,60 @@ const ClientSidebar = () => {
           >
             <FontAwesomeIcon icon={faCalendarAlt} />
             <span>Appointment</span>
+          </Link>
+
+          {/* Request Certificate Dropdown */}
+          <div className="client-menu-item" onClick={() => toggleMenu("certificate")}>
+            <FontAwesomeIcon icon={faCertificate} />
+            <span>Request Certificate</span>
+            <FontAwesomeIcon icon={faChevronDown} className={`dropdown-icon ${openMenus.certificate ? "rotate" : ""}`} />
+          </div>
+          {openMenus.certificate && (
+            <div className="client-submenu">
+              <Link 
+                to="/client-request-baptism-certificate" 
+                state={createLocationState()}
+                className={`client-submenu-item ${location.pathname === "/client-request-baptism-certificate" ? "active" : ""}`}
+                onClick={handleMenuItemClick}
+              >
+                <FontAwesomeIcon icon={faWater} /> Baptism
+              </Link>
+              <Link 
+                to="/client-request-marriage-certificate" 
+                state={createLocationState()}
+                className={`client-submenu-item ${location.pathname === "/client-request-marriage-certificate" ? "active" : ""}`}
+                onClick={handleMenuItemClick}
+              >
+                <FontAwesomeIcon icon={faRing} /> Marriage
+              </Link>
+              <Link 
+                to="/client-request-communion-certificate" 
+                state={createLocationState()}
+                className={`client-submenu-item ${location.pathname === "/client-request-communion-certificate" ? "active" : ""}`}
+                onClick={handleMenuItemClick}
+              >
+                <FontAwesomeIcon icon={faBreadSlice} /> Communion
+              </Link>
+              <Link 
+                to="/client-request-confirmation-certificate" 
+                state={createLocationState()}
+                className={`client-submenu-item ${location.pathname === "/client-request-confirmation-certificate" ? "active" : ""}`}
+                onClick={handleMenuItemClick}
+              >
+                <FontAwesomeIcon icon={faCertificate} /> Confirmation
+              </Link>
+            </div>
+          )}
+
+          {/* Donation */}
+          <Link 
+            to="/client-donation" 
+            state={createLocationState()}
+            className={`client-menu-item ${location.pathname === "/client-donation" ? "active" : ""}`}
+            onClick={handleMenuItemClick}
+          >
+            <FontAwesomeIcon icon={faHeart} />
+            <span>Donation</span>
           </Link>
 
           <div className="client-menu-item-logout" onClick={handleLogout}>

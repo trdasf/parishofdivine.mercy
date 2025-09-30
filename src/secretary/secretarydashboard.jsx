@@ -14,6 +14,8 @@ import {
   faEye,
   faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
+import { GiReceiveMoney } from "react-icons/gi";
+import { FaHandHoldingHeart } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Make sure axios is installed
 
@@ -72,6 +74,9 @@ const SecretaryDashboard = () => {
   const [activities, setActivities] = useState([]);
   const [totalAppointments, setTotalAppointments] = useState(0);
   const [totalActivities, setTotalActivities] = useState(0);
+  const [totalDonations, setTotalDonations] = useState(0);
+  const [totalDonors, setTotalDonors] = useState(0);
+  const [formattedDonations, setFormattedDonations] = useState("₱0.00");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -245,6 +250,29 @@ const SecretaryDashboard = () => {
           }
         } catch (err) {
           console.error('Error fetching total activities:', err);
+          // Continue execution, don't set error state yet
+        }
+        
+        // Fetch total donations
+        try {
+          const totalDonationsResponse = await axios.get(`${API_BASE_URL}/fetch_total_donations.php`);
+          if (totalDonationsResponse.data && totalDonationsResponse.data.success) {
+            setTotalDonations(totalDonationsResponse.data.total_donations);
+            setFormattedDonations(totalDonationsResponse.data.formatted_total);
+          }
+        } catch (err) {
+          console.error('Error fetching total donations:', err);
+          // Continue execution, don't set error state yet
+        }
+        
+        // Fetch total donors
+        try {
+          const totalDonorsResponse = await axios.get(`${API_BASE_URL}/fetch_total_donors.php`);
+          if (totalDonorsResponse.data && totalDonorsResponse.data.success) {
+            setTotalDonors(totalDonorsResponse.data.total_donors);
+          }
+        } catch (err) {
+          console.error('Error fetching total donors:', err);
           // Continue execution, don't set error state yet
         }
         
@@ -666,6 +694,28 @@ const SecretaryDashboard = () => {
             <p className="card-count-sec">{loading ? "..." : totalActivities}</p>
           </div>
         </div>
+        
+      </div>
+      <div className="summary-container-sec">
+        <div className="card-sec appointments-card-sec">
+          <div className="card-icon-sec">
+            <GiReceiveMoney />
+          </div>
+          <div className="card-content-sec">
+            <h3 className="card-title-sec">Total Donations</h3>
+            <p className="card-count-sec">{loading ? "..." : formattedDonations}</p>
+          </div>
+        </div>
+        <div className="card-sec events-card-sec">
+          <div className="card-icon-sec">
+            <FaHandHoldingHeart />
+          </div>
+          <div className="card-content-sec">
+            <h3 className="card-title-sec">Total Donors</h3>
+            <p className="card-count-sec">{loading ? "..." : totalDonors}</p>
+          </div>
+        </div>
+        
       </div>
       
       {/* Calendar Section */}
